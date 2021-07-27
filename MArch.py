@@ -178,9 +178,7 @@ if __name__ == '__main__':
         CFunc.run_as_user(USERNAMEVAR, "{0} --yes 615".format(gs_installer[0]))
     elif args.desktop == "kde":
         # KDE
-        CFunc.pacman_install("plasma kio-extras sddm okular gwenview kio-extras zeroconf-ioslave kde-system-meta ark konsole kcalc kwrite kwalletmanager")
-        CFunc.pacman_install("latte-dock")
-        CFunc.pacman_install("pamac-qt pamac-tray-appindicator")
+        CFunc.pacman_install("plasma-meta kio-extras sddm okular gwenview kio-extras zeroconf-ioslave kde-system-meta ark konsole kcalc kwrite kwalletmanager")
         CFunc.sysctl_enable("-f sddm", error_on_fail=True)
     elif args.desktop == "mate":
         # MATE
