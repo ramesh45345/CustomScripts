@@ -19,13 +19,14 @@ CFunc.is_root(True)
 
 # Get the root user's home folder.
 USERHOME = os.path.expanduser("~root")
+workfolder_default = os.path.join(USERHOME, "fedlive")
 
 # Get arguments
 parser = argparse.ArgumentParser(description='Build Fedora LiveCD.')
 parser.add_argument("-n", "--noprompt", help='Do not prompt.', action="store_true")
-parser.add_argument("-w", "--workfolderroot", help='Location of Working Folder (default: %(default)s)', default=USERHOME)
-parser.add_argument("-o", "--output", help='Output Location of ISO (default: %(default)s)', default=USERHOME)
-parser.add_argument("-r", "--releasever", help='Release Version, default: %(default)s', type=int, default=33)
+parser.add_argument("-w", "--workfolderroot", help='Location of Working Folder (default: %(default)s)', default=workfolder_default)
+parser.add_argument("-o", "--output", help='Output Location of ISO (default: %(default)s)', default=workfolder_default)
+parser.add_argument("-r", "--releasever", help='Release Version, default: %(default)s', type=int, default=34)
 
 # Save arguments.
 args = parser.parse_args()
@@ -35,12 +36,17 @@ buildfolder = os.path.abspath(args.workfolderroot)
 print("Root of Working Folder:", buildfolder)
 outfolder = os.path.abspath(args.output)
 print("ISO Output Folder:", outfolder)
-if not os.path.isdir(outfolder):
-    sys.exit("\nError, ensure {0} is a folder.".format(outfolder))
 print("Release Version is {0}".format(args.releasever))
 
 if args.noprompt is False:
     input("Press Enter to continue.")
+
+# Create the work folder
+if os.path.isdir(buildfolder):
+    print("Work folder {0} already exists.".format(buildfolder))
+else:
+    print("Creating work folder {0}.".format(buildfolder))
+    os.makedirs(buildfolder, 0o777)
 
 # Modify lorax grub config
 subprocess.run('sed -i "s/^default=.*/default=0/g" /usr/share/lorax/templates.d/99-generic/live/config_files/x86/grub.conf /usr/share/lorax/templates.d/99-generic/config_files/x86/grub.conf', shell=True, check=True)
@@ -54,8 +60,8 @@ subprocess.run('sed -i "s/^set timeout=.*/set timeout=1/g" /usr/share/lorax/temp
 # Disable selinux and mitigations
 subprocess.run('sed -i "s/ quiet$/ quiet selinux=0 mitigations=off/g" /usr/share/lorax/templates.d/99-generic/live/config_files/x86/grub.conf /usr/share/lorax/templates.d/99-generic/config_files/x86/grub.conf /usr/share/lorax/templates.d/99-generic/config_files/x86/isolinux.cfg /usr/share/lorax/templates.d/99-generic/live/config_files/x86/isolinux.cfg /usr/share/lorax/templates.d/99-generic/live/config_files/x86/grub2-efi.cfg /usr/share/lorax/templates.d/99-generic/config_files/x86/grub2-efi.cfg', shell=True, check=True)
 # Modify kickstart repos
-# with open(os.path.join(os.sep, "usr", "share", "spin-kickstarts", "fedora-repo.ks"), 'w') as f:
-#     f.write("%include fedora-repo-not-rawhide.ks")
+with open(os.path.join(os.sep, "usr", "share", "spin-kickstarts", "fedora-repo.ks"), 'w') as f:
+    f.write("%include fedora-repo-not-rawhide.ks")
 
 
 ### Prep Environment ###
