@@ -124,7 +124,9 @@ CFunc.is_root(False)
 
 # Get system and user information.
 USERHOME = os.path.expanduser("~")
-CPUCORES = multiprocessing.cpu_count() if multiprocessing.cpu_count() <= 4 else 4
+CPUCORES = multiprocessing.cpu_count()
+# Set memory to system memory size / 4.
+mem_mib = int(((os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')) / (1024.**2)) / 4)
 
 # Get arguments
 parser = argparse.ArgumentParser(description='Create a VM using packer.')
@@ -133,7 +135,7 @@ parser.add_argument("-b", "--getpacker", help="Force refresh packer", action="st
 parser.add_argument("-d", "--debug", help="Enable Debug output from packer", action="store_true")
 parser.add_argument("-e", "--desktopenv", help="Desktop Environment (defaults to mate)", default="mate")
 parser.add_argument("-i", "--iso", help="Path to live cd")
-parser.add_argument("-m", "--memory", help="Memory for VM", default="4096")
+parser.add_argument("-m", "--memory", help="Memory for VM (default: %(default)s)", default=mem_mib)
 parser.add_argument("-n", "--vmname", help="Name of Virtual Machine")
 parser.add_argument("-p", "--vmpath", help="Path of Packer output", required=True)
 parser.add_argument("-q", "--headless", help='Generate Headless', action="store_true")
