@@ -91,9 +91,7 @@ tmux
 zsh
 fish
 
-# Kernel stuff
-ipw2200-fw
-virtualbox-guest-utils
+# Virtual Machine guest
 spice-vdagent
 qemu-guest-agent
 
