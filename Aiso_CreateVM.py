@@ -6,24 +6,47 @@ import argparse
 import os
 import shutil
 import subprocess
+import sys
 # Custom includes
 import CFunc
 import zch
 
-# Global variables
-chroot_locations = os.path.join(os.sep, "root")
-fedora_chroot_location = os.path.join(chroot_locations, "chroot_fedora")
-arch_chroot_location = os.path.join(chroot_locations, "chroot_arch")
-ubuntu_chroot_location = os.path.join(chroot_locations, "chroot_ubuntu")
-
 # Get arguments
 parser = argparse.ArgumentParser(description='Provision VM for ISO building.')
 parser.add_argument("-c", "--clean", help='Remove chroot folders.', action="store_true")
-parser.add_argument("-w", "--workfolder", help='Location of chroot folder.')
+parser.add_argument("-w", "--workfolder", help='Location of chroot folder (default: %(default)s)', default=os.path.expanduser("~root"))
+parser.add_argument("-d", "--cslocation", help='Location of scripts folder (default: %(default)s)', default=sys.path[0])
 args = parser.parse_args()
 
+# Global variables
+workfolder = os.path.abspath(args.workfolder)
+fedora_chroot_location = os.path.join(workfolder, "chroot_fedora")
+arch_chroot_location = os.path.join(workfolder, "chroot_arch")
+ubuntu_chroot_location = os.path.join(workfolder, "chroot_ubuntu")
+cslocation = os.path.join(os.path.abspath(args.cslocation), '')
+
+# Check variables
+if not os.path.isdir(cslocation):
+    print("ERROR: {0} does not exist. Exiting.".format(args.cslocation))
+    sys.exit()
+if not os.path.isdir(args.workfolder):
+    print("ERROR: {0} does not exist. Exiting.".format(args.workfolder))
+    sys.exit()
+print("Chroot root folder: {0}".format(workfolder))
+print("CS Location: {0}".format(cslocation))
+
+### Begin Code ###
 # Host packges
 CFunc.dnfinstall("pacman arch-install-scripts systemd-container debootstrap")
+
+# Clean
+if args.clean is True:
+    if os.path.isdir(fedora_chroot_location):
+        shutil.rmtree(fedora_chroot_location)
+    if os.path.isdir(arch_chroot_location):
+        shutil.rmtree(arch_chroot_location)
+    if os.path.isdir(ubuntu_chroot_location):
+        shutil.rmtree(ubuntu_chroot_location)
 
 # Fedora Chroot
 # Create chroot if it doesn't exist
@@ -35,7 +58,7 @@ if os.path.isdir(fedora_chroot_location):
     # Update packages
     subprocess.run("systemd-nspawn -D {0} sh -c 'dnf upgrade -y'".format(fedora_chroot_location), shell=True, check=True)
     # Rsync Host CustomScripts
-    subprocess.run("rsync -axHAX --info=progress2 /opt/CustomScripts/ {0}/opt/CustomScripts/".format(fedora_chroot_location), shell=True, check=True)
+    subprocess.run("rsync -axHAX --info=progress2 {0} {1}/opt/CustomScripts/".format(cslocation, fedora_chroot_location), shell=True, check=True)
 
 
 # Arch Chroot
@@ -48,7 +71,7 @@ if os.path.isdir(arch_chroot_location):
     # Update packages
     subprocess.run("systemd-nspawn -D {0} sh -c 'pacman -Syu --needed --noconfirm'".format(arch_chroot_location), shell=True, check=True)
     # Rsync Host CustomScripts
-    subprocess.run("rsync -axHAX --info=progress2 /opt/CustomScripts/ {0}/opt/CustomScripts/".format(arch_chroot_location), shell=True, check=True)
+    subprocess.run("rsync -axHAX --info=progress2 {0} {1}/opt/CustomScripts/".format(cslocation, arch_chroot_location), shell=True, check=True)
 
 
 # Ubuntu Chroot
@@ -56,9 +79,9 @@ if os.path.isdir(arch_chroot_location):
 if not os.path.isdir(ubuntu_chroot_location) and shutil.which("debootstrap"):
     os.makedirs(ubuntu_chroot_location)
     subprocess.run("debootstrap hirsute {0} http://archive.ubuntu.com/ubuntu/".format(ubuntu_chroot_location), shell=True, check=True)
-    subprocess.run("systemd-nspawn -D {0} sh -c 'apt install -y debootstrap binutils squashfs-tools xorriso grub-pc-bin grub-efi-amd64-bin mtools dosfstools unzip'".format(arch_chroot_location), shell=True, check=True)
+    zch.ChrootCommand(ubuntu_chroot_location, "sh -c 'apt install -y debootstrap binutils squashfs-tools grub-pc-bin grub-efi-amd64-bin mtools dosfstools unzip'")
 if os.path.isdir(ubuntu_chroot_location):
     # Update packages
-    subprocess.run("systemd-nspawn -D {0} sh -c 'apt update; apt upgrade -y; apt dist-upgrade -y'".format(arch_chroot_location), shell=True, check=True)
+    zch.ChrootCommand(ubuntu_chroot_location, "sh -c 'apt update; apt upgrade -y; apt dist-upgrade -y'")
     # Rsync Host CustomScripts
-    subprocess.run("rsync -axHAX --info=progress2 /opt/CustomScripts/ {0}/opt/CustomScripts/".format(arch_chroot_location), shell=True, check=True)
+    subprocess.run("rsync -axHAX --info=progress2 {0} {1}/opt/CustomScripts/".format(cslocation, arch_chroot_location), shell=True, check=True)
