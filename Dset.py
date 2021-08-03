@@ -330,6 +330,7 @@ if shutil.which("kwriteconfig5") and shutil.which("plasma_session"):
     kwriteconfig("kglobalshortcutsrc", "kwin", "Window Quick Tile Right", "Meta+Right,none,Quick Tile Window to the Right")
     kwriteconfig("kglobalshortcutsrc", "kwin", "Window Quick Tile Bottom", "Meta+PgDown,Meta+Down,Quick Tile Window to the Bottom")
     kwriteconfig("kglobalshortcutsrc", "kwin", "Window Quick Tile Top", "Meta+PgUp,Meta+Up,Quick Tile Window to the Top")
+    kwriteconfig("kglobalshortcutsrc", "kwin", "ExposeAll", "Meta+C\tCtrl+F10\tLaunch (C),Ctrl+F10\tLaunch (C),Toggle Present Windows (All desktops)")
     # Window Manager
     subprocess.run('kwriteconfig5 --file kwinrc --group Plugins --key "kwin4_effect_translucencyEnabled" "false"', shell=True, check=False)
     subprocess.run('kwriteconfig5 --file kwinrc --group Plugins --key "slidingpopupsEnabled" "false"', shell=True, check=False)
