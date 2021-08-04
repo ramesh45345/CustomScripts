@@ -19,17 +19,6 @@ parser.add_argument("-p", "--outfolder", help='Location to store ISOs (default: 
 args = parser.parse_args()
 
 
-# SSH into VM, fixed name.
-# Run CreateVM script to re-provision, create and/or update chroots.
-# Remove existing folders.
-# Run scripts.
-# Check for ISOs, copy into host using scp.
-# Cleanup.
-
-# Arch: Use systemd-nspawn
-# Fedora: Use chroot
-# Ubuntu: 
-
 if __name__ == '__main__':
     print("Running {0}".format(__file__))
     # if args.stage == 1:
@@ -37,8 +26,17 @@ if __name__ == '__main__':
 
         # Run Stage 2
 
-        # Retrieve ISOs
+        # Retrieve ISO paths
+        # realpath $(ls /root/chroot_fedora/root/fedlive/*.iso)
+        # /root/chroot_fedora/root/fedlive/Fedora-CustomLive-2021-08-04_0842.iso
 
+        # realpath $(ls /root/chroot_arch/root/*.iso)
+        # /root/chroot_arch/root/Arch-CustomLive-2021.08.04-x86_64.iso
+
+        # realpath $(ls /root/chroot_ubuntu/root/ubulive/*.iso)
+        # /root/chroot_ubuntu/root/ubulive/Ubuntu-CustomLive-2021-08-04_1453.iso
+
+        # Retrieve ISOs using scp
         # Cleanup
 
     if args.stage == 2:

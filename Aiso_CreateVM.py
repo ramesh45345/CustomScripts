@@ -24,6 +24,7 @@ fedora_chroot_location = os.path.join(workfolder, "chroot_fedora")
 arch_chroot_location = os.path.join(workfolder, "chroot_arch")
 ubuntu_chroot_location = os.path.join(workfolder, "chroot_ubuntu")
 cslocation = os.path.join(os.path.abspath(args.cslocation), '')
+ubuntu_version = "hirsute"
 
 # Check variables
 if not os.path.isdir(cslocation):
@@ -53,10 +54,10 @@ if args.clean is True:
 if not os.path.isdir(fedora_chroot_location) and shutil.which("dnf"):
     os.makedirs(fedora_chroot_location)
     subprocess.run('dnf -y --installroot={0} --releasever $(rpm -q --qf "%{{version}}" -f /etc/fedora-release) install @minimal-environment'.format(fedora_chroot_location), shell=True, check=True)
-    subprocess.run("systemd-nspawn -D {0} sh -c 'dnf install -y nano livecd-tools spin-kickstarts pykickstart anaconda util-linux'".format(fedora_chroot_location), shell=True, check=True)
+    zch.ChrootCommand(fedora_chroot_location, "sh -c 'dnf install -y nano livecd-tools spin-kickstarts pykickstart anaconda util-linux'")
 if os.path.isdir(fedora_chroot_location):
     # Update packages
-    subprocess.run("systemd-nspawn -D {0} sh -c 'dnf upgrade -y'".format(fedora_chroot_location), shell=True, check=True)
+    zch.ChrootCommand(fedora_chroot_location, "sh -c 'dnf upgrade -y'")
     # Rsync Host CustomScripts
     subprocess.run("rsync -axHAX --info=progress2 {0} {1}/opt/CustomScripts/".format(cslocation, fedora_chroot_location), shell=True, check=True)
 
@@ -69,7 +70,7 @@ if not os.path.isdir(arch_chroot_location) and shutil.which("pacstrap"):
     subprocess.run('pacstrap {0} base python archiso'.format(arch_chroot_location), shell=True, check=True)
 if os.path.isdir(arch_chroot_location):
     # Update packages
-    subprocess.run("systemd-nspawn -D {0} sh -c 'pacman -Syu --needed --noconfirm'".format(arch_chroot_location), shell=True, check=True)
+    zch.ChrootCommand(arch_chroot_location, "sh -c 'pacman -Syu --needed --noconfirm'")
     # Rsync Host CustomScripts
     subprocess.run("rsync -axHAX --info=progress2 {0} {1}/opt/CustomScripts/".format(cslocation, arch_chroot_location), shell=True, check=True)
 
@@ -78,7 +79,7 @@ if os.path.isdir(arch_chroot_location):
 # Create chroot if it doesn't exist
 if not os.path.isdir(ubuntu_chroot_location) and shutil.which("debootstrap"):
     os.makedirs(ubuntu_chroot_location)
-    subprocess.run("debootstrap hirsute {0} http://archive.ubuntu.com/ubuntu/".format(ubuntu_chroot_location), shell=True, check=True)
+    subprocess.run("debootstrap {0} {1} http://archive.ubuntu.com/ubuntu/".format(ubuntu_version, ubuntu_chroot_location), shell=True, check=True)
     zch.ChrootCommand(ubuntu_chroot_location, "sh -c 'apt install -y debootstrap binutils squashfs-tools grub-pc-bin grub-efi-amd64-bin mtools dosfstools unzip'")
     zch.ChrootCommand(ubuntu_chroot_location, "sh -c 'apt-get install -y --no-install-recommends software-properties-common'")
     zch.ChrootCommand(ubuntu_chroot_location, "sh -c 'add-apt-repository -y main && add-apt-repository -y restricted && add-apt-repository -y universe && add-apt-repository -y multiverse'")
