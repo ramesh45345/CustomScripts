@@ -18,34 +18,31 @@ parser.add_argument("-w", "--chrootfolder", help='Location of chroot folder (def
 parser.add_argument("-p", "--outfolder", help='Location to store ISOs (default: %(default)s)', default=os.getcwd())
 args = parser.parse_args()
 
+# Global variables
+workfolder = os.path.abspath(args.chrootfolder)
+fedora_chroot_location = os.path.join(workfolder, "chroot_fedora")
+arch_chroot_location = os.path.join(workfolder, "chroot_arch")
+ubuntu_chroot_location = os.path.join(workfolder, "chroot_ubuntu")
+ssh_ip = "ISOVM.local"
+ssh_user = "root"
 
 if __name__ == '__main__':
     print("Running {0}".format(__file__))
-    # if args.stage == 1:
-        # Global variables
-
+    if args.stage == 1:
         # Run Stage 2
 
         # Retrieve ISO paths
-        # realpath $(ls /root/chroot_fedora/root/fedlive/*.iso)
-        # /root/chroot_fedora/root/fedlive/Fedora-CustomLive-2021-08-04_0842.iso
-
-        # realpath $(ls /root/chroot_arch/root/*.iso)
-        # /root/chroot_arch/root/Arch-CustomLive-2021.08.04-x86_64.iso
-
-        # realpath $(ls /root/chroot_ubuntu/root/ubulive/*.iso)
-        # /root/chroot_ubuntu/root/ubulive/Ubuntu-CustomLive-2021-08-04_1453.iso
+        print("ssh {0} -l {1} find {2}/root/fedlive/ -type f -name \*.iso".format(ssh_ip, ssh_user, fedora_chroot_location))
+        fedora_iso_path = subprocess.run("ssh {0} -l {1} find {2}/root/fedlive/ -type f -name '*.iso'".format(ssh_ip, ssh_user, fedora_chroot_location), shell=True, check=False, stdout=subprocess.PIPE, universal_newlines=True).stdout.strip()
+        arch_iso_path = subprocess.run("ssh {0} -l {1} find {2}/root/ -type f -name '*.iso'".format(ssh_ip, ssh_user, arch_chroot_location), shell=True, check=False, stdout=subprocess.PIPE, universal_newlines=True).stdout.strip()
+        ubuntu_iso_path = subprocess.run("ssh {0} -l {1} find {2}/root/ubulive/ -type f -name '*.iso'".format(ssh_ip, ssh_user, ubuntu_chroot_location), shell=True, check=False, stdout=subprocess.PIPE, universal_newlines=True).stdout.strip()
+        print(fedora_iso_path, arch_iso_path, ubuntu_iso_path)
 
         # Retrieve ISOs using scp
         # Cleanup
 
     if args.stage == 2:
         import zch
-        # Global variables
-        workfolder = os.path.abspath(args.chrootfolder)
-        fedora_chroot_location = os.path.join(workfolder, "chroot_fedora")
-        arch_chroot_location = os.path.join(workfolder, "chroot_arch")
-        ubuntu_chroot_location = os.path.join(workfolder, "chroot_ubuntu")
         # Update chroots
         subprocess.run("/opt/CustomScripts/Aiso_CreateVM.py -d {0}".format(sys.path[0]), shell=True, check=True)
         # Fedora ISO
