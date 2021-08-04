@@ -43,9 +43,9 @@ if __name__ == '__main__':
         print("Found {0}, {1}, and {2} .".format(fedora_iso_path, arch_iso_path, ubuntu_iso_path))
 
         # Retrieve ISOs using scp
-        subprocess.run("scp -C {0}@{1}:{2} {3}".format(ssh_user, ssh_ip, fedora_iso_path, args.outfolder), shell=True, check=False)
-        subprocess.run("scp -C {0}@{1}:{2} {3}".format(ssh_user, ssh_ip, arch_iso_path, args.outfolder), shell=True, check=False)
-        subprocess.run("scp -C {0}@{1}:{2} {3}".format(ssh_user, ssh_ip, ubuntu_iso_path, args.outfolder), shell=True, check=False)
+        subprocess.run("scp -C {0}@{1}:{2} {3}".format(ssh_user, ssh_ip, fedora_iso_path, args.outfolder), shell=True, check=True)
+        subprocess.run("scp -C {0}@{1}:{2} {3}".format(ssh_user, ssh_ip, arch_iso_path, args.outfolder), shell=True, check=True)
+        subprocess.run("scp -C {0}@{1}:{2} {3}".format(ssh_user, ssh_ip, ubuntu_iso_path, args.outfolder), shell=True, check=True)
 
         # Cleanup
         subprocess.run("ssh {0} -l {1} rm -rf {2}/root/fedlive/ {3} {4}/root/ubulive/".format(ssh_ip, ssh_user, fedora_chroot_location, arch_iso_path, ubuntu_chroot_location), shell=True, check=False)
