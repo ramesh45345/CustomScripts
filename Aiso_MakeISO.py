@@ -6,6 +6,8 @@ import argparse
 import os
 import subprocess
 import sys
+# Custom includes
+import PCreateChrootVM
 
 # Get arguments
 parser = argparse.ArgumentParser(description='Provision VM for ISO building.')
@@ -20,13 +22,17 @@ workfolder = os.path.abspath(args.chrootfolder)
 fedora_chroot_location = os.path.join(workfolder, "chroot_fedora")
 arch_chroot_location = os.path.join(workfolder, "chroot_arch")
 ubuntu_chroot_location = os.path.join(workfolder, "chroot_ubuntu")
-ssh_ip = "ISOVM.local"
+vm_name = "ISOVM"
+ssh_ip = "{0}.local".format(vm_name)
 ssh_user = "root"
 
 if __name__ == '__main__':
     print("Running {0}".format(__file__))
     if args.stage == 1:
         print("Running Stage 1, only for host.")
+        # Start the VM if it is not started.
+        PCreateChrootVM.vm_start(vm_name)
+        PCreateChrootVM.ssh_wait(ip=ssh_ip, user=ssh_user)
         # Execute Stage 2
         subprocess.run("ssh {0} -l {1} /opt/CustomScripts/Aiso_MakeISO.py -s 2".format(ssh_ip, ssh_user), shell=True, check=True)
 
@@ -41,7 +47,9 @@ if __name__ == '__main__':
         subprocess.run("scp -C {0}@{1}:{2} {3}".format(ssh_user, ssh_ip, ubuntu_iso_path, args.outfolder), shell=True, check=False)
 
         # Cleanup
-
+        subprocess.run("ssh {0} -l {1} rm -rf {2}/root/fedlive/ {3} {4}/root/ubulive/".format(ssh_ip, ssh_user, fedora_chroot_location, arch_iso_path, ubuntu_chroot_location), shell=True, check=False)
+        # Shutdown the VM.
+        PCreateChrootVM.vm_shutdown(vm_name)
     if args.stage == 2:
         print("Running Stage 2, only for VM.")
         # Custom includes
