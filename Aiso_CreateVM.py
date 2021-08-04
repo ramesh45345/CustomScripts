@@ -84,4 +84,4 @@ if os.path.isdir(ubuntu_chroot_location):
     # Update packages
     zch.ChrootCommand(ubuntu_chroot_location, "sh -c 'apt update; apt upgrade -y; apt dist-upgrade -y'")
     # Rsync Host CustomScripts
-    subprocess.run("rsync -axHAX --info=progress2 {0} {1}/opt/CustomScripts/".format(cslocation, arch_chroot_location), shell=True, check=True)
+    subprocess.run("rsync -axHAX --info=progress2 {0} {1}/opt/CustomScripts/".format(cslocation, ubuntu_chroot_location), shell=True, check=True)
