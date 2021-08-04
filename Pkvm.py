@@ -127,6 +127,7 @@ USERHOME = os.path.expanduser("~")
 CPUCORES = multiprocessing.cpu_count()
 # Set memory to system memory size / 4.
 mem_mib = int(((os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')) / (1024.**2)) / 4)
+size_disk = 65536
 
 # Get arguments
 parser = argparse.ArgumentParser(description='Create a VM using packer.')
@@ -139,7 +140,7 @@ parser.add_argument("-m", "--memory", help="Memory for VM (default: %(default)s)
 parser.add_argument("-n", "--vmname", help="Name of Virtual Machine")
 parser.add_argument("-p", "--vmpath", help="Path of Packer output", required=True)
 parser.add_argument("-q", "--headless", help='Generate Headless', action="store_true")
-parser.add_argument("-s", "--imgsize", type=int, help="Size of image", default=65536)
+parser.add_argument("-s", "--imgsize", type=int, help="Size of image", default=size_disk)
 parser.add_argument("-t", "--vmtype", type=int, help="Virtual Machine type (1=Virtualbox, 2=libvirt, 3=VMWare", default="1")
 parser.add_argument("--noprompt", help='Do not prompt to continue.', action="store_true")
 parser.add_argument("--fullname", help="Full Name", default="User Name")
@@ -210,8 +211,11 @@ if args.ostype == 2:
     vmprovision_defopts = "-x"
 if args.ostype == 5:
     vmname = "ISOVM"
-    # Override memory setting.
-    args.memory = int(((os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')) / (1024.**2)) / 2)
+    # Override memory and disk setting if they are set to the default values.
+    if mem_mib == args.memory:
+        args.memory = int(((os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')) / (1024.**2)) / 2)
+    if size_disk == args.imgsize:
+        args.imgsize = 125000
     # Use cli settings for ISOVM.
     vmprovision_defopts = "-x"
 if args.ostype == 9:
