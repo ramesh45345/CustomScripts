@@ -195,7 +195,7 @@ elif args.vmtype == 2:
 md5_isourl = None
 # Set OS options.
 # KVM os options can be found by running "osinfo-query os"
-if 1 <= args.ostype <= 4:
+if 1 <= args.ostype <= 5:
     vmprovisionscript = "MFedora.py"
     vboxosid = "Fedora_64"
     vmwareid = "fedora-64"
@@ -207,6 +207,12 @@ if args.ostype == 1:
     vmprovision_defopts = "-d {0}".format(args.desktopenv)
 if args.ostype == 2:
     vmname = "Packer-FedoraCLI-{0}".format(hvname)
+    vmprovision_defopts = "-x"
+if args.ostype == 5:
+    vmname = "ISOVM"
+    # Override memory setting.
+    args.memory = int(((os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')) / (1024.**2)) / 2)
+    # Use cli settings for ISOVM.
     vmprovision_defopts = "-x"
 if args.ostype == 9:
     vmprovisionscript = "MFedoraSilverblue.py"
@@ -498,10 +504,12 @@ data['builders'][0]["ssh_timeout"] = "90m"
 # Packer Provisioning Configuration
 data['provisioners'] = ['']
 data['provisioners'][0] = {}
-if 1 <= args.ostype <= 4:
+if 1 <= args.ostype <= 5:
     data['builders'][0]["boot_command"] = ["<tab> inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/fedora.cfg<enter><wait>"]
     data['provisioners'][0]["type"] = "shell"
     data['provisioners'][0]["inline"] = "dnf install -y git; {2}; /opt/CustomScripts/{0} {1}".format(vmprovisionscript, vmprovision_opts, git_cmdline())
+if args.ostype == 5:
+    data['provisioners'][0]["inline"] = "dnf install -y git; {2}; /opt/CustomScripts/{0} {1}; /opt/CustomScripts/Aiso_CreateVM.py".format(vmprovisionscript, vmprovision_opts, git_cmdline())
 if args.ostype == 9:
     data['builders'][0]["boot_command"] = ["<tab> inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/silverblue.cfg<enter><wait>"]
     data['provisioners'][0]["type"] = "shell"

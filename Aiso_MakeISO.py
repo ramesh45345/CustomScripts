@@ -32,9 +32,8 @@ args = parser.parse_args()
 
 if __name__ == '__main__':
     print("Running {0}".format(__file__))
-    if args.stage == 1:
+    # if args.stage == 1:
         # Global variables
-        workfolder = os.path.abspath(args.workfolder)
 
         # Run Stage 2
 
@@ -52,8 +51,8 @@ if __name__ == '__main__':
         # Update chroots
         subprocess.run("/opt/CustomScripts/Aiso_CreateVM.py -d {0}".format(sys.path[0]), shell=True, check=True)
         # Fedora ISO
-        zch.ChrootCommand(fedora_chroot_location, "sh -c '/opt/CustomScripts/Afediso.py'")
+        zch.ChrootCommand(fedora_chroot_location, "sh -c '/opt/CustomScripts/Afediso.py -n'")
         # Arch ISO
-        zch.ChrootCommand(arch_chroot_location, "sh -c '/opt/CustomScripts/Aarchiso.py'")
+        zch.ChrootCommand(arch_chroot_location, "sh -c '/opt/CustomScripts/Aarchiso.py -n'")
         # Ubuntu ISO
         zch.ChrootCommand(ubuntu_chroot_location, "sh -c '/opt/CustomScripts/Aubuiso.py'")
