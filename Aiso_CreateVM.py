@@ -80,6 +80,8 @@ if not os.path.isdir(ubuntu_chroot_location) and shutil.which("debootstrap"):
     os.makedirs(ubuntu_chroot_location)
     subprocess.run("debootstrap hirsute {0} http://archive.ubuntu.com/ubuntu/".format(ubuntu_chroot_location), shell=True, check=True)
     zch.ChrootCommand(ubuntu_chroot_location, "sh -c 'apt install -y debootstrap binutils squashfs-tools grub-pc-bin grub-efi-amd64-bin mtools dosfstools unzip'")
+    zch.ChrootCommand(ubuntu_chroot_location, "sh -c 'apt-get install -y --no-install-recommends software-properties-common'")
+    zch.ChrootCommand(ubuntu_chroot_location, "sh -c 'add-apt-repository -y main && add-apt-repository -y restricted && add-apt-repository -y universe && add-apt-repository -y multiverse'")
 if os.path.isdir(ubuntu_chroot_location):
     # Update packages
     zch.ChrootCommand(ubuntu_chroot_location, "sh -c 'apt update; apt upgrade -y; apt dist-upgrade -y'")
