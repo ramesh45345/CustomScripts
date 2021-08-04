@@ -37,9 +37,10 @@ if __name__ == '__main__':
         subprocess.run("ssh {0} -l {1} /opt/CustomScripts/Aiso_MakeISO.py -s 2".format(ssh_ip, ssh_user), shell=True, check=True)
 
         # Retrieve ISO paths
-        fedora_iso_path = subprocess.run("ssh {0} -l {1} find {2}/root/fedlive/ -type f -name '*.iso'".format(ssh_ip, ssh_user, fedora_chroot_location), shell=True, check=False, stdout=subprocess.PIPE, universal_newlines=True).stdout.strip()
-        arch_iso_path = subprocess.run("ssh {0} -l {1} find {2}/root/ -type f -name '*.iso'".format(ssh_ip, ssh_user, arch_chroot_location), shell=True, check=False, stdout=subprocess.PIPE, universal_newlines=True).stdout.strip()
-        ubuntu_iso_path = subprocess.run("ssh {0} -l {1} find {2}/root/ubulive/ -type f -name '*.iso'".format(ssh_ip, ssh_user, ubuntu_chroot_location), shell=True, check=False, stdout=subprocess.PIPE, universal_newlines=True).stdout.strip()
+        fedora_iso_path = subprocess.run("ssh {0} -l {1} find {2}/root/fedlive/ -maxdepth 1 -type f -name '*.iso'".format(ssh_ip, ssh_user, fedora_chroot_location), shell=True, check=False, stdout=subprocess.PIPE, universal_newlines=True).stdout.strip()
+        arch_iso_path = subprocess.run("ssh {0} -l {1} find {2}/root/ -maxdepth 1 -type f -name '*.iso'".format(ssh_ip, ssh_user, arch_chroot_location), shell=True, check=False, stdout=subprocess.PIPE, universal_newlines=True).stdout.strip()
+        ubuntu_iso_path = subprocess.run("ssh {0} -l {1} find {2}/root/ubulive/ -maxdepth 1 -type f -name '*.iso'".format(ssh_ip, ssh_user, ubuntu_chroot_location), shell=True, check=False, stdout=subprocess.PIPE, universal_newlines=True).stdout.strip()
+        print("Found {0}, {1}, and {2} .".format(fedora_iso_path, arch_iso_path, ubuntu_iso_path))
 
         # Retrieve ISOs using scp
         subprocess.run("scp -C {0}@{1}:{2} {3}".format(ssh_user, ssh_ip, fedora_iso_path, args.outfolder), shell=True, check=False)
