@@ -84,10 +84,11 @@ print("Group Name is:", USERGROUP)
 
 # Get VM State
 vmstatus = CFunc.getvmstate()
+# Get Silverblue/Kinoite Status
+fedora_version = CFunc.subpout("ostree refs fedora:fedora")
 
 
 ### Begin Code ###
-fedora_sudoersfile = os.path.join(os.sep, "etc", "sudoers.d", "pkmgt")
 if args.stage == 0:
     print("Please select a stage.")
 if args.stage == 1:
@@ -114,19 +115,10 @@ if args.stage == 1:
     if vmstatus == "vmware":
         rostreeinstall("open-vm-tools open-vm-tools-desktop")
 
-    # Some Gnome Extensions
-    rostreeinstall("gnome-tweak-tool dconf-editor")
-    rostreeinstall("gnome-shell-extension-gpaste gnome-shell-extension-topicons-plus")
-
-    # Remove gnome-software
-    gnome_startup_file = os.path.join(os.sep, "etc", "xdg", "autostart", "gnome-software-service.desktop")
-    if os.path.isfile(gnome_startup_file):
-        os.remove(gnome_startup_file)
-    subprocess.run("rpm-ostree override remove gnome-software gnome-software-rpm-ostree", shell=True, check=False)
-
     # Sudoers changes
     CFuncExt.SudoersEnvSettings()
     # Edit sudoers to add commands.
+    fedora_sudoersfile = os.path.join(os.sep, "etc", "sudoers.d", "pkmgt")
     CFunc.AddLineToSudoersFile(fedora_sudoersfile, "%wheel ALL=(ALL) ALL", overwrite=True)
     CFunc.AddLineToSudoersFile(fedora_sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("rpm-ostree")))
     CFunc.AddLineToSudoersFile(fedora_sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("podman")))
@@ -145,6 +137,19 @@ if args.stage == 1:
 
     # Disable mitigations
     subprocess.run("rpm-ostree kargs --append=mitigations=off", shell=True, check=True)
+
+    # Specific install section
+    if fedora_version.endswith("silverblue"):
+        # Some Gnome Extensions
+        rostreeinstall("gnome-tweak-tool dconf-editor")
+        rostreeinstall("gnome-shell-extension-gpaste gnome-shell-extension-topicons-plus")
+
+        # Remove gnome-software
+        gnome_startup_file = os.path.join(os.sep, "etc", "xdg", "autostart", "gnome-software-service.desktop")
+        if os.path.isfile(gnome_startup_file):
+            os.remove(gnome_startup_file)
+        subprocess.run("rpm-ostree override remove gnome-software gnome-software-rpm-ostree", shell=True, check=False)
+
     print("Stage 1 Complete! Please reboot and run Stage 2.")
 if args.stage == 2:
     print("Stage 2")
@@ -163,18 +168,6 @@ baseurl=https://packages.microsoft.com/yumrepos/vscode
 enabled=1
 gpgcheck=0""")
     rostreeinstall("code")
-
-    # Install gs installer script.
-    gs_installer = CFunc.downloadfile("https://raw.githubusercontent.com/brunelli/gnome-shell-extension-installer/master/gnome-shell-extension-installer", os.path.join(os.sep, "usr", "local", "bin"), overwrite=True)
-    os.chmod(gs_installer[0], 0o777)
-    # Dash to panel
-    CFunc.run_as_user(USERNAMEVAR, "{0} --yes 1160".format(gs_installer[0]))
-    # https://github.com/kgshank/gse-sound-output-device-chooser
-    CFunc.run_as_user(USERNAMEVAR, "{0} --yes 906".format(gs_installer[0]))
-    # https://github.com/mymindstorm/gnome-volume-mixer 
-    CFunc.run_as_user(USERNAMEVAR, "{0} --yes 3499".format(gs_installer[0]))
-    # Kstatusnotifier
-    CFunc.run_as_user(USERNAMEVAR, "{0} --yes 615".format(gs_installer[0]))
 
     # Add normal user to all reasonable groups
     group_silverblueadd("disk")
@@ -206,12 +199,28 @@ gpgcheck=0""")
     os.makedirs(os.path.join(USERHOME, ".config", "autostart"), exist_ok=True)
     # Start flameshot on user login.
     shutil.copy("/var/lib/flatpak/app/org.flameshot.Flameshot/current/active/export/share/applications/org.flameshot.Flameshot.desktop", os.path.join(USERHOME, ".config", "autostart"))
-    # Gnome Apps
-    CFunc.flatpak_install("flathub", "org.gnome.Firmware")
-    CFunc.flatpak_install("flathub", "org.gnome.Extensions")
-    # Configure permissions for apps
-    CFunc.flatpak_override("org.gnome.FileRoller", "--filesystem=host")
-    CFunc.chown_recursive(os.path.join(USERHOME, ".config", ), USERNAMEVAR, USERGROUP)
+
+    # Specific install section
+    if fedora_version.endswith("silverblue"):
+        # Install gs installer script.
+        gs_installer = CFunc.downloadfile("https://raw.githubusercontent.com/brunelli/gnome-shell-extension-installer/master/gnome-shell-extension-installer", os.path.join(os.sep, "usr", "local", "bin"), overwrite=True)
+        os.chmod(gs_installer[0], 0o777)
+        # Dash to panel
+        CFunc.run_as_user(USERNAMEVAR, "{0} --yes 1160".format(gs_installer[0]))
+        # https://github.com/kgshank/gse-sound-output-device-chooser
+        CFunc.run_as_user(USERNAMEVAR, "{0} --yes 906".format(gs_installer[0]))
+        # https://github.com/mymindstorm/gnome-volume-mixer 
+        CFunc.run_as_user(USERNAMEVAR, "{0} --yes 3499".format(gs_installer[0]))
+        # Kstatusnotifier
+        CFunc.run_as_user(USERNAMEVAR, "{0} --yes 615".format(gs_installer[0]))
+
+        # Gnome Apps
+        CFunc.flatpak_install("flathub", "org.gnome.Firmware")
+        CFunc.flatpak_install("flathub", "org.gnome.Extensions")
+        # Configure permissions for apps
+        CFunc.flatpak_override("org.gnome.FileRoller", "--filesystem=host")
+
+    CFunc.chown_recursive(os.path.join(USERHOME, ".config"), USERNAMEVAR, USERGROUP)
 
     # Extra scripts
     subprocess.run("{0}/CCSClone.py".format(SCRIPTDIR), shell=True, check=True)
