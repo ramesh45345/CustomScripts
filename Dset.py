@@ -7,6 +7,7 @@ import os
 import pathlib
 import subprocess
 import shutil
+import xml.etree.ElementTree as ET
 # Custom includes
 import CFunc
 
@@ -58,6 +59,24 @@ def firefox_modify_settings(setting: str, value: str, prefsjs_filepath: str):
         # If the pref doesn't exist, add to the bottom.
         with open(prefsjs_filepath, 'a') as f:
             f.write('user_pref("{0}", {1});\n'.format(setting, value))
+def xml_indent(elem, level=0):
+    """
+    Pretty Print XML using Python Standard libraries only
+    http://effbot.org/zone/element-lib.htm#prettyprint
+    """
+    i = "\n" + level * "  "
+    if len(elem):
+        if not elem.text or not elem.text.strip():
+            elem.text = i + "  "
+        if not elem.tail or not elem.tail.strip():
+            elem.tail = i
+        for elem in elem:
+            xml_indent(elem, level + 1)
+        if not elem.tail or not elem.tail.strip():
+            elem.tail = i
+    else:
+        if level and (not elem.tail or not elem.tail.strip()):
+            elem.tail = i
 
 
 # Get arguments
@@ -529,6 +548,28 @@ if shutil.which("kwriteconfig5") and shutil.which("plasma_session"):
     subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "8" --group "General" --key "extraItems" "org.kde.plasma.networkmanagement,org.kde.plasma.clipboard,org.kde.kdeconnect,org.kde.plasma.devicenotifier,org.kde.plasma.printmanager,org.kde.plasma.bluetooth,org.kde.plasma.battery,org.kde.plasma.volume,org.kde.plasma.keyboardlayout,org.kde.kupapplet,org.kde.plasma.notifications,org.kde.plasma.keyboardindicator,org.kde.plasma.vault,org.kde.plasma.mediacontroller,org.kde.plasma.nightcolorcontrol"', shell=True, check=False)
     subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "8" --group "General" --key "knownItems" "org.kde.plasma.networkmanagement,org.kde.plasma.clipboard,org.kde.kdeconnect,org.kde.plasma.devicenotifier,org.kde.plasma.printmanager,org.kde.plasma.bluetooth,org.kde.plasma.battery,org.kde.plasma.volume,org.kde.plasma.keyboardlayout,org.kde.kupapplet,org.kde.plasma.notifications,org.kde.plasma.keyboardindicator,org.kde.plasma.vault,org.kde.plasma.mediacontroller,org.kde.plasma.nightcolorcontrol"', shell=True, check=False)
     subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "ScreenMapping" --key "itemsOnDisabledScreens" ""', shell=True, check=False)
+# Dolphin bookmarks
+places_xml_path = os.path.join(USERHOME, ".local", "share", "user-places.xbel")
+if os.path.isfile(places_xml_path):
+    # Register the namespace to avoid nsX in namespace.
+    ET.register_namespace('bookmark', 'http://www.freedesktop.org/standards/desktop-bookmarks')
+    ET.register_namespace('kdepriv', 'http://www.kde.org/kdepriv')
+    ET.register_namespace('mime', 'http://www.freedesktop.org/standards/shared-mime-info')
+
+    # Get the xml.
+    tree = ET.parse(places_xml_path)
+    root = tree.getroot()
+    # Bookmarks to delete.
+    search_list = ["Videos", "Music", "Documents", "Downloads", "Pictures"]
+    # Search through the bookmarks in the xml.
+    for bmark in root.findall('bookmark'):
+        # If a bookmark title matches the list, delete it.
+        if bmark.find('title').text in search_list:
+            root.remove(bmark)
+
+    # Write the XML file
+    xml_indent(root)
+    tree.write(places_xml_path)
 
 
 # Xfce settings
