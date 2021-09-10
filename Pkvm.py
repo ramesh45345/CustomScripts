@@ -301,17 +301,15 @@ if args.ostype == 51:
     vmname = "Packer-Windows10LTS-{0}".format(hvname)
     windows_key = "M7XTQ-FN8P6-TTKYV-9D4CC-J462D"
 if 55 <= args.ostype <= 59:
-    vboxosid = "Windows2016_64"
+    vboxosid = "Windows2019_64"
     vmwareid = "windows9srv-64"
     kvm_os = "windows"
     kvm_variant = "win2k19"
     vmprovision_defopts = " "
 if 55 <= args.ostype <= 56:
-    windows_key = "N69G4-B89J2-4G8F4-WWYCC-J464C"
+    windows_key = "VDYBN-27WPP-V4HQT-9VMD4-VMK7H"
 if args.ostype == 55:
-    vmname = "Packer-Windows2019-{0}".format(hvname)
-if args.ostype == 56:
-    vmname = "Packer-Windows2019Core-{0}".format(hvname)
+    vmname = "Packer-Windows2022-{0}".format(hvname)
 
 
 # Override provision opts if provided.
@@ -610,8 +608,6 @@ if 55 <= args.ostype <= 59:
     tree.write(os.path.join(tempunattendfolder, "autounattend.xml"))
 if args.ostype == 55:
     CFunc.find_replace(tempunattendfolder, "INSERTWINOSIMAGE", "2", "autounattend.xml")
-if args.ostype == 56:
-    CFunc.find_replace(tempunattendfolder, "INSERTWINOSIMAGE", "1", "autounattend.xml")
 if 50 <= args.ostype <= 59 and qemu_virtio_diskpath is not None:
     # Insert the virtio driver disk
     xml_insertqemudisk(os.path.join(tempunattendfolder, "autounattend.xml"))
