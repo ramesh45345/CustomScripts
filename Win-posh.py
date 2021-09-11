@@ -150,7 +150,7 @@ if os.path.isfile(cygwin_bash_cmd):
         subprocess.run("git checkout -f", shell=True, check=True)
         subprocess.run("git pull", shell=True, check=True)
     else:
-        subprocess.run("git clone {0} {1}".format("https://github.com/kou1okada/apt-cyg.git", os.path.join(documents_folder, "apt-cyg")), shell=True, check=True)
+        subprocess.run("git clone {0} {1}".format("https://github.com/resistancelion/apt-cyg", os.path.join(documents_folder, "apt-cyg")), shell=True, check=True)
     os.chdir(documents_folder)
 
     subprocess.run([cygwin_bash_cmd, "-c", '/usr/bin/ln -sf "$(/usr/bin/realpath apt-cyg/apt-cyg)" /usr/local/bin/'], cwd=documents_folder, check=True)
