@@ -80,18 +80,25 @@ if [ $(id -u) != "0" ]; then
     }
 fi
 
-# Expand $PATH to include the CustomScripts path.
-if [ "${PATH#*$CUSTOMSCRIPTPATH}" = "${PATH}" ] && [ -d "$CUSTOMSCRIPTPATH" ]; then
-    export PATH=$PATH:$CUSTOMSCRIPTPATH
-fi
+# Expand $PATH to include the passed parameter.
+function addtopath () {
+    if [[ ":$PATH:" != *:"$1":* ]] && [ -d "$1" ]; then
+        export PATH=$PATH:$1
+    fi
+}
+
+# Add paths
+addtopath "/sbin"
+addtopath "/usr/sbin"
+addtopath "/usr/local/sbin"
+addtopath "$CUSTOMSCRIPTPATH"
+addtopath "$HOME/.local/bin"
+# Add snap paths
+pathadd "/snap/bin"
+pathadd "/var/lib/snapd/snap/bin"
 
 # Set editor to nano
 export EDITOR=nano
-
-# Add sbin paths if not in path
-if [ "${PATH#*/sbin}" = "${PATH}" ]; then
-    export PATH=/sbin:/usr/sbin:/usr/local/sbin:$PATH
-fi
 
 # Functions
 function sst () {
@@ -601,6 +608,8 @@ pathadd "/usr/sbin"
 pathadd "/usr/local/sbin"
 # Set Custom Scripts in path
 pathadd "$CUSTOMSCRIPTPATH"
+# Set ".local/bin" in path
+pathadd "$HOME/.local/bin"
 # Add snap paths
 pathadd "/snap/bin"
 pathadd "/var/lib/snapd/snap/bin"
