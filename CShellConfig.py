@@ -94,8 +94,8 @@ addtopath "/usr/local/sbin"
 addtopath "$CUSTOMSCRIPTPATH"
 addtopath "$HOME/.local/bin"
 # Add snap paths
-pathadd "/snap/bin"
-pathadd "/var/lib/snapd/snap/bin"
+addtopath "/snap/bin"
+addtopath "/var/lib/snapd/snap/bin"
 
 # Set editor to nano
 export EDITOR=nano
