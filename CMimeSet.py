@@ -91,7 +91,8 @@ if __name__ == '__main__':
     print("Running {0}".format(__file__))
 
     # Get arguments
-    parser = argparse.ArgumentParser(description='Enter a chroot.')
+    parser = argparse.ArgumentParser(description='Set or query mime types.')
+    parser.add_argument("-l", "--locate", help='Search for a .desktop file to serve as a mime handler.')
     parser.add_argument("-s", "--set", help='Set mimetypes. (i.e. application/"x-7z-compressed,application/x-xz-compressed-tar". Must set app with this option.')
     parser.add_argument("-a", "--application", help='Application to set mimetype to (i.e. "org.kde.ark.desktop". Must be used with set options.')
     parser.add_argument("-q", "--query", help='Query mimetypes. (i.e. "application/x-7z-compressed,application/x-xz-compressed-tar")')
@@ -104,6 +105,10 @@ if __name__ == '__main__':
     # Query command
     if args.query:
         Mime_Query_All(args.query)
+    if args.locate:
+        locatedfiles = LocateDesktopFile(args.locate)
+        for f in locatedfiles:
+            print(f)
     # Passed set command
     elif args.set:
         Mime_Set_All(args.set, args.application)
