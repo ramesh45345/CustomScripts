@@ -5,6 +5,7 @@
 import argparse
 import fnmatch
 import glob
+import mimetypes
 import os
 import re
 import shutil
@@ -17,7 +18,7 @@ SCRIPTDIR = sys.path[0]
 # Global variables
 types_archive = "application/x-7z-compressed,application/x-xz-compressed-tar,application/zip,application/x-compressed-tar,application/x-bzip-compressed-tar,application/x-tar,application/x-xz"
 types_audio = "application/octet-stream,audio/flac,audio/mpeg,audio/ogg,audio/x-m4a"
-types_text = "text/plain"
+types_text = "text/plain,application/x-sh,text/x-python,text/markdown"
 
 ### Functions ###
 def Mime_CheckCmds():
@@ -85,6 +86,21 @@ def FindDesktopFile(desktop_ref: str):
             if glob.glob(os.path.join(xdg_app_folder, desktop_ref)):
                 desktopref_exists = True
     return desktopref_exists
+def FindMimeTypes(folder: str = os.getcwd()):
+    mimes = []
+    if os.path.isdir(folder):
+        files = os.listdir(folder)
+        for f in files:
+            if os.path.isfile(os.path.join(folder, f)):
+                f_mime = mimetypes.guess_type(f)[0]
+                print(f, "\t", f_mime)
+                mimes += [f_mime]
+    # Remove duplicates by converting to set and then list. Also, filter out None entries.
+    mimes = ",".join(list(filter(None, set(mimes))))
+    print("\nMime List:", mimes)
+    # Check mime associations
+    print("\nAssociations for mimes:")
+    Mime_Query_All(mimes)
 
 
 if __name__ == '__main__':
@@ -96,6 +112,7 @@ if __name__ == '__main__':
     parser.add_argument("-s", "--set", help='Set mimetypes. (i.e. application/"x-7z-compressed,application/x-xz-compressed-tar". Must set app with this option.')
     parser.add_argument("-a", "--application", help='Application to set mimetype to (i.e. "org.kde.ark.desktop". Must be used with set options.')
     parser.add_argument("-q", "--query", help='Query mimetypes. (i.e. "application/x-7z-compressed,application/x-xz-compressed-tar")')
+    parser.add_argument("-m", "--mimes", help='Check Mimetypes of specified folder.')
     parser.add_argument("-p", "--predefines", help='Set or query predefines. Set when combined with -a flag. Options: archive,text,audio')
     args = parser.parse_args()
 
@@ -105,10 +122,12 @@ if __name__ == '__main__':
     # Query command
     if args.query:
         Mime_Query_All(args.query)
-    if args.locate:
+    elif args.locate:
         locatedfiles = LocateDesktopFile(args.locate)
         for f in locatedfiles:
             print(f)
+    elif args.mimes:
+        FindMimeTypes(args.mimes)
     # Passed set command
     elif args.set:
         Mime_Set_All(args.set, args.application)
