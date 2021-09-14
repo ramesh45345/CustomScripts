@@ -433,7 +433,7 @@ if shutil.which("kwriteconfig5") and shutil.which("plasma_session"):
     if shutil.which("qdbus"):
         # Reload kwin.
         subprocess.run('qdbus org.kde.KWin /KWin reconfigure', shell=True, check=False)
-    
+
     # Panel Positions
     # Config information and example: https://github.com/shalva97/kde-configuration-files
     # Convert kde config to kwriteconfig line: https://gist.github.com/shalva97/a705590f2c0e309374cccc7f6bd667cb
