@@ -99,5 +99,5 @@ if shutil.which("sddm"):
         with open("/etc/sddm.conf.d/autologin.conf", 'w') as f:
             f.write("""[Autologin]
 User={0}
-Session=plasma.desktop
+Session=plasmax11.desktop
 """.format(USERNAMEVAR))
