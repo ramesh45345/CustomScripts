@@ -175,6 +175,7 @@ if __name__ == '__main__':
     # Get non-root user information.
     USERNAMEVAR, USERGROUP, USERHOME = CFunc.getnormaluser()
     CPUCORES = multiprocessing.cpu_count() if multiprocessing.cpu_count() <= 4 else 4
+    imgsize_default = "64"
 
     # Ensure that certain commands exist.
     cmdcheck = ["ssh", "sshpass", "qemu-img", "virsh", "ip"]
@@ -191,12 +192,13 @@ if __name__ == '__main__':
     parser.add_argument("-i", "--iso", help="Path to live cd", required=True)
     parser.add_argument("-n", "--vmname", help="Name of Virtual Machine")
     parser.add_argument("-p", "--vmpath", help="Path of Virtual Machine folders", required=True)
+    parser.add_argument("-s", "--imgsize", type=int, help="Size of image in GB (default: %(default)s)", default=imgsize_default)
     parser.add_argument("-v", "--rootsshkey", help="Root SSH Key")
     parser.add_argument("-w", "--livesshuser", help="Live SSH Username", default="root")
     parser.add_argument("-x", "--livesshpass", help="Live SSH Password", default="asdf")
     parser.add_argument("-y", "--vmuser", help="VM Username", default="user")
     parser.add_argument("-z", "--vmpass", help="VM Password", default="asdf")
-    parser.add_argument("--memory", help="Memory for VM", default="4096")
+    parser.add_argument("-m", "--memory", help="Memory for VM", default="4096")
     parser.add_argument("--noprompt", help='Do not prompt to continue.', action="store_true")
     args = parser.parse_args()
 
@@ -245,6 +247,7 @@ if __name__ == '__main__':
     print("Path to LiveCD/ISO is {0}".format(iso_path))
     print("OS Type is {0}".format(args.ostype))
     print("VM Memory is {0}".format(args.memory))
+    print("VM Disk size is {0} GB".format(args.imgsize))
     print("Live SSH user is {0}".format(args.livesshuser))
     print("VM User is {0}".format(args.vmuser))
     print("SSH Key is \"{0}\"".format(sshkey))
@@ -252,8 +255,6 @@ if __name__ == '__main__':
     # Variables less likely to change.
     sship = None
     localsshport = 22
-
-    imgsize = "64"
 
     if not os.path.isdir(vmpath) or not os.path.isfile(iso_path):
         sys.exit("\nError, ensure {0} is a folder, and {1} is a file.".format(vmpath, iso_path))
@@ -269,7 +270,7 @@ if __name__ == '__main__':
 
     # Create new VM.
     print("\nCreating VM.")
-    vm_createimage(imgpath, imgsize)
+    vm_createimage(imgpath, args.imgsize)
     vm_create(vm_name, imgpath, iso_path)
     # Bootstrap the VM.
     vm_start(vm_name)

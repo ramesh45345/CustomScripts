@@ -127,7 +127,7 @@ USERHOME = os.path.expanduser("~")
 CPUCORES = multiprocessing.cpu_count()
 # Set memory to system memory size / 4.
 mem_mib = int(((os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')) / (1024.**2)) / 4)
-size_disk = 65536
+size_disk_default_gb = 64
 
 # Get arguments
 parser = argparse.ArgumentParser(description='Create a VM using packer.')
@@ -140,7 +140,7 @@ parser.add_argument("-m", "--memory", help="Memory for VM (default: %(default)s)
 parser.add_argument("-n", "--vmname", help="Name of Virtual Machine")
 parser.add_argument("-p", "--vmpath", help="Path of Packer output", required=True)
 parser.add_argument("-q", "--headless", help='Generate Headless', action="store_true")
-parser.add_argument("-s", "--imgsize", type=int, help="Size of image", default=size_disk)
+parser.add_argument("-s", "--imgsize", type=int, help="Size of image in GB (default: %(default)s)", default=size_disk_default_gb)
 parser.add_argument("-t", "--vmtype", type=int, help="Virtual Machine type (1=Virtualbox, 2=libvirt, 3=VMWare", default="1")
 parser.add_argument("--noprompt", help='Do not prompt to continue.', action="store_true")
 parser.add_argument("--fullname", help="Full Name", default="User Name")
@@ -158,7 +158,7 @@ qemu_virtio_diskpath = None
 print("Path to Packer output is {0}".format(vmpath))
 print("OS Type is {0}".format(args.ostype))
 print("VM Memory is {0}".format(args.memory))
-print("VM Hard Disk size is {0}".format(args.imgsize))
+print("VM Hard Disk size is {0} GB".format(args.imgsize))
 print("VM User is {0}".format(args.vmuser))
 print("Desktop Environment:", args.desktopenv)
 print("Headless:", args.headless)
@@ -214,8 +214,8 @@ if args.ostype == 5:
     # Override memory and disk setting if they are set to the default values.
     if mem_mib == args.memory:
         args.memory = int(((os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')) / (1024.**2)) / 2)
-    if size_disk == args.imgsize:
-        args.imgsize = 125000
+    if size_disk_default_gb == args.imgsize:
+        args.imgsize = 120
     # Use cli settings for ISOVM.
     vmprovision_defopts = "-x"
 if args.ostype == 9:
@@ -323,6 +323,9 @@ print("VM Provision Options:", vmprovision_opts)
 if args.vmname is not None:
     vmname = args.vmname
 print("VM Name is {0}".format(vmname))
+
+# Determine disk size in mb
+size_disk_mb = args.imgsize * 1024
 
 # Detect Powershell command for Windows
 powershell_cmd = None
@@ -498,7 +501,7 @@ data['builders'][0]["iso_url"] = "{0}".format(isopath)
 data['builders'][0]["iso_checksum"] = "md5:{0}".format(md5)
 data['builders'][0]["output_directory"] = "{0}".format(vmname)
 data['builders'][0]["http_directory"] = tempunattendfolder
-data['builders'][0]["disk_size"] = "{0}".format(args.imgsize)
+data['builders'][0]["disk_size"] = "{0}".format(size_disk_mb)
 data['builders'][0]["boot_wait"] = "5s"
 data['builders'][0]["ssh_username"] = "root"
 data['builders'][0]["ssh_password"] = "{0}".format(args.vmpass)
