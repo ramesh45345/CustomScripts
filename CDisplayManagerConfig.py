@@ -95,9 +95,12 @@ if shutil.which("sddm"):
     print("\n Processing sddm configuration.")
     # Enable autologin
     if vmstatus or args.autologin is True:
+        plasma_desktop_file = "plasma.desktop"
+        if os.path.isfile("/usr/share/xsessions/plasmax11.desktop"):
+            plasma_desktop_file = "plasmax11.desktop"
         os.makedirs("/etc/sddm.conf.d", exist_ok=True)
         with open("/etc/sddm.conf.d/autologin.conf", 'w') as f:
             f.write("""[Autologin]
 User={0}
-Session=plasmax11.desktop
-""".format(USERNAMEVAR))
+Session={1}
+""".format(USERNAMEVAR, plasma_desktop_file))
