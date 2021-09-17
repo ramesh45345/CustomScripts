@@ -281,7 +281,7 @@ elif type yay &> /dev/null || type pacman &> /dev/null; then
         if type yay &> /dev/null; then
             yay --pacman pacman --print --print-format="%%n-%%v" -S --needed $@ | sort
         else
-            pacman --print --print-format="%%n-%%v" -S --needed $@ | sort
+            $SUDOCMD pacman --print --print-format="%%n-%%v" -S --needed $@ | sort
         fi
         echo "\nPress Enter to install or Ctrl-C to cancel."
         read -r empty_variable
