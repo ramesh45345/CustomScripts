@@ -280,12 +280,15 @@ elif type yay &> /dev/null || type pacman &> /dev/null; then
         echo "Installing $@.\n"
         if type yay &> /dev/null; then
             yay --pacman pacman --print --print-format="%%n-%%v" -S --needed $@ | sort
+            echo "\nPress Enter to install or Ctrl-C to cancel."
+            read -r empty_variable
+            yay -S --noconfirm --needed $@
         else
             $SUDOCMD pacman --print --print-format="%%n-%%v" -S --needed $@ | sort
+            echo "\nPress Enter to install or Ctrl-C to cancel."
+            read -r empty_variable
+            $SUDOCMD pacman -S --noconfirm --needed $@
         fi
-        echo "\nPress Enter to install or Ctrl-C to cancel."
-        read -r empty_variable
-        $PKGMGR -S --noconfirm --needed $@
     }
     function rmv () {
         echo "Removing $@."
