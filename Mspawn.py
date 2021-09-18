@@ -124,7 +124,8 @@ if os.path.islink(os.path.join(pathvar, "etc", "resolv.conf")):
 nspawn_cmd(pathvar, "useradd -m -s /bin/bash {0}".format(USERNAMEVAR), error_on_fail=False)
 # Install basic packages
 nspawn_distro_cmd(args.distro, pathvar, "arch", "sed -i 's/^#ParallelDownloads/ParallelDownloads/g' /etc/pacman.conf")
-nspawn_distro_cmd(args.distro, pathvar, "arch", "pacman -Syu --needed --noconfirm nano sudo which git zsh python")
+nspawn_distro_cmd(args.distro, pathvar, "arch", "pacman -Syu --needed --noconfirm nano sudo which git zsh python base-devel reflector")
+nspawn_distro_cmd(args.distro, pathvar, "arch", "reflector --country 'United States' --latest 10 --protocol https --sort rate --save /etc/pacman.d/mirrorlist")
 # Set hostname
 nspawn_cmd(pathvar, 'echo "{0}" > /etc/hostname'.format(args.distro))
 nspawn_cmd(pathvar, 'echo "127.0.0.1 {0}" >> /etc/hosts'.format(args.distro))
@@ -150,6 +151,6 @@ nspawn_distro_cmd(args.distro, pathvar, "arch", "pacman -Syu --needed --noconfir
 nspawn_distro_cmd(args.distro, pathvar, "arch", """cd /opt/CustomScripts; python -c 'import CFunc; USERNAMEVAR, USERGROUP, USERHOME = CFunc.getnormaluser(); import MArch; MArch.install_aur_pkg("yay-bin", USERNAMEVAR, USERGROUP)'""")
 
 print("\nUse chroot with following command: ")
-print("systemd-nspawn -D {path} --user={user} --bind-ro=/tmp/.X11-unix/ --setenv=DISPLAY={display} zsh".format(path=pathvar, user=USERNAMEVAR, display=DISPLAY))
+print("systemd-nspawn -D {path} --user={user} --bind-ro=/tmp/.X11-unix/ --setenv=DISPLAY={display} xfce4-terminal".format(path=pathvar, user=USERNAMEVAR, display=DISPLAY))
 
 print("\nScript End")
