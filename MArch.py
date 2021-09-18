@@ -45,12 +45,12 @@ def lightdm_configure():
     subprocess.run("sed -i 's/^greeter-session=.*/greeter-session=lightdm-webkit2-greeter/g' /etc/lightdm/lightdm.conf", shell=True, check=True)
     subprocess.run("sed -i 's/^webkit_theme=.*/webkit_theme=litarvan/g' /etc/lightdm/lightdm-webkit2-greeter.conf", shell=True, check=True)
     CFunc.sysctl_enable("-f lightdm", error_on_fail=True)
-def install_aur_pkg(package: str):
+def install_aur_pkg(package: str, username, usergroup):
     """Install an aur package using makepkg."""
     package_gitcheckout_folder = os.path.join(os.sep, "tmp", package)
     subprocess.run("cd /tmp ; git clone https://aur.archlinux.org/{0}.git".format(package), shell=True, check=True)
-    CFunc.chown_recursive(package_gitcheckout_folder, USERNAMEVAR, USERGROUP)
-    CFunc.run_as_user(USERNAMEVAR, "cd {0} ; makepkg --noconfirm -si".format(package_gitcheckout_folder), error_on_fail=True)
+    CFunc.chown_recursive(package_gitcheckout_folder, username, usergroup)
+    CFunc.run_as_user(username, "cd {0} ; makepkg --noconfirm -si".format(package_gitcheckout_folder), error_on_fail=True)
     shutil.rmtree(package_gitcheckout_folder)
 
 
@@ -89,7 +89,7 @@ if __name__ == '__main__':
     CFunc.AddLineToSudoersFile(sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("pacman")))
     # Yay
     if not shutil.which("yay"):
-        install_aur_pkg("yay-bin")
+        install_aur_pkg("yay-bin", USERNAMEVAR, USERGROUP)
 
     # Cli tools
     CFunc.pacman_install("bash-completion fish zsh zsh-completions nano git tmux iotop rsync p7zip zip unzip unrar xdg-utils xdg-user-dirs sshfs openssh avahi nss-mdns ntfs-3g exfat-utils python-pip")
@@ -172,7 +172,7 @@ if __name__ == '__main__':
         CFunc.run_as_user(USERNAMEVAR, "{0} --yes 1160".format(gs_installer[0]))
         # https://github.com/kgshank/gse-sound-output-device-chooser
         CFunc.run_as_user(USERNAMEVAR, "{0} --yes 906".format(gs_installer[0]))
-        # https://github.com/mymindstorm/gnome-volume-mixer 
+        # https://github.com/mymindstorm/gnome-volume-mixer
         CFunc.run_as_user(USERNAMEVAR, "{0} --yes 3499".format(gs_installer[0]))
         # Kstatusnotifier
         CFunc.run_as_user(USERNAMEVAR, "{0} --yes 615".format(gs_installer[0]))
