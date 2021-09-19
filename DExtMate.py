@@ -56,12 +56,12 @@ ninja -C build install
         subprocess.run("dnf remove -y gtk3-devel mate-panel-devel mate-menus-devel libnotify-devel", shell=True, check=False)
 
 # Configuration
-desktop_search_list = ["firefox.desktop", "UngoogledChromium.desktop", "chrome.desktop", "mate-terminal.desktop", "tilix.desktop", "caja-browser.desktop"]
+desktop_search_list = ["firefox.desktop", "UngoogledChromium.desktop", "chrome.desktop", "mate-terminal.desktop", "tilix.desktop", "caja-browser.desktop", "mate-system-monitor.desktop"]
 desktop_file_list = []
 for d in desktop_search_list:
     ds = CMimeSet.LocateDesktopFile(d)
     if ds:
-        desktop_file_list += ds[0]
+        desktop_file_list.append(ds[0])
 
 # https://github.com/mate-desktop/mate-panel/blob/master/data/fedora.layout
 # https://github.com/ubuntu-mate/ubuntu-mate-settings/blob/master/usr/share/mate-panel/layouts/familiar.layout
@@ -153,16 +153,17 @@ locked=true
 
 applet_position = 10
 for d in desktop_file_list:
-    object_name = os.path.basename(d).replace('.desktop', '')
+    # Object names should have their path removed, have no dots, and be all lowercase for the panel to recognize them.
+    object_name = os.path.basename(d).replace('.desktop', '').replace('.', '-').lower()
     mate_config += """
 [Object {1}]
 object-type=launcher
 launcher-location={0}
 toplevel-id=top
-position=10
+position={2}
 locked=true
-""".format(d, object_name)
-    applet_position += 10
+""".format(d, object_name, applet_position)
+    applet_position += 5
 
 # Write the configuration.
 matepanel_layout_folder = os.path.join(os.path.sep, "usr", "share", "mate-panel", "layouts")
