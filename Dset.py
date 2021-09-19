@@ -10,6 +10,7 @@ import shutil
 import xml.etree.ElementTree as ET
 # Custom includes
 import CFunc
+import CMimeSet
 
 print("Running {0}".format(__file__))
 
@@ -95,13 +96,8 @@ USERHOME = str(pathlib.Path.home())
 
 
 ### Begin Code ###
-# Editor settings
-handler_text = None
-if os.path.isfile("/usr/share/applications/code.desktop"):
-    handler_text = "code.desktop"
-if handler_text:
-    subprocess.run("xdg-mime default {0} text/x-shellscript".format(handler_text), shell=True, check=True)
-    subprocess.run("xdg-mime default {0} text/plain".format(handler_text), shell=True, check=True)
+# Mime Settings
+CMimeSet.HandlePredefines("text", "code.desktop")
 
 # Commented statements to set default text editor
 # xdg-mime default pluma.desktop text/plain
@@ -309,18 +305,7 @@ if shutil.which("gnome-session"):
     gsettings_set("org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/", "name", "'Gnome Display Settings'")
     # No Fish config for gnome-terminal, does not change folders when using "Open in Terminal"
     # Determine default archive program
-    handler_archive = None
-    if os.path.isfile("/var/lib/flatpak/exports/share/applications/org.gnome.FileRoller.desktop") or os.path.isfile("/usr/share/applications/org.gnome.FileRoller.desktop"):
-        handler_archive = "org.gnome.FileRoller.desktop"
-    if handler_archive:
-        # Run "xdg-mime query default <mime type>" to get current association.
-        subprocess.run("xdg-mime default {0} application/x-7z-compressed".format(handler_archive), shell=True, check=False)
-        subprocess.run("xdg-mime default {0} application/x-xz-compressed-tar".format(handler_archive), shell=True, check=False)
-        subprocess.run("xdg-mime default {0} application/zip".format(handler_archive), shell=True, check=False)
-        subprocess.run("xdg-mime default {0} application/x-compressed-tar".format(handler_archive), shell=True, check=False)
-        subprocess.run("xdg-mime default {0} application/x-bzip-compressed-tar".format(handler_archive), shell=True, check=False)
-        subprocess.run("xdg-mime default {0} application/x-tar".format(handler_archive), shell=True, check=False)
-        subprocess.run("xdg-mime default {0} application/x-xz".format(handler_archive), shell=True, check=False)
+    CMimeSet.HandlePredefines("archive", "org.gnome.FileRoller.desktop")
 
 
 # KDE/Plasma specific Settings

@@ -19,6 +19,7 @@ SCRIPTDIR = sys.path[0]
 types_archive = "application/x-7z-compressed,application/x-xz-compressed-tar,application/zip,application/x-compressed-tar,application/x-bzip-compressed-tar,application/x-tar,application/x-xz"
 types_audio = "application/octet-stream,audio/flac,audio/mpeg,audio/ogg,audio/x-m4a"
 types_text = "text/plain,application/x-sh,text/x-python,text/markdown"
+predefine_types = ["archive", "text", "audio"]
 
 ### Functions ###
 def Mime_CheckCmds():
@@ -76,6 +77,13 @@ def LocateDesktopFile(desktop_search_term: str):
             list_path = [i for i in os.listdir(xdg_app_folder) if os.path.isfile(os.path.join(xdg_app_folder, i))]
             desktopref += [os.path.join(xdg_app_folder, j) for j in list_path if re.match(fnmatch.translate("*{0}*".format(desktop_search_term)), j, re.IGNORECASE)]
     return desktopref
+def LocateDesktopFileName(desktop_search_term: str):
+    """Return either the basename of the desktop file searched, or None."""
+    desktop_basename = None
+    desktoplist = LocateDesktopFile(desktop_search_term)
+    if len(desktoplist) >= 1:
+        desktop_basename = os.path.basename(desktoplist[0])
+    return desktop_basename
 def FindDesktopFile(desktop_ref: str):
     """Find out if a desktop file exists."""
     desktopref_exists = False
@@ -113,7 +121,7 @@ if __name__ == '__main__':
     parser.add_argument("-a", "--application", help='Application to set mimetype to (i.e. "org.kde.ark.desktop". Must be used with set options.')
     parser.add_argument("-q", "--query", help='Query mimetypes. (i.e. "application/x-7z-compressed,application/x-xz-compressed-tar")')
     parser.add_argument("-m", "--mimes", help='Check Mimetypes of specified folder.')
-    parser.add_argument("-p", "--predefines", help='Set or query predefines. Set when combined with -a flag. Options: archive,text,audio')
+    parser.add_argument("-p", "--predefines", help='Set or query predefines. Set when combined with -a flag.', choices=predefine_types)
     args = parser.parse_args()
 
     # Ensure proper commands are on system.
