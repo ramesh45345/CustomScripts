@@ -144,6 +144,7 @@ nspawn_cmd(pathvar, 'chmod a+rwx /opt && git clone https://github.com/ramesh4534
 nspawn_cmd(pathvar, '/opt/CustomScripts/CFuncExt.py --sudoenv')
 nspawn_cmd(pathvar, '/opt/CustomScripts/CShellConfig.py -z -d')
 nspawn_cmd(pathvar, 'chsh -s /bin/zsh {0}'.format(USERNAMEVAR))
+nspawn_cmd(pathvar, """echo 'cd $HOME' | tee -a ~{0}/.zshrc ~{0}/.bashrc""".format(USERNAMEVAR))
 
 # Sudoers file
 nspawn_cmd(pathvar, r'echo -e "%wheel ALL=(ALL) NOPASSWD: ALL\n%sudo ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/custom && chmod 440 /etc/sudoers.d/custom && visudo -c')
