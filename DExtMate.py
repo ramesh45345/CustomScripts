@@ -3,13 +3,13 @@
 
 # Python includes.
 import argparse
-import glob
 import os
 import shutil
 import subprocess
 import sys
 # Custom includes
 import CFunc
+import CMimeSet
 
 print("Running {0}".format(__file__))
 
@@ -56,28 +56,12 @@ ninja -C build install
         subprocess.run("dnf remove -y gtk3-devel mate-panel-devel mate-menus-devel libnotify-devel", shell=True, check=False)
 
 # Configuration
-app_folder = os.path.join(os.path.sep, "usr", "share", "applications")
-# Find application desktop icons, for adding to panel
-# Find Firefox
-dpath_firefox = None
-files_list = glob.glob('{0}/*[Ff]irefox*.desktop'.format(app_folder), recursive=True)
-if files_list:
-    dpath_firefox = files_list[0]
-# Find Chromium
-dpath_chromium = None
-files_list = glob.glob('{0}/*[Cc]hromium*.desktop'.format(app_folder), recursive=True)
-if files_list:
-    dpath_chromium = files_list[0]
-# Find Chrome if Chromium was not found.
-if not dpath_chromium:
-    files_list = glob.glob('{0}/*google-chrome*.desktop'.format(app_folder), recursive=True)
-    if files_list:
-        dpath_chromium = files_list[0]
-# Tilix
-dpath_tilix = None
-files_list = glob.glob('{0}/*[Tt]ilix*.desktop'.format(app_folder), recursive=True)
-if files_list:
-    dpath_tilix = files_list[0]
+desktop_search_list = ["firefox.desktop", "UngoogledChromium.desktop", "chrome.desktop", "mate-terminal.desktop", "tilix.desktop", "caja-browser.desktop"]
+desktop_file_list = []
+for d in desktop_search_list:
+    ds = CMimeSet.LocateDesktopFile(d)
+    if ds:
+        desktop_file_list += ds[0]
 
 # https://github.com/mate-desktop/mate-panel/blob/master/data/fedora.layout
 # https://github.com/ubuntu-mate/ubuntu-mate-settings/blob/master/usr/share/mate-panel/layouts/familiar.layout
@@ -167,51 +151,18 @@ position=20
 locked=true
 """
 
-if dpath_firefox:
+applet_position = 10
+for d in desktop_file_list:
+    object_name = os.path.basename(d).replace('.desktop', '')
     mate_config += """
-[Object firefox-browser]
+[Object {1}]
 object-type=launcher
 launcher-location={0}
 toplevel-id=top
 position=10
 locked=true
-""".format(dpath_firefox)
-
-if dpath_chromium:
-    mate_config += """
-[Object chromium-browser]
-object-type=launcher
-launcher-location={0}
-toplevel-id=top
-position=11
-locked=true
-""".format(dpath_chromium)
-
-mate_config += """
-[Object file-browser]
-object-type=launcher
-launcher-location=/usr/share/applications/caja-browser.desktop
-toplevel-id=top
-position=20
-locked=true
-
-[Object mate-terminal]
-object-type=launcher
-launcher-location=/usr/share/applications/mate-terminal.desktop
-toplevel-id=top
-position=30
-locked=true
-"""
-
-if dpath_tilix:
-    mate_config += """
-[Object tilix-terminal]
-object-type=launcher
-launcher-location={0}
-toplevel-id=top
-position=40
-locked=true
-""".format(dpath_tilix)
+""".format(d, object_name)
+    applet_position += 10
 
 # Write the configuration.
 matepanel_layout_folder = os.path.join(os.path.sep, "usr", "share", "mate-panel", "layouts")
