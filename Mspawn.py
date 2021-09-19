@@ -152,7 +152,13 @@ nspawn_cmd(pathvar, r'echo -e "%wheel ALL=(ALL) NOPASSWD: ALL\n%sudo ALL=(ALL) N
 nspawn_distro_cmd(args.distro, pathvar, "arch", "pacman -Syu --needed --noconfirm xfce4-terminal noto-fonts ttf-ubuntu-font-family")
 nspawn_distro_cmd(args.distro, pathvar, "arch", """cd /opt/CustomScripts; python -c 'import CFunc; USERNAMEVAR, USERGROUP, USERHOME = CFunc.getnormaluser(); import MArch; MArch.install_aur_pkg("yay-bin", USERNAMEVAR, USERGROUP)'""")
 
+chroot_cmd = "sudo systemd-nspawn -D {path} --user={user} --bind-ro=/tmp/.X11-unix/ --bind={homefld}:/tophomefld/ --setenv=DISPLAY={display} xfce4-terminal".format(path=pathvar, user=USERNAMEVAR, display=DISPLAY, homefld=USERHOME)
+chroot_run_script = os.path.join(pathvar, "run.sh")
 print("\nUse chroot with following command: ")
-print("systemd-nspawn -D {path} --user={user} --bind-ro=/tmp/.X11-unix/ --bind={homefld}:/tophomefld/ --setenv=DISPLAY={display} xfce4-terminal".format(path=pathvar, user=USERNAMEVAR, display=DISPLAY, homefld=USERHOME))
+print(chroot_cmd)
+with open(chroot_run_script, 'w') as f:
+    f.write("#!/bin/bash\n" + chroot_cmd)
+os.chmod(chroot_run_script, 0o777)
+print("Wrote script to: {0}".format(chroot_run_script))
 
 print("\nScript End")
