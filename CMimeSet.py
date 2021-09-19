@@ -42,9 +42,10 @@ def Mime_Set_All(mimes: str, app: str):
     """
     if FindDesktopFile(app) is False:
         print("ERROR: desktop file {0} not found.".format(app))
-    split_mimes = mimes.split(",")
-    for mime in split_mimes:
-        Mime_Set(mime, app)
+    else:
+        split_mimes = mimes.split(",")
+        for mime in split_mimes:
+            Mime_Set(mime, app)
 def Mime_Query_All(mimes):
     """
     Query all mime-types.
