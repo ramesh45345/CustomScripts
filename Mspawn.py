@@ -91,6 +91,8 @@ args = parser.parse_args()
 print("Distro:", args.distro)
 pathvar = os.path.abspath(args.path)
 print("Path of chroot:", pathvar)
+chroot_hostname = os.path.basename(path_default)
+print("Hostname of chroot: {0}".format(chroot_hostname))
 
 # Exit if not root.
 CFunc.is_root(True)
@@ -127,8 +129,8 @@ nspawn_distro_cmd(args.distro, pathvar, "arch", "sed -i 's/^#ParallelDownloads/P
 nspawn_distro_cmd(args.distro, pathvar, "arch", "pacman -Syu --needed --noconfirm nano sudo which git zsh python base-devel reflector")
 nspawn_distro_cmd(args.distro, pathvar, "arch", "reflector --country 'United States' --latest 10 --protocol https --sort rate --save /etc/pacman.d/mirrorlist")
 # Set hostname
-nspawn_cmd(pathvar, 'echo "{0}" > /etc/hostname'.format(args.distro))
-nspawn_cmd(pathvar, 'echo "127.0.0.1 {0}" >> /etc/hosts'.format(args.distro))
+nspawn_cmd(pathvar, 'echo "{0}" > /etc/hostname'.format(chroot_hostname))
+nspawn_cmd(pathvar, 'grep -q -e "127.0.0.1 {0}" /etc/hosts || echo "127.0.0.1 {0}" >> /etc/hosts'.format(chroot_hostname))
 # Locales
 nspawn_cmd(pathvar, "echo 'en_US.UTF-8 UTF-8' > /etc/locale.gen")
 nspawn_cmd(pathvar, """echo 'LANG="en_US.UTF-8"' | tee /etc/default/locale /etc/locale.conf""")
@@ -151,6 +153,6 @@ nspawn_distro_cmd(args.distro, pathvar, "arch", "pacman -Syu --needed --noconfir
 nspawn_distro_cmd(args.distro, pathvar, "arch", """cd /opt/CustomScripts; python -c 'import CFunc; USERNAMEVAR, USERGROUP, USERHOME = CFunc.getnormaluser(); import MArch; MArch.install_aur_pkg("yay-bin", USERNAMEVAR, USERGROUP)'""")
 
 print("\nUse chroot with following command: ")
-print("systemd-nspawn -D {path} --user={user} --bind-ro=/tmp/.X11-unix/ --setenv=DISPLAY={display} xfce4-terminal".format(path=pathvar, user=USERNAMEVAR, display=DISPLAY))
+print("systemd-nspawn -D {path} --user={user} --bind-ro=/tmp/.X11-unix/ --bind={homefld}:/tophomefld/ --setenv=DISPLAY={display} xfce4-terminal".format(path=pathvar, user=USERNAMEVAR, display=DISPLAY, homefld=USERHOME))
 
 print("\nScript End")
