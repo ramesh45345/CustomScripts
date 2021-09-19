@@ -70,7 +70,10 @@ def HandlePredefines(predefines, app):
 def LocateDesktopFile(desktop_search_term: str):
     """Search for a desktop file."""
     desktopref = []
-    XDG_DATA_DIRS = os.environ.get('XDG_DATA_DIRS').split(":")
+    XDG_DATA_DIRS = os.environ.get('XDG_DATA_DIRS')
+    if not XDG_DATA_DIRS:
+        XDG_DATA_DIRS = "/var/lib/flatpak/exports/share:/usr/local/share:/usr/share:/var/lib/snapd/desktop"
+    XDG_DATA_DIRS = XDG_DATA_DIRS.split(":")
     for xdg_folder in XDG_DATA_DIRS:
         xdg_app_folder = os.path.join(xdg_folder, "applications")
         if os.path.isdir(xdg_app_folder):
