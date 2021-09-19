@@ -97,6 +97,7 @@ USERHOME = str(pathlib.Path.home())
 
 ### Begin Code ###
 # Mime Settings
+CMimeSet.HandlePredefines("text", "code-oss.desktop")
 CMimeSet.HandlePredefines("text", "code.desktop")
 
 # Commented statements to set default text editor
