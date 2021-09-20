@@ -252,6 +252,16 @@ if shutil.which("gnome-session"):
     gsettings_set("org.gnome.desktop.interface", "text-scaling-factor", "1.0")
     gsettings_set("org.gnome.desktop.interface", "clock-show-date", "true")
     gsettings_set("org.gnome.shell", "enabled-extensions", "['window-list@gnome-shell-extensions.gcampax.github.com', 'dash-to-dock@micxgx.gmail.com', 'dash-to-panel@jderose9.github.com', 'GPaste@gnome-shell-extensions.gnome.org', 'user-theme@gnome-shell-extensions.gcampax.github.com', 'sound-output-device-chooser@kgshank.net', 'volume-mixer@evermiss.net', 'appindicatorsupport@rgcjonas.gmail.com']")
+    # Check current variable for gnome-system-monitor. If it doesn't exist, set the variable.
+    gnome_desktop_read_list = subprocess.run("gsettings get org.gnome.shell favorite-apps", shell=True, check=False, stdout=subprocess.PIPE).stdout.decode().strip()
+    if "gnome-system-monitor.desktop" not in gnome_desktop_read_list:
+        gnome_desktop_search_list = ["firefox.desktop", "UngoogledChromium.desktop", "chrome.desktop", 'evolution.desktop', 'nautilus.desktop', "tilix.desktop", 'virt-manager.desktop', 'gnome-system-monitor.desktop']
+        gnome_desktop_file_list = []
+        for d in gnome_desktop_search_list:
+            ds = CMimeSet.LocateDesktopFileName(d)
+            if ds:
+                gnome_desktop_file_list.append(ds)
+        gsettings_set("org.gnome.shell", "favorite-apps", str(gnome_desktop_file_list))
     gsettings_set("org.gnome.desktop.wm.preferences", "button-layout", ":minimize,maximize,close")
     gsettings_set("org.gnome.desktop.interface", "locate-pointer", "true")
     gsettings_set("org.gnome.mutter", "locate-pointer-key", "'Control_R'")
