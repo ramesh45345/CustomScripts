@@ -132,6 +132,8 @@ if args.desktop == "gnome":
     CFunc.run_as_user(USERNAMEVAR, "{0} --yes 3499".format(gs_installer[0]))
     # Kstatusnotifier
     CFunc.run_as_user(USERNAMEVAR, "{0} --yes 615".format(gs_installer[0]))
+    # Extensions app
+    CFunc.flatpak_install("flathub", "org.gnome.Extensions")
 elif args.desktop == "kde":
     # KDE
     CFunc.dnfinstall("--allowerasing @kde-desktop-environment")
