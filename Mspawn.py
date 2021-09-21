@@ -82,6 +82,7 @@ path_default = os.path.join(os.sep, "var", "lib", "machines", distro_default)
 # Get arguments
 parser = argparse.ArgumentParser(description='Install systemd-nspawn chroot.')
 parser.add_argument("-n", "--noprompt", help='Do not prompt.', action="store_true")
+parser.add_argument("-b", "--bootable", help='Provision for booting.', action="store_true")
 parser.add_argument("-c", "--clean", help='Remove chroot folder and remake chroot.', action="store_true")
 parser.add_argument("-d", "--distro", help='Distribution of Linux (default: %(default)s)', default=distro_default, choices=distro_options)
 parser.add_argument("-p", "--path", help='Path to store chroot. This is the root of the chroot. (default: %(default)s)', default=path_default)
@@ -91,7 +92,7 @@ args = parser.parse_args()
 print("Distro:", args.distro)
 pathvar = os.path.abspath(args.path)
 print("Path of chroot:", pathvar)
-chroot_hostname = os.path.basename(path_default)
+chroot_hostname = os.path.basename(pathvar)
 print("Hostname of chroot: {0}".format(chroot_hostname))
 
 # Exit if not root.
@@ -153,6 +154,18 @@ nspawn_cmd(pathvar, r'echo -e "%wheel ALL=(ALL) NOPASSWD: ALL\n%sudo ALL=(ALL) N
 nspawn_distro_cmd(args.distro, pathvar, "arch", "pacman -Syu --needed --noconfirm xfce4-terminal noto-fonts ttf-ubuntu-font-family")
 nspawn_distro_cmd(args.distro, pathvar, "arch", """cd /opt/CustomScripts; python -c 'import CFunc; USERNAMEVAR, USERGROUP, USERHOME = CFunc.getnormaluser(); import MArch; MArch.install_aur_pkg("yay-bin", USERNAMEVAR, USERGROUP)'""")
 
+# Set password
+nspawn_cmd(pathvar, 'chpasswd <<<"{0}:asdf"'.format(USERNAMEVAR))
+nspawn_cmd(pathvar, 'chpasswd <<<"root:asdf"')
+
+# Bootable logic
+if args.bootable:
+    # Network tools
+    nspawn_distro_cmd(args.distro, pathvar, "arch", "pacman -Syu --needed --noconfirm networkmanager openssh avahi")
+    nspawn_distro_cmd(args.distro, pathvar, "arch", "systemctl enable NetworkManager avahi-daemon sshd")
+
+
+# Create helper scripts
 chroot_cmd = "sudo systemd-nspawn -D {path} --user={user} --bind-ro=/tmp/.X11-unix/ --bind={homefld}:/tophomefld/ --setenv=DISPLAY={display} xfce4-terminal".format(path=pathvar, user=USERNAMEVAR, display=DISPLAY, homefld=USERHOME)
 chroot_run_script = os.path.join(pathvar, "run.sh")
 print("\nUse chroot with following command: ")
@@ -160,6 +173,17 @@ print(chroot_cmd)
 with open(chroot_run_script, 'w') as f:
     f.write("#!/bin/bash\n" + chroot_cmd)
 os.chmod(chroot_run_script, 0o777)
-print("Wrote script to: {0}".format(chroot_run_script))
+print("Wrote run script to: {0}".format(chroot_run_script))
+
+if args.bootable:
+    # Create helper scripts
+    boot_cmd = "sudo systemd-nspawn -D {path} --user=root --bind={homefld}:/tophomefld/ --network-bridge=virbr0 -b".format(path=pathvar, homefld=USERHOME)
+    boot_script = os.path.join(pathvar, "boot.sh")
+    print("\nBoot with following command: ")
+    print(boot_cmd)
+    with open(boot_script, 'w') as f:
+        f.write("#!/bin/bash\n" + boot_cmd)
+    os.chmod(boot_script, 0o777)
+    print("Wrote boot script to: {0}".format(boot_script))
 
 print("\nScript End")
