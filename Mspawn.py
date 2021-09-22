@@ -180,7 +180,7 @@ if args.bootable:
     # VNC Config
     nspawn_distro_cmd(args.distro, pathvar, "arch", "mkdir -p {1}/.vnc && chown {0}:{0} -R {1} && echo 'asdf' | vncpasswd -f | tee /etc/vncpasswd".format(CT_USERNAME, CT_HOME))
     nspawn_distro_cmd(args.distro, pathvar, "arch", 'echo ":1={0}" > /etc/tigervnc/vncserver.users ; echo -e "session=mate\nsecuritytypes=none\ndesktop=ct-desktop\ngeometry=1600x900\nlocalhost=0\nalwaysshared\nauth=~/.Xauthority\nrfbport=5901" > {1}/.vnc/config'.format(CT_USERNAME, CT_HOME))
-    nspawn_distro_cmd(args.distro, pathvar, "arch", 'echo -e "unset SESSION_MANAGER\nunset DBUS_SESSION_BUS_ADDRESS\nexec mate-session" > {1}/.xsession ; chown {0}:{0} {1}/.xsession ; chmod 700 {1}/.xsession'.format(CT_USERNAME, CT_HOME))
+    nspawn_distro_cmd(args.distro, pathvar, "arch", 'echo -e "exec mate-session" > {1}/.xsession ; chown {0}:{0} {1}/.xsession ; chmod 700 {1}/.xsession'.format(CT_USERNAME, CT_HOME))
     nspawn_distro_cmd(args.distro, pathvar, "arch", "systemctl enable vncserver@:1")
 
 
