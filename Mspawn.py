@@ -100,9 +100,12 @@ CFunc.is_root(True)
 
 # Get non-root user information.
 USERNAMEVAR, USERGROUP, USERHOME = CFunc.getnormaluser()
+CT_USERNAME = USERNAMEVAR
+CT_GROUPNAME = USERGROUP
+CT_HOME = os.path.join(os.sep, "home", CT_USERNAME)
 DISPLAY = os.getenv("DISPLAY")
-print("Username is:", USERNAMEVAR)
-print("Group Name is:", USERGROUP)
+print("Username is:", CT_USERNAME)
+print("Group Name is:", CT_GROUPNAME)
 print("Display variable:", DISPLAY)
 if args.clean is True:
     print("\nWARNING: Clean flag set, {0} will be removed! Ensure that this is desired before continuing.\n".format(pathvar))
@@ -124,10 +127,10 @@ if not os.path.isdir(pathvar):
 if os.path.islink(os.path.join(pathvar, "etc", "resolv.conf")):
     os.remove(os.path.join(pathvar, "etc", "resolv.conf"))
 # Create user
-nspawn_cmd(pathvar, "useradd -m -s /bin/bash {0}".format(USERNAMEVAR), error_on_fail=False)
+nspawn_cmd(pathvar, "useradd -m -s /bin/bash {0}".format(CT_USERNAME), error_on_fail=False)
 # Install basic packages
 nspawn_distro_cmd(args.distro, pathvar, "arch", "sed -i 's/^#ParallelDownloads/ParallelDownloads/g' /etc/pacman.conf")
-nspawn_distro_cmd(args.distro, pathvar, "arch", "pacman -Syu --needed --noconfirm nano sudo which git zsh python base-devel reflector")
+nspawn_distro_cmd(args.distro, pathvar, "arch", "pacman -Syu --needed --noconfirm nano sudo which git zsh python python-pip base-devel reflector")
 nspawn_distro_cmd(args.distro, pathvar, "arch", "reflector --country 'United States' --latest 10 --protocol https --sort rate --save /etc/pacman.d/mirrorlist")
 # Set hostname
 nspawn_cmd(pathvar, 'echo "{0}" > /etc/hostname'.format(chroot_hostname))
@@ -137,15 +140,15 @@ nspawn_cmd(pathvar, "echo 'en_US.UTF-8 UTF-8' > /etc/locale.gen")
 nspawn_cmd(pathvar, """echo 'LANG="en_US.UTF-8"' | tee /etc/default/locale /etc/locale.conf""")
 nspawn_cmd(pathvar, "locale-gen --purge en_US en_US.UTF-8")
 # Groups
-nspawn_distro_cmd(args.distro, pathvar, "arch", "usermod -aG wheel {0}".format(USERNAMEVAR))
-nspawn_distro_cmd(args.distro, pathvar, "fedora", "usermod -aG wheel {0}".format(USERNAMEVAR))
-nspawn_distro_cmd(args.distro, pathvar, "ubuntu", "usermod -aG sudo {0}".format(USERNAMEVAR))
+nspawn_distro_cmd(args.distro, pathvar, "arch", "usermod -aG wheel {0}".format(CT_USERNAME))
+nspawn_distro_cmd(args.distro, pathvar, "fedora", "usermod -aG wheel {0}".format(CT_USERNAME))
+nspawn_distro_cmd(args.distro, pathvar, "ubuntu", "usermod -aG sudo {0}".format(CT_USERNAME))
 # Scripts
-nspawn_cmd(pathvar, 'chmod a+rwx /opt && git clone https://github.com/ramesh45345/CustomScripts /opt/CustomScripts && chown -R {0}:{0} /opt/CustomScripts'.format(USERNAMEVAR), error_on_fail=False)
+nspawn_cmd(pathvar, 'chmod a+rwx /opt && git clone https://github.com/ramesh45345/CustomScripts /opt/CustomScripts && chown -R {0}:{0} /opt/CustomScripts'.format(CT_USERNAME), error_on_fail=False)
 nspawn_cmd(pathvar, '/opt/CustomScripts/CFuncExt.py --sudoenv')
 nspawn_cmd(pathvar, '/opt/CustomScripts/CShellConfig.py -z -d')
-nspawn_cmd(pathvar, 'chsh -s /bin/zsh {0}'.format(USERNAMEVAR))
-nspawn_cmd(pathvar, """echo 'cd $HOME' | tee -a ~{0}/.zshrc ~{0}/.bashrc""".format(USERNAMEVAR))
+nspawn_cmd(pathvar, 'chsh -s /bin/zsh {0}'.format(CT_USERNAME))
+nspawn_cmd(pathvar, """echo 'cd $HOME' | tee -a ~{0}/.zshrc ~{0}/.bashrc""".format(CT_USERNAME))
 
 # Sudoers file
 nspawn_cmd(pathvar, r'echo -e "%wheel ALL=(ALL) NOPASSWD: ALL\n%sudo ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/custom && chmod 440 /etc/sudoers.d/custom && visudo -c')
@@ -155,7 +158,7 @@ nspawn_distro_cmd(args.distro, pathvar, "arch", "pacman -Syu --needed --noconfir
 nspawn_distro_cmd(args.distro, pathvar, "arch", """cd /opt/CustomScripts; python -c 'import CFunc; USERNAMEVAR, USERGROUP, USERHOME = CFunc.getnormaluser(); import MArch; MArch.install_aur_pkg("yay-bin", USERNAMEVAR, USERGROUP)'""")
 
 # Set password
-nspawn_cmd(pathvar, 'chpasswd <<<"{0}:asdf"'.format(USERNAMEVAR))
+nspawn_cmd(pathvar, 'chpasswd <<<"{0}:asdf"'.format(CT_USERNAME))
 nspawn_cmd(pathvar, 'chpasswd <<<"root:asdf"')
 
 # Bootable logic
@@ -163,6 +166,22 @@ if args.bootable:
     # Network tools
     nspawn_distro_cmd(args.distro, pathvar, "arch", "pacman -Syu --needed --noconfirm networkmanager openssh avahi")
     nspawn_distro_cmd(args.distro, pathvar, "arch", "systemctl enable NetworkManager avahi-daemon sshd")
+
+    # Install GUI
+    nspawn_distro_cmd(args.distro, pathvar, "arch", "pacman -Syu --needed --noconfirm mate-panel mate-session-manager mate-control-center marco xdg-utils dconf-editor epiphany pluma caja caja-open-terminal tilix mate-terminal mate-themes ttf-roboto noto-fonts ttf-liberation code")
+    nspawn_distro_cmd(args.distro, pathvar, "arch", """cd /opt/CustomScripts; python -c 'import MArch; MArch.yay_install("{0}", "xrdp xorgxrdp brisk-menu numix-circle-icon-theme-git")'""".format(CT_USERNAME))
+    nspawn_distro_cmd(args.distro, pathvar, "arch", "/opt/CustomScripts/DExtMate.py")
+
+    # Desktop configuration
+    nspawn_distro_cmd(args.distro, pathvar, "arch", 'echo -e "[Desktop Entry]\nName=MATE Settings Script\nExec=/bin/bash -c "/opt/CustomScripts/Dset.py -p"\nTerminal=false\nType=Application" > "/etc/xdg/autostart/mate-dset.desktop"')
+    nspawn_distro_cmd(args.distro, pathvar, "arch", '''echo -e '[Desktop Entry]\nName=csupdate\nExec=/bin/bash -c "cd /opt/CustomScripts; git pull"\nTerminal=false\nType=Application' > "/etc/xdg/autostart/csupdate.desktop"''')
+    # nspawn_distro_cmd(args.distro, pathvar, "arch", "runuser -l {0} -c '/opt/CustomScripts/Cvscode.py'".format(CT_USERNAME))
+
+    # VNC Config
+    nspawn_distro_cmd(args.distro, pathvar, "arch", "mkdir -p {1}/.vnc && chown {0}:{0} -R {1} && echo 'asdf' | vncpasswd -f | tee /etc/vncpasswd".format(CT_USERNAME, CT_HOME))
+    nspawn_distro_cmd(args.distro, pathvar, "arch", 'echo ":1={0}" > /etc/tigervnc/vncserver.users ; echo -e "session=mate\nsecuritytypes=none\ndesktop=ct-desktop\ngeometry=1600x900\nlocalhost=0\nalwaysshared\nauth=~/.Xauthority\nrfbport=5901" > {1}/.vnc/config'.format(CT_USERNAME, CT_HOME))
+    nspawn_distro_cmd(args.distro, pathvar, "arch", 'echo -e "unset SESSION_MANAGER\nunset DBUS_SESSION_BUS_ADDRESS\nexec mate-session" > {1}/.xsession ; chown {0}:{0} {1}/.xsession ; chmod 700 {1}/.xsession'.format(CT_USERNAME, CT_HOME))
+    nspawn_distro_cmd(args.distro, pathvar, "arch", "systemctl enable vncserver@:1")
 
 
 # Create helper scripts
