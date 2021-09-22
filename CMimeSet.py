@@ -22,6 +22,13 @@ types_text = "text/plain,application/x-sh,text/x-python,text/markdown"
 predefine_types = ["archive", "text", "audio"]
 
 ### Functions ###
+def Retrieve_XdgDataDir():
+    """Get or create XDG_DATA_DIRS variable."""
+    xdg_datadir_var = os.environ.get('XDG_DATA_DIRS')
+    if not xdg_datadir_var:
+        xdg_datadir_var = "/var/lib/flatpak/exports/share:/usr/local/share:/usr/share:/var/lib/snapd/desktop"
+    xdg_datadir_var = xdg_datadir_var.split(":")
+    return xdg_datadir_var
 def Mime_CheckCmds():
     """Check for required utilities."""
     cmdcheck = ["xdg-mime"]
@@ -71,10 +78,7 @@ def HandlePredefines(predefines, app):
 def LocateDesktopFile(desktop_search_term: str):
     """Search for a desktop file."""
     desktopref = []
-    XDG_DATA_DIRS = os.environ.get('XDG_DATA_DIRS')
-    if not XDG_DATA_DIRS:
-        XDG_DATA_DIRS = "/var/lib/flatpak/exports/share:/usr/local/share:/usr/share:/var/lib/snapd/desktop"
-    XDG_DATA_DIRS = XDG_DATA_DIRS.split(":")
+    XDG_DATA_DIRS = Retrieve_XdgDataDir()
     for xdg_folder in XDG_DATA_DIRS:
         xdg_app_folder = os.path.join(xdg_folder, "applications")
         if os.path.isdir(xdg_app_folder):
@@ -91,7 +95,7 @@ def LocateDesktopFileName(desktop_search_term: str):
 def FindDesktopFile(desktop_ref: str):
     """Find out if a desktop file exists."""
     desktopref_exists = False
-    XDG_DATA_DIRS = os.environ.get('XDG_DATA_DIRS').split(":")
+    XDG_DATA_DIRS = Retrieve_XdgDataDir()
     for xdg_folder in XDG_DATA_DIRS:
         xdg_app_folder = os.path.join(xdg_folder, "applications")
         if os.path.isdir(xdg_app_folder):
