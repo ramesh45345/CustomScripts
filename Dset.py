@@ -366,6 +366,8 @@ if shutil.which("kwriteconfig5") and shutil.which("plasma_session"):
     subprocess.run('kwriteconfig5 --file "$HOME/.local/share/konsole/Profile 1.profile" --group "Scrolling" --key HistoryMode 2', shell=True, check=False)
     subprocess.run('kwriteconfig5 --file "$HOME/.local/share/konsole/Profile 1.profile" --group "Appearance" --key ColorScheme Solarized', shell=True, check=False)
     subprocess.run('kwriteconfig5 --file "$HOME/.local/share/konsole/Profile 1.profile" --group "Appearance" --key Font "Liberation Mono,11,-1,5,50,0,0,0,0,0,Regular"', shell=True, check=False)
+    # Clipboard settings
+    kwriteconfig("klipperrc", "General", "MaxClipItems", "20")
 
     # Notification settings
     subprocess.run('kwriteconfig5 --file plasma_workspace.notifyrc --group "Event/Textcompletion: no match" --key "Execute" ""', shell=True, check=False)
