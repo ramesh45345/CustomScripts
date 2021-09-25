@@ -125,7 +125,6 @@ if args.stage == 1:
 
     # Flatpak setup
     CFunc.AddLineToSudoersFile(fedora_sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("flatpak")))
-    subprocess.run('chmod -R "ugo=rwX" /var/lib/flatpak/', shell=True, check=True)
 
     # Disable Selinux
     # To get selinux status: sestatus, getenforce
