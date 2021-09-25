@@ -278,7 +278,7 @@ elif type yay &> /dev/null || type pacman &> /dev/null; then
 
     function ins () {
         echo "Installing $@.\n"
-        if type yay &> /dev/null; then
+        if type yay &> /dev/null && [ $(id -u) != "0" ]; then
             yay --pacman pacman --print --print-format="%%n-%%v" -S --needed $@ | sort
             echo "\nPress Enter to install or Ctrl-C to cancel."
             read -r empty_variable
