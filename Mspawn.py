@@ -3,6 +3,7 @@
 
 # Python includes.
 import argparse
+import pwd
 import os
 import shutil
 import subprocess
@@ -70,6 +71,16 @@ def nspawn_distro_cmd(dist_current: str, path: str, dist_select: str, cmd: str):
     """
     if dist_select == dist_current:
         nspawn_cmd(path, cmd)
+def sshauthkey_get():
+    """Get the ssh public key from the host machine."""
+    sshkey = ""
+    if os.path.isfile(os.path.join(USERHOME, ".ssh", "id_ed25519.pub")) is True:
+        with open(os.path.join(USERHOME, ".ssh", "id_ed25519.pub"), 'r') as sshfile:
+            sshkey = sshfile.read().replace('\n', '')
+    elif os.path.isfile(os.path.join(USERHOME, ".ssh", "id_rsa.pub")) is True:
+        with open(os.path.join(USERHOME, ".ssh", "id_rsa.pub"), 'r') as sshfile:
+            sshkey = sshfile.read().replace('\n', '')
+    return sshkey
 
 
 # Check for commands.
@@ -77,7 +88,8 @@ check_cmds()
 
 # Default variables
 distro_default = "arch"
-path_default = os.path.join(os.sep, "var", "lib", "machines", distro_default)
+basepath_default = os.path.join(os.sep, "var", "lib", "machines")
+path_default = os.path.join(basepath_default, distro_default)
 
 # Get arguments
 parser = argparse.ArgumentParser(description='Install systemd-nspawn chroot.')
@@ -100,8 +112,10 @@ CFunc.is_root(True)
 
 # Get non-root user information.
 USERNAMEVAR, USERGROUP, USERHOME = CFunc.getnormaluser()
-CT_USERNAME = USERNAMEVAR
-CT_GROUPNAME = USERGROUP
+CT_USERNAME = "user"
+CT_USERID = pwd.getpwnam(USERNAMEVAR).pw_uid
+CT_GROUPNAME = CT_USERNAME
+CT_GROUPID = pwd.getpwnam(USERNAMEVAR).pw_gid
 CT_HOME = os.path.join(os.sep, "home", CT_USERNAME)
 DISPLAY = os.getenv("DISPLAY")
 print("Username is:", CT_USERNAME)
@@ -118,6 +132,11 @@ if args.noprompt is False:
 # Clean folder if flag set.
 if os.path.isdir(pathvar) and args.clean is True:
     shutil.rmtree(pathvar)
+# Remove the nspawn file if it exists.
+os.makedirs(os.path.join(os.sep, "etc", "systemd", "nspawn"), exist_ok=True)
+nspawn_file = os.path.join(os.sep, "etc", "systemd", "nspawn", "{0}.nspawn".format(chroot_hostname))
+if os.path.isfile(nspawn_file):
+    os.remove(nspawn_file)
 # Create the chroot if the folder is missing.
 if not os.path.isdir(pathvar):
     create_chroot(args.distro, pathvar)
@@ -127,7 +146,8 @@ if not os.path.isdir(pathvar):
 if os.path.islink(os.path.join(pathvar, "etc", "resolv.conf")):
     os.remove(os.path.join(pathvar, "etc", "resolv.conf"))
 # Create user
-nspawn_cmd(pathvar, "useradd -m -s /bin/bash {0}".format(CT_USERNAME), error_on_fail=False)
+nspawn_cmd(pathvar, "groupadd {0} -g {1} -f".format(CT_GROUPNAME, CT_GROUPID), error_on_fail=False)
+nspawn_cmd(pathvar, "useradd -m -s /bin/bash {0} -u {1} -g {2}".format(CT_USERNAME, CT_USERID, CT_GROUPID), error_on_fail=False)
 # Install basic packages
 nspawn_distro_cmd(args.distro, pathvar, "arch", "sed -i 's/^#ParallelDownloads/ParallelDownloads/g' /etc/pacman.conf")
 nspawn_distro_cmd(args.distro, pathvar, "arch", "pacman -Syu --needed --noconfirm nano sudo which git zsh python python-pip base-devel reflector")
@@ -146,12 +166,14 @@ nspawn_distro_cmd(args.distro, pathvar, "ubuntu", "usermod -aG sudo {0}".format(
 # Scripts
 nspawn_cmd(pathvar, 'chmod a+rwx /opt && git clone https://github.com/ramesh45345/CustomScripts /opt/CustomScripts && chown -R {0}:{0} /opt/CustomScripts'.format(CT_USERNAME), error_on_fail=False)
 nspawn_cmd(pathvar, '/opt/CustomScripts/CFuncExt.py --sudoenv')
-nspawn_cmd(pathvar, '/opt/CustomScripts/CShellConfig.py -z -d')
+nspawn_cmd(pathvar, '/opt/CustomScripts/CShellConfig.py -z')
 nspawn_cmd(pathvar, 'chsh -s /bin/zsh {0}'.format(CT_USERNAME))
 nspawn_cmd(pathvar, """echo 'cd $HOME' | tee -a ~{0}/.zshrc ~{0}/.bashrc""".format(CT_USERNAME))
 
 # Sudoers file
 nspawn_cmd(pathvar, r'echo -e "%wheel ALL=(ALL) NOPASSWD: ALL\n%sudo ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/custom && chmod 440 /etc/sudoers.d/custom && visudo -c')
+# Create ssh authorized_keys
+nspawn_cmd(pathvar, "mkdir -p /root/.ssh {userhome}/.ssh ; echo '{sshkey}' | tee /root/.ssh/authorized_keys {userhome}/.ssh/authorized_keys ; chown -R {user}:{group} {userhome}/.ssh".format(sshkey=sshauthkey_get(), userhome=CT_HOME, user=CT_USERNAME, group=CT_GROUPNAME))
 
 # Gui apps
 nspawn_distro_cmd(args.distro, pathvar, "arch", "pacman -Syu --needed --noconfirm xfce4-terminal noto-fonts ttf-ubuntu-font-family")
@@ -185,7 +207,7 @@ if args.bootable:
 
 
 # Create helper scripts
-chroot_cmd = "sudo systemd-nspawn -D {path} --user={user} --bind-ro=/tmp/.X11-unix/ --bind={homefld}:/tophomefld/ --setenv=DISPLAY={display} xfce4-terminal".format(path=pathvar, user=USERNAMEVAR, display=DISPLAY, homefld=USERHOME)
+chroot_cmd = "sudo systemd-nspawn -D {path} --user={user} --bind-ro=/tmp/.X11-unix/ --bind={homefld}:/tophomefld/ --setenv=DISPLAY={display} xfce4-terminal".format(path=pathvar, user=CT_USERNAME, display=DISPLAY, homefld=USERHOME)
 chroot_run_script = os.path.join(pathvar, "run.sh")
 print("\nUse chroot with following command: ")
 print(chroot_cmd)
@@ -204,5 +226,23 @@ if args.bootable:
         f.write("#!/bin/bash\n" + boot_cmd)
     os.chmod(boot_script, 0o777)
     print("Wrote boot script to: {0}".format(boot_script))
+
+    # Create nspawn file
+    with open(nspawn_file, 'w') as f:
+        f.write("""
+[Exec]
+User=root
+PrivateUsers=no
+
+[Files]
+Bind={0}:/tophomefld/
+
+[Network]
+Bridge=virbr0
+# Expose ports to host
+# Port=
+""".format(USERHOME))
+    print("Wrote nspawn file to: {0}".format(nspawn_file))
+    print("Run systemd service with: sudo systemctl start systemd-nspawn@{0}.service".format(chroot_hostname))
 
 print("\nScript End")
