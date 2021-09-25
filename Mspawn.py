@@ -190,13 +190,14 @@ if args.bootable:
     nspawn_distro_cmd(args.distro, pathvar, "arch", "systemctl enable NetworkManager avahi-daemon sshd")
 
     # Install GUI
-    nspawn_distro_cmd(args.distro, pathvar, "arch", "pacman -Syu --needed --noconfirm mate-panel mate-session-manager mate-control-center marco xdg-utils dconf-editor epiphany pluma caja caja-open-terminal tilix mate-terminal mate-themes ttf-roboto noto-fonts ttf-liberation code")
+    nspawn_distro_cmd(args.distro, pathvar, "arch", "pacman -Syu --needed --noconfirm mate-panel mate-session-manager mate-control-center marco xdg-utils dconf-editor epiphany pluma caja caja-open-terminal tilix mate-terminal mate-themes mate-polkit xdg-user-dirs ttf-roboto noto-fonts ttf-liberation")
     nspawn_distro_cmd(args.distro, pathvar, "arch", """cd /opt/CustomScripts; python -c 'import MArch; MArch.yay_install("{0}", "xrdp xorgxrdp brisk-menu numix-circle-icon-theme-git")'""".format(CT_USERNAME))
     nspawn_distro_cmd(args.distro, pathvar, "arch", "/opt/CustomScripts/DExtMate.py")
 
     # Desktop configuration
     nspawn_distro_cmd(args.distro, pathvar, "arch", 'echo -e "[Desktop Entry]\nName=MATE Settings Script\nExec=/bin/bash -c "/opt/CustomScripts/Dset.py -p"\nTerminal=false\nType=Application" > "/etc/xdg/autostart/mate-dset.desktop"')
     nspawn_distro_cmd(args.distro, pathvar, "arch", '''echo -e '[Desktop Entry]\nName=csupdate\nExec=/bin/bash -c "cd /opt/CustomScripts; git pull"\nTerminal=false\nType=Application' > "/etc/xdg/autostart/csupdate.desktop"''')
+    nspawn_cmd(pathvar, "/opt/CustomScripts/Cxdgdirs.py")
     # nspawn_distro_cmd(args.distro, pathvar, "arch", "runuser -l {0} -c '/opt/CustomScripts/Cvscode.py'".format(CT_USERNAME))
 
     # VNC Config
