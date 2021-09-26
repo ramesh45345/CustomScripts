@@ -31,17 +31,22 @@ def Retrieve_XdgDataDir():
     return xdg_datadir_var
 def Mime_CheckCmds():
     """Check for required utilities."""
+    status = True
     cmdcheck = ["xdg-mime"]
     for cmd in cmdcheck:
         if not shutil.which(cmd):
-            sys.exit("\nError, ensure command {0} is installed.".format(cmd))
+            print("\nError, ensure command {0} is installed.".format(cmd))
+            status = False
+    return status
 def Mime_Set(mimetype: str, app: str):
     """Set mime-type."""
-    subprocess.run(["xdg-mime", "default", app, mimetype], check=False)
+    if Mime_CheckCmds():
+        subprocess.run(["xdg-mime", "default", app, mimetype], check=False)
 def Mime_Query(mimetype: str):
     """Query currently set mime-type."""
-    output = subprocess.run(["xdg-mime", "query", "default", mimetype], stdout=subprocess.PIPE, universal_newlines=True, check=False).stdout.strip()
-    print("Mime: {0}\tSetting: {1}".format(mimetype, output))
+    if Mime_CheckCmds():
+        output = subprocess.run(["xdg-mime", "query", "default", mimetype], stdout=subprocess.PIPE, universal_newlines=True, check=False).stdout.strip()
+        print("Mime: {0}\tSetting: {1}".format(mimetype, output))
 def Mime_Set_All(mimes: str, app: str):
     """
     Set all mime-types.
@@ -133,7 +138,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Ensure proper commands are on system.
-    Mime_CheckCmds()
+    if not Mime_CheckCmds():
+        sys.exit(0)
 
     # Query command
     if args.query:
