@@ -677,6 +677,49 @@ if shutil.which("xfconf-query") and shutil.which("xfce4-panel"):
     # Reset the panel
     if subprocess.run(["pgrep", "xfce4-panel"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False).returncode == 0:
         subprocess.Popen("xfce4-panel -r &", shell=True)
+# Xfce4 terminal
+if shutil.which("xfce4-terminal"):
+    xfterm_config_basefolder = os.path.join(USERHOME, ".config", "xfce4", "terminal")
+    xfterm_config_file = os.path.join(xfterm_config_basefolder, "terminalrc")
+    os.makedirs(xfterm_config_basefolder, exist_ok=True)
+    xfterm_config_text = """[Configuration]
+MiscAlwaysShowTabs=FALSE
+MiscBell=FALSE
+MiscBellUrgent=FALSE
+MiscBordersDefault=TRUE
+MiscCursorBlinks=FALSE
+MiscCursorShape=TERMINAL_CURSOR_SHAPE_BLOCK
+MiscDefaultGeometry=80x24
+MiscInheritGeometry=FALSE
+MiscMenubarDefault=TRUE
+MiscMouseAutohide=FALSE
+MiscMouseWheelZoom=TRUE
+MiscToolbarDefault=FALSE
+MiscConfirmClose=TRUE
+MiscCycleTabs=TRUE
+MiscTabCloseButtons=TRUE
+MiscTabCloseMiddleClick=TRUE
+MiscTabPosition=GTK_POS_TOP
+MiscHighlightUrls=TRUE
+MiscMiddleClickOpensUri=FALSE
+MiscCopyOnSelect=TRUE
+MiscShowRelaunchDialog=TRUE
+MiscRewrapOnResize=TRUE
+MiscUseShiftArrowsToScroll=FALSE
+MiscSlimTabs=FALSE
+MiscNewTabAdjacent=FALSE
+MiscSearchDialogOpacity=100
+MiscShowUnsafePasteDialog=FALSE
+Encoding=UTF-8
+ScrollingUnlimited=TRUE
+ColorPalette=#000000;#cc0000;#4e9a06;#c4a000;#3465a4;#75507b;#06989a;#d3d7cf;#555753;#ef2929;#8ae234;#fce94f;#739fcf;#ad7fa8;#34e2e2;#eeeeec
+"""
+    if shutil.which("fish"):
+        xfterm_config_text += """RunCustomCommand=TRUE
+CustomCommand={0}
+""".format(shutil.which("fish"))
+    with open(xfterm_config_file, 'w') as f:
+        f.write(xfterm_config_text)
 
 
 # Firefox settings.

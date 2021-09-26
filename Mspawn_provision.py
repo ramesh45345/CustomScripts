@@ -111,7 +111,7 @@ CFunc.AddUserToGroup("sudo", USERNAMEVAR)
 if not os.path.isdir(os.path.join(os.sep, "opt", "CustomScripts")):
     subprocess.run("chmod a+rwx /opt && git clone https://github.com/ramesh45345/CustomScripts /opt/CustomScripts", check=True, shell=True)
 else:
-    subprocess.run("cd /opt/CustomScripts && git checkout -f && git pull", check=True, shell=True)
+    subprocess.run("cd /opt/CustomScripts && git pull", check=True, shell=True)
 subprocess.run("chown -R {0}:{1} /opt/CustomScripts".format(USERNAMEVAR, USERGROUP), check=True, shell=True)
 subprocess.run(['/opt/CustomScripts/CShellConfig.py', '-z', '-d'], check=True)
 subprocess.run("""echo 'cd $HOME' | tee -a ~{0}/.zshrc ~{0}/.bashrc""".format(USERNAMEVAR), shell=True, check=True)
