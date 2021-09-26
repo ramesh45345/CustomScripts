@@ -99,8 +99,8 @@ WantedBy=timers.target
     with open(fullunitpath, 'w') as fullunitpath_write:
         fullunitpath_write.write(CSUpdate_SystemTimerText)
     # Enable the timer
-    subprocess.run("systemctl daemon-reload", shell=True)
-    subprocess.run("systemctl enable {0}".format("csupdate.timer"), shell=True)
+    subprocess.run("systemctl daemon-reload", shell=True, check=False)
+    CFunc.sysctl_enable("csupdate.timer")
     # Remove the cron script if it exists.
     if os.path.isfile("/etc/cron.hourly/{0}".format(reponame)):
         os.remove("/etc/cron.hourly/{0}".format(reponame))
@@ -119,5 +119,5 @@ EOL
 
 # Set permissions of cloned folder
 if CFunc.is_windows() is False:
-    subprocess.run("chown -R {0}:{1} {2}".format(USERNAMEVAR, USERGROUP, clonepath), shell=True)
+    subprocess.run("chown -R {0}:{1} {2}".format(USERNAMEVAR, USERGROUP, clonepath), shell=True, check=False)
     os.chmod(clonepath, 0o777)
