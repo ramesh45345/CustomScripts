@@ -32,15 +32,15 @@ def ubuntu_repos_setup(distrorelease: str, ubuntu_url: str = "http://archive.ubu
         # Updates
         if not "{0}-updates main".format(distrorelease) in DATA:
             print("\nAdding updates to sources.list")
-            subprocess.run('add-apt-repository "deb {URL} {DEBRELEASE}-updates main restricted universe multiverse"'.format(URL=ubuntu_url, DEBRELEASE=distrorelease), shell=True, check=True)
+            subprocess.run(["add-apt-repository", "-y", "deb {URL} {DEBRELEASE}-updates main restricted universe multiverse".format(URL=ubuntu_url, DEBRELEASE=distrorelease)], check=True)
         # Security
         if not "{0}-security main".format(distrorelease) in DATA:
             print("\nAdding security to sources.list")
-            subprocess.run('add-apt-repository "deb {URL} {DEBRELEASE}-security main restricted universe multiverse"'.format(URL=ubuntu_url, DEBRELEASE=distrorelease), shell=True, check=True)
+            subprocess.run(["add-apt-repository", "-y", "deb {URL} {DEBRELEASE}-security main restricted universe multiverse".format(URL=ubuntu_url, DEBRELEASE=distrorelease)], check=True)
         # Backports
         if not "{0}-backports main".format(distrorelease) in DATA:
             print("\nAdding backports to sources.list")
-            subprocess.run('add-apt-repository "deb {URL} {DEBRELEASE}-backports main restricted universe multiverse"'.format(URL=ubuntu_url, DEBRELEASE=distrorelease), shell=True, check=True)
+            subprocess.run(["add-apt-repository", "-y", "deb {URL} {DEBRELEASE}-backports main restricted universe multiverse".format(URL=ubuntu_url, DEBRELEASE=distrorelease)], check=True)
     # Add timeouts for repository connections
     with open('/etc/apt/apt.conf.d/99timeout', 'w') as writefile:
         writefile.write('''Acquire::http::Timeout "5";
