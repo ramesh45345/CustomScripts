@@ -19,7 +19,7 @@ CFunc.is_root(True)
 
 
 ### Functions ###
-def ubuntu_repos_setup(distrorelease: str, ubuntu_url: str = "http://archive.ubuntu.com/ubuntu/"):
+def ubuntu_repos_setup(distrorelease: str, ubuntu_url: str = "http://archive.ubuntu.com/ubuntu/", rolling: bool = False):
     """Setup stock ubuntu repositories and options."""
     # Main, Restricted, universe, and multiverse for Ubuntu.
     subprocess.run(["add-apt-repository", "main"], check=True)
@@ -48,6 +48,9 @@ Acquire::https::Timeout "5";
 Acquire::ftp::Timeout "5";''')
     # Comment out lines containing httpredir.
     subprocess.run("sed -i '/httpredir/ s/^#*/#/' /etc/apt/sources.list", shell=True, check=True)
+    # Enable rolling if requested.
+    if args.rolling:
+        CFunc.find_replace(os.path.join(os.sep, "etc", "apt"), debrelease, "devel", "sources.list")
 def vscode_deb():
     """Install vscode deb and repository."""
     subprocess.run("""curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /tmp/microsoft.gpg
@@ -104,11 +107,7 @@ if __name__ == '__main__':
     print("Release is {0}.".format(debrelease))
 
     ### Set up Ubuntu Repos ###
-    ubuntu_repos_setup(distrorelease=debrelease)
-
-    # Enable rolling if requested.
-    if args.rolling:
-        CFunc.find_replace(os.path.join(os.sep, "etc", "apt"), debrelease, "devel", "sources.list")
+    ubuntu_repos_setup(distrorelease=debrelease, rolling=args.rolling)
 
     # Update and upgrade with new base repositories
     CFunc.aptupdate()

@@ -63,6 +63,7 @@ if args.distro == "arch":
     import MArch
     check_cmds(["pacman"])
 if args.distro == "ubuntu":
+    import MUbuntu
     check_cmds(["apt-get"])
 if args.distro == "fedora":
     check_cmds(["dnf"])
@@ -82,8 +83,16 @@ if args.distro == "arch":
     subprocess.run("reflector --country 'United States' --latest 5 --protocol https --sort rate --save /etc/pacman.d/mirrorlist", shell=True, check=True)
     MArch.pacman_update()
 if args.distro == "ubuntu":
+    # Get Ubuntu Release
     CFunc.aptupdate()
-    CFunc.aptinstall("sudo passwd libcap2-bin zsh git nano python3 iproute2 iputils-ping software-properties-common wget curl build-essential")
+    CFunc.aptinstall("lsb-release software-properties-common apt-transport-https")
+    # Detect OS information
+    distro, debrelease = CFunc.detectdistro()
+    # Setup ubuntu repos
+    MUbuntu.ubuntu_repos_setup(distrorelease=debrelease)
+    CFunc.aptupdate()
+    CFunc.aptdistupg()
+    CFunc.aptinstall("sudo passwd libcap2-bin zsh git nano python3 iproute2 iputils-ping wget curl build-essential")
 
 # Add nopasswd entry for sudo.
 sudoersfile = os.path.join(os.sep, "etc", "sudoers.d", "custom")
@@ -145,7 +154,7 @@ if args.bootable:
         CFunc.pacman_install("networkmanager openssh avahi")
         CFunc.sysctl_enable("NetworkManager avahi-daemon sshd")
     if args.distro == "ubuntu":
-        CFunc.aptinstall("ssh avahi-daemon avahi-discover libnss-mdns binutils util-linux iputils-ping iproute2 apt-transport-https network-manager network-manager-ssh resolvconf")
+        CFunc.aptinstall("ssh avahi-daemon avahi-discover libnss-mdns binutils util-linux iputils-ping iproute2 network-manager network-manager-ssh resolvconf")
         subprocess.run("sed -i 's/managed=.*/managed=true/g' /etc/NetworkManager/NetworkManager.conf", shell=True, check=True)
         with open('/etc/NetworkManager/conf.d/10-globally-managed-devices.conf', 'w') as writefile:
             writefile.write("""[keyfile]
@@ -161,12 +170,7 @@ unmanaged-devices=none""")
         CFunc.aptinstall("mate-desktop-environment marco mate-polkit mate-menus mate-terminal mate-applet-appmenu mate-applet-brisk-menu mate-tweak xdg-utils dconf-editor epiphany pluma caja caja-open-terminal tilix mate-terminal mate-themes fonts-roboto fonts-noto-extra fonts-noto-ui-extra fonts-liberation2 numix-icon-theme numix-icon-theme-circle gnome-icon-theme network-manager-gnome tigervnc-viewer tigervnc-standalone-server tigervnc-xorg-extension xrdp xorgxrdp")
 
         # Visual Studio Code
-        subprocess.run("""curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
-        mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg""", shell=True, check=True)
-        # Install repo
-        subprocess.run('echo "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list', shell=True, check=True)
-        CFunc.aptupdate()
-        CFunc.aptinstall("code")
+        MUbuntu.vscode_deb()
     subprocess.run(["/opt/CustomScripts/DExtMate.py"], check=True)
 
     # Desktop configuration
