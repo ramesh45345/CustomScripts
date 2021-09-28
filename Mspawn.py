@@ -58,19 +58,6 @@ def create_chroot(distro: str, path: str):
     # Fedora
     elif args.distro == distro_options[2]:
         ctr_create("registry.fedoraproject.org/fedora", path, "dnf -y --releasever={0} --installroot=/chrootfld --disablerepo='*' --enablerepo=fedora --enablerepo=updates install systemd passwd dnf fedora-release vim-minimal".format(fedora_version))
-def nspawn_cmd(path: str, cmd: str, error_on_fail: bool = True):
-    """Run systemd-nspawn commands"""
-    full_cmd = ["systemd-nspawn", "-D", path, "bash", "-c", cmd]
-    print("Running command: ", full_cmd)
-    subprocess.run(full_cmd, check=error_on_fail)
-def nspawn_distro_cmd(dist_current: str, path: str, dist_select: str, cmd: str):
-    """
-    Run command if the distro matches the specified distro.
-    dist_current: The distro selected by the script arguments.
-    dist_select: Specify in text what distro this command should run on.
-    """
-    if dist_select == dist_current:
-        nspawn_cmd(path, cmd)
 def sshauthkey_get():
     """Get the ssh public key from the host machine."""
     sshkey = ""
