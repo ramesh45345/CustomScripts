@@ -49,7 +49,7 @@ Acquire::ftp::Timeout "5";''')
     # Comment out lines containing httpredir.
     subprocess.run("sed -i '/httpredir/ s/^#*/#/' /etc/apt/sources.list", shell=True, check=True)
     # Enable rolling if requested.
-    if args.rolling:
+    if rolling:
         CFunc.find_replace(os.path.join(os.sep, "etc", "apt"), debrelease, "devel", "sources.list")
 def vscode_deb():
     """Install vscode deb and repository."""
