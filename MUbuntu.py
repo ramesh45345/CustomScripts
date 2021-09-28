@@ -22,10 +22,10 @@ CFunc.is_root(True)
 def ubuntu_repos_setup(distrorelease: str, ubuntu_url: str = "http://archive.ubuntu.com/ubuntu/", rolling: bool = False):
     """Setup stock ubuntu repositories and options."""
     # Main, Restricted, universe, and multiverse for Ubuntu.
-    subprocess.run(["add-apt-repository", "main"], check=True)
-    subprocess.run(["add-apt-repository", "restricted"], check=True)
-    subprocess.run(["add-apt-repository", "universe"], check=True)
-    subprocess.run(["add-apt-repository", "multiverse"], check=True)
+    subprocess.run(["add-apt-repository", "-y", "main"], check=True)
+    subprocess.run(["add-apt-repository", "-y", "restricted"], check=True)
+    subprocess.run(["add-apt-repository", "-y", "universe"], check=True)
+    subprocess.run(["add-apt-repository", "-y", "multiverse"], check=True)
     # Add updates, security, and backports.
     with open(os.path.join(os.sep, "etc", "apt", "sources.list"), 'r') as VAR:
         DATA = VAR.read()
