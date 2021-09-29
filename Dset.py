@@ -474,7 +474,20 @@ if shutil.which("kwriteconfig5") and shutil.which("plasma_session"):
     subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "5" --key "immutability" "1"', shell=True, check=False)
     subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "5" --key "plugin" "org.kde.plasma.icontasks"', shell=True, check=False)
     subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "5" --group "Configuration" --key "PreloadWeight" "42"', shell=True, check=False)
-    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "5" --group "Configuration" --group "General" --key "launchers" "applications:firefox.desktop,applications:systemsettings.desktop,preferred://filemanager,applications:com.gexperts.Tilix.desktop,applications:org.kde.plasma-systemmonitor.desktop"', shell=True, check=False)
+
+    # Check current variable for tilix. If it doesn't exist, set the variable.
+    plasma_desktop_string = ""
+    plasma_desktop_read_list = subprocess.run('kreadconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "5" --group "Configuration" --group "General" --key "launchers"', shell=True, check=False, stdout=subprocess.PIPE).stdout.decode().strip()
+    if "tilix.desktop" not in plasma_desktop_read_list:
+        plasma_desktop_search_list = ["firefox.desktop", "UngoogledChromium.desktop", "chrome.desktop", 'thunderbird.desktop', 'kde.dolphin.desktop', "tilix.desktop", 'virt-manager.desktop', 'org.kde.plasma-systemmonitor.desktop']
+        plasma_desktop_file_list = []
+        for d in plasma_desktop_search_list:
+            ds = CMimeSet.LocateDesktopFileName(d)
+            if ds:
+                plasma_desktop_file_list.append("applications:" + ds)
+        plasma_desktop_string = ','.join(plasma_desktop_file_list)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "5" --group "Configuration" --group "General" --key "launchers" "{0}"'.format(plasma_desktop_string), shell=True, check=False)
+
     subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "6" --key "immutability" "1"', shell=True, check=False)
     subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "6" --key "plugin" "org.kde.plasma.marginsseparator"', shell=True, check=False)
     subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "6" --group "Configuration" --key "PreloadWeight" "42"', shell=True, check=False)
