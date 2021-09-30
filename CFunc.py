@@ -315,7 +315,6 @@ def chmod_mask(path: str, mask: oct, and_mask: bool = False):
             os.chmod(path, current_mode | mask)
     except:
         print("ERROR, chmod {0:o} failed for {1}".format(mask, path))
-    print(path, oct(os.stat(path).st_mode))
 def chmod_recursive_mask(path: str, mask: oct, and_mask: bool = False):
     """
     AND/OR a chmod mask recursively.
