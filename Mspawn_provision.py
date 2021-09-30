@@ -80,7 +80,7 @@ if args.distro == "arch":
     subprocess.run("sed -i 's/^#ParallelDownloads/ParallelDownloads/g' /etc/pacman.conf", shell=True, check=True)
     CFunc.pacman_install("nano sudo which git zsh python python-pip base-devel reflector")
     # Reflector
-    subprocess.run("reflector --country 'United States' --latest 5 --protocol https --sort rate --save /etc/pacman.d/mirrorlist", shell=True, check=True)
+    subprocess.run("reflector --country 'United States' --latest 7 --protocol https --sort rate --save /etc/pacman.d/mirrorlist", shell=True, check=True)
     MArch.pacman_update()
 if args.distro == "ubuntu":
     # Get Ubuntu Release
@@ -97,7 +97,7 @@ if args.distro == "ubuntu":
 # Add nopasswd entry for sudo.
 sudoersfile = os.path.join(os.sep, "etc", "sudoers.d", "custom")
 CFunc.AddLineToSudoersFile(sudoersfile, r"%wheel ALL=(ALL) NOPASSWD: ALL", overwrite=True)
-CFunc.AddLineToSudoersFile(sudoersfile, r"%sudo ALL=(ALL) NOPASSWD: ALL", overwrite=True)
+CFunc.AddLineToSudoersFile(sudoersfile, r"%sudo ALL=(ALL) NOPASSWD: ALL")
 CFuncExt.SudoersEnvSettings()
 
 # Set hostname
@@ -107,7 +107,7 @@ subprocess.run('grep -q -e "127.0.0.1 {0}" /etc/hosts || echo "127.0.0.1 {0}" >>
 
 # Locales
 with open("/etc/locale.gen", 'w') as f:
-    f.write("en_US.UTF-8 UTF-8")
+    f.write("en_US.UTF-8 UTF-8\n")
 subprocess.run("""echo 'LANG="en_US.UTF-8"' | tee /etc/default/locale /etc/locale.conf""", shell=True, check=True)
 subprocess.run(["locale-gen", "--purge", "en_US", "en_US.UTF-8"], check=True)
 if args.distro == "ubuntu":
@@ -191,18 +191,18 @@ Type=Application""")
     # VNC Config
     subprocess.run("mkdir -p {2}/.vnc && chown {0}:{1} -R {2} && echo 'asdf' | vncpasswd -f | tee /etc/vncpasswd".format(USERNAMEVAR, USERGROUP, USERHOME), shell=True, check=True)
     with open("/etc/tigervnc/vncserver.users", 'w') as f:
-        f.write(":1={0}".format(USERNAMEVAR))
+        f.write(":1={0}\n".format(USERNAMEVAR))
     with open(os.path.join(USERHOME, ".vnc", "config"), 'w') as f:
         f.write("""session=mate
 securitytypes=none
 desktop=ct-desktop
 geometry=1600x900
-localhost=1
+# localhost
 alwaysshared
 auth=~/.Xauthority
 rfbport=5901""")
     with open(os.path.join(USERHOME, ".xsession"), 'w') as f:
-        f.write("exec mate-session")
+        f.write("exec mate-session\n")
     CFunc.chown_recursive(os.path.join(USERHOME, ".xsession"), USERNAMEVAR, USERGROUP)
     subprocess.run("chmod 700 {0}/.xsession".format(USERHOME), shell=True, check=True)
     if args.distro == "arch" or args.distro == "fedora":
