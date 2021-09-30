@@ -280,6 +280,57 @@ def chown_recursive(path, user_name, group_name):
                 except:
                     print("ERROR, chown failed for {0}".format(os.path.join(dirpath, fname)))
     return
+def chmod_recursive(path, mode: oct):
+    """
+    Recursive chmod.
+    mode: octal mode for chmod
+    """
+    print("Running chmod on {0}.".format(path))
+    os.chmod(path, mode)
+    # Drill down into the folder if it is a folder.
+    if os.path.isdir(path):
+        for dirpath, dirnames, filenames in os.walk(path):
+            for dname in dirnames:
+                try:
+                    os.chmod(os.path.join(dirpath, dname), mode)
+                except:
+                    print("ERROR, chmod {0} failed for {1}".format(mode, os.path.join(dirpath, dname)))
+            for fname in filenames:
+                try:
+                    os.chmod(os.path.join(dirpath, fname), mode)
+                except:
+                    print("ERROR, chmod {0} failed for {1}".format(mode, os.path.join(dirpath, fname)))
+def chmod_mask(path: str, mask: oct, and_mask: bool = False):
+    """
+    AND/OR a chmod mask on an individual file/folder.
+    mask: Bit mask to merge into the file mode. Mask modes: https://docs.python.org/3/library/stat.html
+    Example, mask without group or everyone execute bits: (~stat.S_IXGRP & 0xFFFF) & (~stat.S_IXOTH & 0xFFFF)
+    and_mask: AND the mask into the file mode if True, OR if False.
+    """
+    current_mode = os.stat(path).st_mode
+    try:
+        if and_mask:
+            os.chmod(path, current_mode & mask)
+        else:
+            os.chmod(path, current_mode | mask)
+    except:
+        print("ERROR, chmod {0:o} failed for {1}".format(mask, path))
+    print(path, oct(os.stat(path).st_mode))
+def chmod_recursive_mask(path: str, mask: oct, and_mask: bool = False):
+    """
+    AND/OR a chmod mask recursively.
+    mask: Bit mask to merge into the file mode
+    and_mask: AND the mask into the file mode if True, OR if False.
+    """
+    print("Running chmod on {0}.".format(path))
+    chmod_mask(path, mask, and_mask)
+    # Drill down into the folder if it is a folder.
+    if os.path.isdir(path):
+        for dirpath, dirnames, filenames in os.walk(path):
+            for dname in dirnames:
+                chmod_mask(os.path.join(dirpath, dname), mask, and_mask)
+            for fname in filenames:
+                chmod_mask(os.path.join(dirpath, fname), mask, and_mask)
 ### Systemd Functions ###
 def sysctl_enable(options: str, now: bool = False, error_on_fail: bool = False):
     """Enable systemctl services"""

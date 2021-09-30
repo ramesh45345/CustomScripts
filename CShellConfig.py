@@ -4,6 +4,7 @@
 # Python includes.
 import argparse
 import os
+import stat
 import sys
 import subprocess
 import shutil
@@ -442,7 +443,8 @@ else:
 bashit_path = os.path.join(repos_path, "bash-it")
 if os.access(repos_path, os.W_OK):
     CFunc.gitclone("https://github.com/Bash-it/bash-it", bashit_path)
-    subprocess.run("chmod -R a+rwx {0}".format(bashit_path), shell=True, check=True)
+    # chmod a+rwx bash-it
+    CFunc.chmod_recursive(bashit_path, 0o777)
 if os.path.isdir(bashit_path):
     subprocess.run("""
     [ "$(id -u)" = "0" ] && HOME={0}
@@ -503,7 +505,8 @@ fi
     ZSHSCRIPT += rc_additions
     with open(zshrc_path, 'w') as file:
         file.write(ZSHSCRIPT)
-    subprocess.run("chmod -R g-w,o-w {0}".format(os.path.join(USERVARHOME, ".oh-my-zsh")), shell=True, check=True)
+    # chmod -R g-w,o-w .oh-my-zsh
+    CFunc.chmod_recursive_mask(os.path.join(USERVARHOME, ".oh-my-zsh"), mask=((~stat.S_IXGRP & 0xFFFF) & (~stat.S_IXOTH & 0xFFFF)), and_mask=True)
     CFunc.chown_recursive(os.path.join(USERVARHOME, ".oh-my-zsh"), USERNAMEVAR, USERGROUP)
     shutil.chown(zshrc_path, USERNAMEVAR, USERGROUP)
 else:
@@ -516,6 +519,8 @@ if shutil.which("tmux"):
     # Clone tmux config repo
     CFunc.gitclone("https://github.com/gpakosz/.tmux.git", tmux_cfg_path)
     subprocess.run("chmod -R a+rw {0}".format(tmux_cfg_path), shell=True, check=True)
+    # chmod -R a+rw tmux_cfg_path
+    CFunc.chmod_recursive_mask(tmux_cfg_path, mask=0o666, and_mask=False)
     tmux_cfg_common = os.path.join(tmux_cfg_path, ".tmux.conf")
     tmux_cfg_common_local = os.path.join(tmux_cfg_path, ".tmux.conf.local")
     # Modify Local settings before copying
