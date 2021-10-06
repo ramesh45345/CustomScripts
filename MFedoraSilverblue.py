@@ -63,6 +63,13 @@ def group_silverblueadd(group: str):
     """Add group to /etc/group, and add user to group."""
     group_addtosystem(group)
     CFunc.AddUserToGroup(group)
+def kargs_getcurrent():
+    """Get current kernel command line arguments."""
+    kargs = CFunc.subpout("rpm-ostree kargs", error_on_fail=True)
+    return kargs
+def kargs_append(arg: str, value: str):
+    """Append a kernel command line argument."""
+    subprocess.run("rpm-ostree kargs --append={0}={1}".format(arg, value), shell=True, check=True)
 
 
 # Get arguments
@@ -208,7 +215,7 @@ gpgcheck=0""")
         CFunc.run_as_user(USERNAMEVAR, "{0} --yes 1160".format(gs_installer[0]))
         # https://github.com/kgshank/gse-sound-output-device-chooser
         CFunc.run_as_user(USERNAMEVAR, "{0} --yes 906".format(gs_installer[0]))
-        # https://github.com/mymindstorm/gnome-volume-mixer 
+        # https://github.com/mymindstorm/gnome-volume-mixer
         CFunc.run_as_user(USERNAMEVAR, "{0} --yes 3499".format(gs_installer[0]))
         # Kstatusnotifier
         CFunc.run_as_user(USERNAMEVAR, "{0} --yes 615".format(gs_installer[0]))
