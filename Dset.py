@@ -776,6 +776,8 @@ if os.path.isdir(firefox_profiles_path):
                     firefox_modify_settings("dom.webnotifications.enabled", "false", prefsjs_file)
                     # Autoplay (5 blocks audio and video for all sites by default)
                     firefox_modify_settings("media.autoplay.default", "5", prefsjs_file)
+                    # Sponsored suggest
+                    firefox_modify_settings("browser.urlbar.suggest.quicksuggest.sponsored", "false", prefsjs_file)
 
                     # Install firefox gnome theme.
                     if os.getenv('XDG_CURRENT_DESKTOP') == "GNOME":
