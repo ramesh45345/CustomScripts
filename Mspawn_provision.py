@@ -96,7 +96,7 @@ if args.distro == "ubuntu":
     CFunc.aptinstall("sudo passwd libcap2-bin zsh git nano python3 iproute2 iputils-ping wget curl build-essential")
 if args.distro == "fedora":
     CFunc.dnfupdate()
-    CFunc.dnfinstall("sudo bash zsh nano git util-linux-user passwd binutils wget iputils dbus-tools")
+    CFunc.dnfinstall("sudo bash zsh nano git util-linux-user passwd binutils wget iputils dbus-tools glibc-langpack-en")
     MFedora.repo_rpmfusion()
 
 # Add nopasswd entry for sudo.
