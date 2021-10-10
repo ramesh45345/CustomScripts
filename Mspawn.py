@@ -135,7 +135,9 @@ if os.path.islink(os.path.join(pathvar, "etc", "resolv.conf")):
 
 # Copy CustomScripts into chroot
 cspath = os.path.join(pathvar, "opt", "CustomScripts")
-shutil.copytree(SCRIPTDIR, cspath, dirs_exist_ok=True)
+if os.path.isdir(cspath):
+    shutil.rmtree(cspath)
+shutil.copytree(SCRIPTDIR, cspath)
 # Rewrite origin remote url
 currentpath = os.getcwd()
 os.chdir(cspath)
