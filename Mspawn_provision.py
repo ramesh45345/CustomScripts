@@ -66,6 +66,7 @@ if args.distro == "ubuntu":
     import MUbuntu
     check_cmds(["apt-get"])
 if args.distro == "fedora":
+    import MFedora
     check_cmds(["dnf"])
 
 # Create group and user
@@ -93,6 +94,10 @@ if args.distro == "ubuntu":
     CFunc.aptupdate()
     CFunc.aptdistupg()
     CFunc.aptinstall("sudo passwd libcap2-bin zsh git nano python3 iproute2 iputils-ping wget curl build-essential")
+if args.distro == "fedora":
+    CFunc.dnfupdate()
+    CFunc.dnfinstall("sudo bash zsh nano git util-linux-user passwd binutils wget iputils dbus-tools")
+    MFedora.repo_rpmfusion()
 
 # Add nopasswd entry for sudo.
 sudoersfile = os.path.join(os.sep, "etc", "sudoers.d", "custom")
@@ -109,7 +114,8 @@ subprocess.run('grep -q -e "127.0.0.1 {0}" /etc/hosts || echo "127.0.0.1 {0}" >>
 with open("/etc/locale.gen", 'w') as f:
     f.write("en_US.UTF-8 UTF-8\n")
 subprocess.run("""echo 'LANG="en_US.UTF-8"' | tee /etc/default/locale /etc/locale.conf""", shell=True, check=True)
-subprocess.run(["locale-gen", "--purge", "en_US", "en_US.UTF-8"], check=True)
+if args.distro == "arch" or args.distro == "ubuntu":
+    subprocess.run(["locale-gen", "--purge", "en_US", "en_US.UTF-8"], check=True)
 if args.distro == "ubuntu":
     subprocess.run("dpkg-reconfigure --frontend=noninteractive locales && update-locale", shell=True, check=True)
 
@@ -142,6 +148,8 @@ if args.distro == "arch":
         MArch.install_aur_pkg("yay-bin", USERNAMEVAR, USERGROUP)
 if args.distro == "ubuntu":
     CFunc.aptinstall("xserver-xorg fonts-powerline fonts-liberation fonts-liberation2 fonts-dejavu xfce4-terminal")
+if args.distro == "fedora":
+    CFunc.dnfinstall("--allowerasing @fonts @base-x xdg-utils xterm powerline-fonts xfce4-terminal")
 
 # Set password
 subprocess.run(['chpasswd'], input=bytes("{0}:{1}".format(USERNAMEVAR, args.password), 'utf-8'), check=True)
@@ -159,6 +167,8 @@ if args.bootable:
         with open('/etc/NetworkManager/conf.d/10-globally-managed-devices.conf', 'w') as writefile:
             writefile.write("""[keyfile]
 unmanaged-devices=none""")
+    if args.distro == "fedora":
+        CFunc.dnfinstall("@networkmanager-submodules avahi nss-mdns openssh openssh-clients openssh-server passwd binutils util-linux-user tigervnc-server dnf-plugins-core iputils iproute xrdp xorgxrdp")
 
     # Install GUI
     if args.distro == "arch":
@@ -168,10 +178,17 @@ unmanaged-devices=none""")
         held_pkgs = "gnome-shell gdm3 gnome-session gnome-session-bin ubuntu-session gnome-desktop3-data gnome-control-center cheese"
         CFunc.aptmark(held_pkgs)
         CFunc.aptinstall("mate-desktop-environment marco mate-polkit mate-menus mate-terminal mate-applet-appmenu mate-applet-brisk-menu mate-tweak xdg-utils dconf-editor epiphany pluma caja caja-open-terminal tilix mate-terminal mate-themes fonts-roboto fonts-noto-extra fonts-noto-ui-extra fonts-liberation2 numix-icon-theme numix-icon-theme-circle gnome-icon-theme network-manager-gnome tigervnc-viewer tigervnc-standalone-server tigervnc-xorg-extension xrdp xorgxrdp")
-
-        # Visual Studio Code
         MUbuntu.vscode_deb()
+    if args.distro == "fedora":
+        CFunc.dnfinstall("mate-panel mate-session-manager mate-control-center marco")
+        MFedora.repo_vscode()
+        subprocess.run("dnf copr enable -y rmkrishna/rpms", shell=True, check=True)
+        CFunc.dnfupdate()
+        CFunc.dnfinstall("xdg-utils dconf-editor brisk-menu epiphany pluma caja caja-open-terminal tilix mate-terminal mate-themes google-roboto-fonts google-noto-sans-fonts liberation-mono-fonts numix-icon-theme numix-icon-theme-circle code")
     subprocess.run(["/opt/CustomScripts/DExtMate.py"], check=True)
+    # vscode setup
+    if args.distro == "ubuntu" or args.distro == "fedora":
+        CFunc.run_as_user(USERNAMEVAR, os.path.join(SCRIPTDIR, "Cvscode.py"), shutil.which("bash"), error_on_fail=True)
 
     # Desktop configuration
     with open("/etc/xdg/autostart/mate-dset.desktop", 'w') as f:
