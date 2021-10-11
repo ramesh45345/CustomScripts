@@ -300,6 +300,9 @@ if args.ostype == 50:
 if args.ostype == 51:
     vmname = "Packer-Windows10LTS-{0}".format(hvname)
     windows_key = "M7XTQ-FN8P6-TTKYV-9D4CC-J462D"
+if args.ostype == 52:
+    vmname = "Packer-Windows11-{0}".format(hvname)
+    windows_key = "NRG8B-VKK3Q-CXVCJ-9G2XF-6Q84J"
 if 55 <= args.ostype <= 59:
     vboxosid = "Windows2019_64"
     vmwareid = "windows9srv-64"
@@ -581,14 +584,12 @@ if 50 <= args.ostype <= 59:
     ET.register_namespace('', "urn:schemas-microsoft-com:unattend")
     ET.register_namespace('wcm', "http://schemas.microsoft.com/WMIConfig/2002/State")
     ET.register_namespace('xsi', "http://www.w3.org/2001/XMLSchema-instance")
-if args.ostype == 50:
+if 50 <= args.ostype <= 52:
     shutil.move(os.path.join(tempunattendfolder, "windows10.xml"), os.path.join(tempunattendfolder, "autounattend.xml"))
     # Insert product key
     xml_insertwindowskey(windows_key, os.path.join(tempunattendfolder, "autounattend.xml"))
-if args.ostype == 51:
-    shutil.move(os.path.join(tempunattendfolder, "windows10.xml"), os.path.join(tempunattendfolder, "autounattend.xml"))
-    # Insert product key
-    xml_insertwindowskey(windows_key, os.path.join(tempunattendfolder, "autounattend.xml"))
+if args.ostype == 52:
+    data['builders'][0]["boot_command"] = ["<wait3m><leftShiftOn><f10><leftShiftOff><wait>reg add HKLM\\SYSTEM\\Setup\\LabConfig /t REG_DWORD /v BypassTPMCheck /d 1<return>reg add HKLM\\SYSTEM\\Setup\\LabConfig /t REG_DWORD /v BypassSecureBootCheck /d 1<return><wait>exit<return><wait><return>"]
 if 55 <= args.ostype <= 59:
     shutil.move(os.path.join(tempunattendfolder, "windows10.xml"), os.path.join(tempunattendfolder, "autounattend.xml"))
     # Insert Windows Server product key
