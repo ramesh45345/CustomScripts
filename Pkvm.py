@@ -117,6 +117,34 @@ def git_cmdline(destination=os.path.join(os.sep, "opt", "CustomScripts")):
     git_branch = git_branch_retrieve()
     git_cmd = "git clone https://github.com/ramesh45345/CustomScripts {0} -b {1}".format(destination, git_branch)
     return git_cmd
+def ovmf_bin_nvramcopy(destpath: str, vmname: str, secureboot: bool = False):
+    """Get the edk2 ovmf bin, and copy and return the corresponding nvram path."""
+    # Files to be found.
+    ovmf_bin_fullpath = ""
+    ovmf_nvram_fullpath = ""
+    # Search for efi bin
+    if os.path.join(os.sep, "usr", "share", "OVMF", "OVMF_CODE.secboot.fd") and secureboot is True:
+        ovmf_bin_fullpath = os.path.join(os.sep, "usr", "share", "OVMF", "OVMF_CODE.secboot.fd")
+    elif os.path.join(os.sep, "usr", "share", "OVMF", "OVMF_CODE.fd"):
+        ovmf_bin_fullpath = os.path.join(os.sep, "usr", "share", "OVMF", "OVMF_CODE.fd")
+    # Search for nvram
+    if os.path.join(os.sep, "usr", "share", "OVMF", "OVMF_VARS.secboot.fd") and secureboot is True:
+        ovmf_nvram_fullpath = os.path.join(os.sep, "usr", "share", "OVMF", "OVMF_VARS.secboot.fd")
+    elif os.path.join(os.sep, "usr", "share", "OVMF", "OVMF_VARS.fd"):
+        ovmf_nvram_fullpath = os.path.join(os.sep, "usr", "share", "OVMF", "OVMF_VARS.fd")
+    # Error if efi binaries not found.
+    if not os.path.isfile(ovmf_bin_fullpath) or not os.path.isfile(ovmf_nvram_fullpath):
+        print("\nERROR: OVMF_CODE or OVMF_VARS not detected!")
+        sys.exit(1)
+    # nvram copy logic
+    nvram_filename = "{0}_VARS.fd".format(vmname)
+    nvram_copy_path = os.path.join(destpath, nvram_filename)
+    # Remove nvram if it exists.
+    if os.path.isfile(nvram_copy_path):
+        os.remove(nvram_copy_path)
+    # Copy nvram to destination path.
+    shutil.copy(ovmf_nvram_fullpath, nvram_copy_path)
+    return ovmf_bin_fullpath, nvram_copy_path
 
 
 # Exit if root.
@@ -192,6 +220,9 @@ if args.vmtype == 1:
 elif args.vmtype == 2:
     hvname = "kvm"
 
+# EFI flag
+useefi = False
+secureboot = False
 # Predetermined iso checksum.
 md5_isourl = None
 # Set OS options.
@@ -295,14 +326,13 @@ if 50 <= args.ostype <= 59:
     # Windows KMS key list: https://docs.microsoft.com/en-us/windows-server/get-started/kmsclientkeys
     windows_key = None
 if args.ostype == 50:
-    vmname = "Packer-Windows10-{0}".format(hvname)
+    vmname = "Packer-Windows11-{0}".format(hvname)
     windows_key = "NRG8B-VKK3Q-CXVCJ-9G2XF-6Q84J"
+    useefi = True
+    secureboot = True
 if args.ostype == 51:
     vmname = "Packer-Windows10LTS-{0}".format(hvname)
     windows_key = "M7XTQ-FN8P6-TTKYV-9D4CC-J462D"
-if args.ostype == 52:
-    vmname = "Packer-Windows11-{0}".format(hvname)
-    windows_key = "NRG8B-VKK3Q-CXVCJ-9G2XF-6Q84J"
 if 55 <= args.ostype <= 59:
     vboxosid = "Windows2019_64"
     vmwareid = "windows9srv-64"
@@ -382,6 +412,7 @@ if os.path.isdir(packer_temp_folder):
     shutil.rmtree(packer_temp_folder)
 os.mkdir(packer_temp_folder)
 os.chdir(packer_temp_folder)
+output_folder = os.path.join(packer_temp_folder, vmname)
 
 # Detect root ssh key.
 if args.sshkey is not None:
@@ -483,22 +514,21 @@ elif args.vmtype == 2:
     data['builders'][0]["qemuargs"][0] = ["-m", "{0}M".format(args.memory)]
     data['builders'][0]["qemuargs"].append(["--cpu", "host"])
     data['builders'][0]["qemuargs"].append(["--smp", "cores={0}".format(CPUCORES)])
+    # if useefi is True:
+    #     imagepath = os.path.join(output_folder, "{0}.qcow2".format(vmname))
+    #     efi_bin, efi_nvram = ovmf_bin_nvramcopy(vmpath, vmname, secureboot=secureboot)
+    #     # nvram
+    #     data['builders'][0]["qemuargs"].append(["--drive", "if=pflash,format=raw,file={0},readonly".format(efi_bin)])
+    #     data['builders'][0]["qemuargs"].append(["--drive", "if=pflash,format=raw,file={0}".format(efi_nvram)])
+    #     # TODO: hard drive
+    #     # cdrom
+    #     data['builders'][0]["qemuargs"].append(["--drive", "if=virtio,media=cdrom,file={0}".format(isopath)])
     if 50 <= args.ostype <= 59:
         # Grab the virtio drivers
         # https://docs.fedoraproject.org/en-US/quick-docs/creating-windows-virtual-machines-using-virtio-drivers/
         qemu_virtio_diskpath = CFunc.downloadfile("https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/latest-virtio/virtio-win.iso", vmpath)[0]
         # Set the iso as a new cdrom drive.
         data['builders'][0]["qemuargs"].append(["--drive", "file={0},media=cdrom,index=1".format(qemu_virtio_diskpath)])
-elif args.vmtype == 3:
-    data['builders'][0]["type"] = "vmware-iso"
-    data['builders'][0]["version"] = "12"
-    data['builders'][0]["vm_name"] = "{0}".format(vmname)
-    data['builders'][0]["vmdk_name"] = "{0}".format(vmname)
-    data['builders'][0]["vmx_data"] = {"virtualhw.version": "12", "memsize": "{0}".format(args.memory), "numvcpus": "{0}".format(CPUCORES), "cpuid.coresPerSocket": "{0}".format(CPUCORES), "guestos": "{0}".format(vmwareid), "usb.present": "TRUE", "scsi0.virtualDev": "lsisas1068"}
-    data['builders'][0]["vmx_data_post"] = {"sharedFolder0.present": "TRUE", "sharedFolder0.enabled": "TRUE", "sharedFolder0.readAccess": "TRUE", "sharedFolder0.writeAccess": "TRUE", "sharedFolder0.hostPath": "/", "sharedFolder0.guestName": "root", "sharedFolder0.expiration": "never", "sharedFolder.maxNum": "1", "isolation.tools.hgfs.disable": "FALSE"}
-    if 50 <= args.ostype <= 59:
-        data['builders'][0]["tools_upload_flavor"] = "windows"
-        data['builders'][0]["tools_upload_path"] = "c:/Windows/Temp/windows.iso"
 data['builders'][0]["shutdown_command"] = "shutdown -P now"
 data['builders'][0]["iso_url"] = "{0}".format(isopath)
 data['builders'][0]["iso_checksum"] = "md5:{0}".format(md5)
@@ -588,8 +618,6 @@ if 50 <= args.ostype <= 52:
     shutil.move(os.path.join(tempunattendfolder, "windows10.xml"), os.path.join(tempunattendfolder, "autounattend.xml"))
     # Insert product key
     xml_insertwindowskey(windows_key, os.path.join(tempunattendfolder, "autounattend.xml"))
-if args.ostype == 52:
-    data['builders'][0]["boot_command"] = ["<wait3m><leftShiftOn><f10><leftShiftOff><wait>reg add HKLM\\SYSTEM\\Setup\\LabConfig /t REG_DWORD /v BypassTPMCheck /d 1<return>reg add HKLM\\SYSTEM\\Setup\\LabConfig /t REG_DWORD /v BypassSecureBootCheck /d 1<return><wait>exit<return><wait><return>"]
 if 55 <= args.ostype <= 59:
     shutil.move(os.path.join(tempunattendfolder, "windows10.xml"), os.path.join(tempunattendfolder, "autounattend.xml"))
     # Insert Windows Server product key
@@ -638,7 +666,6 @@ packerfinishtime = datetime.now()
 
 # Remove temp folder
 os.chdir(vmpath)
-output_folder = os.path.join(packer_temp_folder, vmname)
 buildlog_sourcepath = os.path.join(packer_temp_folder, "build.log")
 
 # Copy output to VM folder.
@@ -681,6 +708,8 @@ if args.vmtype == 2:
     # virt-install manual: https://www.mankier.com/1/virt-install
     # List of os: osinfo-query os
     CREATESCRIPT_KVM = """virt-install --connect qemu:///system --name={vmname} --disk path={fullpathtoimg}.qcow2,bus={kvm_diskinterface} --graphics spice --vcpu={cpus} --ram={memory} --network bridge=virbr0,model={kvm_netdevice} --filesystem source=/,target=root,mode=mapped --os-type={kvm_os} --os-variant={kvm_variant} --import --noautoconsole --noreboot --video={kvm_video} --channel unix,target_type=virtio,name=org.qemu.guest_agent.0 --channel spicevmc,target_type=virtio,name=com.redhat.spice.0""".format(vmname=vmname, memory=args.memory, cpus=CPUCORES, fullpathtoimg=os.path.join(vmpath, vmname), kvm_os=kvm_os, kvm_variant=kvm_variant, kvm_video=kvm_video, kvm_diskinterface=kvm_diskinterface, kvm_netdevice=kvm_netdevice)
+    # if useefi is True:
+    #     CREATESCRIPT_KVM += "--boot loader={0},loader_ro=yes,loader_type=pflash,nvram={1},loader_secure=no".format(efi_bin, efi_nvram)
     logging.info("KVM launch command: {0}".format(CREATESCRIPT_KVM))
     if args.noprompt is False:
         subprocess.run(CREATESCRIPT_KVM, shell=True, check=False)
