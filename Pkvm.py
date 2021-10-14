@@ -514,15 +514,11 @@ elif args.vmtype == 2:
     data['builders'][0]["qemuargs"][0] = ["-m", "{0}M".format(args.memory)]
     data['builders'][0]["qemuargs"].append(["--cpu", "host"])
     data['builders'][0]["qemuargs"].append(["--smp", "cores={0}".format(CPUCORES)])
-    # if useefi is True:
-    #     imagepath = os.path.join(output_folder, "{0}.qcow2".format(vmname))
-    #     efi_bin, efi_nvram = ovmf_bin_nvramcopy(vmpath, vmname, secureboot=secureboot)
-    #     # nvram
-    #     data['builders'][0]["qemuargs"].append(["--drive", "if=pflash,format=raw,file={0},readonly".format(efi_bin)])
-    #     data['builders'][0]["qemuargs"].append(["--drive", "if=pflash,format=raw,file={0}".format(efi_nvram)])
-    #     # TODO: hard drive
-    #     # cdrom
-    #     data['builders'][0]["qemuargs"].append(["--drive", "if=virtio,media=cdrom,file={0}".format(isopath)])
+    if useefi is True:
+        efi_bin, efi_nvram = ovmf_bin_nvramcopy(vmpath, vmname, secureboot=secureboot)
+        # nvram
+        data['builders'][0]["qemuargs"].append(["--drive", "if=pflash,format=raw,file={0},readonly".format(efi_bin)])
+        data['builders'][0]["qemuargs"].append(["--drive", "if=pflash,format=raw,file={0}".format(efi_nvram)])
     if 50 <= args.ostype <= 59:
         # Grab the virtio drivers
         # https://docs.fedoraproject.org/en-US/quick-docs/creating-windows-virtual-machines-using-virtio-drivers/
@@ -708,8 +704,8 @@ if args.vmtype == 2:
     # virt-install manual: https://www.mankier.com/1/virt-install
     # List of os: osinfo-query os
     CREATESCRIPT_KVM = """virt-install --connect qemu:///system --name={vmname} --disk path={fullpathtoimg}.qcow2,bus={kvm_diskinterface} --graphics spice --vcpu={cpus} --ram={memory} --network bridge=virbr0,model={kvm_netdevice} --filesystem source=/,target=root,mode=mapped --os-type={kvm_os} --os-variant={kvm_variant} --import --noautoconsole --noreboot --video={kvm_video} --channel unix,target_type=virtio,name=org.qemu.guest_agent.0 --channel spicevmc,target_type=virtio,name=com.redhat.spice.0""".format(vmname=vmname, memory=args.memory, cpus=CPUCORES, fullpathtoimg=os.path.join(vmpath, vmname), kvm_os=kvm_os, kvm_variant=kvm_variant, kvm_video=kvm_video, kvm_diskinterface=kvm_diskinterface, kvm_netdevice=kvm_netdevice)
-    # if useefi is True:
-    #     CREATESCRIPT_KVM += "--boot loader={0},loader_ro=yes,loader_type=pflash,nvram={1},loader_secure=no".format(efi_bin, efi_nvram)
+    if useefi is True:
+        CREATESCRIPT_KVM += "--boot loader={0},loader_ro=yes,loader_type=pflash,nvram={1},loader_secure=no".format(efi_bin, efi_nvram)
     logging.info("KVM launch command: {0}".format(CREATESCRIPT_KVM))
     if args.noprompt is False:
         subprocess.run(CREATESCRIPT_KVM, shell=True, check=False)
