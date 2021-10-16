@@ -20,7 +20,7 @@
         <OSImage>
           <InstallTo>
             <DiskID>0</DiskID>
-            <PartitionID>2</PartitionID>
+            <PartitionID>3</PartitionID>
           </InstallTo>
           <InstallToAvailablePartition>false</InstallToAvailablePartition>
         </OSImage>
@@ -33,38 +33,42 @@
       <EnableFirewall>true</EnableFirewall>
       <DiskConfiguration>
         <Disk wcm:action="add">
+          <DiskID>0</DiskID>
+          <WillWipeDisk>true</WillWipeDisk>
           <CreatePartitions>
             <CreatePartition wcm:action="add">
               <Order>1</Order>
-              <Type>Primary</Type>
+              <Type>EFI</Type>
               <Size>100</Size>
             </CreatePartition>
             <CreatePartition wcm:action="add">
-              <Extend>true</Extend>
               <Order>2</Order>
+              <Type>MSR</Type>
+              <Size>512</Size>
+            </CreatePartition>
+            <CreatePartition wcm:action="add">
+              <Order>3</Order>
               <Type>Primary</Type>
+              <Extend>true</Extend>
             </CreatePartition>
           </CreatePartitions>
           <ModifyPartitions>
             <ModifyPartition wcm:action="add">
-              <Format>NTFS</Format>
-              <Label>System Reserved</Label>
               <Order>1</Order>
               <PartitionID>1</PartitionID>
-              <TypeID>0x27</TypeID>
+              <Label>System</Label>
+              <Format>FAT32</Format>
             </ModifyPartition>
             <ModifyPartition wcm:action="add">
-              <Active>true</Active>
-              <Format>NTFS</Format>
-              <Label>OS</Label>
-              <Letter>C</Letter>
               <Order>2</Order>
-              <PartitionID>2</PartitionID>
+              <PartitionID>3</PartitionID>
+              <Label>Windows</Label>
+              <Letter>C</Letter>
+              <Format>NTFS</Format>
             </ModifyPartition>
           </ModifyPartitions>
-          <DiskID>0</DiskID>
-          <WillWipeDisk>true</WillWipeDisk>
         </Disk>
+        <WillShowUI>OnError</WillShowUI>
       </DiskConfiguration>
     </component>
   </settings>

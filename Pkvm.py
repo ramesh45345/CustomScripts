@@ -11,8 +11,10 @@ import multiprocessing
 import os
 import pathlib
 import shutil
+import signal
 import subprocess
 import sys
+import tempfile
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -117,21 +119,33 @@ def git_cmdline(destination=os.path.join(os.sep, "opt", "CustomScripts")):
     git_branch = git_branch_retrieve()
     git_cmd = "git clone https://github.com/ramesh45345/CustomScripts {0} -b {1}".format(destination, git_branch)
     return git_cmd
+def file_ifexists(paths: list):
+    """Return the first file string if it exists in a list."""
+    for f in paths:
+        if os.path.isfile(f):
+            return f
+    return None
 def ovmf_bin_nvramcopy(destpath: str, vmname: str, secureboot: bool = False):
     """Get the edk2 ovmf bin, and copy and return the corresponding nvram path."""
     # Files to be found.
     ovmf_bin_fullpath = ""
     ovmf_nvram_fullpath = ""
+    # Search paths for efi files.
+    # TODO: Implement any long term fix proposed in https://github.com/wimpysworld/quickemu/issues/102
+    ovmf_bin_options = [os.path.join(destpath, "OVMF_CODE.fd"), "/usr/share/OVMF/OVMF_CODE.fd"]
+    ovmf_vars_options = [os.path.join(destpath, "OVMF_VARS.fd"), "/usr/share/OVMF/OVMF_VARS.fd"]
+    ovmf_bin_secboot_options = [os.path.join(destpath, "OVMF_CODE_4M.fd"), "/usr/share/OVMF/OVMF_CODE.secboot.fd"] + ovmf_bin_options
+    ovmf_vars_secboot_options = [os.path.join(destpath, "OVMF_VARS_4M.fd"), "/usr/share/OVMF/OVMF_VARS.secboot.fd"] + ovmf_vars_options
     # Search for efi bin
-    if os.path.join(os.sep, "usr", "share", "OVMF", "OVMF_CODE.secboot.fd") and secureboot is True:
-        ovmf_bin_fullpath = os.path.join(os.sep, "usr", "share", "OVMF", "OVMF_CODE.secboot.fd")
-    elif os.path.join(os.sep, "usr", "share", "OVMF", "OVMF_CODE.fd"):
-        ovmf_bin_fullpath = os.path.join(os.sep, "usr", "share", "OVMF", "OVMF_CODE.fd")
+    if secureboot is True:
+        ovmf_bin_fullpath = file_ifexists(ovmf_bin_secboot_options)
+    else:
+        ovmf_bin_fullpath = file_ifexists(ovmf_bin_options)
     # Search for nvram
-    if os.path.join(os.sep, "usr", "share", "OVMF", "OVMF_VARS.secboot.fd") and secureboot is True:
-        ovmf_nvram_fullpath = os.path.join(os.sep, "usr", "share", "OVMF", "OVMF_VARS.secboot.fd")
-    elif os.path.join(os.sep, "usr", "share", "OVMF", "OVMF_VARS.fd"):
-        ovmf_nvram_fullpath = os.path.join(os.sep, "usr", "share", "OVMF", "OVMF_VARS.fd")
+    if secureboot is True:
+        ovmf_nvram_fullpath = file_ifexists(ovmf_vars_secboot_options)
+    else:
+        ovmf_nvram_fullpath = file_ifexists(ovmf_vars_options)
     # Error if efi binaries not found.
     if not os.path.isfile(ovmf_bin_fullpath) or not os.path.isfile(ovmf_nvram_fullpath):
         print("\nERROR: OVMF_CODE or OVMF_VARS not detected!")
@@ -145,6 +159,16 @@ def ovmf_bin_nvramcopy(destpath: str, vmname: str, secureboot: bool = False):
     # Copy nvram to destination path.
     shutil.copy(ovmf_nvram_fullpath, nvram_copy_path)
     return ovmf_bin_fullpath, nvram_copy_path
+def signal_handler(sig, frame):
+    """Cleanup if given early termination."""
+    if tpm_process:
+        tpm_process.terminate()
+    if tpm_tempdir:
+        shutil.rmtree(tpm_tempdir.name)
+    if os.path.isdir(packer_temp_folder) and args.debug is False:
+        shutil.rmtree(packer_temp_folder)
+    print('Exiting due to SIGINT.')
+    sys.exit(1)
 
 
 # Exit if root.
@@ -220,11 +244,15 @@ if args.vmtype == 1:
 elif args.vmtype == 2:
     hvname = "kvm"
 
+# Variables
+tpm_tempdir = None
+tpm_process = None
 # EFI flag
 useefi = False
 secureboot = False
 # Predetermined iso checksum.
 md5_isourl = None
+
 # Set OS options.
 # KVM os options can be found by running "osinfo-query os"
 if 1 <= args.ostype <= 5:
@@ -405,6 +433,9 @@ if os.path.isfile(isopath) is True:
 else:
     sys.exit("\nError, ensure iso {0} exists.".format(isopath))
 
+# Attach signal handler.
+signal.signal(signal.SIGINT, signal_handler)
+
 # Create temporary folder for packer
 packer_temp_folder = os.path.join(vmpath, "packertemp" + vmname)
 if os.path.isdir(packer_temp_folder):
@@ -519,6 +550,12 @@ elif args.vmtype == 2:
         # nvram
         data['builders'][0]["qemuargs"].append(["--drive", "if=pflash,format=raw,file={0},readonly".format(efi_bin)])
         data['builders'][0]["qemuargs"].append(["--drive", "if=pflash,format=raw,file={0}".format(efi_nvram)])
+        if secureboot is True:
+            tpm_tempdir = tempfile.TemporaryDirectory(prefix="packer-tpm-")
+            tpm_process = subprocess.Popen(["swtpm", "socket", "--tpm2", "--tpmstate", "dir={0}".format(tpm_tempdir.name), "--ctrl", "type=unixio,path={0}/swtpm-sock".format(tpm_tempdir.name), "--daemon"], stdout=subprocess.PIPE)
+            data['builders'][0]["qemuargs"].append(["--chardev", "socket,id=chrtpm,path={0}/swtpm-sock".format(tpm_tempdir.name)])
+            data['builders'][0]["qemuargs"].append(["--tpmdev", "emulator,id=tpm0,chardev=chrtpm"])
+            data['builders'][0]["qemuargs"].append(["--device", "tpm-tis,tpmdev=tpm0"])
     if 50 <= args.ostype <= 59:
         # Grab the virtio drivers
         # https://docs.fedoraproject.org/en-US/quick-docs/creating-windows-virtual-machines-using-virtio-drivers/
@@ -612,6 +649,7 @@ if 50 <= args.ostype <= 59:
     ET.register_namespace('xsi', "http://www.w3.org/2001/XMLSchema-instance")
 if 50 <= args.ostype <= 52:
     shutil.move(os.path.join(tempunattendfolder, "windows10.xml"), os.path.join(tempunattendfolder, "autounattend.xml"))
+    data['builders'][0]["boot_command"] = ["<wait><enter><wait><enter><wait><enter><wait><enter><wait><enter>"]
     # Insert product key
     xml_insertwindowskey(windows_key, os.path.join(tempunattendfolder, "autounattend.xml"))
 if 55 <= args.ostype <= 59:
@@ -705,7 +743,12 @@ if args.vmtype == 2:
     # List of os: osinfo-query os
     CREATESCRIPT_KVM = """virt-install --connect qemu:///system --name={vmname} --disk path={fullpathtoimg}.qcow2,bus={kvm_diskinterface} --graphics spice --vcpu={cpus} --ram={memory} --network bridge=virbr0,model={kvm_netdevice} --filesystem source=/,target=root,mode=mapped --os-type={kvm_os} --os-variant={kvm_variant} --import --noautoconsole --noreboot --video={kvm_video} --channel unix,target_type=virtio,name=org.qemu.guest_agent.0 --channel spicevmc,target_type=virtio,name=com.redhat.spice.0""".format(vmname=vmname, memory=args.memory, cpus=CPUCORES, fullpathtoimg=os.path.join(vmpath, vmname), kvm_os=kvm_os, kvm_variant=kvm_variant, kvm_video=kvm_video, kvm_diskinterface=kvm_diskinterface, kvm_netdevice=kvm_netdevice)
     if useefi is True:
-        CREATESCRIPT_KVM += "--boot loader={0},loader_ro=yes,loader_type=pflash,nvram={1},loader_secure=no".format(efi_bin, efi_nvram)
+        # Add efi loading
+        CREATESCRIPT_KVM += " --boot loader={0},loader_ro=yes,loader_type=pflash,nvram={1},loader_secure=no".format(efi_bin, efi_nvram)
+    if secureboot is True:
+        # Add TPM loading
+        CREATESCRIPT_KVM += " --tpm backend.type=emulator,backend.version=2.0,model=tpm-tis"
+        tpm_process.terminate()
     logging.info("KVM launch command: {0}".format(CREATESCRIPT_KVM))
     if args.noprompt is False:
         subprocess.run(CREATESCRIPT_KVM, shell=True, check=False)
