@@ -28,6 +28,11 @@ SCRIPTDIR = sys.path[0]
 
 
 ### Functions ###
+def cmd_check(cmd: str):
+    """Check if a command exists. Exit if it doesn't exist"""
+    if not shutil.which(cmd):
+        print("ERROR: {0} does not exist. Exiting.")
+        sys.exit()
 def md5sum(md5_filename, blocksize=65536):
     """
     Calculate the MD5Sum of a file
@@ -233,10 +238,7 @@ if not shutil.which("packer") or args.getpacker is True:
     subprocess.run("packer -v", shell=True, check=True)
 
 # Ensure that certain commands exist.
-cmdcheck = ["packer"]
-for cmd in cmdcheck:
-    if not shutil.which(cmd):
-        sys.exit("\nError, ensure command {0} is installed.".format(cmd))
+cmd_check("packer")
 
 # Determine VM hypervisor
 if args.vmtype == 1:
@@ -353,11 +355,11 @@ if 50 <= args.ostype <= 59:
     isourl = None
     # Windows KMS key list: https://docs.microsoft.com/en-us/windows-server/get-started/kmsclientkeys
     windows_key = None
+    useefi = True
+    secureboot = True
 if args.ostype == 50:
     vmname = "Packer-Windows11-{0}".format(hvname)
     windows_key = "NRG8B-VKK3Q-CXVCJ-9G2XF-6Q84J"
-    useefi = True
-    secureboot = True
 if args.ostype == 51:
     vmname = "Packer-Windows10LTS-{0}".format(hvname)
     windows_key = "M7XTQ-FN8P6-TTKYV-9D4CC-J462D"
@@ -395,6 +397,9 @@ if CFunc.is_windows():
         powershell_cmd = "pwsh"
     elif shutil.which("powershell"):
         powershell_cmd = "powershell"
+# Detect swtpms for linux if using qemu
+if args.vmtype == 2 and secureboot is True:
+    cmd_check("swtpm")
 
 if args.noprompt is False:
     input("Press Enter to continue.")
@@ -628,7 +633,8 @@ if 50 <= args.ostype <= 59:
     data['provisioners'][1]["type"] = "powershell"
     # Provision with generic windows script
     data['provisioners'][1]["scripts"] = [os.path.join(tempscriptfolderpath, "Win-provision.ps1")]
-    data['builders'][0]["boot_command"] = ["<wait5>"]
+    # Press enter at the cdrom prompt.
+    data['builders'][0]["boot_command"] = ["<wait><enter><wait><enter><wait><enter><wait><enter><wait><enter>"]
     data['builders'][0]["shutdown_command"] = "shutdown /s /t 60"
     data['builders'][0]["shutdown_timeout"] = "15m"
     data['builders'][0]["communicator"] = "winrm"
@@ -648,12 +654,11 @@ if 50 <= args.ostype <= 59:
     ET.register_namespace('wcm', "http://schemas.microsoft.com/WMIConfig/2002/State")
     ET.register_namespace('xsi', "http://www.w3.org/2001/XMLSchema-instance")
 if 50 <= args.ostype <= 52:
-    shutil.move(os.path.join(tempunattendfolder, "windows10.xml"), os.path.join(tempunattendfolder, "autounattend.xml"))
-    data['builders'][0]["boot_command"] = ["<wait><enter><wait><enter><wait><enter><wait><enter><wait><enter>"]
+    shutil.move(os.path.join(tempunattendfolder, "windows.xml"), os.path.join(tempunattendfolder, "autounattend.xml"))
     # Insert product key
     xml_insertwindowskey(windows_key, os.path.join(tempunattendfolder, "autounattend.xml"))
 if 55 <= args.ostype <= 59:
-    shutil.move(os.path.join(tempunattendfolder, "windows10.xml"), os.path.join(tempunattendfolder, "autounattend.xml"))
+    shutil.move(os.path.join(tempunattendfolder, "windows.xml"), os.path.join(tempunattendfolder, "autounattend.xml"))
     # Insert Windows Server product key
     xml_insertwindowskey(windows_key, os.path.join(tempunattendfolder, "autounattend.xml"))
     # Load the xml file
