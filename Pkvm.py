@@ -235,7 +235,7 @@ if 10 <= args.ostype <= 19:
 # Ubuntu latest
 if 10 <= args.ostype <= 14:
     kvm_variant = "ubuntu20.04"
-    isourl = "https://releases.ubuntu.com/21.04/ubuntu-21.04-live-server-amd64.iso"
+    isourl = "https://releases.ubuntu.com/21.10/ubuntu-21.10-live-server-amd64.iso"
 # Ubuntu LTS
 if 15 <= args.ostype <= 19:
     kvm_variant = "ubuntu20.04"
