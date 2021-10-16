@@ -18,7 +18,7 @@ SCRIPTDIR = sys.path[0]
 
 # Global variables
 distro_options = ["arch", "ubuntu", "fedora"]
-ubuntu_version = "hirsute"
+ubuntu_version = "impish"
 fedora_version = "34"
 
 
@@ -84,14 +84,14 @@ parser.add_argument("-n", "--noprompt", help='Do not prompt.', action="store_tru
 parser.add_argument("-b", "--bootable", help='Provision for booting.', action="store_true")
 parser.add_argument("-c", "--clean", help='Remove chroot folder and remake chroot.', action="store_true")
 parser.add_argument("-d", "--distro", help='Distribution of Linux (default: %(default)s)', default=distro_default, choices=distro_options)
-parser.add_argument("-p", "--path", help='Path to store chroot. This is the root of the chroot. (default: %(default)s)', default=path_default)
+parser.add_argument("-p", "--hostname", help='Hostname of chroot. This is also the folder name of the chroot. (default: %(default)s)', default=distro_default)
 
 # Save arguments.
 args = parser.parse_args()
 print("Distro:", args.distro)
-pathvar = os.path.abspath(args.path)
+pathvar = os.path.join(basepath_default, args.hostname)
 print("Path of chroot:", pathvar)
-chroot_hostname = os.path.basename(pathvar)
+chroot_hostname = args.hostname
 print("Hostname of chroot: {0}".format(chroot_hostname))
 
 # Exit if not root.
@@ -162,16 +162,6 @@ os.chmod(chroot_run_script, 0o777)
 print("Wrote run script to: {0}".format(chroot_run_script))
 
 if args.bootable:
-    # Create helper scripts
-    boot_cmd = "sudo systemd-nspawn -D {path} --user=root --bind={homefld}:/tophomefld/ --network-bridge=virbr0 -b".format(path=pathvar, homefld=USERHOME)
-    boot_script = os.path.join(pathvar, "boot.sh")
-    print("\nBoot with following command: ")
-    print(boot_cmd)
-    with open(boot_script, 'w') as f:
-        f.write("#!/bin/bash\n" + boot_cmd)
-    os.chmod(boot_script, 0o777)
-    print("Wrote boot script to: {0}".format(boot_script))
-
     # Create nspawn file
     with open(nspawn_file, 'w') as f:
         f.write("""
@@ -184,8 +174,8 @@ Bind={0}:/tophomefld/
 
 [Network]
 Bridge=virbr0
-# Expose ports to host
-# Port=
+# Expose ports to host.
+# Port=tcp:2222:22
 """.format(USERHOME))
     print("Wrote nspawn file to: {0}".format(nspawn_file))
     print("Run systemd service with: sudo systemctl start systemd-nspawn@{0}.service".format(chroot_hostname))

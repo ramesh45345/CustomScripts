@@ -175,7 +175,7 @@ unmanaged-devices=none""")
         CFunc.pacman_install("mate-panel mate-session-manager mate-control-center marco xdg-utils dconf-editor epiphany pluma caja caja-open-terminal tilix mate-terminal mate-themes mate-polkit xdg-user-dirs ttf-roboto noto-fonts ttf-liberation tigervnc")
         MArch.yay_install(USERNAMEVAR, "xrdp xorgxrdp brisk-menu numix-circle-icon-theme-git")
     if args.distro == "ubuntu":
-        held_pkgs = "gnome-shell gdm3 gnome-session gnome-session-bin ubuntu-session gnome-desktop3-data gnome-control-center cheese"
+        held_pkgs = "gnome-shell gdm3 gnome-session gnome-session-bin ubuntu-session gnome-control-center cheese"
         CFunc.aptmark(held_pkgs)
         CFunc.aptinstall("mate-desktop-environment marco mate-polkit mate-menus mate-terminal mate-applet-appmenu mate-applet-brisk-menu mate-tweak xdg-utils dconf-editor epiphany pluma caja caja-open-terminal tilix mate-terminal mate-themes fonts-roboto fonts-noto-extra fonts-noto-ui-extra fonts-liberation2 numix-icon-theme numix-icon-theme-circle gnome-icon-theme network-manager-gnome tigervnc-viewer tigervnc-standalone-server tigervnc-xorg-extension xrdp xorgxrdp")
         MUbuntu.vscode_deb()
