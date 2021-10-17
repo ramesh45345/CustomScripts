@@ -651,8 +651,7 @@ if 50 <= args.ostype <= 59:
     data['builders'][0]["ssh_username"] = "{0}".format(args.vmuser)
     data['builders'][0]["floppy_files"] = [os.path.join(tempscriptbasename, "unattend", "autounattend.xml"),
                                            os.path.join(tempscriptbasename, "unattend", "win_initial.bat"),
-                                           os.path.join(tempscriptbasename, "unattend", "win_enablerm.ps1"),
-                                           os.path.join(tempscriptbasename, "unattend", "win_cygssh.bat")]
+                                           os.path.join(tempscriptbasename, "unattend", "win_enablerm.ps1")]
     # Register the namespace to avoid nsX in namespace.
     ET.register_namespace('', "urn:schemas-microsoft-com:unattend")
     ET.register_namespace('wcm', "http://schemas.microsoft.com/WMIConfig/2002/State")
@@ -754,14 +753,16 @@ if args.vmtype == 2:
         kvm_video = "virtio"
     # virt-install manual: https://www.mankier.com/1/virt-install
     # List of os: osinfo-query os
-    CREATESCRIPT_KVM = """virt-install --connect qemu:///system --name={vmname} --disk path={fullpathtoimg}.qcow2,bus={kvm_diskinterface} --graphics spice --vcpu={cpus} --ram={memory} --network bridge=virbr0,model={kvm_netdevice} --filesystem source=/,target=root,mode=mapped --os-type={kvm_os} --os-variant={kvm_variant} --import --noautoconsole --noreboot --video={kvm_video} --channel unix,target_type=virtio,name=org.qemu.guest_agent.0 --channel spicevmc,target_type=virtio,name=com.redhat.spice.0""".format(vmname=vmname, memory=args.memory, cpus=CPUCORES, fullpathtoimg=os.path.join(vmpath, vmname), kvm_os=kvm_os, kvm_variant=kvm_variant, kvm_video=kvm_video, kvm_diskinterface=kvm_diskinterface, kvm_netdevice=kvm_netdevice)
+    CREATESCRIPT_KVM = """virt-install --connect qemu:///system --name={vmname} --disk path={fullpathtoimg}.qcow2,bus={kvm_diskinterface} --disk device=cdrom,bus=sata,target=sda,readonly=on --graphics spice --vcpu={cpus} --ram={memory} --network bridge=virbr0,model={kvm_netdevice} --filesystem source=/,target=root,mode=mapped --os-type={kvm_os} --os-variant={kvm_variant} --import --noautoconsole --noreboot --video={kvm_video} --channel unix,target_type=virtio,name=org.qemu.guest_agent.0 --channel spicevmc,target_type=virtio,name=com.redhat.spice.0""".format(vmname=vmname, memory=args.memory, cpus=CPUCORES, fullpathtoimg=os.path.join(vmpath, vmname), kvm_os=kvm_os, kvm_variant=kvm_variant, kvm_video=kvm_video, kvm_diskinterface=kvm_diskinterface, kvm_netdevice=kvm_netdevice)
     if useefi is True:
         # Add efi loading
-        CREATESCRIPT_KVM += " --boot loader={0},loader_ro=yes,loader_type=pflash,nvram={1},loader_secure=yes --features smm.state=on".format(efi_bin, efi_nvram)
-    if secureboot is True:
-        # Add TPM loading
-        CREATESCRIPT_KVM += " --tpm backend.type=emulator,backend.version=2.0,model=tpm-tis"
-        tpm_process.terminate()
+        CREATESCRIPT_KVM += " --boot loader={0},loader_ro=yes,loader_type=pflash,nvram={1}".format(efi_bin, efi_nvram)
+        if secureboot is True:
+            # Add options to efi line. Note that this line (",loader_secure=yes") MUST follow the previous efi line.
+            CREATESCRIPT_KVM += ",loader_secure=yes --features smm.state=on"
+            # Add TPM loading
+            CREATESCRIPT_KVM += " --tpm backend.type=emulator,backend.version=2.0,model=tpm-tis"
+            tpm_process.terminate()
     logging.info("KVM launch command: {0}".format(CREATESCRIPT_KVM))
     if args.noprompt is False:
         subprocess.run(CREATESCRIPT_KVM, shell=True, check=False)

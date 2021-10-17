@@ -190,17 +190,16 @@ function Fcn-Software {
 
     # QEMU
     if ($VMtype -eq 2) {
-      Write-Output "Installing SPICE/QEMU tools"
-      $kvmguestfolder = "$temppath\kvm-guest-drivers-windows"
-      Start-Process -Wait "$gitcmdpath\git.exe" -ArgumentList "clone","https://github.com/virtio-win/kvm-guest-drivers-windows","$kvmguestfolder"
-      Start-Process -Wait "$kvmguestfolder\Tools\InstallCertificate.bat" -WorkingDirectory "$kvmguestfolder\Tools\"
-      $desktop_folder = "$env:PUBLIC\Desktop\"
-      Invoke-WebRequest -Uri https://www.spice-space.org/download/windows/spice-guest-tools/spice-guest-tools-latest.exe -OutFile "$desktop_folder\spice-guest-tools-latest.exe"
-      Start-Process -Wait "$desktop_folder\spice-guest-tools-latest.exe" -ArgumentList "/S"
-      Remove-Item -Recurse -Force $kvmguestfolder
-
+      $desktop_folder = "$env:PUBLIC\Desktop"
       # Add script to add network share
       Set-Content -Path "$desktop_folder\share.bat" -Value "@echo off`nnet use * `"\\192.168.122.1\rootfs`" /PERSISTENT:YES /SAVECRED"
+
+      # Copy virtio drivers from CD. Assume drive containing virtio is E:
+      if (Test-Path "E:\virtio-win-guest-tools.exe") {
+        Copy-Item 'E:\*' -Destination "$desktop_folder\virtdrivers\" -Recurse
+        # Create script to install drivers post-install.
+        Set-Content -Path "$desktop_folder\virtdrivers.ps1" -Value "Start-Process -Wait -FilePath `"$desktop_folder\virtdrivers\virtio-win-guest-tools.exe`" -ArgumentList `"/install /norestart /passive`"`nGet-ChildItem `"$desktop_folder\virtdrivers`" -Recurse -Filter `"*.inf`" | ForEach-Object { PNPUtil.exe /add-driver `$_.FullName /install }`nRemove-Item -Recurse -Force $desktop_folder\virtdrivers`nRemove-Item -Force `$MyInvocation.MyCommand.Path"
+      }
     }
 
     # Enable remote desktop
