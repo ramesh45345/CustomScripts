@@ -215,8 +215,8 @@ function Fcn-Software {
   # Install desktop apps.
   Write-Output "Installing Desktop Apps"
   # GUI Apps
-  choco upgrade -y firefox notepadplusplus tortoisegit bleachbit putty chocolateygui conemu microsoft-windows-terminal vscode sumatrapdf WizTree
-  choco upgrade -y open-shell ShutUp10
+  choco upgrade -y firefox notepadplusplus tortoisegit bleachbit putty chocolateygui conemu cascadiafonts microsoft-windows-terminal vscode sumatrapdf WizTree
+  choco upgrade -y ShutUp10
   # Set default browser.
   choco upgrade -y setdefaultbrowser
   SetDefaultBrowser.exe HKLM Firefox-308046B0AF4A39CB
@@ -400,8 +400,7 @@ function Fcn-UTC {
 # Remove Windows Defender
 function Fcn-DisableDefender {
   if (Get-Command "Uninstall-WindowsFeature" -errorAction SilentlyContinue) {
-    # Windows Server
-    Uninstall-WindowsFeature Windows-Defender-GUI
+    # Disable Defender on Windows Server
     Uninstall-WindowsFeature Windows-Defender
   }
 
@@ -423,7 +422,7 @@ function Fcn-DisableDefender {
 function Fcn-EnableDefender {
   if (Get-Command "Install-WindowsFeature" -errorAction SilentlyContinue) {
     # Windows Server
-    Install-WindowsFeature -Name Windows-Defender-GUI
+    Install-WindowsFeature -Name Windows-Defender
   }
 
   # Windows 10
