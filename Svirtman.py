@@ -76,7 +76,7 @@ if args.uninstall is False:
         print("Installing libvirt")
         if shutil.which("dnf"):
             CFunc.dnfinstall("@virtualization")
-            CFunc.dnfinstall("python3-libguestfs")
+            CFunc.dnfinstall("python3-libguestfs swtpm swtpm-tools")
             CFunc.sysctl_enable("libvirtd", now=True, error_on_fail=True)
             subprocess.run("usermod -aG libvirt {0}".format(USERNAMEVAR), shell=True, check=True)
         elif shutil.which("apt-get"):

@@ -136,11 +136,10 @@ def ovmf_bin_nvramcopy(destpath: str, vmname: str, secureboot: bool = False):
     ovmf_bin_fullpath = ""
     ovmf_nvram_fullpath = ""
     # Search paths for efi files.
-    # TODO: Implement any long term fix proposed in https://github.com/wimpysworld/quickemu/issues/102
     ovmf_bin_options = [os.path.join(destpath, "OVMF_CODE.fd"), "/usr/share/OVMF/OVMF_CODE.fd"]
     ovmf_vars_options = [os.path.join(destpath, "OVMF_VARS.fd"), "/usr/share/OVMF/OVMF_VARS.fd"]
-    ovmf_bin_secboot_options = [os.path.join(destpath, "OVMF_CODE_4M.fd"), "/usr/share/OVMF/OVMF_CODE.secboot.fd"] + ovmf_bin_options
-    ovmf_vars_secboot_options = [os.path.join(destpath, "OVMF_VARS_4M.fd"), "/usr/share/OVMF/OVMF_VARS.secboot.fd"] + ovmf_vars_options
+    ovmf_bin_secboot_options = ["/usr/share/OVMF/OVMF_CODE.secboot.fd"] + ovmf_bin_options
+    ovmf_vars_secboot_options = ["/usr/share/OVMF/OVMF_VARS.secboot.fd"] + ovmf_vars_options
     # Search for efi bin
     if secureboot is True:
         ovmf_bin_fullpath = file_ifexists(ovmf_bin_secboot_options)
@@ -551,7 +550,7 @@ elif args.vmtype == 2:
     data['builders'][0]["qemuargs"].append(["--cpu", "host"])
     data['builders'][0]["qemuargs"].append(["--smp", "cores={0}".format(CPUCORES)])
     if useefi is True:
-        efi_bin, efi_nvram = ovmf_bin_nvramcopy(vmpath, vmname, secureboot=secureboot)
+        efi_bin, efi_nvram = ovmf_bin_nvramcopy(packer_temp_folder, vmname, secureboot=secureboot)
         # nvram
         data['builders'][0]["qemuargs"].append(["--drive", "if=pflash,format=raw,file={0},readonly".format(efi_bin)])
         data['builders'][0]["qemuargs"].append(["--drive", "if=pflash,format=raw,file={0}".format(efi_nvram)])
@@ -561,6 +560,11 @@ elif args.vmtype == 2:
             data['builders'][0]["qemuargs"].append(["--chardev", "socket,id=chrtpm,path={0}/swtpm-sock".format(tpm_tempdir.name)])
             data['builders'][0]["qemuargs"].append(["--tpmdev", "emulator,id=tpm0,chardev=chrtpm"])
             data['builders'][0]["qemuargs"].append(["--device", "tpm-tis,tpmdev=tpm0"])
+            # According to https://github.com/tianocore/edk2/blob/master/OvmfPkg/README , smm must be enabled for secureboot, which can only be done by q35 machine type. However, if you run the secureboot VM without disabling s3 suspend, the machine will not boot (black screen).
+            # Override the machine type to be q35, and enable smm.
+            data['builders'][0]["machine_type"] = "q35,smm=on"
+            # Force s3 to be disabled.
+            data['builders'][0]["qemuargs"].append(["--global", "ICH9-LPC.disable_s3=1"])
     if 50 <= args.ostype <= 59:
         # Grab the virtio drivers
         # https://docs.fedoraproject.org/en-US/quick-docs/creating-windows-virtual-machines-using-virtio-drivers/
@@ -727,6 +731,10 @@ if os.path.isdir(output_folder):
     # Copy the qcow2 file, and remove the folder entirely for kvm.
     if args.vmtype == 2 and os.path.isfile(os.path.join(output_folder, vmname + ".qcow2")):
         shutil.copy2(os.path.join(output_folder, vmname + ".qcow2"), os.path.join(vmpath, vmname + ".qcow2"))
+        if useefi:
+            shutil.copy2(efi_nvram, vmpath)
+            # Set nvram path to copied path.
+            efi_nvram = os.path.join(vmpath, os.path.basename(efi_nvram))
 if args.debug:
     logging.info("Not removing {0}, debug flag is set. Please remove this folder manually.".format(packer_temp_folder))
 else:
@@ -749,7 +757,7 @@ if args.vmtype == 2:
     CREATESCRIPT_KVM = """virt-install --connect qemu:///system --name={vmname} --disk path={fullpathtoimg}.qcow2,bus={kvm_diskinterface} --graphics spice --vcpu={cpus} --ram={memory} --network bridge=virbr0,model={kvm_netdevice} --filesystem source=/,target=root,mode=mapped --os-type={kvm_os} --os-variant={kvm_variant} --import --noautoconsole --noreboot --video={kvm_video} --channel unix,target_type=virtio,name=org.qemu.guest_agent.0 --channel spicevmc,target_type=virtio,name=com.redhat.spice.0""".format(vmname=vmname, memory=args.memory, cpus=CPUCORES, fullpathtoimg=os.path.join(vmpath, vmname), kvm_os=kvm_os, kvm_variant=kvm_variant, kvm_video=kvm_video, kvm_diskinterface=kvm_diskinterface, kvm_netdevice=kvm_netdevice)
     if useefi is True:
         # Add efi loading
-        CREATESCRIPT_KVM += " --boot loader={0},loader_ro=yes,loader_type=pflash,nvram={1},loader_secure=no".format(efi_bin, efi_nvram)
+        CREATESCRIPT_KVM += " --boot loader={0},loader_ro=yes,loader_type=pflash,nvram={1},loader_secure=yes --features smm.state=on".format(efi_bin, efi_nvram)
     if secureboot is True:
         # Add TPM loading
         CREATESCRIPT_KVM += " --tpm backend.type=emulator,backend.version=2.0,model=tpm-tis"
