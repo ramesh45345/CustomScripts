@@ -196,7 +196,7 @@ function Fcn-Software {
 
       # Copy virtio drivers from CD. Assume drive containing virtio is E:
       if (Test-Path "E:\virtio-win-guest-tools.exe") {
-        Copy-Item 'E:\*' -Destination "$desktop_folder\virtdrivers\" -Recurse
+        Copy-Item 'E:\' -Destination "$desktop_folder\virtdrivers\" -Recurse -Force
         # Create script to install drivers post-install.
         Set-Content -Path "$desktop_folder\virtdrivers.ps1" -Value "Start-Process -Wait -FilePath `"$desktop_folder\virtdrivers\virtio-win-guest-tools.exe`" -ArgumentList `"/install /norestart /passive`"`nGet-ChildItem `"$desktop_folder\virtdrivers`" -Recurse -Filter `"*.inf`" | ForEach-Object { PNPUtil.exe /add-driver `$_.FullName /install }`nRemove-Item -Recurse -Force $desktop_folder\virtdrivers`nRemove-Item -Force `$MyInvocation.MyCommand.Path"
       }
@@ -364,6 +364,10 @@ function Fcn-Customize {
 
   # Disable Ctrl-Alt-Delete on Windows Server
   New-ItemProperty -Path Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System -Name DisableCAD -Value 1 -Force -ErrorAction SilentlyContinue | Out-Null
+  # Disable shutdown prompt on Windows Server
+  New-Item -Path 'registry::HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT' -Name Reliability -Force -ErrorAction SilentlyContinue | Out-Null
+  New-ItemProperty -Path "Registry::HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Reliability" -Name ShutDownReasonOn -Value 0 -Force -ErrorAction SilentlyContinue | Out-Null
+
 
   # Remove pinned apps, like Edge and Store
   # https://stackoverflow.com/questions/45152335/unpin-the-microsoft-edge-and-store-taskbar-shortcuts-programmatically
