@@ -185,7 +185,7 @@ if __name__ == '__main__':
 
     # Get arguments
     parser = argparse.ArgumentParser(description='Create and run a Virtual Machine.')
-    parser.add_argument("-a", "--ostype", type=int, help="OS type (20=Manjaro, 10=Ubuntu)", default="1")
+    parser.add_argument("-a", "--ostype", type=int, help="OS type (1=Arch)", default="1")
     parser.add_argument("-d", "--debug", help='Use Debug Logging', action="store_true")
     parser.add_argument("-e", "--desktopenv", help="Desktop Environment (defaults to mate)", default="mate")
     parser.add_argument("-f", "--fullname", help="Full Name", default="User Name")
