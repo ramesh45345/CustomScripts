@@ -221,6 +221,9 @@ function Fcn-Software {
   choco upgrade -y setdefaultbrowser
   SetDefaultBrowser.exe HKLM Firefox-308046B0AF4A39CB
 
+  # Install scoop
+  Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
+
   # Tablacus
   Fcn-Tablacus
 
