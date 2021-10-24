@@ -638,7 +638,8 @@ if 50 <= args.ostype <= 59:
     # Provision with generic windows script
     data['provisioners'][1]["scripts"] = [os.path.join(tempscriptfolderpath, "Win-provision.ps1")]
     # Press enter at the cdrom prompt.
-    data['builders'][0]["boot_command"] = ["<wait><enter><wait><enter><wait><enter><wait><enter><wait><enter>"]
+    data['builders'][0]["boot_command"] = ["<enter><wait><enter><wait><enter><wait><enter><wait><enter>"]
+    data['builders'][0]["boot_wait"] = "1s"
     data['builders'][0]["shutdown_command"] = "shutdown /s /t 60"
     data['builders'][0]["shutdown_timeout"] = "15m"
     data['builders'][0]["communicator"] = "winrm"
