@@ -136,9 +136,9 @@ def ovmf_bin_nvramcopy(destpath: str, vmname: str, secureboot: bool = False):
     ovmf_bin_fullpath = ""
     ovmf_nvram_fullpath = ""
     # Search paths for efi files.
-    ovmf_bin_options = [os.path.join(destpath, "OVMF_CODE.fd"), "/usr/share/OVMF/OVMF_CODE.fd"]
-    ovmf_vars_options = [os.path.join(destpath, "OVMF_VARS.fd"), "/usr/share/OVMF/OVMF_VARS.fd"]
-    ovmf_bin_secboot_options = ["/usr/share/OVMF/OVMF_CODE.secboot.fd"] + ovmf_bin_options
+    ovmf_bin_options = [os.path.join(destpath, "OVMF_CODE.fd"), "/usr/share/OVMF/OVMF_CODE.fd", "/usr/share/ovmf/x64/OVMF_CODE.fd"]
+    ovmf_vars_options = [os.path.join(destpath, "OVMF_VARS.fd"), "/usr/share/OVMF/OVMF_VARS.fd", "/usr/share/ovmf/x64/OVMF_VARS.fd"]
+    ovmf_bin_secboot_options = ["/usr/share/OVMF/OVMF_CODE.secboot.fd", "/usr/share/ovmf/x64/OVMF_CODE.secboot.fd"] + ovmf_bin_options
     ovmf_vars_secboot_options = ["/usr/share/OVMF/OVMF_VARS.secboot.fd"] + ovmf_vars_options
     # Search for efi bin
     if secureboot is True:
