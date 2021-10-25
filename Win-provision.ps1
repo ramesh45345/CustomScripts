@@ -195,7 +195,7 @@ function Fcn-Software {
       Set-Content -Path "$desktop_folder\share.bat" -Value "@echo off`nnet use * `"\\192.168.122.1\rootfs`" /PERSISTENT:YES /SAVECRED"
 
       # Copy virtio drivers from CD. Assume drive containing virtio is E:
-      if (Test-Path "E:\virtio-win-guest-tools.exe") {
+      if ((Test-Path "E:\virtio-win-guest-tools.exe") -and -not (Test-Path "$desktop_folder\virtdrivers\")) {
         Copy-Item 'E:\' -Destination "$desktop_folder\virtdrivers\" -Recurse -Force
         # Create script to install drivers post-install.
         Set-Content -Path "$desktop_folder\virtdrivers.ps1" -Value "Start-Process -Wait -FilePath `"$desktop_folder\virtdrivers\virtio-win-guest-tools.exe`" -ArgumentList `"/install /norestart /passive`"`nGet-ChildItem `"$desktop_folder\virtdrivers`" -Recurse -Filter `"*.inf`" | ForEach-Object { PNPUtil.exe /add-driver `$_.FullName /install }`nRemove-Item -Recurse -Force $desktop_folder\virtdrivers`nRemove-Item -Force `$MyInvocation.MyCommand.Path"
@@ -222,7 +222,9 @@ function Fcn-Software {
   SetDefaultBrowser.exe HKLM Firefox-308046B0AF4A39CB
 
   # Install scoop
-  Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
+  if ( -not (Get-Command "scoop")){
+    Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh') -ErrorAction SilentlyContinue
+  }
 
   # Tablacus
   Fcn-Tablacus
@@ -239,7 +241,7 @@ function Fcn-Software {
   choco feature enable -n allowGlobalConfirmation
 
   # Remove IE11
-  Disable-WindowsOptionalFeature -FeatureName Internet-Explorer-Optional-amd64 -Online -NoRestart
+  Disable-WindowsOptionalFeature -FeatureName Internet-Explorer-Optional-amd64 -Online -NoRestart -Force -ErrorAction SilentlyContinue | Out-Null
 }
 
 # Tablacus Function
