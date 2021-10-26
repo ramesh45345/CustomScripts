@@ -552,7 +552,7 @@ elif args.vmtype == 2:
     if useefi is True:
         efi_bin, efi_nvram = ovmf_bin_nvramcopy(packer_temp_folder, vmname, secureboot=secureboot)
         # nvram
-        data['builders'][0]["qemuargs"].append(["--drive", "if=pflash,format=raw,file={0},readonly".format(efi_bin)])
+        data['builders'][0]["qemuargs"].append(["--drive", "if=pflash,format=raw,file={0},readonly=on".format(efi_bin)])
         data['builders'][0]["qemuargs"].append(["--drive", "if=pflash,format=raw,file={0}".format(efi_nvram)])
         if secureboot is True:
             tpm_tempdir = tempfile.TemporaryDirectory(prefix="packer-tpm-")
