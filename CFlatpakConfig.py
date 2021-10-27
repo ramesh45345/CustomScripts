@@ -34,7 +34,6 @@ CFunc.flatpak_addremote("flathub", "https://flathub.org/repo/flathub.flatpakrepo
 
 if args.configure_remotes is False:
     # Flatpak apps
-    CFunc.flatpak_install("flathub", "org.keepassxc.KeePassXC")
     CFunc.flatpak_install("flathub", "com.calibre_ebook.calibre")
     CFunc.flatpak_install("flathub", "com.github.tchx84.Flatseal")
     CFunc.flatpak_install("flathub", "net.cozic.joplin_desktop")
