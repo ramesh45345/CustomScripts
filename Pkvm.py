@@ -262,7 +262,7 @@ if 1 <= args.ostype <= 5:
     vmwareid = "fedora-64"
     kvm_os = "linux"
     kvm_variant = "fedora-rawhide"
-    isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/34/Server/x86_64/iso/Fedora-Server-dvd-x86_64-34-1.2.iso"
+    isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/35/Server/x86_64/iso/Fedora-Server-dvd-x86_64-35-1.2.iso"
 if args.ostype == 1:
     vmname = "Packer-Fedora-{0}".format(hvname)
     vmprovision_defopts = "-d {0}".format(args.desktopenv)
@@ -278,13 +278,22 @@ if args.ostype == 5:
         args.imgsize = 120
     # Use cli settings for ISOVM.
     vmprovision_defopts = "-x"
+if args.ostype == 8:
+    vmprovisionscript = "MFedoraSilverblue.py"
+    vboxosid = "Fedora_64"
+    vmwareid = "fedora-64"
+    kvm_os = "linux"
+    kvm_variant = "silverblue-rawhide"
+    isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/35/Kinoite/x86_64/iso/Fedora-Kinoite-ostree-x86_64-35-1.2.iso"
+    vmname = "Packer-FedoraKinoite-{0}".format(hvname)
+    vmprovision_defopts = ""
 if args.ostype == 9:
     vmprovisionscript = "MFedoraSilverblue.py"
     vboxosid = "Fedora_64"
     vmwareid = "fedora-64"
     kvm_os = "linux"
     kvm_variant = "silverblue-rawhide"
-    isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/34/Silverblue/x86_64/iso/Fedora-Silverblue-ostree-x86_64-34-1.2.iso"
+    isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/35/Silverblue/x86_64/iso/Fedora-Silverblue-ostree-x86_64-35-1.2.iso"
     vmname = "Packer-FedoraSilverblue-{0}".format(hvname)
     vmprovision_defopts = ""
 if 10 <= args.ostype <= 19:
@@ -590,7 +599,9 @@ if 1 <= args.ostype <= 5:
     data['provisioners'][0]["inline"] = "dnf install -y git; {2}; /opt/CustomScripts/{0} {1}".format(vmprovisionscript, vmprovision_opts, git_cmdline())
 if args.ostype == 5:
     data['provisioners'][0]["inline"] = "dnf install -y git; {2}; /opt/CustomScripts/{0} {1}; /opt/CustomScripts/Aiso_CreateVM.py".format(vmprovisionscript, vmprovision_opts, git_cmdline())
-if args.ostype == 9:
+if args.ostype == 8:
+    CFunc.find_replace(tempunattendfolder, "silverblue", "kinoite", "silverblue.cfg")
+if 8 <= args.ostype <= 9:
     data['builders'][0]["boot_command"] = ["<tab> inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/silverblue.cfg<enter><wait>"]
     data['provisioners'][0]["type"] = "shell"
     data['provisioners'][0]["inline"] = "{1}; /opt/CustomScripts/{0} -s 1; systemctl reboot".format(vmprovisionscript, git_cmdline())
