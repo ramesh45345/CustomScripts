@@ -120,6 +120,7 @@ open-vm-tools-desktop
 # Graphical Utils
 gnome-disk-utility
 gparted
+xset
 
 # For clonezilla
 dialog
