@@ -41,6 +41,9 @@ if args.configure_remotes is False:
     CFunc.flatpak_install("flathub", "org.videolan.VLC")
     CFunc.flatpak_install("flathub", "org.atheme.audacious")
     CFunc.flatpak_install("flathub", "io.github.quodlibet.QuodLibet")
+    # Browser
+    CFunc.flatpak_install("flathub", "com.github.Eloston.UngoogledChromium")
 
     # Configure permissions for apps
     CFunc.flatpak_override("org.atheme.audacious", "--filesystem=host")
+    CFunc.flatpak_override("com.github.Eloston.UngoogledChromium", "--filesystem=/mnt --filesystem=/media")
