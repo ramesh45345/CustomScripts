@@ -155,6 +155,9 @@ if args.stage == 1:
         if os.path.isfile(gnome_startup_file):
             os.remove(gnome_startup_file)
         subprocess.run("rpm-ostree override remove gnome-software gnome-software-rpm-ostree", shell=True, check=False)
+    elif fedora_version.endswith("kinoite"):
+        # Gnome Disk Utility
+        rostreeinstall("gnome-disk-utility")
 
     print("Stage 1 Complete! Please reboot and run Stage 2.")
 if args.stage == 2:
