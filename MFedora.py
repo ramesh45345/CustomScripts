@@ -89,7 +89,7 @@ if __name__ == '__main__':
         # Toolbox
         CFunc.dnfinstall("toolbox")
         # Base Packages
-        CFunc.dnfinstall("@fonts @base-x @networkmanager-submodules xrandr")
+        CFunc.dnfinstall("@fonts @base-x @networkmanager-submodules xrandr xset")
         # Browsers
         # Official Google Chrome
         # CFunc.dnfinstall("https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm")
