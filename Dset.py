@@ -354,7 +354,7 @@ if shutil.which("kwriteconfig5") and shutil.which("plasma_session"):
     kwriteconfig("kwinrc", "Windows", "ElectricBorderCornerRatio", "0.1")
     # Lock Screen and Power Management
     subprocess.run('kwriteconfig5 --file powermanagementprofilesrc --group AC --group HandleButtonEvents --key lidAction 64', shell=True, check=False)
-    subprocess.run('kwriteconfig5 --file powermanagementprofilesrc --group AC --group HandleButtonEvents --key powerButtonAction 16', shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file powermanagementprofilesrc --group AC --group HandleButtonEvents --key powerButtonAction 8', shell=True, check=False)
     subprocess.run('kwriteconfig5 --file powermanagementprofilesrc --group AC --group HandleButtonEvents --key powerDownAction 16', shell=True, check=False)
     subprocess.run('kwriteconfig5 --file powermanagementprofilesrc --group AC --group HandleButtonEvents --key triggerLidActionWhenExternalMonitorPresent false', shell=True, check=False)
     subprocess.run('kwriteconfig5 --file powermanagementprofilesrc --group AC --group DimDisplay --key idleTime --delete', shell=True, check=False)
