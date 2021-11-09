@@ -353,6 +353,17 @@ if shutil.which("kwriteconfig5") and shutil.which("plasma_session"):
     kwriteconfig("kwinrc", "Plugins", "slidingpopupsEnabled", "false")
     kwriteconfig("kwinrc", "Windows", "ElectricBorderCornerRatio", "0.1")
     # Lock Screen and Power Management
+    subprocess.run('kwriteconfig5 --file powermanagementprofilesrc --group AC --group HandleButtonEvents --key lidAction 64', shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file powermanagementprofilesrc --group AC --group HandleButtonEvents --key powerButtonAction 16', shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file powermanagementprofilesrc --group AC --group HandleButtonEvents --key powerDownAction 16', shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file powermanagementprofilesrc --group AC --group HandleButtonEvents --key triggerLidActionWhenExternalMonitorPresent false', shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file powermanagementprofilesrc --group AC --group DimDisplay --key idleTime --delete', shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file powermanagementprofilesrc --group Battery --group HandleButtonEvents --key lidAction 1', shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file powermanagementprofilesrc --group Battery --group HandleButtonEvents --key powerButtonAction 1', shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file powermanagementprofilesrc --group Battery --group HandleButtonEvents --key powerDownAction 16', shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file powermanagementprofilesrc --group Battery --group HandleButtonEvents --key triggerLidActionWhenExternalMonitorPresent false', shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file powermanagementprofilesrc --group Battery --group DimDisplay --key idleTime --delete', shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file powermanagementprofilesrc --group AC --group DPMSControl --key idleTime 300', shell=True, check=False)
     if vmstatus or args.disable_powersave:
         subprocess.run('kwriteconfig5 --file powermanagementprofilesrc --group AC --group DPMSControl --key idleTime 300000', shell=True, check=False)
     else:
@@ -383,6 +394,8 @@ if shutil.which("kwriteconfig5") and shutil.which("plasma_session"):
     kwriteconfig(os.path.join(USERHOME, ".local", "share", "konsole", "Profile 1.profile"), "General", "TerminalRows", "30")
     # Clipboard settings
     kwriteconfig("klipperrc", "General", "MaxClipItems", "20")
+    # Fonts
+    kwriteconfig("kcmfonts", "General", "forceFontDPI", "96")
 
     # Notification settings
     subprocess.run('kwriteconfig5 --file plasma_workspace.notifyrc --group "Event/Textcompletion: no match" --key "Execute" ""', shell=True, check=False)
