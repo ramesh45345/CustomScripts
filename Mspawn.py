@@ -19,7 +19,7 @@ SCRIPTDIR = sys.path[0]
 # Global variables
 distro_options = ["arch", "ubuntu", "fedora"]
 ubuntu_version = "impish"
-fedora_version = "34"
+fedora_version = "35"
 
 
 ### Functions ###
