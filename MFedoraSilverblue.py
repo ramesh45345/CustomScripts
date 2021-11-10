@@ -143,6 +143,8 @@ if args.stage == 1:
 
     # Disable mitigations
     subprocess.run("rpm-ostree kargs --append=mitigations=off", shell=True, check=True)
+    # Grub update
+    CFuncExt.GrubUpdate()
 
     # Specific install section
     if fedora_version.endswith("silverblue"):
