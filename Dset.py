@@ -7,6 +7,7 @@ import os
 import pathlib
 import subprocess
 import shutil
+import sys
 import xml.etree.ElementTree as ET
 # Custom includes
 import CFunc
@@ -448,6 +449,11 @@ if shutil.which("kwriteconfig5") and shutil.which("plasma_session"):
     subprocess.run('kwriteconfig5 --file plasma_workspace.notifyrc --group "Event/warning" --key "Execute" ""', shell=True, check=False)
     subprocess.run('kwriteconfig5 --file plasma_workspace.notifyrc --group "Event/warning" --key "Logfile" ""', shell=True, check=False)
     subprocess.run('kwriteconfig5 --file plasma_workspace.notifyrc --group "Event/warning" --key "TTS" ""', shell=True, check=False)
+    # Turn off monitors on lock screen
+    kwriteconfig("ksmserver.notifyrc", "Event/locked", "Action", "Execute")
+    kwriteconfig("ksmserver.notifyrc", "Event/locked", "Execute", os.path.join(sys.path[0], "whloffscreen.sh"))
+    kwriteconfig("ksmserver.notifyrc", "Event/unlocked", "Action", "Execute")
+    kwriteconfig("ksmserver.notifyrc", "Event/unlocked", "Execute", "{0} whloffscreen.sh".format(shutil.which("killall")))
 
     # Fish config for konsole
     if shutil.which("fish"):
@@ -506,7 +512,7 @@ if shutil.which("kwriteconfig5") and shutil.which("plasma_session"):
     plasma_desktop_string = ""
     plasma_desktop_read_list = subprocess.run('kreadconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "5" --group "Configuration" --group "General" --key "launchers"', shell=True, check=False, stdout=subprocess.PIPE).stdout.decode().strip()
     if "tilix.desktop" not in plasma_desktop_read_list:
-        plasma_desktop_search_list = ["firefox.desktop", "UngoogledChromium.desktop", "chrome.desktop", 'thunderbird.desktop', 'kde.dolphin.desktop', "tilix.desktop", 'virt-manager.desktop', 'org.kde.plasma-systemmonitor.desktop']
+        plasma_desktop_search_list = ["firefox.desktop", "UngoogledChromium.desktop", "chrome.desktop", 'thunderbird.desktop', 'kde.dolphin.desktop', "tilix.desktop", "org.kde.konsole.desktop", 'virt-manager.desktop', 'org.kde.plasma-systemmonitor.desktop']
         plasma_desktop_file_list = []
         for d in plasma_desktop_search_list:
             ds = CMimeSet.LocateDesktopFileName(d)
