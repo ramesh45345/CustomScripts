@@ -451,6 +451,7 @@ if shutil.which("kwriteconfig5") and shutil.which("plasma_session"):
     subprocess.run('kwriteconfig5 --file plasma_workspace.notifyrc --group "Event/warning" --key "Execute" ""', shell=True, check=False)
     subprocess.run('kwriteconfig5 --file plasma_workspace.notifyrc --group "Event/warning" --key "Logfile" ""', shell=True, check=False)
     subprocess.run('kwriteconfig5 --file plasma_workspace.notifyrc --group "Event/warning" --key "TTS" ""', shell=True, check=False)
+    kwriteconfig("plasmanotifyrc", "Jobs", "PermanentPopups", "false")
     # Turn off monitors on lock screen
     kwriteconfig("ksmserver.notifyrc", "Event/locked", "Action", "Execute")
     kwriteconfig("ksmserver.notifyrc", "Event/locked", "Execute", os.path.join(sys.path[0], "whloffscreen.sh"))
