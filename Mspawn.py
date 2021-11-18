@@ -152,7 +152,7 @@ print(provision_cmd)
 subprocess.run(provision_cmd, check=True)
 
 # Create helper scripts
-chroot_cmd = "sudo systemd-nspawn -D {path} --settings=0 --user={user} --bind-ro=/tmp/.X11-unix/ --bind={homefld}:/tophomefld/ --setenv=DISPLAY={display} xfce4-terminal".format(path=pathvar, user=CT_USERNAME, display=DISPLAY, homefld=USERHOME)
+chroot_cmd = "sudo systemd-nspawn -D {path} --settings=0 --user={user} --bind-ro=/tmp/.X11-unix/ --bind={homefld}:/tophomefld/ --bind=/:/toprootfld/ --setenv=DISPLAY={display} xfce4-terminal".format(path=pathvar, user=CT_USERNAME, display=DISPLAY, homefld=USERHOME)
 chroot_run_script = os.path.join(pathvar, "run.sh")
 print("\nUse chroot with following command: ")
 print(chroot_cmd)
@@ -171,6 +171,7 @@ PrivateUsers=no
 
 [Files]
 Bind={0}:/tophomefld/
+Bind=/:/toprootfld/
 
 [Network]
 Bridge=virbr0
