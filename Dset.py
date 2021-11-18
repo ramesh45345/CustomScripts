@@ -389,7 +389,7 @@ if shutil.which("kwriteconfig5") and shutil.which("plasma_session"):
     kwriteconfig(os.path.join(USERHOME, ".local", "share", "konsole", "Profile 1.profile"), "General", "Name", "Profile 1")
     kwriteconfig(os.path.join(USERHOME, ".local", "share", "konsole", "Profile 1.profile"), "General", "Parent", "FALLBACK/")
     kwriteconfig(os.path.join(USERHOME, ".local", "share", "konsole", "Profile 1.profile"), "Scrolling", "HistoryMode", "2")
-    kwriteconfig(os.path.join(USERHOME, ".local", "share", "konsole", "Profile 1.profile"), "Appearance", "ColorScheme", "Solarized")
+    kwriteconfig(os.path.join(USERHOME, ".local", "share", "konsole", "Profile 1.profile"), "Appearance", "ColorScheme", "Breeze")
     kwriteconfig(os.path.join(USERHOME, ".local", "share", "konsole", "Profile 1.profile"), "Appearance", "Font", "Liberation Mono,11,-1,5,50,0,0,0,0,0,Regular")
     kwriteconfig(os.path.join(USERHOME, ".local", "share", "konsole", "Profile 1.profile"), "General", "TerminalColumns", "85")
     kwriteconfig(os.path.join(USERHOME, ".local", "share", "konsole", "Profile 1.profile"), "General", "TerminalRows", "30")
