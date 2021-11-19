@@ -19,11 +19,13 @@ SCRIPTDIR = sys.path[0]
 
 # Get arguments
 parser = argparse.ArgumentParser(description='Install CentOS 8 Software.')
-parser.add_argument("-t", "--type", help='Type (i.e. 1=Workstation, 2=Server with GUI, 3=Server)', type=int)
+parser.add_argument("-d", "--desktop", help='Desktop Environment (choices: %(choices)s) (default: %(default)s)', default="kde", choices=["gnome", "kde"])
+parser.add_argument("-x", "--nogui", help='Configure script to disable GUI.', action="store_true")
 
 # Save arguments.
 args = parser.parse_args()
-print("Type:", args.type)
+print("Desktop Environment:", args.desktop)
+print("No GUI:", args.nogui)
 
 # Exit if not root.
 CFunc.is_root(True)
@@ -37,7 +39,9 @@ print("Group Name is:", USERGROUP)
 # Get VM State
 vmstatus = CFunc.getvmstate()
 
-### Fedora Repos ###
+### Repos ###
+# Enable powertools
+subprocess.run(["dnf", "config-manager", "--set-enabled", "powertools"], check=True)
 # EPEL
 CFunc.dnfinstall("https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm")
 # RPMFusion
@@ -46,8 +50,6 @@ CFunc.dnfinstall("https://download1.rpmfusion.org/free/el/rpmfusion-free-release
 CFunc.rpmimport("https://packages.microsoft.com/keys/microsoft.asc")
 with open("/etc/yum.repos.d/vscode.repo", 'w') as vscoderepofile_write:
     vscoderepofile_write.write('[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc"')
-# Balena Etcher
-CFunc.downloadfile("https://balena.io/etcher/static/etcher-rpm.repo", os.path.join(os.sep, "etc", "yum.repos.d"))
 # EL Repo
 # https://elrepo.org
 subprocess.run("rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org ; dnf install -y https://www.elrepo.org/elrepo-release-8.0-2.el8.elrepo.noarch.rpm ; dnf config-manager --enable elrepo-kernel", shell=True)
@@ -57,12 +59,12 @@ CFunc.dnfupdate()
 
 ### Install CentOS Software ###
 # Cli tools
-CFunc.dnfinstall("zsh nano tmux iotop rsync p7zip p7zip-plugins zip unzip xdg-utils xdg-user-dirs util-linux-user redhat-lsb-core openssh-server openssh-clients avahi")
-subprocess.run("systemctl enable sshd", shell=True)
+CFunc.dnfinstall("zsh fish nano tmux iotop rsync p7zip p7zip-plugins zip unzip xdg-utils xdg-user-dirs util-linux-user redhat-lsb-core openssh-server openssh-clients avahi")
+CFunc.sysctl_enable("sshd avahi-daemon")
 CFunc.dnfinstall("google-noto-sans-fonts")
 # Samba
 CFunc.dnfinstall("samba")
-subprocess.run("systemctl enable smb", shell=True)
+CFunc.sysctl_enable("smb")
 # cifs-utils
 CFunc.dnfinstall("cifs-utils")
 # Enable setuid for mount.cifs to enable mounting as a normal user
@@ -77,30 +79,20 @@ CFunc.gitclone("https://github.com/powerline/fonts", powerline_git_path)
 subprocess.run(os.path.join(powerline_git_path, "install.sh"), shell=True)
 CFunc.run_as_user(USERNAMEVAR, os.path.join(powerline_git_path, "install.sh"))
 shutil.rmtree(powerline_git_path)
-# Groups
-if args.type == 1:
-    # Workstation
-    CFunc.dnfinstall("@workstation --skip-broken")
-elif args.type == 2:
-    # Server with GUI
-    CFunc.dnfinstall('@"Server with GUI" --skip-broken')
-elif args.type == 3:
-    # Server
-    CFunc.dnfinstall("@server")
-
+# firewalld
+CFunc.dnfinstall("firewalld")
+CFunc.sysctl_enable("firewalld", now=True, error_on_fail=True)
+CFuncExt.FirewalldConfig()
 
 # GUI Packages
-if args.type == 1 or args.type == 2:
+if not args.nogui:
+    CFunc.dnfinstall("@base-x")
     # Enable graphical target
     subprocess.run("systemctl set-default graphical.target", shell=True)
     # Browsers
     CFunc.dnfinstall("firefox")
     # Editors
     CFunc.dnfinstall("code")
-    # Etcher
-    CFunc.dnfinstall("balena-etcher-electron")
-    # Misc tools
-    CFunc.dnfinstall("dconf-editor chrome-gnome-shell")
     # Flameshot
     CFunc.dnfinstall("flameshot")
     os.makedirs(os.path.join(USERHOME, ".config", "autostart"), exist_ok=True)
@@ -109,6 +101,15 @@ if args.type == 1 or args.type == 2:
         shutil.copy(os.path.join(os.sep, "usr", "share", "applications", "flameshot.desktop"), os.path.join(USERHOME, ".config", "autostart"))
     CFunc.chown_recursive(os.path.join(USERHOME, ".config", ), USERNAMEVAR, USERGROUP)
 
+    # Numix Icon Theme
+    CFuncExt.numix_icons(os.path.join(os.sep, "usr", "local", "share", "icons"))
+
+# Desktop Environments
+if args.desktop == "gnome":
+    # Workstation
+    CFunc.dnfinstall("@workstation --skip-broken")
+    # Misc tools
+    CFunc.dnfinstall("dconf-editor chrome-gnome-shell")
     # Gnome Stuff
     CFunc.dnfinstall("gnome-tweaks")
     # Gnome Shell extensions
@@ -119,13 +120,12 @@ if args.type == 1 or args.type == 2:
     CFunc.run_as_user(USERNAMEVAR, "{0} --yes 858".format(gs_installer[0]))
     # Install dashtodock extension
     CFunc.run_as_user(USERNAMEVAR, "{0} --yes 307".format(gs_installer[0]))
-    # Install Do Not Disturb extension
-    CFunc.run_as_user(USERNAMEVAR, "{0} --yes 1480".format(gs_installer[0]))
     # Topicons plus
     CFunc.run_as_user(USERNAMEVAR, "{0} --yes 1031".format(gs_installer[0]))
-
-    # Numix Icon Theme
-    CFuncExt.numix_icons(os.path.join(os.sep, "usr", "local", "share", "icons"))
+elif args.desktop == "kde":
+    # Plasma
+    CFunc.dnfinstall('--skip-broken install @"KDE Plasma Workspaces"')
+    CFunc.sysctl_enable("sddm")
 
 # Install software for VMs
 if vmstatus == "kvm":
@@ -134,7 +134,7 @@ if vmstatus == "vbox":
     CFunc.dnfinstall("virtualbox-guest-additions virtualbox-guest-additions-ogl")
 if vmstatus == "vmware":
     CFunc.dnfinstall("open-vm-tools")
-    if args.type == 1 or args.type == 2:
+    if not args.nogui:
         CFunc.dnfinstall("open-vm-tools-desktop")
 
 # Add normal user to all reasonable groups
@@ -152,9 +152,7 @@ CFunc.AddUserToGroup("audio")
 CFunc.AddUserToGroup("input")
 CFunc.AddUserToGroup("kvm")
 CFunc.AddUserToGroup("systemd-journal")
-CFunc.AddUserToGroup("systemd-network")
 CFunc.AddUserToGroup("systemd-resolve")
-CFunc.AddUserToGroup("systemd-timesync")
 CFunc.AddUserToGroup("pipewire")
 CFunc.AddUserToGroup("colord")
 CFunc.AddUserToGroup("nm-openconnect")
@@ -169,25 +167,25 @@ CFunc.AddLineToSudoersFile(fedora_sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".for
 # Hdparm
 CFunc.dnfinstall("smartmontools hdparm")
 
-if args.type == 1 or args.type == 2:
+if not args.nogui:
     # Flatpak setup
     CFunc.dnfinstall("flatpak xdg-desktop-portal")
-    CFunc.flatpak_addremote("flathub", "https://flathub.org/repo/flathub.flatpakrepo")
     CFunc.AddLineToSudoersFile(fedora_sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("flatpak")))
 
     # Flatpak apps
-    CFunc.flatpak_install("flathub", "org.keepassxc.KeePassXC")
-    CFunc.flatpak_install("flathub", "org.videolan.VLC")
-    CFunc.flatpak_install("flathub", "io.github.quodlibet.QuodLibet")
-    CFunc.flatpak_install("flathub", "com.calibre_ebook.calibre")
+    subprocess.run(os.path.join(SCRIPTDIR, "CFlatpakConfig.py"), shell=True, check=True)
 
 # Disable Selinux
 # To get selinux status: sestatus, getenforce
-# To enable or disable selinux temporarily: setenforce 1 (to enable), setenforce 0 (to disable)
+CFuncExt.GrubEnvAdd(os.path.join(os.sep, "etc", "default", "grub"), "GRUB_CMDLINE_LINUX", "selinux=0")
+CFuncExt.GrubUpdate()
+subprocess.run('grubby --update-kernel=ALL --args="selinux=0"', shell=True, check=True)
 subprocess.run("sed -i 's/^SELINUX=.*/SELINUX=disabled/g' /etc/selinux/config /etc/sysconfig/selinux", shell=True)
 
-# Disable the firewall
-subprocess.run("systemctl mask firewalld", shell=True)
+# Disable mitigations
+CFuncExt.GrubEnvAdd(os.path.join(os.sep, "etc", "default", "grub"), "GRUB_CMDLINE_LINUX", "mitigations=off")
+CFuncExt.GrubUpdate()
+subprocess.run('grubby --update-kernel=ALL --args="mitigations=off"', shell=True, check=True)
 
 # Extra scripts
 subprocess.run("{0}/Csshconfig.sh".format(SCRIPTDIR), shell=True)
