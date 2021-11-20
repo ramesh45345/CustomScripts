@@ -399,6 +399,8 @@ if shutil.which("kwriteconfig5") and shutil.which("plasma_session"):
     kwriteconfig("kcmfonts", "General", "forceFontDPI", "96")
     # User Feedback
     kwriteconfig("PlasmaUserFeedback", "Global", "FeedbackLevel", "48")
+    # System bell
+    kwriteconfig("kaccessrc", "Bell", "SystemBell", "false")
 
     # Notification settings
     subprocess.run('kwriteconfig5 --file plasma_workspace.notifyrc --group "Event/Textcompletion: no match" --key "Execute" ""', shell=True, check=False)
