@@ -349,9 +349,11 @@ if shutil.which("kwriteconfig5") and shutil.which("plasma_session"):
     kwriteconfig("kglobalshortcutsrc", "kwin", "Window Quick Tile Bottom", "Meta+PgDown,Meta+Down,Quick Tile Window to the Bottom")
     kwriteconfig("kglobalshortcutsrc", "kwin", "Window Quick Tile Top", "Meta+PgUp,Meta+Up,Quick Tile Window to the Top")
     kwriteconfig("kglobalshortcutsrc", "kwin", "ExposeAll", "Meta+C\tCtrl+F10\tLaunch (C),Ctrl+F10\tLaunch (C),Toggle Present Windows (All desktops)")
+    kwriteconfig("kglobalshortcutsrc", "kwin", "TrackMouse", "Meta+Ctrl+Z,none,Track mouse")
     # Window Manager
     kwriteconfig("kwinrc", "Plugins", "kwin4_effect_translucencyEnabled", "false")
     kwriteconfig("kwinrc", "Plugins", "slidingpopupsEnabled", "false")
+    kwriteconfig("kwinrc", "Plugins", "trackmouseEnabled", "true")
     kwriteconfig("kwinrc", "Windows", "ElectricBorderCornerRatio", "0.1")
     # Lock Screen and Power Management
     subprocess.run('kwriteconfig5 --file powermanagementprofilesrc --group AC --group HandleButtonEvents --key lidAction 64', shell=True, check=False)
