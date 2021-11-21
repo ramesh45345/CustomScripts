@@ -27,7 +27,7 @@ def repo_vscode():
     """Install vscode repository"""
     CFunc.rpmimport("https://packages.microsoft.com/keys/microsoft.asc")
     with open("/etc/yum.repos.d/vscode.repo", 'w') as vscoderepofile_write:
-        vscoderepofile_write.write('[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc"')
+        vscoderepofile_write.write('[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc')
 
 
 if __name__ == '__main__':
