@@ -24,7 +24,7 @@ fedora_chroot_location = os.path.join(workfolder, "chroot_fedora")
 arch_chroot_location = os.path.join(workfolder, "chroot_arch")
 ubuntu_chroot_location = os.path.join(workfolder, "chroot_ubuntu")
 cslocation = os.path.join(os.path.abspath(args.cslocation), '')
-ubuntu_version = "hirsute"
+ubuntu_version = "impish"
 
 # Check variables
 if not os.path.isdir(cslocation):
@@ -65,7 +65,7 @@ if os.path.isdir(fedora_chroot_location):
 # Arch Chroot
 # Create chroot if it doesn't exist
 if not os.path.isdir(arch_chroot_location) and shutil.which("pacstrap"):
-    subprocess.run("pacman-key --init; pacman-key --populate archlinux", shell=True, check=True)
+    subprocess.run("pacman-key --init; pacman-key --populate archlinux; pacman-key --refresh-keys", shell=True, check=True)
     os.makedirs(arch_chroot_location)
     subprocess.run('pacstrap {0} base python archiso'.format(arch_chroot_location), shell=True, check=True)
 if os.path.isdir(arch_chroot_location):
