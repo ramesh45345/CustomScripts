@@ -563,6 +563,15 @@ if shutil.which("kwriteconfig5") and shutil.which("plasma_session"):
         subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "{0}" --group "ConfigDialog" --key "DialogWidth" "1280"'.format(extrapanel_id), shell=True, check=False)
         subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "{0}" --group "General" --key "AppletOrder" "{1}"'.format(extrapanel_id, extrapanel_appletid), shell=True, check=False)
         subprocess.run('kwriteconfig5 --file plasmashellrc --group "PlasmaViews" --group "Panel {0}" --group "Defaults" --key "thickness" "24"'.format(extrapanel_id), shell=True, check=False)
+        extrapanel_appletid = extrapanel_appletid + 1
+        # Use desktop view instead of folder view.
+        subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "{0}" --key "activityId" "aecca071-25ec-4ff1-be05-9f6468e20095"'.format(extrapanel_appletid), shell=True, check=False)
+        subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "{0}" --key "formfactor" "0"'.format(extrapanel_appletid), shell=True, check=False)
+        subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "{0}" --key "immutability" "1"'.format(extrapanel_appletid), shell=True, check=False)
+        subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "{0}" --key "lastScreen" "{1}"'.format(extrapanel_appletid, x), shell=True, check=False)
+        subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "{0}" --key "location" "0"'.format(extrapanel_appletid), shell=True, check=False)
+        subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "{0}" --key "plugin" "org.kde.desktopcontainment"'.format(extrapanel_appletid), shell=True, check=False)
+        subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "{0}" --key "wallpaperplugin" "org.kde.image"'.format(extrapanel_appletid), shell=True, check=False)
         extrapanel_id = extrapanel_appletid + 1
 
     subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "8" --key "activityId" ""', shell=True, check=False)
