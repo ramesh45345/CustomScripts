@@ -384,18 +384,14 @@ if 50 <= args.ostype <= 59:
 if args.ostype == 50:
     vmname = "Packer-Windows11-{0}".format(hvname)
     windows_key = "NRG8B-VKK3Q-CXVCJ-9G2XF-6Q84J"
-if args.ostype == 51:
-    vmname = "Packer-Windows10LTS-{0}".format(hvname)
-    windows_key = "M7XTQ-FN8P6-TTKYV-9D4CC-J462D"
 if 55 <= args.ostype <= 59:
     vboxosid = "Windows2019_64"
     vmwareid = "windows9srv-64"
     kvm_os = "windows"
     kvm_variant = "win2k19"
     vmprovision_defopts = " "
-if 55 <= args.ostype <= 56:
-    windows_key = "VDYBN-27WPP-V4HQT-9VMD4-VMK7H"
 if args.ostype == 55:
+    windows_key = "VDYBN-27WPP-V4HQT-9VMD4-VMK7H"
     vmname = "Packer-Windows2022-{0}".format(hvname)
 
 
