@@ -38,7 +38,7 @@ print("CS Location: {0}".format(cslocation))
 
 ### Begin Code ###
 # Host packges
-CFunc.dnfinstall("pacman arch-install-scripts systemd-container debootstrap")
+CFunc.dnfinstall("pacman arch-install-scripts systemd-container debootstrap zstd")
 
 # Clean
 if args.clean is True:
@@ -65,7 +65,9 @@ if os.path.isdir(fedora_chroot_location):
 # Arch Chroot
 # Create chroot if it doesn't exist
 if not os.path.isdir(arch_chroot_location) and shutil.which("pacstrap"):
-    subprocess.run("pacman-key --init; pacman-key --populate archlinux; pacman-key --refresh-keys", shell=True, check=True)
+    subprocess.run("pacman-key --init; pacman-key --populate archlinux", shell=True, check=True)
+    # Workaround for missing keys. Remove later.
+    subprocess.run("pacman-key --recv-keys 7EDF681F ; pacman-key --recv-keys 2072D77A ; pacman-key --finger 7EDF681F ; pacman-key --finger 2072D77A ; pacman-key --lsign-key 7EDF681F ; pacman-key --lsign-key 2072D77A", shell=True, check=True)
     os.makedirs(arch_chroot_location)
     subprocess.run('pacstrap {0} base python archiso'.format(arch_chroot_location), shell=True, check=True)
 if os.path.isdir(arch_chroot_location):
