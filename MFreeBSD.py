@@ -36,6 +36,16 @@ def sysrc_cmd(cmd):
     """Run command for sysrc"""
     subprocess.run("sysrc {0}".format(cmd), shell=True, check=True)
     return
+def setup_slim(slim_session_name):
+    pkg_install("slim")
+    sysrc_cmd('slim_enable=yes')
+    sysrc_cmd('gdm_enable=')
+    sysrc_cmd('sddm_enable=')
+    # Setup slim
+    with open(os.path.join(os.sep, "root", ".xinitrc"), 'w') as file:
+        file.write("exec {0}".format(slim_session_name))
+    with open(os.path.join(USERHOME, ".xinitrc"), 'w') as file:
+        file.write("exec {0}".format(slim_session_name))
 
 
 # Exit if not root.
@@ -111,23 +121,16 @@ if args.desktop == "gnome":
     slim_session_name = "gnome-session"
     pkg_install("gnome-shell-extension-dashtodock")
     subprocess.run("glib-compile-schemas /usr/local/share/gnome-shell/extensions/dash-to-dock@micxgx.gmail.com/schemas", shell=True, check=True)
+elif args.desktop == "kde":
+    pkg_install("kde5 sddm")
+    sysrc_cmd('sddm_enable=yes')
+    sysrc_cmd('slim_enable=')
 elif args.desktop == "mate":
     pkg_install("mate")
-    # Setup slim
-    slim_session_name = "mate-session"
+    setup_slim("mate-session")
 elif args.desktop == "lumina":
     pkg_install("lumina")
-    slim_session_name = "lumina-session"
-# Install slim
-if args.desktop != "gnome":
-    pkg_install("slim")
-    sysrc_cmd('slim_enable=yes')
-    sysrc_cmd('gdm_enable=')
-    # Setup slim
-    with open(os.path.join("/", "root", ".xinitrc"), 'w') as file:
-        file.write("exec {0}".format(slim_session_name))
-    with open(os.path.join(USERHOME, ".xinitrc"), 'w') as file:
-        file.write("exec {0}".format(slim_session_name))
+    setup_slim("lumina-session")
 
 # Post-desktop installs
 if not args.nogui:
