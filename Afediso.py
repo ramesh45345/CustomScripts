@@ -62,6 +62,8 @@ subprocess.run('sed -i "s/ quiet$/ quiet selinux=0 mitigations=off/g" /usr/share
 # Modify kickstart repos
 with open(os.path.join(os.sep, "usr", "share", "spin-kickstarts", "fedora-repo.ks"), 'w') as f:
     f.write("%include fedora-repo-not-rawhide.ks")
+# Remove auth statements. Temporary workaround, to be removed.
+subprocess.run("sed -i '/^auth */d' /usr/share/spin-kickstarts/fedora-live-base.ks", shell=True, check=False)
 
 
 ### Prep Environment ###
@@ -72,6 +74,7 @@ ks_text = r"""
 %include /usr/share/spin-kickstarts/fedora-live-minimization.ks
 
 part / --size 7168
+selinux --disabled
 
 %packages
 
