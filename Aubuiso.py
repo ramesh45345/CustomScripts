@@ -176,7 +176,7 @@ sed -i '/^#PermitRootLogin.*/s/^#//g' /etc/ssh/sshd_config
 sed -i 's/^PermitRootLogin.*/PermitRootLogin yes/g' /etc/ssh/sshd_config
 
 # Hold gnome packages (not needed for MATE desktop)
-apt-mark hold gnome-shell gdm3 gnome-session gnome-session-bin ubuntu-session gnome-desktop3-data gnome-control-center cheese
+apt-mark hold gnome-shell gdm3 gnome-session gnome-session-bin ubuntu-session gnome-control-center cheese
 
 # Install GUI software
 apt-get install -y \
