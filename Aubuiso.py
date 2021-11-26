@@ -48,7 +48,7 @@ workfolder_default = os.path.join(USERHOME, "ubulive")
 parser = argparse.ArgumentParser(description='Build LiveCD.')
 parser.add_argument("-n", "--noprompt", help='Do not prompt.', action="store_true")
 parser.add_argument("-w", "--workfolder", help='Location of Working Folder (default: %(default)s)', default=workfolder_default)
-parser.add_argument("-r", "--release", help='Ubuntu Release, default: %(default)s', default="focal")
+parser.add_argument("-r", "--release", help='Ubuntu Release, default: %(default)s', default="impish")
 
 # Save arguments.
 args = parser.parse_args()
