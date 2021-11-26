@@ -51,13 +51,17 @@ if __name__ == '__main__':
         # Retrieve ISOs using scp
         if fedora_iso_path:
             subprocess.run("scp -C {0}@{1}:{2} {3}".format(ssh_user, ssh_ip, fedora_iso_path, args.outfolder), shell=True, check=True)
+            # Cleanup
+            subprocess.run("ssh {0} -l {1} rm -rf {2}/root/fedlive/".format(ssh_ip, ssh_user, fedora_chroot_location), shell=True, check=False)
         if arch_iso_path:
             subprocess.run("scp -C {0}@{1}:{2} {3}".format(ssh_user, ssh_ip, arch_iso_path, args.outfolder), shell=True, check=True)
+            # Cleanup
+            subprocess.run("ssh {0} -l {1} rm -rf {2}".format(ssh_ip, ssh_user, arch_iso_path), shell=True, check=False)
         if ubuntu_iso_path:
             subprocess.run("scp -C {0}@{1}:{2} {3}".format(ssh_user, ssh_ip, ubuntu_iso_path, args.outfolder), shell=True, check=True)
+            # Cleanup
+            subprocess.run("ssh {0} -l {1} rm -rf {2}/root/ubulive/".format(ssh_ip, ssh_user, ubuntu_chroot_location), shell=True, check=False)
 
-        # Cleanup
-        subprocess.run("ssh {0} -l {1} rm -rf {2}/root/fedlive/ {3} {4}/root/ubulive/".format(ssh_ip, ssh_user, fedora_chroot_location, arch_iso_path, ubuntu_chroot_location), shell=True, check=False)
         # Shutdown the VM.
         PCreateChrootVM.vm_shutdown(vm_name)
     if args.stage == 2:
