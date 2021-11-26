@@ -328,10 +328,11 @@ if shutil.which("gnome-session"):
 if shutil.which("kwriteconfig5") and shutil.which("plasma_session"):
     # Dolphin settings
     if shutil.which("dolphin"):
-        subprocess.run('kwriteconfig5 --file dolphinrc --group General --key GlobalViewProps --type bool true', shell=True, check=False)
-        subprocess.run('kwriteconfig5 --file dolphinrc --group IconsMode --key "PreviewSize" "32"', shell=True, check=False)
-        subprocess.run('kwriteconfig5 --file dolphinrc --group DetailsMode --key "PreviewSize" "22"', shell=True, check=False)
-        subprocess.run('kwriteconfig5 --file dolphinrc --group CompactMode --key "PreviewSize" "16"', shell=True, check=False)
+        kwriteconfig("dolphinrc", "General", "GlobalViewProps", "true")
+        kwriteconfig("dolphinrc", "General", "ShowZoomSlider", "false")
+        kwriteconfig("dolphinrc", "IconsMode", "PreviewSize", "32")
+        kwriteconfig("dolphinrc", "DetailsMode", "PreviewSize", "22")
+        kwriteconfig("dolphinrc", "CompactMode", "PreviewSize", "16")
     # KDE Globals
     subprocess.run('kwriteconfig5 --file kdeglobals --group KDE --key SingleClick --type bool false', shell=True, check=False)
     subprocess.run('kwriteconfig5 --file kdeglobals --group General    --key XftSubPixel "rgb"', shell=True, check=False)
