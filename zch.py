@@ -43,9 +43,11 @@ def ChrootRunCommandArray(RootPath: str, command: list, interpreter: str = None,
         subprocess.run(["chroot", RootPath] + command, shell=False, check=error_on_fail)
 def ChrootCommand(RootPath: str, command: str):
     """Run a command in the chroot, mounting before and unmounting after."""
-    ChrootMountPaths(RootPath)
-    ChrootRunCommand(RootPath, command)
-    ChrootUnmountPaths(RootPath)
+    try:
+        ChrootMountPaths(RootPath)
+        ChrootRunCommand(RootPath, command)
+    finally:
+        ChrootUnmountPaths(RootPath)
 
 
 # Exit if not root.
