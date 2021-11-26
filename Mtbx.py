@@ -80,8 +80,6 @@ ENV NAME=ubuntu-shared
 
 addtext(r"""
 LABEL com.github.containers.toolbox="true" \
-      com.github.debarshiray.toolbox="true" \
-      com.redhat.component="$NAME" \
       name="$NAME"
 """)
 
@@ -115,8 +113,11 @@ RUN sed -i '/tsflags=nodocs/d' /etc/dnf/dnf.conf
 RUN dnf -y reinstall acl bash curl gawk grep gzip libcap openssl p11-kit pam python3 rpm sed systemd tar
 RUN dnf -y install bash-completion bzip2 diffutils dnf-plugins-core findutils flatpak-spawn fpaste git gnupg gnupg2-smime gvfs-client hostname iputils jwhois keyutils krb5-libs less lsof man-db man-pages mlocate mtr nano-default-editor nss-mdns openssh-clients passwd pigz procps-ng rsync shadow-utils sudo tcpdump time traceroute tree unzip vte-profile wget which words xorg-x11-xauth xz zip
 
-# Custom stuff
+# Shell Tools
 RUN dnf -y install zsh
+# Build tools
+RUN dnf -y install make gcc automake autoconf ninja-build
+# Wine
 RUN dnf -y install wine winetricks
 """, "fedora")
 addtext(r"""
@@ -201,15 +202,15 @@ if args.distro == "all" or args.distro == "ubuntu":
 currentpath = os.getcwd()
 if args.distro == "all" or args.distro == "arch":
     os.chdir(tempfolder_arch)
-    subprocess.run(["podman", "build", "-t", "arch-shared", "-f", os.path.basename(tempfile_arch)], check=True)
+    subprocess.run(["podman", "build", "--pull=true", "-t", "arch-shared", "-f", os.path.basename(tempfile_arch)], check=True)
     print('Run "toolbox create -i arch-shared ; toolbox enter arch-shared" to create and run a container.')
 if args.distro == "all" or args.distro == "fedora":
     os.chdir(tempfolder_fedora)
-    subprocess.run(["podman", "build", "-t", "fedora-shared", "-f", os.path.basename(tempfile_fedora)], check=True)
+    subprocess.run(["podman", "build", "--pull=true", "-t", "fedora-shared", "-f", os.path.basename(tempfile_fedora)], check=True)
     print('Run "toolbox create -i fedora-shared ; toolbox enter fedora-shared" to create and run a container.')
 if args.distro == "all" or args.distro == "ubuntu":
     os.chdir(tempfolder_ubuntu)
-    subprocess.run(["podman", "build", "-t", "ubuntu-shared", "-f", os.path.basename(tempfile_ubuntu)], check=True)
+    subprocess.run(["podman", "build", "--pull=true", "-t", "ubuntu-shared", "-f", os.path.basename(tempfile_ubuntu)], check=True)
     print('Run "toolbox create -i ubuntu-shared ; toolbox enter ubuntu-shared" to create and run a container.')
 os.chdir(currentpath)
 
