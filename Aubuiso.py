@@ -7,6 +7,7 @@ from datetime import datetime
 import logging
 import os
 from pathlib import Path
+import shutil
 import signal
 import sys
 import time
@@ -22,10 +23,14 @@ SCRIPTDIR = sys.path[0]
 
 
 ### Functions ###
-def signal_handler(sig, frame):
-    """Cleanup if given early termination."""
+def cleanup():
+    """Cleanup build folder."""
     if os.path.isdir(rootfsfolder):
         zch.ChrootUnmountPaths(rootfsfolder)
+        shutil.rmtree(rootfsfolder)
+def signal_handler(sig, frame):
+    """Cleanup if given early termination."""
+    cleanup()
     print('Exiting due to SIGINT.')
     sys.exit(1)
 
@@ -64,6 +69,8 @@ if os.path.isdir(buildfolder):
 else:
     print("Creating work folder {0}.".format(buildfolder))
     os.makedirs(buildfolder, 0o777)
+# Cleanup before starting.
+cleanup()
 
 # Save start time.
 beforetime = datetime.now()
