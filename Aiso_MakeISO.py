@@ -15,6 +15,7 @@ parser.add_argument("-c", "--clean", help='Remove iso folders.', action="store_t
 parser.add_argument("-s", "--stage", help='Setup Stage (1: Host System, 2: VM, default: %(default)s)', type=int, default=1)
 parser.add_argument("-w", "--chrootfolder", help='Location of chroot folder (default: %(default)s)', default=os.path.expanduser("~root"))
 parser.add_argument("-p", "--outfolder", help='Location to store ISOs (default: %(default)s)', default=os.getcwd())
+parser.add_argument("-t", "--distrotype", help='Specify ISO  (choices: %(choices)s) (default: %(default)s)', type=str, default="all", choices=["all", "fedora", "arch", "ubuntu"])
 args = parser.parse_args()
 
 # Global variables
@@ -33,8 +34,13 @@ if __name__ == '__main__':
         # Start the VM if it is not started.
         PCreateChrootVM.vm_start(vm_name)
         PCreateChrootVM.ssh_wait(ip=ssh_ip, user=ssh_user)
+        # Update CustomScripts in VM.
+        subprocess.run("ssh {0} -l {1} 'cd /opt/CustomScripts ; git checkout -f ; git pull'".format(ssh_ip, ssh_user), shell=True, check=True)
         # Execute Stage 2
-        subprocess.run("ssh {0} -l {1} /opt/CustomScripts/Aiso_MakeISO.py -s 2".format(ssh_ip, ssh_user), shell=True, check=True)
+        stagetwocmd = "ssh {0} -l {1} /opt/CustomScripts/Aiso_MakeISO.py -s 2 -t {2}".format(ssh_ip, ssh_user, args.distrotype)
+        if args.clean:
+            stagetwocmd += " -c"
+        subprocess.run(stagetwocmd, shell=True, check=True)
 
         # Retrieve ISO paths
         fedora_iso_path = subprocess.run("ssh {0} -l {1} find {2}/root/fedlive/ -maxdepth 1 -type f -name '*.iso'".format(ssh_ip, ssh_user, fedora_chroot_location), shell=True, check=False, stdout=subprocess.PIPE, universal_newlines=True).stdout.strip()
@@ -56,10 +62,16 @@ if __name__ == '__main__':
         # Custom includes
         import zch
         # Update chroots
-        subprocess.run("/opt/CustomScripts/Aiso_CreateVM.py -d {0}".format(sys.path[0]), shell=True, check=True)
-        # Fedora ISO
-        zch.ChrootCommand(fedora_chroot_location, "sh -c '/opt/CustomScripts/Afediso.py -n'")
-        # Arch ISO
-        zch.ChrootCommand(arch_chroot_location, "sh -c '/opt/CustomScripts/Aarchiso.py -n'")
-        # Ubuntu ISO
-        zch.ChrootCommand(ubuntu_chroot_location, "sh -c '/opt/CustomScripts/Aubuiso.py -n'")
+        chroot_update_cmd = "/opt/CustomScripts/Aiso_CreateVM.py -d {0}".format(sys.path[0])
+        if args.clean:
+            chroot_update_cmd += " -c"
+        subprocess.run(chroot_update_cmd, shell=True, check=True)
+        if args.distrotype == "all" or args.distrotype == "fedora":
+            # Fedora ISO
+            zch.ChrootCommand(fedora_chroot_location, "sh -c '/opt/CustomScripts/Afediso.py -n'")
+        if args.distrotype == "all" or args.distrotype == "arch":
+            # Arch ISO
+            zch.ChrootCommand(arch_chroot_location, "sh -c '/opt/CustomScripts/Aarchiso.py -n'")
+        if args.distrotype == "all" or args.distrotype == "ubuntu":
+            # Ubuntu ISO
+            zch.ChrootCommand(ubuntu_chroot_location, "sh -c '/opt/CustomScripts/Aubuiso.py -n'")

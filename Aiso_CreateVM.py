@@ -25,6 +25,7 @@ arch_chroot_location = os.path.join(workfolder, "chroot_arch")
 ubuntu_chroot_location = os.path.join(workfolder, "chroot_ubuntu")
 cslocation = os.path.join(os.path.abspath(args.cslocation), '')
 ubuntu_version = "impish"
+fedora_version = "35"
 
 # Check variables
 if not os.path.isdir(cslocation):
@@ -36,9 +37,33 @@ if not os.path.isdir(args.workfolder):
 print("Chroot root folder: {0}".format(workfolder))
 print("CS Location: {0}".format(cslocation))
 
+
+### Functions ###
+def ctr_create(ctrimage: str, path: str, cmd: str):
+    """Run a chroot create command using a container runtime."""
+    full_cmd = ["podman", "run", "--rm", "--privileged", "--pull=always", "-it", "--volume={0}:/chrootfld".format(path), "--name=chrootsetup", ctrimage, "bash", "-c", cmd]
+    print("Running {0}".format(full_cmd))
+    subprocess.run(full_cmd, check=True)
+def create_chroot_arch(path: str, packages: str = "base"):
+    """Create an arch chroot."""
+    print("Creating arch at {0}".format(path))
+    os.makedirs(path, exist_ok=False)
+    ctr_create("docker.io/library/archlinux:latest", path, "sed -i 's/^#ParallelDownloads/ParallelDownloads/g' /etc/pacman.conf && pacman -Sy --noconfirm --needed arch-install-scripts && pacstrap -c /chrootfld {0}".format(packages))
+def create_chroot_fedora(path: str, packages: str = "systemd passwd dnf fedora-release vim-minimal"):
+    """Create a fedora chroot."""
+    print("Creating fedora at {0}".format(path))
+    os.makedirs(path, exist_ok=False)
+    ctr_create("registry.fedoraproject.org/fedora", path, "dnf -y --releasever={0} --installroot=/chrootfld --disablerepo='*' --enablerepo=fedora --enablerepo=updates install {1}".format(fedora_version, packages))
+def create_chroot_ubuntu(path: str, packages: str = "systemd-container"):
+    """Create an ubuntu chroot."""
+    print("Creating ubuntu at {0}".format(path))
+    os.makedirs(path, exist_ok=False)
+    ctr_create("docker.io/library/ubuntu:rolling", path, "apt-get update && apt-get install -y debootstrap && debootstrap --include={1} --components=main,universe,restricted,multiverse --arch amd64 {0} /chrootfld".format(ubuntu_version, packages))
+
+
 ### Begin Code ###
 # Host packges
-CFunc.dnfinstall("pacman arch-install-scripts systemd-container debootstrap zstd")
+CFunc.dnfinstall("podman pacman arch-install-scripts systemd-container debootstrap zstd")
 
 # Clean
 if args.clean is True:
@@ -64,12 +89,8 @@ if os.path.isdir(fedora_chroot_location):
 
 # Arch Chroot
 # Create chroot if it doesn't exist
-if not os.path.isdir(arch_chroot_location) and shutil.which("pacstrap"):
-    subprocess.run("pacman-key --init; pacman-key --populate archlinux", shell=True, check=True)
-    # Workaround for missing keys. Remove later.
-    subprocess.run("pacman-key --recv-keys 7EDF681F ; pacman-key --recv-keys 2072D77A ; pacman-key --finger 7EDF681F ; pacman-key --finger 2072D77A ; pacman-key --lsign-key 7EDF681F ; pacman-key --lsign-key 2072D77A", shell=True, check=True)
-    os.makedirs(arch_chroot_location)
-    subprocess.run('pacstrap {0} base python archiso'.format(arch_chroot_location), shell=True, check=True)
+if not os.path.isdir(arch_chroot_location):
+    create_chroot_arch(arch_chroot_location, "base python archiso")
 if os.path.isdir(arch_chroot_location):
     # Update packages
     zch.ChrootCommand(arch_chroot_location, "sh -c 'pacman -Syu --needed --noconfirm'")
