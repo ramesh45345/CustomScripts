@@ -213,12 +213,6 @@ if __name__ == '__main__':
     CFunc.dnfinstall("smartmontools hdparm")
 
     if not args.nogui:
-        # Install snapd
-        CFunc.dnfinstall("snapd")
-        if not os.path.islink("/snap"):
-            os.symlink("/var/lib/snapd/snap", "/snap", target_is_directory=True)
-        CFunc.AddLineToSudoersFile(fedora_sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("snap")))
-
         # Flatpak setup
         CFunc.dnfinstall("flatpak xdg-desktop-portal")
         CFunc.AddLineToSudoersFile(fedora_sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("flatpak")))
