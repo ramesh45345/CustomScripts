@@ -134,6 +134,15 @@ def FirewalldConfig():
         subprocess.run("firewall-cmd --zone=trusted --permanent --add-masquerade", shell=True, check=True)
         subprocess.run("firewall-cmd --permanent --add-masquerade", shell=True, check=True)
         subprocess.run("firewall-cmd --reload", shell=True, check=True)
+def ytdlp_install(install_path: str = os.path.join(os.sep, "usr", "local", "bin")):
+    """
+    Install yt-dlp.
+    """
+    CFunc.downloadfile("https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp", install_path, overwrite=True)
+    os.chmod(os.path.join(install_path, "yt-dlp"), 0o755)
+    # Symlink youtube-dl
+    os.chdir(install_path)
+    os.symlink("yt-dlp", "youtube-dl")
 
 
 if __name__ == '__main__':
@@ -145,6 +154,7 @@ if __name__ == '__main__':
     parser.add_argument("-g", "--grubupdate", help='Run Grub update', action="store_true")
     parser.add_argument("-n", "--numix", help='Numix Circle Icons', action="store_true")
     parser.add_argument("-s", "--sudoenv", help='Sudo Environment Changes', action="store_true")
+    parser.add_argument("--ytdlp", help='Install yt-dlp', action="store_true")
     args = parser.parse_args()
 
     # Run functions
@@ -156,3 +166,5 @@ if __name__ == '__main__':
         numix_icons()
     if args.sudoenv:
         SudoersEnvSettings()
+    if args.ytdlp:
+        ytdlp_install()

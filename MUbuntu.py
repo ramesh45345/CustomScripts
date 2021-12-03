@@ -236,7 +236,8 @@ renderer: NetworkManager""")
         # Cups-pdf
         CFunc.aptinstall("printer-driver-cups-pdf")
         # Media Playback
-        CFunc.aptinstall("ffmpeg youtube-dl smplayer")
+        CFunc.aptinstall("ffmpeg smplayer")
+        CFuncExt.ytdlp_install()
         CFunc.aptinstall("alsa-utils pavucontrol paprefs pulseaudio-module-zeroconf pulseaudio-module-bluetooth swh-plugins")
         CFunc.aptinstall("gstreamer1.0-vaapi")
         # For Office 2010

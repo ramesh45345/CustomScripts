@@ -103,7 +103,8 @@ if __name__ == '__main__':
         # Multimedia
         CFunc.dnfinstall("@multimedia")
         CFunc.dnfinstall("gstreamer1-vaapi")
-        CFunc.dnfinstall("youtube-dl ffmpeg smplayer mpv")
+        CFunc.dnfinstall("ffmpeg smplayer mpv")
+        CFuncExt.ytdlp_install()
         # Editors
         CFunc.dnfinstall("code")
         # Syncthing

@@ -171,7 +171,8 @@ if args.stage == 2:
     subprocess.run("systemctl enable smb", shell=True, check=True)
 
     # Media apps
-    rostreeinstall("youtube-dl ffmpeg mpv smplayer")
+    rostreeinstall("ffmpeg mpv smplayer")
+    CFuncExt.ytdlp_install()
 
     # VSCode
     with open(os.path.join(os.sep, "etc", "yum.repos.d", "vscode.repo"), 'w') as f:
