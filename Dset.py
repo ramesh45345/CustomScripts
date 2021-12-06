@@ -356,6 +356,7 @@ if shutil.which("kwriteconfig5") and shutil.which("plasma_session"):
     kwriteconfig("kwinrc", "Plugins", "slidingpopupsEnabled", "false")
     kwriteconfig("kwinrc", "Plugins", "trackmouseEnabled", "true")
     kwriteconfig("kwinrc", "Windows", "ElectricBorderCornerRatio", "0.1")
+    kwriteconfig("kwinrc", "org.kde.kdecoration2", "BorderSizeAuto", "false")
     # Lock Screen and Power Management
     subprocess.run('kwriteconfig5 --file powermanagementprofilesrc --group AC --group HandleButtonEvents --key lidAction 64', shell=True, check=False)
     subprocess.run('kwriteconfig5 --file powermanagementprofilesrc --group AC --group HandleButtonEvents --key powerButtonAction 8', shell=True, check=False)
