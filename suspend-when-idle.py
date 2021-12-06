@@ -89,7 +89,7 @@ def check_hd_used_multiple(num_times: int = 5):
     disks_are_used = False
     disk_used_numtrue = 0
     # Loop through the list
-    for l in range(0, num_times):
+    for _ in range(0, num_times):
         # Add one to the counter if it was used.
         if check_hd_used_once(args.diskthreshold) is True:
             disk_used_numtrue += 1
