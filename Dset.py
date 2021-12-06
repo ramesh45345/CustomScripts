@@ -835,10 +835,3 @@ if os.path.isdir(firefox_profiles_path):
                     firefox_modify_settings("media.autoplay.default", "5", prefsjs_file)
                     # Sponsored suggest
                     firefox_modify_settings("browser.urlbar.suggest.quicksuggest.sponsored", "false", prefsjs_file)
-
-                    # Install firefox gnome theme.
-                    if os.getenv('XDG_CURRENT_DESKTOP') == "GNOME":
-                        firefox_gnometheme_path = os.path.join(USERHOME, "firefox-gnome-theme")
-                        CFunc.gitclone("https://github.com/rafaelmardojai/firefox-gnome-theme/", firefox_gnometheme_path)
-                        if os.path.isdir(firefox_gnometheme_path):
-                            subprocess.run("{0}/scripts/install.sh -p {1}".format(firefox_gnometheme_path, entry.name), shell=True, check=False)
