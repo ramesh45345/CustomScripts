@@ -638,6 +638,12 @@ if os.path.isfile(places_xml_path):
         # If a bookmark title matches the list, delete it.
         if bmark.find('title').text in search_list:
             root.remove(bmark)
+    # Hide the "Search For" section
+    for x in root.iter('GroupState-SearchFor-IsHidden'):
+        x.text = "true"
+    # Hide the "Recently" section
+    for x in root.iter('GroupState-RecentlySaved-IsHidden'):
+        x.text = "true"
 
     # Write the XML file
     xml_indent(root)
