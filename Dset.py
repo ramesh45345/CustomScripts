@@ -496,50 +496,107 @@ if shutil.which("kwriteconfig5") and shutil.which("plasma_session"):
     subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --key "location" "3"', shell=True, check=False)
     subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --key "plugin" "org.kde.panel"', shell=True, check=False)
     subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --key "wallpaperplugin" "org.kde.image"', shell=True, check=False)
-    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "18" --key "immutability" "1"', shell=True, check=False)
-    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "18" --key "plugin" "org.kde.plasma.digitalclock"', shell=True, check=False)
-    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "18" --group "Configuration" --key "PreloadWeight" "52"', shell=True, check=False)
-    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "19" --key "immutability" "1"', shell=True, check=False)
-    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "19" --key "plugin" "org.kde.plasma.minimizeall"', shell=True, check=False)
-    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "19" --group "Configuration" --key "PreloadWeight" "42"', shell=True, check=False)
-    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "3" --key "immutability" "1"', shell=True, check=False)
-    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "3" --key "plugin" "org.kde.plasma.kickoff"', shell=True, check=False)
-    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "3" --group "Configuration" --key "PreloadWeight" "100"', shell=True, check=False)
-    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "3" --group "Configuration" --group "Configuration/General" --key "showAppsByName" "true"', shell=True, check=False)
-    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "3" --group "Configuration" --group "General" --key "favoritesPortedToKAstats" "true"', shell=True, check=False)
-    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "3" --group "Configuration" --group "Shortcuts" --key "global" "Alt+F1"', shell=True, check=False)
-    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "3" --group "Shortcuts" --key "global" "Alt+F1"', shell=True, check=False)
-    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "4" --key "immutability" "1"', shell=True, check=False)
-    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "4" --key "plugin" "org.kde.plasma.pager"', shell=True, check=False)
-    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "4" --group "Configuration" --key "PreloadWeight" "42"', shell=True, check=False)
-    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "5" --key "immutability" "1"', shell=True, check=False)
-    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "5" --key "plugin" "org.kde.plasma.icontasks"', shell=True, check=False)
-    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "5" --group "Configuration" --key "PreloadWeight" "42"', shell=True, check=False)
+    toppanel_appletgroup_id = 1
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --key "immutability" "1"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --key "plugin" "org.kde.plasma.kickoff"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --key "PreloadWeight" "100"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "Configuration/General" --key "showAppsByName" "true"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "General" --key "favoritesPortedToKAstats" "true"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "Shortcuts" --key "global" "Alt+F1"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Shortcuts" --key "global" "Alt+F1"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    toppanel_appletgroup_id = toppanel_appletgroup_id + 1
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --key "immutability" "1"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --key "plugin" "org.kde.plasma.pager"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --key "PreloadWeight" "42"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    toppanel_appletgroup_id = toppanel_appletgroup_id + 1
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --key "immutability" "1"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --key "plugin" "org.kde.plasma.icontasks"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --key "PreloadWeight" "42"'.format(toppanel_appletgroup_id), shell=True, check=False)
 
-    # Check current variable for tilix. If it doesn't exist, set the variable.
     plasma_desktop_string = ""
-    plasma_desktop_read_list = subprocess.run('kreadconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "5" --group "Configuration" --group "General" --key "launchers"', shell=True, check=False, stdout=subprocess.PIPE).stdout.decode().strip()
-    if "tilix.desktop" not in plasma_desktop_read_list:
-        plasma_desktop_search_list = ["firefox.desktop", "UngoogledChromium.desktop", "chrome.desktop", 'thunderbird.desktop', 'kde.dolphin.desktop', "tilix.desktop", "org.kde.konsole.desktop", 'virt-manager.desktop', 'org.kde.plasma-systemmonitor.desktop']
-        plasma_desktop_file_list = []
-        for d in plasma_desktop_search_list:
-            ds = CMimeSet.LocateDesktopFileName(d)
-            if ds:
-                plasma_desktop_file_list.append("applications:" + ds)
-        plasma_desktop_string = ','.join(plasma_desktop_file_list)
-    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "5" --group "Configuration" --group "General" --key "launchers" "{0}"'.format(plasma_desktop_string), shell=True, check=False)
-
-    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "6" --key "immutability" "1"', shell=True, check=False)
-    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "6" --key "plugin" "org.kde.plasma.marginsseparator"', shell=True, check=False)
-    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "6" --group "Configuration" --key "PreloadWeight" "42"', shell=True, check=False)
-    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "7" --key "immutability" "1"', shell=True, check=False)
-    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "7" --key "plugin" "org.kde.plasma.systemtray"', shell=True, check=False)
-    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "7" --group "Configuration" --key "PreloadWeight" "57"', shell=True, check=False)
-    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "7" --group "Configuration" --key "SystrayContainmentId" "8"', shell=True, check=False)
+    plasma_desktop_search_list = ["firefox.desktop", "UngoogledChromium.desktop", "chrome.desktop", 'thunderbird.desktop', 'kde.dolphin.desktop', "tilix.desktop", "org.kde.konsole.desktop", 'virt-manager.desktop', 'org.kde.plasma-systemmonitor.desktop']
+    plasma_desktop_file_list = []
+    for d in plasma_desktop_search_list:
+        ds = CMimeSet.LocateDesktopFileName(d)
+        if ds:
+            plasma_desktop_file_list.append("applications:" + ds)
+    plasma_desktop_string = ','.join(plasma_desktop_file_list)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "General" --key "launchers" "{1}"'.format(toppanel_appletgroup_id, plasma_desktop_string), shell=True, check=False)
+    toppanel_appletgroup_id = toppanel_appletgroup_id + 1
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --key "immutability" "1"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --key "plugin" "org.kde.plasma.marginsseparator"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --key "PreloadWeight" "42"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    # System monitor applets
+    toppanel_appletgroup_id = toppanel_appletgroup_id + 1
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --key "immutability" "1"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --key "plugin" "org.kde.plasma.systemmonitor"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --key "PreloadWeight" "100"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "Appearance" --key "chartFace" "org.kde.ksysguard.linechart"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "Appearance" --key "title" "CPU Usage"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "Appearance" --key "updateRateLimit" "1000"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "Sensors" --key "highPrioritySensorIds" "[\\"cpu/all/usage\\"]"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "Sensors" --key "totalSensors" "[cpu/all/usage]"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "SensorColors" --key "cpu/all/usage" "85,255,255"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "org.kde.ksysguard.linechart" --group "General" --key "historyAmount" "30"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "org.kde.ksysguard.linechart" --group "General" --key "rangeAutoY" "false"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    toppanel_appletgroup_id = toppanel_appletgroup_id + 1
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --key "immutability" "1"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --key "plugin" "org.kde.plasma.systemmonitor"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --key "PreloadWeight" "70"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "Appearance" --key "chartFace" "org.kde.ksysguard.linechart"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "Appearance" --key "title" "Memory Usage"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "Appearance" --key "updateRateLimit" "1000"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "Sensors" --key "highPrioritySensorIds" "[\\"memory/physical/usedPercent\\",\\"memory/swap/usedPercent\\"]"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "SensorColors" --key "memory/physical/usedPercent" "0,255,0"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "SensorColors" --key "memory/swap/usedPercent" "255,0,0"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "SensorLabels" --key "memory/physical/usedPercent" "Physical"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "SensorLabels" --key "memory/swap/usedPercent" "Swap"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "org.kde.ksysguard.linechart" --group "General" --key "rangeAutoY" "false"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    toppanel_appletgroup_id = toppanel_appletgroup_id + 1
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --key "immutability" "1"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --key "plugin" "org.kde.plasma.systemmonitor"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --key "PreloadWeight" "100"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "Appearance" --key "chartFace" "org.kde.ksysguard.linechart"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "Appearance" --key "title" "I/O Rate"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "Appearance" --key "updateRateLimit" "1000"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "Sensors" --key "highPrioritySensorIds" "[\\"disk/all/read\\",\\"disk/all/write\\"]"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "SensorColors" --key "disk/all/read" "233,61,217"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "SensorColors" --key "disk/all/write" "160,233,61"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "org.kde.ksysguard.linechart" --group "General" --key "historyAmount" "30"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    toppanel_appletgroup_id = toppanel_appletgroup_id + 1
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --key "immutability" "1"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --key "plugin" "org.kde.plasma.systemmonitor"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --key "PreloadWeight" "55"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "Appearance" --key "chartFace" "org.kde.ksysguard.linechart"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "Appearance" --key "title" "Network"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "Appearance" --key "updateRateLimit" "1000"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "Sensors" --key "highPrioritySensorIds" "[\\"network/all/download\\",\\"network/all/upload\\"]"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "SensorColors" --key "network/all/download" "0,255,0"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "SensorColors" --key "network/all/upload" "255,170,255"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "org.kde.ksysguard.linechart" --group "General" --key "historyAmount" "30"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    # System Tray
+    toppanel_appletgroup_id = toppanel_appletgroup_id + 1
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --key "immutability" "1"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --key "plugin" "org.kde.plasma.systemtray"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --key "PreloadWeight" "57"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --key "SystrayContainmentId" "8"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    toppanel_appletgroup_id = toppanel_appletgroup_id + 1
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --key "immutability" "1"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --key "plugin" "org.kde.plasma.digitalclock"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --key "PreloadWeight" "52"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    toppanel_appletgroup_id = toppanel_appletgroup_id + 1
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --key "immutability" "1"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --key "plugin" "org.kde.plasma.minimizeall"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --key "PreloadWeight" "42"'.format(toppanel_appletgroup_id), shell=True, check=False)
     subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "ConfigDialog" --key "DialogHeight" "84"', shell=True, check=False)
     subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "ConfigDialog" --key "DialogWidth" "1206"', shell=True, check=False)
     subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Configuration" --key "PreloadWeight" "42"', shell=True, check=False)
-    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "General" --key "AppletOrder" "3;4;5;6;7;18;19"', shell=True, check=False)
+
+    toppanel_appletgroup_list = []
+    for x in range(toppanel_appletgroup_id):
+        toppanel_appletgroup_list.append(str(x))
+    toppanel_appletgroup_string = ';'.join(toppanel_appletgroup_list)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "General" --key "AppletOrder" "{0}"'.format(toppanel_appletgroup_string), shell=True, check=False)
 
     # Create multiple panels for each screen.
     extrapanel_id = 50
