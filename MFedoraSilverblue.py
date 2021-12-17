@@ -111,7 +111,7 @@ if args.stage == 1:
 
     ### OSTree Apps ###
     # Cli tools
-    rostreeinstall("fish zsh tmux iotop p7zip util-linux-user fuse-sshfs redhat-lsb-core powerline-fonts google-roboto-fonts samba hdparm cups-pdf tilix tilix-nautilus syncthing numix-icon-theme numix-icon-theme-circle tigervnc xrandr xset")
+    rostreeinstall("fish zsh tmux iotop p7zip util-linux-user fuse-sshfs redhat-lsb-core powerline-fonts google-roboto-fonts samba hdparm cups-pdf syncthing numix-icon-theme numix-icon-theme-circle tigervnc xrandr xset")
     subprocess.run("systemctl enable sshd", shell=True, check=True)
     # NTP Configuration
     subprocess.run("systemctl enable systemd-timesyncd; timedatectl set-local-rtc false; timedatectl set-ntp 1", shell=True, check=True)
@@ -149,7 +149,7 @@ if args.stage == 1:
     # Specific install section
     if fedora_version.endswith("silverblue"):
         # Extra packages
-        rostreeinstall("google-noto-sans-fonts smartmontools p7zip-plugins")
+        rostreeinstall("google-noto-sans-fonts smartmontools p7zip-plugins tilix tilix-nautilus")
         # Some Gnome Extensions
         rostreeinstall("gnome-tweak-tool dconf-editor")
         rostreeinstall("gnome-shell-extension-gpaste gnome-shell-extension-topicons-plus")
