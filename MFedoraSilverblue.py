@@ -122,6 +122,9 @@ if args.stage == 1:
     if vmstatus == "vmware":
         rostreeinstall("open-vm-tools open-vm-tools-desktop")
 
+    # Install libvirt software
+    rostreeinstall("virt-install libvirt-daemon-config-network libvirt-daemon-kvm qemu-kvm virt-manager swtpm swtpm-tools")
+
     # Sudoers changes
     CFuncExt.SudoersEnvSettings()
     # Edit sudoers to add commands.
