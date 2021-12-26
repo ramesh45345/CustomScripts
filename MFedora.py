@@ -150,7 +150,7 @@ if __name__ == '__main__':
     elif args.desktop == "kde":
         # KDE
         CFunc.dnfinstall("--allowerasing @kde-desktop-environment")
-        CFunc.dnfinstall("ark latte-dock")
+        CFunc.dnfinstall("ark")
         CFunc.sysctl_enable("-f sddm", error_on_fail=True)
     elif args.desktop == "mate":
         # MATE
