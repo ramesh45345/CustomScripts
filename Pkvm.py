@@ -640,7 +640,7 @@ if 10 <= args.ostype <= 14:
 if 15 <= args.ostype <= 19:
     data['builders'][0]["boot_command"] = ["<space><wait><enter><wait><f6><wait><esc><home>ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ autoinstall <enter>"]
 if 20 <= args.ostype <= 29:
-    data['builders'][0]["boot_command"] = ["<tab> ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/centos.cfg<enter><wait>"]
+    data['builders'][0]["boot_command"] = ["<tab> inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/centos.cfg<enter><wait>"]
     data['provisioners'][0]["type"] = "shell"
     data['provisioners'][0]["inline"] = "{2}; /opt/CustomScripts/{0} {1}".format(vmprovisionscript, vmprovision_opts, git_cmdline())
 if 30 <= args.ostype <= 39:
