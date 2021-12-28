@@ -333,13 +333,10 @@ if 20 <= args.ostype <= 29:
     vmprovisionscript = "MCentOS.py"
 if args.ostype == 20:
     vmname = "Packer-CentOS-{0}".format(hvname)
-    vmprovision_defopts = "-t 1"
+    vmprovision_defopts = "-d {0}".format(args.desktopenv)
 if args.ostype == 21:
-    vmname = "Packer-CentOSSvr-{0}".format(hvname)
-    vmprovision_defopts = "-t 2"
-if args.ostype == 22:
     vmname = "Packer-CentOSCLI-{0}".format(hvname)
-    vmprovision_defopts = "-t 3"
+    vmprovision_defopts = "-x"
 if 30 <= args.ostype <= 39:
     vboxosid = "Debian_64"
     vmwareid = "debian-64"
