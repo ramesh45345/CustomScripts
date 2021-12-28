@@ -124,7 +124,7 @@ if args.desktop == "gnome":
     CFunc.run_as_user(USERNAMEVAR, "{0} --yes 1031".format(gs_installer[0]))
 elif args.desktop == "kde":
     # Plasma
-    CFunc.dnfinstall('--skip-broken install @"KDE Plasma Workspaces"')
+    CFunc.dnfinstall('--skip-broken install @"KDE Plasma Workspaces" --exclude kf5-akonadi-server-mysql')
     CFunc.sysctl_enable("sddm")
 
 # Install software for VMs
