@@ -236,6 +236,8 @@ gpgcheck=0""")
         CFunc.flatpak_install("flathub", "org.gnome.Extensions")
         # Configure permissions for apps
         CFunc.flatpak_override("org.gnome.FileRoller", "--filesystem=host")
+    elif fedora_version.endswith("kinoite"):
+        CFunc.flatpak_install("flathub", "org.kde.kclock")
 
     CFunc.chown_recursive(os.path.join(USERHOME, ".config"), USERNAMEVAR, USERGROUP)
 
