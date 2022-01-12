@@ -236,7 +236,7 @@ if __name__ == '__main__':
         CFunc.find_replace(temp_folder, "INSERTPASSWORDHERE", args.vmpass, "alis.conf")
         CFunc.find_replace(temp_folder, "INSERTHOSTNAMENAMEHERE", vm_name, "alis.conf")
         # VM commands
-        vmbootstrap_cmd = 'cd /opt/CustomScripts && git checkout -f && git pull && git checkout {gitbranch} && cd ~ && curl -sL https://raw.githubusercontent.com/picodotdev/alis/master/download.sh | bash && cp /root/alis_new.conf /root/alis.conf && cp /root/alis-packages_new.conf /root/alis-packages.conf && export LANG=en_US.UTF-8 && yes | ./alis.sh && echo "PermitRootLogin yes" >> /mnt/etc/ssh/sshd_config && poweroff'.format(gitbranch=git_branch_retrieve())
+        vmbootstrap_cmd = 'cd /opt/CustomScripts && git fetch && git checkout {gitbranch} -f && cd ~ && curl -sL https://raw.githubusercontent.com/picodotdev/alis/master/download.sh | bash && cp /root/alis_new.conf /root/alis.conf && cp /root/alis-packages_new.conf /root/alis-packages.conf && export LANG=en_US.UTF-8 && yes | ./alis.sh && echo "PermitRootLogin yes" >> /mnt/etc/ssh/sshd_config && poweroff'.format(gitbranch=git_branch_retrieve())
         vmprovision_cmd = "mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{vmuser}/.ssh; echo '{sshkey}' > ~{vmuser}/.ssh/authorized_keys; chown {vmuser}:users -R ~{vmuser}; pacman -Sy --noconfirm git; {gitcmd}; /opt/CustomScripts/MArch.py -d {desktop}".format(vmuser=args.vmuser, sshkey=sshkey, gitcmd=git_cmdline(), desktop=args.desktopenv)
         kvm_variant = "archlinux"
 
