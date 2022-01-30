@@ -574,6 +574,10 @@ if shutil.which("kwriteconfig5") and shutil.which("plasma_session"):
     subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "SensorColors" --key "network/all/download" "0,255,0"'.format(toppanel_appletgroup_id), shell=True, check=False)
     subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "SensorColors" --key "network/all/upload" "255,170,255"'.format(toppanel_appletgroup_id), shell=True, check=False)
     subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --group "org.kde.ksysguard.linechart" --group "General" --key "historyAmount" "30"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    # Battery widget
+    toppanel_appletgroup_id = toppanel_appletgroup_id + 1
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --key "plugin" "org.kde.plasma.battery"'.format(toppanel_appletgroup_id), shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --key "immutability" "1"'.format(toppanel_appletgroup_id), shell=True, check=False)
     # System Tray
     toppanel_appletgroup_id = toppanel_appletgroup_id + 1
     subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --key "immutability" "1"'.format(toppanel_appletgroup_id), shell=True, check=False)
