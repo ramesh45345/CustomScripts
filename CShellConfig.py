@@ -467,6 +467,11 @@ if rootstate is True:
     os.chmod(BASHROOTSCRIPTPATH, 0o644)
     shutil.chown(BASHSCRIPTPATH, USERNAMEVAR, USERGROUP)
 
+# Create .local/bin folder for normal user
+localbin_path = os.path.join(USERVARHOME, ".local", "bin")
+os.makedirs(localbin_path, mode=0o755)
+shutil.chown(localbin_path, USERNAMEVAR, USERGROUP)
+
 
 ######### Zsh Section #########
 # Check if zsh exists
