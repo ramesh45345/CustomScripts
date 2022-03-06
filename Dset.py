@@ -459,9 +459,9 @@ if shutil.which("kwriteconfig5") and shutil.which("plasma_session"):
     kwriteconfig("plasmanotifyrc", "Jobs", "PermanentPopups", "false")
     # Turn off monitors on lock screen
     kwriteconfig("ksmserver.notifyrc", "Event/locked", "Action", "Execute")
-    kwriteconfig("ksmserver.notifyrc", "Event/locked", "Execute", os.path.join(sys.path[0], "whloffscreen.sh"))
+    kwriteconfig("ksmserver.notifyrc", "Event/locked", "Execute", os.path.join(sys.path[0], "whloffscreen.py"))
     kwriteconfig("ksmserver.notifyrc", "Event/unlocked", "Action", "Execute")
-    kwriteconfig("ksmserver.notifyrc", "Event/unlocked", "Execute", "{0} whloffscreen.sh".format(shutil.which("killall")))
+    kwriteconfig("ksmserver.notifyrc", "Event/unlocked", "Execute", '{0} $(pgrep -f "whloffscreen.py")'.format(shutil.which("kill")))
 
     # Fish config for konsole
     if shutil.which("fish"):
