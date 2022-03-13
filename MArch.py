@@ -14,10 +14,6 @@ import CFuncExt
 # Folder of this script
 SCRIPTDIR = sys.path[0]
 
-# Exit if not root.
-CFunc.is_root(True)
-
-
 ### Functions ###
 def yay_invoke(run_as_user: str, options: str):
     """Invoke yay as normal user"""
@@ -69,6 +65,9 @@ if __name__ == '__main__':
     print("Username is:", USERNAMEVAR)
     print("Group Name is:", USERGROUP)
     print("Desktop Environment:", args.desktop)
+
+    # Exit if not root.
+    CFunc.is_root(True)
 
     # Get VM State
     vmstatus = CFunc.getvmstate()
