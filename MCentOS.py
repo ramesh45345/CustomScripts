@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Install CentOS 8 Software"""
+"""Install CentOS 9 Software"""
 
 # Python includes.
 import argparse
@@ -18,7 +18,7 @@ print("Running {0}".format(__file__))
 SCRIPTDIR = sys.path[0]
 
 # Get arguments
-parser = argparse.ArgumentParser(description='Install CentOS 8 Software.')
+parser = argparse.ArgumentParser(description='Install CentOS 9 Software.')
 parser.add_argument("-d", "--desktop", help='Desktop Environment (choices: %(choices)s) (default: %(default)s)', default="kde", choices=["gnome", "kde"])
 parser.add_argument("-x", "--nogui", help='Configure script to disable GUI.', action="store_true")
 
@@ -43,16 +43,16 @@ vmstatus = CFunc.getvmstate()
 # Enable powertools
 subprocess.run(["dnf", "config-manager", "--set-enabled", "powertools"], check=True)
 # EPEL
-CFunc.dnfinstall("https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm")
+CFunc.dnfinstall("https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm")
 # RPMFusion
-CFunc.dnfinstall("https://download1.rpmfusion.org/free/el/rpmfusion-free-release-8.noarch.rpm https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-8.noarch.rpm")
+CFunc.dnfinstall("https://download1.rpmfusion.org/free/el/rpmfusion-free-release-9.noarch.rpm https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-9.noarch.rpm")
 # Visual Studio Code
 CFunc.rpmimport("https://packages.microsoft.com/keys/microsoft.asc")
 with open("/etc/yum.repos.d/vscode.repo", 'w') as vscoderepofile_write:
     vscoderepofile_write.write('[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc"')
 # EL Repo
 # https://elrepo.org
-subprocess.run("rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org ; dnf install -y https://www.elrepo.org/elrepo-release-8.0-2.el8.elrepo.noarch.rpm ; dnf config-manager --enable elrepo-kernel", shell=True)
+subprocess.run("rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org ; dnf install -y https://elrepo.org/linux/elrepo/el9/x86_64/RPMS/elrepo-release-9.0-1.el9.noarch.rpm ; dnf config-manager --enable elrepo-kernel", shell=True)
 
 # Update system after enabling repos.
 CFunc.dnfupdate()

@@ -329,7 +329,7 @@ if 20 <= args.ostype <= 29:
     vmwareid = "fedora-64"
     kvm_os = "linux"
     kvm_variant = "rhel8.0"
-    isourl = "http://www.gtlib.gatech.edu/pub/centos/8-stream/isos/x86_64/CentOS-Stream-8-x86_64-latest-boot.iso"
+    isourl = "http://mirror.stream.centos.org/9-stream/BaseOS/x86_64/iso/CentOS-Stream-9-latest-x86_64-boot.iso"
     vmprovisionscript = "MCentOS.py"
 if args.ostype == 20:
     vmname = "Packer-CentOS-{0}".format(hvname)
