@@ -443,9 +443,9 @@ else:
 bashit_path = os.path.join(repos_path, "bash-it")
 if os.access(repos_path, os.W_OK):
     CFunc.gitclone("https://github.com/Bash-it/bash-it", bashit_path)
+if os.path.isdir(bashit_path):
     # chmod a+rwx bash-it
     CFunc.chmod_recursive(bashit_path, 0o777)
-if os.path.isdir(bashit_path):
     subprocess.run("""
     [ "$(id -u)" = "0" ] && HOME={0}
     {1}/install.sh --silent --overwrite-backup
@@ -469,8 +469,8 @@ if rootstate is True:
 
 # Create .local/bin folder for normal user
 localbin_path = os.path.join(USERVARHOME, ".local", "bin")
-os.makedirs(localbin_path, mode=0o755)
-shutil.chown(localbin_path, USERNAMEVAR, USERGROUP)
+os.makedirs(localbin_path, mode=0o755, exist_ok=True)
+CFunc.chown_recursive(os.path.dirname(localbin_path), USERNAMEVAR, USERGROUP)
 
 
 ######### Zsh Section #########
