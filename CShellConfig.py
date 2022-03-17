@@ -470,7 +470,8 @@ if rootstate is True:
 # Create .local/bin folder for normal user
 localbin_path = os.path.join(USERVARHOME, ".local", "bin")
 os.makedirs(localbin_path, mode=0o755, exist_ok=True)
-CFunc.chown_recursive(os.path.dirname(localbin_path), USERNAMEVAR, USERGROUP)
+shutil.chown(os.path.dirname(localbin_path), USERNAMEVAR, USERGROUP)
+shutil.chown(localbin_path, USERNAMEVAR, USERGROUP)
 
 
 ######### Zsh Section #########
@@ -479,7 +480,7 @@ if args.zsh is True and shutil.which('zsh'):
     ZSHPATH = shutil.which('zsh')
 
     # Install oh-my-zsh for user
-    CFunc.gitclone("git://github.com/robbyrussell/oh-my-zsh.git", os.path.join(USERVARHOME, ".oh-my-zsh"))
+    CFunc.gitclone("https://github.com/robbyrussell/oh-my-zsh.git", os.path.join(USERVARHOME, ".oh-my-zsh"))
     # Install zsh-syntax-highlighting
     CFunc.gitclone("https://github.com/zsh-users/zsh-syntax-highlighting.git", "{0}/.oh-my-zsh/plugins/zsh-syntax-highlighting".format(USERVARHOME))
     # Install zsh-autosuggestions
