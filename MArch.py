@@ -230,13 +230,6 @@ if __name__ == '__main__':
     CFunc.pacman_install("smartmontools hdparm")
 
     if not args.nogui:
-        # Install snapd
-        yay_install(USERNAMEVAR, "snapd")
-        if not os.path.islink("/snap"):
-            os.symlink("/var/lib/snapd/snap", "/snap", target_is_directory=True)
-        CFunc.AddLineToSudoersFile(sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("snap")))
-        CFunc.sysctl_enable("snapd.socket", error_on_fail=True)
-
         # Flatpak setup
         CFunc.pacman_install("flatpak xdg-desktop-portal")
         CFunc.AddLineToSudoersFile(sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("flatpak")))
