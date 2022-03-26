@@ -443,9 +443,9 @@ else:
 bashit_path = os.path.join(repos_path, "bash-it")
 if os.access(repos_path, os.W_OK):
     CFunc.gitclone("https://github.com/Bash-it/bash-it", bashit_path)
+if os.path.isdir(bashit_path):
     # chmod a+rwx bash-it
     CFunc.chmod_recursive(bashit_path, 0o777)
-if os.path.isdir(bashit_path):
     subprocess.run("""
     [ "$(id -u)" = "0" ] && HOME={0}
     {1}/install.sh --silent --overwrite-backup
@@ -469,7 +469,8 @@ if rootstate is True:
 
 # Create .local/bin folder for normal user
 localbin_path = os.path.join(USERVARHOME, ".local", "bin")
-os.makedirs(localbin_path, mode=0o755)
+os.makedirs(localbin_path, mode=0o755, exist_ok=True)
+shutil.chown(os.path.dirname(localbin_path), USERNAMEVAR, USERGROUP)
 shutil.chown(localbin_path, USERNAMEVAR, USERGROUP)
 
 
@@ -479,7 +480,7 @@ if args.zsh is True and shutil.which('zsh'):
     ZSHPATH = shutil.which('zsh')
 
     # Install oh-my-zsh for user
-    CFunc.gitclone("git://github.com/robbyrussell/oh-my-zsh.git", os.path.join(USERVARHOME, ".oh-my-zsh"))
+    CFunc.gitclone("https://github.com/robbyrussell/oh-my-zsh.git", os.path.join(USERVARHOME, ".oh-my-zsh"))
     # Install zsh-syntax-highlighting
     CFunc.gitclone("https://github.com/zsh-users/zsh-syntax-highlighting.git", "{0}/.oh-my-zsh/plugins/zsh-syntax-highlighting".format(USERVARHOME))
     # Install zsh-autosuggestions
