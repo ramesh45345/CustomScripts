@@ -40,8 +40,6 @@ print("Group Name is:", USERGROUP)
 vmstatus = CFunc.getvmstate()
 
 ### Repos ###
-# Enable powertools
-subprocess.run(["dnf", "config-manager", "--set-enabled", "powertools"], check=True)
 # EPEL
 CFunc.dnfinstall("https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm")
 # RPMFusion
@@ -59,7 +57,8 @@ CFunc.dnfupdate()
 
 ### Install CentOS Software ###
 # Cli tools
-CFunc.dnfinstall("zsh fish nano tmux iotop rsync p7zip p7zip-plugins zip unzip xdg-utils xdg-user-dirs util-linux-user redhat-lsb-core openssh-server openssh-clients avahi")
+CFunc.dnfinstall("zsh fish nano tmux iotop rsync p7zip p7zip-plugins zip unzip xdg-utils xdg-user-dirs util-linux-user openssh-server openssh-clients avahi")
+# CFunc.dnfinstall("redhat-lsb-core")
 CFunc.sysctl_enable("sshd avahi-daemon")
 CFunc.dnfinstall("google-noto-sans-fonts")
 # Samba
@@ -72,7 +71,7 @@ subprocess.run("sudo chmod u+s /sbin/mount.cifs", shell=True)
 # NTP Configuration
 subprocess.run("systemctl enable systemd-timesyncd; timedatectl set-local-rtc false; timedatectl set-ntp 1", shell=True)
 # Install kernel
-CFunc.dnfinstall("kernel-ml kernel-ml-devel kernel-ml-modules-extra")
+# CFunc.dnfinstall("kernel-ml kernel-ml-devel kernel-ml-modules-extra")
 # Install powerline fonts
 powerline_git_path = os.path.join(tempfile.gettempdir(), "pl-fonts")
 CFunc.gitclone("https://github.com/powerline/fonts", powerline_git_path)
@@ -93,13 +92,6 @@ if not args.nogui:
     CFunc.dnfinstall("firefox")
     # Editors
     CFunc.dnfinstall("code")
-    # Flameshot
-    CFunc.dnfinstall("flameshot")
-    os.makedirs(os.path.join(USERHOME, ".config", "autostart"), exist_ok=True)
-    # Start flameshot on user login.
-    if os.path.isfile(os.path.join(os.sep, "usr", "share", "applications", "flameshot.desktop")):
-        shutil.copy(os.path.join(os.sep, "usr", "share", "applications", "flameshot.desktop"), os.path.join(USERHOME, ".config", "autostart"))
-    CFunc.chown_recursive(os.path.join(USERHOME, ".config", ), USERNAMEVAR, USERGROUP)
 
     # Numix Icon Theme
     CFuncExt.numix_icons(os.path.join(os.sep, "usr", "local", "share", "icons"))
@@ -174,6 +166,14 @@ if not args.nogui:
 
     # Flatpak apps
     subprocess.run(os.path.join(SCRIPTDIR, "CFlatpakConfig.py"), shell=True, check=True)
+    # Flameshot
+    CFunc.flatpak_install("flathub", "org.flameshot.Flameshot")
+    os.makedirs(os.path.join(USERHOME, ".config", "autostart"), exist_ok=True)
+    # Start flameshot on user login.
+    shutil.copy("/var/lib/flatpak/app/org.flameshot.Flameshot/current/active/export/share/applications/org.flameshot.Flameshot.desktop", os.path.join(USERHOME, ".config", "autostart"))
+    shutil.chown(os.path.join(USERHOME, ".config"), USERNAMEVAR, USERGROUP)
+    shutil.chown(os.path.join(USERHOME, ".config", "autostart"), USERNAMEVAR, USERGROUP)
+    shutil.chown(os.path.join(USERHOME, ".config", "autostart", "org.flameshot.Flameshot.desktop"), USERNAMEVAR, USERGROUP)
 
 # Disable Selinux
 # To get selinux status: sestatus, getenforce
