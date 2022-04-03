@@ -858,35 +858,44 @@ CustomCommand={0}
 
 
 # Firefox settings.
-# If prefs.js for firefox was created, set the profile information.
-firefox_profiles_path = os.path.join(USERHOME, ".mozilla", "firefox")
-if os.path.isdir(firefox_profiles_path):
-    # Find profile folders
-    with os.scandir(firefox_profiles_path) as it:
-        for entry in it:
-            firefox_profilefolder = os.path.join(firefox_profiles_path, entry.name)
-            if "default" in entry.name and os.path.isdir(firefox_profilefolder):
-                prefsjs_file = os.path.join(firefox_profilefolder, "prefs.js")
-                # Find a prefs.js in a potential profile folder
-                if os.path.isfile(prefsjs_file):
-                    os.chdir(firefox_profilefolder)
-                    print("Editing Firefox preferences in {0}.".format(prefsjs_file))
-                    firefox_modify_settings("general.autoScroll", "true", prefsjs_file)
-                    firefox_modify_settings("extensions.pocket.enabled", "false", prefsjs_file)
-                    firefox_modify_settings("browser.tabs.drawInTitlebar", "true", prefsjs_file)
-                    firefox_modify_settings("browser.aboutConfig.showWarning", "false", prefsjs_file)
-                    firefox_modify_settings("browser.download.useDownloadDir", "false", prefsjs_file)
-                    firefox_modify_settings("browser.startup.page", "3", prefsjs_file)
-                    firefox_modify_settings("app.shield.optoutstudies.enabled", "false", prefsjs_file)
-                    firefox_modify_settings("browser.newtabpage.activity-stream.showSponsored", "false", prefsjs_file)
-                    firefox_modify_settings("browser.newtabpage.enabled", "false", prefsjs_file)
-                    firefox_modify_settings("browser.startup.homepage", '"about:blank"', prefsjs_file)
-                    # DNS-over-HTTPS
-                    firefox_modify_settings("network.trr.mode", "2", prefsjs_file)
-                    firefox_modify_settings("network.trr.bootstrapAddress", '"1.1.1.1"', prefsjs_file)
-                    # Disable notifications
-                    firefox_modify_settings("dom.webnotifications.enabled", "false", prefsjs_file)
-                    # Autoplay (5 blocks audio and video for all sites by default)
-                    firefox_modify_settings("media.autoplay.default", "5", prefsjs_file)
-                    # Sponsored suggest
-                    firefox_modify_settings("browser.urlbar.suggest.quicksuggest.sponsored", "false", prefsjs_file)
+# If prefs.js for firefox was created, set the profile information. Search for natively installed firefox, flatpak firefox, and flatpak librewolf.
+firefox_profiles_paths = [os.path.join(USERHOME, ".mozilla", "firefox"), os.path.join(USERHOME, ".var", "app", "org.mozilla.firefox", ".mozilla", "firefox"), os.path.join(USERHOME, ".var", "app", "io.gitlab.librewolf-community", ".librewolf")]
+for ff_path in firefox_profiles_paths:
+    if os.path.isdir(ff_path):
+        # Find profile folders
+        with os.scandir(ff_path) as it:
+            for entry in it:
+                firefox_profilefolder = os.path.join(ff_path, entry.name)
+                if "default" in entry.name and os.path.isdir(firefox_profilefolder):
+                    prefsjs_file = os.path.join(firefox_profilefolder, "prefs.js")
+                    # Find a prefs.js in a potential profile folder
+                    if os.path.isfile(prefsjs_file):
+                        os.chdir(firefox_profilefolder)
+                        print("Editing Firefox preferences in {0}.".format(prefsjs_file))
+                        firefox_modify_settings("general.autoScroll", "true", prefsjs_file)
+                        firefox_modify_settings("extensions.pocket.enabled", "false", prefsjs_file)
+                        firefox_modify_settings("browser.tabs.drawInTitlebar", "true", prefsjs_file)
+                        firefox_modify_settings("browser.aboutConfig.showWarning", "false", prefsjs_file)
+                        firefox_modify_settings("browser.download.useDownloadDir", "false", prefsjs_file)
+                        firefox_modify_settings("browser.startup.page", "3", prefsjs_file)
+                        firefox_modify_settings("app.shield.optoutstudies.enabled", "false", prefsjs_file)
+                        firefox_modify_settings("browser.newtabpage.activity-stream.showSponsored", "false", prefsjs_file)
+                        firefox_modify_settings("browser.newtabpage.enabled", "false", prefsjs_file)
+                        firefox_modify_settings("browser.startup.homepage", '"about:blank"', prefsjs_file)
+                        # DNS-over-HTTPS
+                        firefox_modify_settings("network.trr.mode", "2", prefsjs_file)
+                        firefox_modify_settings("network.trr.bootstrapAddress", '"1.1.1.1"', prefsjs_file)
+                        # Disable notifications
+                        firefox_modify_settings("dom.webnotifications.enabled", "false", prefsjs_file)
+                        # Autoplay (5 blocks audio and video for all sites by default)
+                        firefox_modify_settings("media.autoplay.default", "5", prefsjs_file)
+                        # Sponsored suggest
+                        firefox_modify_settings("browser.urlbar.suggest.quicksuggest.sponsored", "false", prefsjs_file)
+                        if "librewolf" in ff_path:
+                            firefox_modify_settings("network.dns.disableIPv6", "false", prefsjs_file)
+                            firefox_modify_settings("webgl.disabled", "false", prefsjs_file)
+                            firefox_modify_settings("identity.fxaccounts.enabled", "true", prefsjs_file)
+                            firefox_modify_settings("privacy.clearOnShutdown.history", "false", prefsjs_file)
+                            firefox_modify_settings("privacy.clearOnShutdown.downloads", "false", prefsjs_file)
+                            firefox_modify_settings("privacy.sanitize.sanitizeOnShutdown", "false", prefsjs_file)
+                            firefox_modify_settings("security.OCSP.require", "false", prefsjs_file)
