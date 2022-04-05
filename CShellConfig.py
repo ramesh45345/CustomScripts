@@ -579,8 +579,10 @@ if args.fish is True and shutil.which('fish'):
         # Install bobthefish
         if rootstate is True:
             CFunc.run_as_user(USERNAMEVAR, "omf install bobthefish", shutil.which("fish"), error_on_fail=True)
+            CFunc.run_as_user(USERNAMEVAR, "omf install foreign-env", shutil.which("fish"), error_on_fail=True)
         else:
             subprocess.Popen("omf install bobthefish", shell=True, executable=shutil.which("fish"))
+            subprocess.Popen("omf install foreign-env", shell=True, executable=shutil.which("fish"))
 
     # Personal note: To uninstall omf completely, use the following command as a normal user:
     # omf destroy; rm -rf ~/.config/omf/ ~/.cache/omf/ ~/.local/share/omf/
