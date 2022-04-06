@@ -607,7 +607,14 @@ if 1 <= args.ostype <= 5:
     data['provisioners'][0]["type"] = "shell"
     data['provisioners'][0]["inline"] = "dnf install -y git; {2}; /opt/CustomScripts/{0} {1}".format(vmprovisionscript, vmprovision_opts, git_cmdline())
 if args.ostype == 5:
-    data['provisioners'][0]["inline"] = "dnf install -y git; {2}; /opt/CustomScripts/{0} {1}; /opt/CustomScripts/Aiso_CreateVM.py".format(vmprovisionscript, vmprovision_opts, git_cmdline())
+    data['provisioners'][0]["inline"] = "dnf install -y git; {2}; /opt/CustomScripts/{0} {1}; systemctl reboot".format(vmprovisionscript, vmprovision_opts, git_cmdline())
+    data['provisioners'][0]["expect_disconnect"] = True
+    data['provisioners'].append('')
+    data['provisioners'][1] = {}
+    data['provisioners'][1]["type"] = "shell"
+    data['provisioners'][1]["inline"] = "/opt/CustomScripts/Aiso_CreateVM.py"
+    data['provisioners'][1]["pause_before"] = "15s"
+    data['provisioners'][1]["timeout"] = "90m"
 if args.ostype == 8:
     CFunc.find_replace(tempunattendfolder, "silverblue", "kinoite", "silverblue.cfg")
 if 8 <= args.ostype <= 9:
