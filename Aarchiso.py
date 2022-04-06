@@ -109,7 +109,6 @@ onboard
 networkmanager
 network-manager-applet
 gnome-keyring
-gnome-icon-theme
 firefox
 gvfs
 gvfs-smb
@@ -131,7 +130,7 @@ mate-system-monitor
 mate-terminal
 mate-utils
 pluma
-mate-icon-theme-faenza
+mate-icon-theme
 ttf-dejavu
 ttf-liberation
 ttf-roboto
