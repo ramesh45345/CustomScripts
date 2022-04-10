@@ -49,7 +49,7 @@ def cmd_pips(cmd_type=int, enabled=bool):
         subprocess.run("pip3 install pylama pylama-pylint flake8", shell=True, check=True)
 def ce_ins(vscode_cmd=list, extension=str):
     """Install an extension"""
-    subprocess.run(vscode_cmd + ["--install-extension", extension, "--force"], check=True, shell=False)
+    subprocess.run(vscode_cmd + ["--install-extension", extension, "--force"], check=False, shell=False)
 def codeconfig_installext(vscode_cmd=list):
     """Install vscode extensions"""
     print("\nInstalling VS Code extensions.")
@@ -118,8 +118,10 @@ code_array[3]["path"] = os.path.join(userhome, "AppData", "Roaming", "Code", "Us
 # VSCodium
 if shutil.which("vscodium"):
     code_array[4]["cmd"] = ["vscodium"]
+    code_array[4]["en"] = True
 elif shutil.which("codium"):
     code_array[4]["cmd"] = ["codium"]
+    code_array[4]["en"] = True
 else:
     code_array[4]["cmd"] = None
     code_array[4]["en"] = False
@@ -135,7 +137,7 @@ code_array[5]["path"] = os.path.join(userhome, ".var", "app", "com.vscodium.codi
 
 # Force config to use argument type if specified.
 if args.type is not None:
-    for idx in range(1, 5):
+    for idx in range(1, 6):
         if idx != args.type:
             code_array[idx]["en"] = False
 
@@ -158,7 +160,7 @@ for idx in range(1, 6):
         cmd_pips(idx, code_array[idx]["en"])
 
         # Add marketplace for vscodium
-        if idx == 2 or idx == 5:
+        if idx == 4 or idx == 5:
             os.makedirs(os.path.dirname(code_array[idx]["path"]), exist_ok=True)
             product_json_path = os.path.join(os.path.dirname(code_array[idx]["path"]), "product.json")
             # Json data
