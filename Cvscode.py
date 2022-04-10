@@ -35,16 +35,6 @@ def cmd_silent(cmd=list):
     status = subprocess.run(cmd, check=False, shell=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode
     return status
 
-def cmd_distropkgs(cmd_type=int, enabled=bool):
-    """Install distro specific packages"""
-    if cmd_type == 1 or cmd_type == 3 or cmd_type == 5 and enabled is True:
-        if shutil.which("dnf"):
-            print("Install dnf dependencies.")
-            CFunc.dnfinstall("python3-pip ShellCheck")
-        elif shutil.which("apt-get"):
-            print("Install apt dependencies.")
-            CFunc.aptinstall("python3-pip shellcheck")
-
 def cmd_pips(cmd_type=int, enabled=bool):
     """Install python pip packages"""
     pip_packages = "pylama pylama-pylint flake8"
@@ -56,7 +46,7 @@ def cmd_pips(cmd_type=int, enabled=bool):
         subprocess.run("pip install {0}".format(pip_packages), shell=True, check=True)
     # Other Linux types
     if cmd_type == 1 or cmd_type == 3 or cmd_type == 5 and enabled is True and shutil.which("pip3"):
-        subprocess.run("{0}pip3 install pylama pylama-pylint flake8".format(CFunc.sudocmd(True)), shell=True, check=True)
+        subprocess.run("pip3 install pylama pylama-pylint flake8", shell=True, check=True)
 def ce_ins(vscode_cmd=list, extension=str):
     """Install an extension"""
     subprocess.run(vscode_cmd + ["--install-extension", extension, "--force"], check=True, shell=False)
@@ -116,32 +106,32 @@ else:
     code_array[2]["en"] = False
 code_array[2]["path"] = os.path.join(userhome, ".var", "app", "com.visualstudio.code-oss", "config", "Code - OSS", "User")
 
-# Snap
-code_array[3]["cmd"] = ["snap", "run", "vscode.code"]
-if shutil.which("snap") and cmd_silent(code_array[3]["cmd"] + ["-h"]) == 0:
+# Windows
+code_array[3]["cmd"] = [os.path.join("C:", os.sep, "Program Files", "Microsoft VS Code", "bin", "code.cmd")]
+# Since the command is in an array, index the 0th element to run which on it.
+if CFunc.is_windows() and shutil.which(code_array[4]["cmd"][0]):
     code_array[3]["en"] = True
 else:
     code_array[3]["en"] = False
-code_array[3]["path"] = os.path.join(userhome, ".config", "Code", "User")
-
-# Windows
-code_array[4]["cmd"] = [os.path.join("C:", os.sep, "Program Files", "Microsoft VS Code", "bin", "code.cmd")]
-# Since the command is in an array, index the 0th element to run which on it.
-if CFunc.is_windows() and shutil.which(code_array[4]["cmd"][0]):
-    code_array[4]["en"] = True
-else:
-    code_array[4]["en"] = False
-code_array[4]["path"] = os.path.join(userhome, "AppData", "Roaming", "Code", "User")
+code_array[3]["path"] = os.path.join(userhome, "AppData", "Roaming", "Code", "User")
 
 # VSCodium
 if shutil.which("vscodium"):
-    code_array[5]["cmd"] = ["vscodium"]
+    code_array[4]["cmd"] = ["vscodium"]
 elif shutil.which("codium"):
-    code_array[5]["cmd"] = ["codium"]
+    code_array[4]["cmd"] = ["codium"]
 else:
-    code_array[5]["cmd"] = None
+    code_array[4]["cmd"] = None
+    code_array[4]["en"] = False
+code_array[4]["path"] = os.path.join(userhome, ".config", "VSCodium", "User")
+
+# VSCodium Flatpak
+code_array[5]["cmd"] = ["flatpak", "run", "--command=codium", "com.vscodium.codium"]
+if shutil.which("flatpak") and cmd_silent(code_array[5]["cmd"] + ["-h"]) == 0:
+    code_array[5]["en"] = True
+else:
     code_array[5]["en"] = False
-code_array[5]["path"] = os.path.join(userhome, ".config", "VSCodium", "User")
+code_array[5]["path"] = os.path.join(userhome, ".var", "app", "com.vscodium.codium", "config", "VSCodium", "User")
 
 # Force config to use argument type if specified.
 if args.type is not None:
@@ -152,22 +142,40 @@ if args.type is not None:
 print("""Enabled choices:
 1 (Native): {0}
 2 (Flatpak OSS): {1}
-3 (Snap): {2}
-4 (Windows): {3}
-5 (VSCodium): {4}
+3 (Windows): {2}
+4 (VSCodium): {3}
+5 (VSCodium Flatpak): {4}
 """.format(code_array[1]["en"], code_array[2]["en"], code_array[3]["en"], code_array[4]["en"], code_array[5]["en"]))
 
 
 ########################## Begin Code ##########################
 # Process options
-for idx in range(1, 5):
+for idx in range(1, 6):
     # Only process enabled options.
     if code_array[idx]["en"] is True:
         print("\nProcessing option {0}\n".format(idx))
-        # Install OS based packages
-        cmd_distropkgs(idx, code_array[idx]["en"])
         # Pip Commands
         cmd_pips(idx, code_array[idx]["en"])
+
+        # Add marketplace for vscodium
+        if idx == 2 or idx == 5:
+            os.makedirs(os.path.dirname(code_array[idx]["path"]), exist_ok=True)
+            product_json_path = os.path.join(os.path.dirname(code_array[idx]["path"]), "product.json")
+            # Json data
+            productjson = {}
+            productjson["workbench.startupEditor"] = "newUntitledFile"
+            productjson["window.titleBarStyle"] = "custom"
+            productjson["editor.renderWhitespace"] = "all"
+            productjson["editor.wordWrap"] = "on"
+            productjson["extensionsGallery"] = {
+                "serviceUrl": "https://marketplace.visualstudio.com/_apis/public/gallery",
+                "cacheUrl": "https://vscode.blob.core.windows.net/gallery/index",
+                "itemUrl": "https://marketplace.visualstudio.com/items",
+                "controlUrl": "",
+                "recommendationsUrl": ""
+            }
+            with open(product_json_path, 'w') as f:
+                json.dump(productjson, f, indent=2)
 
         # Extensions
         codeconfig_installext(code_array[idx]["cmd"])
@@ -179,7 +187,7 @@ for idx in range(1, 5):
         data["editor.renderWhitespace"] = "all"
         data["editor.wordWrap"] = "on"
         # Flatpak specific options
-        if idx == 2:
+        if idx == 2 or idx == 5:
             # Flatpak specific options
             data["terminal.integrated.profiles.linux"] = {
                 "bash": {
