@@ -22,8 +22,12 @@ def immutable_root_detect():
     if shutil.which("rpm-ostree"):
         detected = True
     return detected
-def immutable_root(user: str):
-    """Install service for immutable operating system. All commands here require root."""
+def create_nix_root(user: str):
+    """
+    Create /nix root with correct ownership.
+    Install service which creates /nix for immutable operating system.
+    All commands here require root.
+    """
     if immutable_root_detect() is True:
         # Create /nix for immutable fs OS
         nix_service_text = """
@@ -44,6 +48,9 @@ WantedBy=local-fs.target
         CFunc.systemd_createsystemunit("mount-nix-prepare.service", nix_service_text, sysenable=True)
         subprocess.run(["systemctl", "restart", "mount-nix-prepare.service"], check=True)
         shutil.chown(os.path.join(os.sep, "nix"), user)
+    else:
+        os.makedirs("/nix", exist_ok=True)
+        shutil.chown("/nix", user)
 def install_profile_config():
     """Install system profile script."""
     with open(os.path.join(os.sep, "etc", "profile.d", "rcustom_nix.sh"), 'w') as f:
@@ -79,7 +86,7 @@ if __name__ == '__main__':
     USERNAMEVAR, USERGROUP, USERHOME = CFunc.getnormaluser(args.user)
 
     # Install immutable root services.
-    immutable_root(USERNAMEVAR)
+    create_nix_root(USERNAMEVAR)
     # Install profile modifications.
     install_profile_config()
     # Perform install for user if requested.
