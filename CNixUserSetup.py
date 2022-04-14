@@ -89,6 +89,7 @@ if __name__ == '__main__':
     # Get arguments
     parser = argparse.ArgumentParser(description='Setup nix.')
     parser.add_argument("-u", "--uninstall", help='Remove nix.', action="store_true")
+    parser.add_argument("-m", "--homemanager", help='Only install home-manager (i.e. for NixOS).', action="store_true")
     parser.add_argument("-n", "--noprompt", help="Make changes without prompting.", action="store_true")
 
     # Save arguments.
@@ -105,6 +106,8 @@ if __name__ == '__main__':
 
     if args.uninstall:
         uninstall_nix()
+    elif args.homemanager:
+        install_homemanager()
     else:
         # Install Nix
         install_nix()
