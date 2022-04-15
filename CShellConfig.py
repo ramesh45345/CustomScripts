@@ -98,6 +98,12 @@ addtopath "$HOME/.local/bin"
 addtopath "/snap/bin"
 addtopath "/var/lib/snapd/snap/bin"
 
+# Source nix files
+if [[ ":$PATH:" != *:"$HOME/.nix-profile/bin":* ]] && [ -d "$HOME/.nix-profile/bin" ]; then
+    source $HOME/.nix-profile/etc/profile.d/nix.sh
+    source $HOME/.nix-profile/etc/profile.d/hm-session-vars.sh
+fi
+
 # Set editor to nano
 export EDITOR=nano
 
@@ -670,6 +676,12 @@ pathadd "$HOME/.local/bin"
 # Add snap paths
 pathadd "/snap/bin"
 pathadd "/var/lib/snapd/snap/bin"
+
+# Source nix files
+if checkpath "$HOME/.nix-profile/bin"; and test -d "$HOME/.nix-profile/bin"
+    fenv source $HOME/.nix-profile/etc/profile.d/nix.sh
+    fenv source $HOME/.nix-profile/etc/profile.d/hm-session-vars.sh
+end
 
 function sl
     sudo su -l root
