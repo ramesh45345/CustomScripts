@@ -209,6 +209,7 @@ for idx in range(1, 6):
         data["telemetry.telemetryLevel"] = "error"
         data["workbench.iconTheme"] = "vscode-icons"
         data["gitlens.showWelcomeOnInstall"] = False
+        data["git.confirmSync"] = False
         # Python Config
         data["python.linting.maxNumberOfProblems"] = 500
         data["python.linting.pylintArgs"] = ["--disable=C0301,C0103"]
