@@ -50,10 +50,15 @@ def cmd_pips(cmd_type=int, enabled=bool):
 def ce_ins(vscode_cmd=list, extension=str):
     """Install an extension"""
     subprocess.run(vscode_cmd + ["--install-extension", extension, "--force"], check=False, shell=False)
+def ce_unins(vscode_cmd=list, extension=str):
+    """Uninstall an extension"""
+    subprocess.run(vscode_cmd + ["--uninstall-extension", extension, "--force"], check=False, shell=False)
 def codeconfig_installext(vscode_cmd=list):
     """Install vscode extensions"""
     print("\nInstalling VS Code extensions.")
+    ce_ins(vscode_cmd, "ms-pyright.pyright")
     ce_ins(vscode_cmd, "ms-python.python")
+    ce_unins(vscode_cmd, "ms-python.vscode-pylance")
     ce_ins(vscode_cmd, "ms-azuretools.vscode-docker")
     ce_ins(vscode_cmd, "mikestead.dotenv")
     ce_ins(vscode_cmd, "timonwong.shellcheck")
@@ -165,10 +170,9 @@ for idx in range(1, 6):
             product_json_path = os.path.join(os.path.dirname(code_array[idx]["path"]), "product.json")
             # Json data
             productjson = {}
-            productjson["workbench.startupEditor"] = "newUntitledFile"
-            productjson["window.titleBarStyle"] = "custom"
-            productjson["editor.renderWhitespace"] = "all"
-            productjson["editor.wordWrap"] = "on"
+            # Uncomment if issues with extensions not being enabled.
+            # productjson["nameShort"] = "Visual Studio Code"
+            # productjson["nameLong"] = "Visual Studio Code"
             productjson["extensionsGallery"] = {
                 "serviceUrl": "https://marketplace.visualstudio.com/_apis/public/gallery",
                 "cacheUrl": "https://vscode.blob.core.windows.net/gallery/index",
@@ -201,18 +205,20 @@ for idx in range(1, 6):
                 },
             }
             data["terminal.integrated.defaultProfile.linux"] = "fphost"
+        data["security.workspace.trust.enabled"] = False
+        data["telemetry.telemetryLevel"] = "error"
+        data["workbench.iconTheme"] = "vscode-icons"
+        data["gitlens.showWelcomeOnInstall"] = False
+        data["git.confirmSync"] = False
         # Python Config
-        if not CFunc.is_windows():
-            data["python.pythonPath"] = "python3"
         data["python.linting.maxNumberOfProblems"] = 500
         data["python.linting.pylintArgs"] = ["--disable=C0301,C0103"]
         data["python.linting.pylamaEnabled"] = True
         data["python.linting.pylamaArgs"] = ["-i", "E501,E266,E302"]
         data["python.linting.flake8Enabled"] = True
         data["python.linting.flake8Args"] = ["--ignore=E501,E302,E266"]
-        data["python.showStartPage"] = False
-        data["workbench.iconTheme"] = "vscode-icons"
-        data["security.workspace.trust.enabled"] = False
+        data["python.analysis.typeCheckingMode"] = "off"
+
         # Print the json data for debugging purposes.
         # print(json.dumps(data, indent=2))
 
