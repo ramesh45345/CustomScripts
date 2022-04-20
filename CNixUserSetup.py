@@ -3,6 +3,7 @@
 
 # Python includes.
 import argparse
+import fileinput
 import os
 import subprocess
 import sys
@@ -57,6 +58,7 @@ def configure_nix():
         os.makedirs(os.path.join(homepath, ".config", "nix"), exist_ok=True)
         with open(os.path.join(homepath, ".config", "nix", "nix.conf"), 'w') as f:
             f.write("experimental-features = nix-command flakes\n")
+
     # config.nix
     if not os.path.isfile(os.path.join(homepath, ".config", "nixpkgs", "config.nix")):
         os.makedirs(os.path.join(homepath, ".config", "nixpkgs"), exist_ok=True)
@@ -67,6 +69,22 @@ def configure_nix():
   allowUnfree = true;
 }
 """)
+
+    # home.nix
+    homeman_filepath = os.path.join(homepath, ".config", "nix", "home.nix")
+#    Check if the pattern isn't found
+    if os.path.isfile(homeman_filepath) and not CFunc.find_pattern_infile(homeman_filepath, "home.packages = with pkgs;"):
+        print("Adding home.packages to Home Manager config.")
+        for line in fileinput.FileInput(homeman_filepath, inplace=1):
+            # Insert the package line after the homedirectory entry.
+            if "home.homeDirectory = " in line:
+                line = line.replace(line, line + """
+  home.packages = with pkgs; [
+  ];
+""")
+        print(line, end='')
+    else:
+        print("home.packages found in config file. Not editing.")
 def uninstall_nix():
     """Uninstall nix."""
     subprocess.run("sudo rm -rf $HOME/.nix-profile $HOME/.nix-profile $HOME/.nix-channels $HOME/.nix-defexpr", shell=True, check=False)
