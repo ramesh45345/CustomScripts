@@ -22,13 +22,13 @@ def immutable_root_detect():
     if shutil.which("rpm-ostree"):
         detected = True
     return detected
-def create_nix_root(user: str):
+def create_nix_root_immutable(user: str, path: str = "/var/lib"):
     """
     Create /nix root with correct ownership.
     Install service which creates /nix for immutable operating system.
-    All commands here require root.
+    Path must not use "nix" in the name. Example: /var/lib, /mnt/Storage/VMs
     """
-    if immutable_root_detect() is True:
+    if os.path.isdir(path):
         # Create /nix for immutable fs OS
         nix_service_text = """
 [Unit]
@@ -36,21 +36,27 @@ Description=Prepare nix mount points
 
 [Service]
 Type=oneshot
+RequiresMountsFor={0}
 ExecStartPre=chattr -i /
 ExecStart=/bin/sh -c "mkdir -p /nix"
-ExecStart=/bin/sh -c "mkdir -p /var/lib/nix"
-ExecStart=/bin/sh -c "mount --bind /var/lib/nix /nix"
+ExecStart=/bin/sh -c "mkdir -p {0}/nix"
+ExecStart=/bin/sh -c "mount --bind {0}/nix /nix"
 ExecStopPost=chattr +i /
 
 [Install]
 WantedBy=local-fs.target
-"""
+    """.format(path)
         CFunc.systemd_createsystemunit("mount-nix-prepare.service", nix_service_text, sysenable=True)
         subprocess.run(["systemctl", "restart", "mount-nix-prepare.service"], check=True)
         shutil.chown(os.path.join(os.sep, "nix"), user)
-    else:
-        os.makedirs("/nix", exist_ok=True)
-        shutil.chown("/nix", user)
+def create_nix_root_mutable_bind(user: str, path: str):
+    """Create bind mount for /nix on mutable os."""
+
+def create_nix_root_mutable_nobind(user: str):
+    """Create /nix on local filesystem."""
+    # Just using /nix on local filesystem.
+    os.makedirs("/nix", exist_ok=True)
+    shutil.chown("/nix", user)
 def install_profile_config():
     """Install system profile script."""
     with open(os.path.join(os.sep, "etc", "profile.d", "rcustom_nix.sh"), 'w') as f:
@@ -77,6 +83,7 @@ if __name__ == '__main__':
     # Get arguments
     parser = argparse.ArgumentParser(description='Setup nix.')
     parser.add_argument("-u", "--user", help='User to set up nix as.', default=USERNAMEVAR)
+    parser.add_argument("-p", "--nixpath", help='Specify custom path to bind mount /nix at.', type=str)
     parser.add_argument("-i", "--install", help="Execute non-root install.", action="store_true")
 
     # Save arguments.
@@ -85,8 +92,20 @@ if __name__ == '__main__':
     # Get non-root user information for specified user.
     USERNAMEVAR, USERGROUP, USERHOME = CFunc.getnormaluser(args.user)
 
-    # Install immutable root services.
-    create_nix_root(USERNAMEVAR)
+    # Create nix root.
+    immutable_root = immutable_root_detect()
+    if os.path.isdir(args.nixpath) and immutable_root is True:
+        create_nix_root_immutable(USERNAMEVAR, os.path.abspath(args.nixpath))
+    # If no path specified and immutable root.
+    elif os.path.isdir(path) is False and immutable_root is True:
+        create_nix_root_immutable(USERNAMEVAR)
+    # If path specified and no immutable root.
+    elif os.path.isdir(path) is True and immutable_root is False:
+        create_nix_root_mutable_bind(USERNAMEVAR, os.path.abspath(args.nixpath))
+    # If no path specified and no immutable root.
+    else:
+        create_nix_root_mutable_nobind(USERNAMEVAR)
+
     # Install profile modifications.
     install_profile_config()
     # Perform install for user if requested.

@@ -97,7 +97,7 @@ def uninstall_nix():
         subprocess.run('sudo rm -rf /nix', shell=True, check=False)
     if os.path.isdir("/var/lib/nix"):
         subprocess.run("sudo rm -rf /var/lib/nix", shell=True, check=False)
-    print("INFO: Remove nix information from '~/.bash_profile'")
+    print("INFO: Remove nix information from '~/.bash_profile', and remove custom nix folder stored on another drive.")
 
 
 ### Begin Code ###
