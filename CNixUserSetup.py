@@ -51,6 +51,22 @@ def install_homemanager():
     os.environ['NIX_PATH'] = "{0}/.nix-defexpr/channels:/nix/var/nix/profiles/per-user/{1}/channels".format(homepath, currentusername)
     # Install
     subprocess.run("nix-shell '<home-manager>' -A install", shell=True, check=True)
+
+    # home.nix
+    homeman_filepath = os.path.join(homepath, ".config", "nixpkgs", "home.nix")
+    # Check if the pattern isn't found
+    if os.path.isfile(homeman_filepath) and not CFunc.find_pattern_infile(homeman_filepath, "home.packages = with pkgs;"):
+        print("Adding home.packages to Home Manager config.")
+        for line in fileinput.FileInput(homeman_filepath, inplace=1):
+            # Insert the package line after the homedirectory entry.
+            if "home.homeDirectory = " in line:
+                line = line.replace(line, line + """
+  home.packages = with pkgs; [
+  ];
+""")
+            print(line, end='')
+    else:
+        print("home.packages found in config file. Not editing.")
 def configure_nix():
     """Insert nix configuration."""
     # nix.conf
@@ -69,32 +85,16 @@ def configure_nix():
   allowUnfree = true;
 }
 """)
-
-    # home.nix
-    homeman_filepath = os.path.join(homepath, ".config", "nix", "home.nix")
-#    Check if the pattern isn't found
-    if os.path.isfile(homeman_filepath) and not CFunc.find_pattern_infile(homeman_filepath, "home.packages = with pkgs;"):
-        print("Adding home.packages to Home Manager config.")
-        for line in fileinput.FileInput(homeman_filepath, inplace=1):
-            # Insert the package line after the homedirectory entry.
-            if "home.homeDirectory = " in line:
-                line = line.replace(line, line + """
-  home.packages = with pkgs; [
-  ];
-""")
-        print(line, end='')
-    else:
-        print("home.packages found in config file. Not editing.")
 def uninstall_nix():
     """Uninstall nix."""
-    subprocess.run("sudo rm -rf $HOME/.nix-profile $HOME/.nix-profile $HOME/.nix-channels $HOME/.nix-defexpr", shell=True, check=False)
+    subprocess.run("sudo rm -rf $HOME/.nix-profile $HOME/.nix-profile $HOME/.nix-channels $HOME/.nix-defexpr $HOME/.config/nix/ $HOME/.config/nixpkgs/", shell=True, check=False)
     subprocess.run("sudo rm -rf /etc/profile.d/rcustom_nix.sh", shell=True, check=False)
     # Immutable os instructions
     if os.path.isfile("/etc/systemd/system/mount-nix-prepare.service"):
         subprocess.run("sudo systemctl stop mount-nix-prepare; sudo systemctl disable --now mount-nix-prepare.service; sleep 1; sudo rm -rf /etc/systemd/system/mount-nix-prepare.service", shell=True, check=False)
         subprocess.run("sudo chattr -i / ; sudo umount -l /nix /var/lib/nix ; sleep 1 ; sudo rm -rf /nix /var/lib/nix ; sudo chattr +i /", shell=True, check=False)
     else:
-        subprocess.run('sudo rm -rf /nix', shell=True, check=False)
+        subprocess.run('sudo umount -l /nix ; sudo rm -rf /nix', shell=True, check=False)
     if os.path.isdir("/var/lib/nix"):
         subprocess.run("sudo rm -rf /var/lib/nix", shell=True, check=False)
     print("INFO: Remove nix information from '~/.bash_profile', and remove custom nix folder stored on another drive.")

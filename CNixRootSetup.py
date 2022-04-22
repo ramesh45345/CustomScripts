@@ -51,7 +51,16 @@ WantedBy=local-fs.target
         shutil.chown(os.path.join(os.sep, "nix"), user)
 def create_nix_root_mutable_bind(user: str, path: str):
     """Create bind mount for /nix on mutable os."""
-
+    if not os.path.isdir(path):
+        print("Changing bindmount path to /var/lib")
+        path = "/var/lib"
+    fstab_text = "{0}/nix    /nix    none    bind    0    0".format(path)
+    if not CFunc.Fstab_CheckStringInFile("/etc/fstab", " /nix "):
+        os.makedirs("{0}/nix".format(path), 0o777, exist_ok=True)
+        CFunc.Fstab_AddLine("/etc/fstab", fstab_text)
+        os.makedirs("/nix", exist_ok=True)
+        subprocess.run(["mount", "/nix"], check=True)
+        shutil.chown("/nix", user)
 def create_nix_root_mutable_nobind(user: str):
     """Create /nix on local filesystem."""
     # Just using /nix on local filesystem.
@@ -97,10 +106,10 @@ if __name__ == '__main__':
     if os.path.isdir(args.nixpath) and immutable_root is True:
         create_nix_root_immutable(USERNAMEVAR, os.path.abspath(args.nixpath))
     # If no path specified and immutable root.
-    elif os.path.isdir(path) is False and immutable_root is True:
+    elif os.path.isdir(args.nixpath) is False and immutable_root is True:
         create_nix_root_immutable(USERNAMEVAR)
     # If path specified and no immutable root.
-    elif os.path.isdir(path) is True and immutable_root is False:
+    elif os.path.isdir(args.nixpath) is True and immutable_root is False:
         create_nix_root_mutable_bind(USERNAMEVAR, os.path.abspath(args.nixpath))
     # If no path specified and no immutable root.
     else:
