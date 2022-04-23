@@ -7,7 +7,6 @@ from datetime import datetime
 import os
 import shutil
 import subprocess
-import sys
 import time
 # Custom includes
 import CFunc
@@ -82,6 +81,7 @@ selinux --disabled
 @mate-desktop
 @mate-applications
 @networkmanager-submodules
+NetworkManager-wifi
 
 # CLI Utils
 git
@@ -128,6 +128,7 @@ xset
 # For clonezilla
 dialog
 make
+bc
 
 # Exclusions
 -thunderbird

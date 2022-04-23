@@ -99,6 +99,7 @@ qemu-guest-agent
 lxdm
 xorg-server
 xorg-drivers
+xorg-xset
 mesa-libgl
 mesa-demos
 xorg-xinit

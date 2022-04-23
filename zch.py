@@ -22,6 +22,8 @@ def ChrootMountPaths(RootPath: str):
     subprocess.run("mount --rbind /sys {0}/sys".format(RootPath), shell=True, check=True)
     subprocess.run("mount --make-rslave {0}/sys".format(RootPath), shell=True, check=True)
     subprocess.run("mount --rbind /tmp {0}/tmp".format(RootPath), shell=True, check=True)
+    if os.path.islink(os.path.join(RootPath, "etc", "resolv.conf")):
+        os.unlink(os.path.join(RootPath, "etc", "resolv.conf"))
     shutil.copy(os.path.join(os.sep, "etc", "resolv.conf"), os.path.join(RootPath, "etc", "resolv.conf"))
 def ChrootUnmountPaths(RootPath: str):
     """Unmount all binds for chroot"""
