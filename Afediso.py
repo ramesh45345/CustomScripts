@@ -82,6 +82,7 @@ selinux --disabled
 @mate-applications
 @networkmanager-submodules
 NetworkManager-wifi
+network-manager-applet
 
 # CLI Utils
 git
@@ -140,6 +141,7 @@ bc
 %post
 
 # Set DNS nameservers
+rm -f /etc/resolv.conf
 echo -e "nameserver 1.0.0.1\\nnameserver 1.1.1.1\\nnameserver 2606:4700:4700::1111\\nnameserver 2606:4700:4700::1001" > /etc/resolv.conf
 
 # Pull CustomScripts
