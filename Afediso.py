@@ -84,6 +84,20 @@ selinux --disabled
 NetworkManager-wifi
 network-manager-applet
 
+# Firmware
+iwl4965-firmware
+iwl5000-firmware
+iwl5150-firmware
+iwl6000-firmware
+iwl6000g2a-firmware
+iwl6000g2b-firmware
+iwl6050-firmware
+iwl7260-firmware
+libertas-sd8686-firmware
+libertas-sd8787-firmware
+libertas-usb8388-firmware
+iwlax2xx-firmware
+
 # CLI Utils
 git
 zsh
