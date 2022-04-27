@@ -5,6 +5,7 @@
 import argparse
 import fileinput
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -44,11 +45,21 @@ def install_nix():
 def install_homemanager():
     """Install home-manager."""
     setup_nix_envvars()
+    # Detect nixos version
+    hm_version = None
+    if shutil.which("nixos-version"):
+        nixstring = CFunc.subpout("nixos-version").split(".")
+        hm_version = "{0}.{1}".format(nixstring[0], nixstring[1])
     # Add channel
-    subprocess.run("nix-channel --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager", shell=True, check=True)
+    if hm_version is not None:
+        channel_url = "https://github.com/nix-community/home-manager/archive/release-{0}.tar.gz".format(hm_version)
+    else:
+        channel_url = "https://github.com/nix-community/home-manager/archive/master.tar.gz"
+    subprocess.run("nix-channel --add {0} home-manager".format(channel_url), shell=True, check=True)
     subprocess.run("nix-channel --update", shell=True, check=True)
-    # # Set nix path
-    os.environ['NIX_PATH'] = "{0}/.nix-defexpr/channels:/nix/var/nix/profiles/per-user/{1}/channels".format(homepath, currentusername)
+    # Set nix path if not on nixos
+    if not shutil.which("nixos-version"):
+        os.environ['NIX_PATH'] = "{0}/.nix-defexpr/channels:/nix/var/nix/profiles/per-user/{1}/channels".format(homepath, currentusername)
     # Install
     subprocess.run("nix-shell '<home-manager>' -A install", shell=True, check=True)
 
