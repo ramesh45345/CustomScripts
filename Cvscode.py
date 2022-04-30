@@ -17,9 +17,9 @@ parser = argparse.ArgumentParser(description='Install Visual Studio Code configu
 parser.add_argument("-t", "--type", help='''Type of configuration. Leave blank for autodetect.
     1: Native (Linux)
     2: Flatpak (OSS)
-    3: Snap
-    4: Windows
-    5: VSCodium
+    3: Windows
+    4: VSCodium
+    5: VSCodium Flatpak
 ''', type=int, default=None)
 args = parser.parse_args()
 
@@ -42,10 +42,10 @@ def cmd_pips(cmd_type=int, enabled=bool):
     if enabled is True and cmd_type == 2:
         subprocess.run("flatpak run --command=pip3 com.visualstudio.code-oss install {0} --user".format(pip_packages), shell=True, check=True)
     # Windows
-    if enabled is True and cmd_type == 4 and shutil.which("pip"):
+    if enabled is True and cmd_type == 3 and shutil.which("pip"):
         subprocess.run("pip install {0}".format(pip_packages), shell=True, check=True)
     # Other Linux types
-    if cmd_type == 1 or cmd_type == 3 or cmd_type == 5 and enabled is True and shutil.which("pip3"):
+    if cmd_type == 1 or cmd_type == 3 or cmd_type == 5 and enabled is True and shutil.which("pip3") and not shutil.which("nixos-version"):
         subprocess.run("pip3 install pylama pylama-pylint flake8", shell=True, check=True)
 def ce_ins(vscode_cmd=list, extension=str):
     """Install an extension"""
