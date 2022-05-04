@@ -47,7 +47,7 @@ def install_homemanager():
     setup_nix_envvars()
     # Detect nixos version
     hm_version = None
-    if shutil.which("nixos-version"):
+    if CFunc.is_nixos():
         nixstring = CFunc.subpout("nixos-version").split(".")
         hm_version = "{0}.{1}".format(nixstring[0], nixstring[1])
     # Add channel
@@ -58,7 +58,7 @@ def install_homemanager():
     subprocess.run("nix-channel --add {0} home-manager".format(channel_url), shell=True, check=True)
     subprocess.run("nix-channel --update", shell=True, check=True)
     # Set nix path if not on nixos
-    if not shutil.which("nixos-version"):
+    if not CFunc.is_nixos():
         os.environ['NIX_PATH'] = "{0}/.nix-defexpr/channels:/nix/var/nix/profiles/per-user/{1}/channels".format(homepath, currentusername)
     # Install
     subprocess.run("nix-shell '<home-manager>' -A install", shell=True, check=True)

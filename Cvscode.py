@@ -45,7 +45,7 @@ def cmd_pips(cmd_type=int, enabled=bool):
     if enabled is True and cmd_type == 3 and shutil.which("pip"):
         subprocess.run("pip install {0}".format(pip_packages), shell=True, check=True)
     # Other Linux types
-    if cmd_type == 1 or cmd_type == 3 or cmd_type == 5 and enabled is True and shutil.which("pip3") and not shutil.which("nixos-version"):
+    if cmd_type == 1 or cmd_type == 3 or cmd_type == 5 and enabled is True and shutil.which("pip3") and not CFunc.is_nixos():
         subprocess.run("pip3 install pylama pylama-pylint flake8", shell=True, check=True)
 def ce_ins(vscode_cmd=list, extension=str):
     """Install an extension"""
