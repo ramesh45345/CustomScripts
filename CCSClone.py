@@ -67,7 +67,7 @@ if os.path.isfile(variablefile):
 
 # Update scripts folder every hour.
 # Make systemd service and timer if available
-if shutil.which("systemctl"):
+if shutil.which("systemctl") and not CFunc.is_nixos():
     # Systemd service
     CSUpdate_SystemUnitText = """[Unit]
 Description=Service for CSUpdate
