@@ -208,6 +208,7 @@ for idx in range(1, 6):
         data["security.workspace.trust.enabled"] = False
         data["telemetry.telemetryLevel"] = "error"
         data["workbench.iconTheme"] = "vscode-icons"
+        data["vsicons.dontShowNewVersionMessage"] = True
         data["gitlens.showWelcomeOnInstall"] = False
         data["git.confirmSync"] = False
         # Python Config
