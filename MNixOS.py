@@ -19,7 +19,7 @@ CFunc.is_root(checkstate=True)
 def cli_scripts():
     """"""
     subprocess.run(['{0}/CShellConfig.py'.format(SCRIPTDIR), '-f', '-z', '-d'], check=True)
-    subprocess.run(['{0}/CCSClone.py'.format(SCRIPTDIR), '-f', '-z', '-d'], check=True)
+    subprocess.run(['{0}/CCSClone.py'.format(SCRIPTDIR)], check=True)
 def gui_scripts(user: str):
     """"""
     subprocess.run(['{0}/CFlatpakConfig.py'.format(SCRIPTDIR)], check=True)
