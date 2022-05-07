@@ -44,6 +44,9 @@ if __name__ == '__main__':
     # Get non-root user information for specified user.
     USERNAMEVAR, USERGROUP, USERHOME = CFunc.getnormaluser(args.user)
 
+    # Chown /etc/nixos
+    CFunc.chown_recursive("/etc/nixos", USERNAMEVAR, USERGROUP)
+
     cli_scripts()
     if not args.clionly:
         gui_scripts(USERNAMEVAR)
