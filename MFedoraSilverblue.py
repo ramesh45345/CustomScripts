@@ -11,6 +11,7 @@ import time
 # Custom includes
 import CFunc
 import CFuncExt
+import MFedora
 
 print("Running {0}".format(__file__))
 
@@ -178,13 +179,8 @@ if args.stage == 2:
     CFuncExt.ytdlp_install()
 
     # VSCode
-    with open(os.path.join(os.sep, "etc", "yum.repos.d", "vscode.repo"), 'w') as f:
-        f.write("""[code]
-name=Visual Studio Code
-baseurl=https://packages.microsoft.com/yumrepos/vscode
-enabled=1
-gpgcheck=0""")
-    rostreeinstall("code")
+    MFedora.repo_vscode()
+    rostreeinstall("codium")
 
     # Add normal user to all reasonable groups
     group_silverblueadd("disk")

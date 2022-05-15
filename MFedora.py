@@ -25,9 +25,16 @@ def repo_rpmfusion():
     CFunc.dnfinstall("rpmfusion-free-release-tainted rpmfusion-nonfree-release-tainted")
 def repo_vscode():
     """Install vscode repository"""
-    CFunc.rpmimport("https://packages.microsoft.com/keys/microsoft.asc")
-    with open("/etc/yum.repos.d/vscode.repo", 'w') as vscoderepofile_write:
-        vscoderepofile_write.write('[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc')
+    with open(os.path.join(os.sep, "etc", "yum.repos.d", "vscodium.repo"), 'w') as f:
+        f.write("""[gitlab.com_paulcarroty_vscodium_repo]
+name=gitlab.com_paulcarroty_vscodium_repo
+baseurl=https://paulcarroty.gitlab.io/vscodium-deb-rpm-repo/rpms/
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/raw/master/pub.gpg
+metadata_expire=1h
+""")
 
 
 if __name__ == '__main__':
