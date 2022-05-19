@@ -98,6 +98,12 @@ addtopath "$HOME/.local/bin"
 addtopath "/snap/bin"
 addtopath "/var/lib/snapd/snap/bin"
 
+# Source nix files
+if [[ ":$PATH:" != *:"$HOME/.nix-profile/bin":* ]] && [ -d "$HOME/.nix-profile/bin" ]; then
+    source $HOME/.nix-profile/etc/profile.d/nix.sh
+    source $HOME/.nix-profile/etc/profile.d/hm-session-vars.sh
+fi
+
 # Set editor to nano
 export EDITOR=nano
 
@@ -348,6 +354,51 @@ elif type rpm-ostree &> /dev/null; then
         echo "Updating system."
         $SUDOCMD rpm-ostree upgrade
     }
+# NixOS package manager only.
+elif type nix &> /dev/null && ! [[ "$(which nix)" == *"$USER"* ]]; then
+    function se () {
+        echo -e "\nSearching for $@."
+        flatpak_search "$@"
+        nix search nixpkgs "$@"
+    }
+    function cln () {
+        echo "Auto-removing packages and performing garbage collection."
+        $SUDOCMD nix-collect-garbage -d
+        flatpak_clean
+    }
+    function up () {
+        echo "Updating system."
+        $SUDOCMD nixos-rebuild switch --upgrade
+    }
+    function nsed () {
+        echo "Editing nix config."
+        $SUDOCMD nano /etc/nixos/configuration.nix
+    }
+fi
+
+# Nix user-mode functions
+if type nix &> /dev/null; then
+    function ned () {
+        echo "Editing home-manager config"
+        nano $HOME/.config/nixpkgs/home.nix
+    }
+    function nup () {
+        echo "Updating Nix userspace."
+        nix-channel --update
+        home-manager switch
+    }
+    function ncln () {
+        echo "Performing Nix garbage collection."
+        nix-collect-garbage -d
+    }
+    function nroots () {
+        echo "Show gc roots"
+        find -H /nix/var/nix/gcroots/auto -type l | xargs -I {{}} sh -c 'readlink {{}}; realpath {{}}; echo'
+    }
+    function nse () {
+        echo "Search nix packages"
+        nix search nixpkgs "$@"
+    }
 fi
 
 # Load tmux upon interactive ssh connection
@@ -435,10 +486,10 @@ if os.path.isdir(os.path.join(os.sep, "opt")) and os.access(os.path.join(os.sep,
     repos_path = os.path.join(os.sep, "opt")
 elif os.path.isdir(os.path.join(os.sep, "var")) and os.access(os.path.join(os.sep, "var"), os.W_OK) and not CFunc.is_windows():
     repos_path = os.path.join(os.sep, "var", "opt")
-    os.makedirs(repos_path)
+    os.makedirs(repos_path, exist_ok=True)
 else:
     repos_path = os.path.join(USERVARHOME, "opt")
-    os.makedirs(repos_path)
+    os.makedirs(repos_path, exist_ok=True)
 # Only do it if the current user can write to repos_path
 bashit_path = os.path.join(repos_path, "bash-it")
 if os.access(repos_path, os.W_OK):
@@ -579,8 +630,10 @@ if args.fish is True and shutil.which('fish'):
         # Install bobthefish
         if rootstate is True:
             CFunc.run_as_user(USERNAMEVAR, "omf install bobthefish", shutil.which("fish"), error_on_fail=True)
+            CFunc.run_as_user(USERNAMEVAR, "omf install foreign-env", shutil.which("fish"), error_on_fail=True)
         else:
             subprocess.Popen("omf install bobthefish", shell=True, executable=shutil.which("fish"))
+            subprocess.Popen("omf install foreign-env", shell=True, executable=shutil.which("fish"))
 
     # Personal note: To uninstall omf completely, use the following command as a normal user:
     # omf destroy; rm -rf ~/.config/omf/ ~/.cache/omf/ ~/.local/share/omf/
@@ -627,6 +680,12 @@ pathadd "$HOME/.local/bin"
 # Add snap paths
 pathadd "/snap/bin"
 pathadd "/var/lib/snapd/snap/bin"
+
+# Source nix files
+if checkpath "$HOME/.nix-profile/bin"; and test -d "$HOME/.nix-profile/bin"
+    fenv source $HOME/.nix-profile/etc/profile.d/nix.sh
+    fenv source $HOME/.nix-profile/etc/profile.d/hm-session-vars.sh
+end
 
 function sl
     sudo su -l root
@@ -750,6 +809,7 @@ function snap_search
         snap find $argv
     end
 end
+
 # Set package manager functions
 if type -q apt-get
     function ins
@@ -881,6 +941,51 @@ else if type -q rpm-ostree
     function up
         echo "Updating system."
         sudo rpm-ostree upgrade
+    end
+# NixOS package manager only.
+else if type -q nix; and not string match -qr $USER (which nix);
+    function se
+        echo -e "\\nSearching for $argv."
+        flatpak_search $argv
+        nix search nixpkgs $argv
+    end
+    function cln
+        echo "Auto-removing packages and performing garbage collection."
+        sudo nix-collect-garbage -d
+        flatpak_clean
+    end
+    function up
+        echo "Updating system."
+        sudo nixos-rebuild switch --upgrade
+    end
+    function nsed
+        echo "Editing nix config."
+        sudo nano /etc/nixos/configuration.nix
+    end
+end
+
+# Nix user-mode functions
+if type -q nix;
+    function ned
+        echo "Editing home-manager config"
+        nano $HOME/.config/nixpkgs/home.nix
+    end
+    function nup
+        echo "Updating Nix userspace."
+        nix-channel --update
+        home-manager switch
+    end
+    function ncln
+        echo "Performing Nix garbage collection."
+        nix-collect-garbage -d
+    end
+    function nroots
+        echo "Show gc roots"
+        find -H /nix/var/nix/gcroots/auto -type l | xargs -I {{}} sh -c 'readlink {{}}; realpath {{}}; echo'
+    end
+    function nse
+        echo "Search nix packages"
+        nix search nixpkgs $argv
     end
 end
 """.format(SCRIPTDIR=SCRIPTDIR)

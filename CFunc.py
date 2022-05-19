@@ -218,8 +218,6 @@ def is_root(checkstate=True, state_exit=True):
             match = False
             if state_exit is True:
                 sys.exit("\nError: Actual root state is {0}, expected {1}.\n".format(actualstate, checkstate))
-            else:
-                print("Actual root state is {0}, expected {1}.".format(actualstate, checkstate))
         else:
             match = True
         # Return result of root match check.
@@ -496,6 +494,12 @@ def Fstab_AddLine(fstab_path, linetoadd):
     else:
         print("ERROR, no such file {0}".format(fstab_path))
     return
+def is_nixos():
+    """Return true if using NixOS."""
+    if shutil.which("nixos-version"):
+        return True
+    else:
+        return False
 # Apt
 def aptupdate():
     """Update apt sources"""

@@ -53,12 +53,12 @@ Acquire::ftp::Timeout "5";''')
         CFunc.find_replace(os.path.join(os.sep, "etc", "apt"), debrelease, "devel", "sources.list")
 def vscode_deb():
     """Install vscode deb and repository."""
-    subprocess.run("""curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /tmp/microsoft.gpg
-    mv /tmp/microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg""", shell=True, check=True)
+    subprocess.run("""curl https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/raw/master/pub.gpg | gpg --dearmor > /tmp/vscodium-archive-keyring.gpg
+    mv /tmp/vscodium-archive-keyring.gpg /etc/apt/trusted.gpg.d/vscodium-archive-keyring.gpg""", shell=True, check=True)
     # Install repo
-    subprocess.run('echo "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list', shell=True, check=True)
+    subprocess.run('echo "deb [ signed-by=/etc/apt/trusted.gpg.d/vscodium-archive-keyring.gpg ] https://paulcarroty.gitlab.io/vscodium-deb-rpm-repo/debs vscodium main" > /etc/apt/sources.list.d/vscodium.list', shell=True, check=True)
     CFunc.aptupdate()
-    CFunc.aptinstall("code")
+    CFunc.aptinstall("codium")
 
 
 if __name__ == '__main__':

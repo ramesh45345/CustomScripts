@@ -619,15 +619,6 @@ if shutil.which("kwriteconfig5") and shutil.which("plasma_session"):
         subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "{0}" --group "Applets" --group "{1}" --group "Configuration" --group "General" --key "launchers" ""'.format(extrapanel_id, extrapanel_appletid), shell=True, check=False)
         subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "{0}" --group "General" --key "AppletOrder" "{1}"'.format(extrapanel_id, extrapanel_appletid), shell=True, check=False)
         subprocess.run('kwriteconfig5 --file plasmashellrc --group "PlasmaViews" --group "Panel {0}" --group "Defaults" --key "thickness" "24"'.format(extrapanel_id), shell=True, check=False)
-        extrapanel_appletid = extrapanel_appletid + 1
-        # Use desktop view instead of folder view.
-        subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "{0}" --key "activityId" "aecca071-25ec-4ff1-be05-9f6468e20095"'.format(extrapanel_appletid), shell=True, check=False)
-        subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "{0}" --key "formfactor" "0"'.format(extrapanel_appletid), shell=True, check=False)
-        subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "{0}" --key "immutability" "1"'.format(extrapanel_appletid), shell=True, check=False)
-        subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "{0}" --key "lastScreen" "{1}"'.format(extrapanel_appletid, x), shell=True, check=False)
-        subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "{0}" --key "location" "0"'.format(extrapanel_appletid), shell=True, check=False)
-        subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "{0}" --key "plugin" "org.kde.desktopcontainment"'.format(extrapanel_appletid), shell=True, check=False)
-        subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "{0}" --key "wallpaperplugin" "org.kde.image"'.format(extrapanel_appletid), shell=True, check=False)
         extrapanel_id = extrapanel_appletid + 1
 
     subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "8" --key "activityId" ""', shell=True, check=False)
@@ -858,35 +849,44 @@ CustomCommand={0}
 
 
 # Firefox settings.
-# If prefs.js for firefox was created, set the profile information.
-firefox_profiles_path = os.path.join(USERHOME, ".mozilla", "firefox")
-if os.path.isdir(firefox_profiles_path):
-    # Find profile folders
-    with os.scandir(firefox_profiles_path) as it:
-        for entry in it:
-            firefox_profilefolder = os.path.join(firefox_profiles_path, entry.name)
-            if "default" in entry.name and os.path.isdir(firefox_profilefolder):
-                prefsjs_file = os.path.join(firefox_profilefolder, "prefs.js")
-                # Find a prefs.js in a potential profile folder
-                if os.path.isfile(prefsjs_file):
-                    os.chdir(firefox_profilefolder)
-                    print("Editing Firefox preferences in {0}.".format(prefsjs_file))
-                    firefox_modify_settings("general.autoScroll", "true", prefsjs_file)
-                    firefox_modify_settings("extensions.pocket.enabled", "false", prefsjs_file)
-                    firefox_modify_settings("browser.tabs.drawInTitlebar", "true", prefsjs_file)
-                    firefox_modify_settings("browser.aboutConfig.showWarning", "false", prefsjs_file)
-                    firefox_modify_settings("browser.download.useDownloadDir", "false", prefsjs_file)
-                    firefox_modify_settings("browser.startup.page", "3", prefsjs_file)
-                    firefox_modify_settings("app.shield.optoutstudies.enabled", "false", prefsjs_file)
-                    firefox_modify_settings("browser.newtabpage.activity-stream.showSponsored", "false", prefsjs_file)
-                    firefox_modify_settings("browser.newtabpage.enabled", "false", prefsjs_file)
-                    firefox_modify_settings("browser.startup.homepage", '"about:blank"', prefsjs_file)
-                    # DNS-over-HTTPS
-                    firefox_modify_settings("network.trr.mode", "2", prefsjs_file)
-                    firefox_modify_settings("network.trr.bootstrapAddress", '"1.1.1.1"', prefsjs_file)
-                    # Disable notifications
-                    firefox_modify_settings("dom.webnotifications.enabled", "false", prefsjs_file)
-                    # Autoplay (5 blocks audio and video for all sites by default)
-                    firefox_modify_settings("media.autoplay.default", "5", prefsjs_file)
-                    # Sponsored suggest
-                    firefox_modify_settings("browser.urlbar.suggest.quicksuggest.sponsored", "false", prefsjs_file)
+# If prefs.js for firefox was created, set the profile information. Search for natively installed firefox, flatpak firefox, and flatpak librewolf.
+firefox_profiles_paths = [os.path.join(USERHOME, ".mozilla", "firefox"), os.path.join(USERHOME, ".var", "app", "org.mozilla.firefox", ".mozilla", "firefox"), os.path.join(USERHOME, ".var", "app", "io.gitlab.librewolf-community", ".librewolf")]
+for ff_path in firefox_profiles_paths:
+    if os.path.isdir(ff_path):
+        # Find profile folders
+        with os.scandir(ff_path) as it:
+            for entry in it:
+                firefox_profilefolder = os.path.join(ff_path, entry.name)
+                if "default" in entry.name and os.path.isdir(firefox_profilefolder):
+                    prefsjs_file = os.path.join(firefox_profilefolder, "prefs.js")
+                    # Find a prefs.js in a potential profile folder
+                    if os.path.isfile(prefsjs_file):
+                        os.chdir(firefox_profilefolder)
+                        print("Editing Firefox preferences in {0}.".format(prefsjs_file))
+                        firefox_modify_settings("general.autoScroll", "true", prefsjs_file)
+                        firefox_modify_settings("extensions.pocket.enabled", "false", prefsjs_file)
+                        firefox_modify_settings("browser.tabs.drawInTitlebar", "true", prefsjs_file)
+                        firefox_modify_settings("browser.aboutConfig.showWarning", "false", prefsjs_file)
+                        firefox_modify_settings("browser.download.useDownloadDir", "false", prefsjs_file)
+                        firefox_modify_settings("browser.startup.page", "3", prefsjs_file)
+                        firefox_modify_settings("app.shield.optoutstudies.enabled", "false", prefsjs_file)
+                        firefox_modify_settings("browser.newtabpage.activity-stream.showSponsored", "false", prefsjs_file)
+                        firefox_modify_settings("browser.newtabpage.enabled", "false", prefsjs_file)
+                        firefox_modify_settings("browser.startup.homepage", '"about:blank"', prefsjs_file)
+                        # DNS-over-HTTPS
+                        firefox_modify_settings("network.trr.mode", "2", prefsjs_file)
+                        firefox_modify_settings("network.trr.bootstrapAddress", '"1.1.1.1"', prefsjs_file)
+                        # Disable notifications
+                        firefox_modify_settings("dom.webnotifications.enabled", "false", prefsjs_file)
+                        # Autoplay (5 blocks audio and video for all sites by default)
+                        firefox_modify_settings("media.autoplay.default", "5", prefsjs_file)
+                        # Sponsored suggest
+                        firefox_modify_settings("browser.urlbar.suggest.quicksuggest.sponsored", "false", prefsjs_file)
+                        if "librewolf" in ff_path:
+                            firefox_modify_settings("network.dns.disableIPv6", "false", prefsjs_file)
+                            firefox_modify_settings("webgl.disabled", "false", prefsjs_file)
+                            firefox_modify_settings("identity.fxaccounts.enabled", "true", prefsjs_file)
+                            firefox_modify_settings("privacy.clearOnShutdown.history", "false", prefsjs_file)
+                            firefox_modify_settings("privacy.clearOnShutdown.downloads", "false", prefsjs_file)
+                            firefox_modify_settings("privacy.sanitize.sanitizeOnShutdown", "false", prefsjs_file)
+                            firefox_modify_settings("security.OCSP.require", "false", prefsjs_file)

@@ -102,10 +102,11 @@ if args.uninstall is False:
     subprocess.run("virsh pool-info default", shell=True, check=False)
 
     # Set config info
-    subprocess.run('''sed -i 's/#user = "root"/user = "{0}"/g' /etc/libvirt/qemu.conf'''.format(USERNAMEVAR), shell=True, check=True)
-    subprocess.run('''sed -i 's/#save_image_format = "raw"/save_image_format = "xz"/g' /etc/libvirt/qemu.conf''', shell=True, check=True)
-    subprocess.run('''sed -i 's/#dump_image_format = "raw"/dump_image_format = "xz"/g' /etc/libvirt/qemu.conf''', shell=True, check=True)
-    subprocess.run('''sed -i 's/#snapshot_image_format = "raw"/snapshot_image_format = "xz"/g' /etc/libvirt/qemu.conf''', shell=True, check=True)
+    if os.path.isfile("/etc/libvirt/qemu.conf"):
+        subprocess.run('''sed -i 's/#user = "root"/user = "{0}"/g' /etc/libvirt/qemu.conf'''.format(USERNAMEVAR), shell=True, check=True)
+        subprocess.run('''sed -i 's/#save_image_format = "raw"/save_image_format = "xz"/g' /etc/libvirt/qemu.conf''', shell=True, check=True)
+        subprocess.run('''sed -i 's/#dump_image_format = "raw"/dump_image_format = "xz"/g' /etc/libvirt/qemu.conf''', shell=True, check=True)
+        subprocess.run('''sed -i 's/#snapshot_image_format = "raw"/snapshot_image_format = "xz"/g' /etc/libvirt/qemu.conf''', shell=True, check=True)
 
     if os.path.isdir(PolkitPath) and not os.path.isdir(PolkitRulesPath):
         os.makedirs(PolkitRulesPath)

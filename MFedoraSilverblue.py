@@ -11,6 +11,7 @@ import time
 # Custom includes
 import CFunc
 import CFuncExt
+import MFedora
 
 print("Running {0}".format(__file__))
 
@@ -111,7 +112,7 @@ if args.stage == 1:
 
     ### OSTree Apps ###
     # Cli tools
-    rostreeinstall("fish zsh tmux iotop p7zip util-linux-user fuse-sshfs redhat-lsb-core powerline-fonts google-roboto-fonts samba hdparm cups-pdf syncthing numix-icon-theme numix-icon-theme-circle tigervnc xrandr xset")
+    rostreeinstall("fish zsh tmux iotop p7zip util-linux-user fuse-sshfs redhat-lsb-core powerline-fonts google-roboto-fonts samba hdparm cups-pdf syncthing numix-icon-theme numix-icon-theme-circle tigervnc xrandr xset python3-pip")
     subprocess.run("systemctl enable sshd", shell=True, check=True)
     # NTP Configuration
     subprocess.run("systemctl enable systemd-timesyncd; timedatectl set-local-rtc false; timedatectl set-ntp 1", shell=True, check=True)
@@ -178,13 +179,8 @@ if args.stage == 2:
     CFuncExt.ytdlp_install()
 
     # VSCode
-    with open(os.path.join(os.sep, "etc", "yum.repos.d", "vscode.repo"), 'w') as f:
-        f.write("""[code]
-name=Visual Studio Code
-baseurl=https://packages.microsoft.com/yumrepos/vscode
-enabled=1
-gpgcheck=0""")
-    rostreeinstall("code")
+    MFedora.repo_vscode()
+    rostreeinstall("codium")
 
     # Add normal user to all reasonable groups
     group_silverblueadd("disk")

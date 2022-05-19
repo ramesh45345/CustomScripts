@@ -184,7 +184,7 @@ unmanaged-devices=none""")
         MFedora.repo_vscode()
         subprocess.run("dnf copr enable -y rmkrishna/rpms", shell=True, check=True)
         CFunc.dnfupdate()
-        CFunc.dnfinstall("xdg-utils dconf-editor brisk-menu epiphany pluma caja caja-open-terminal tilix mate-terminal mate-themes google-roboto-fonts google-noto-sans-fonts liberation-mono-fonts numix-icon-theme numix-icon-theme-circle code")
+        CFunc.dnfinstall("xdg-utils dconf-editor brisk-menu epiphany pluma caja caja-open-terminal tilix mate-terminal mate-themes google-roboto-fonts google-noto-sans-fonts liberation-mono-fonts numix-icon-theme numix-icon-theme-circle codium")
     subprocess.run(["/opt/CustomScripts/DExtMate.py"], check=True)
     # vscode setup
     if args.distro == "ubuntu" or args.distro == "fedora":

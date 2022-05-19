@@ -85,9 +85,12 @@ def ssh_vm(ip: str, command: str, ssh_opts: str = "", port: int = 22, user: str 
     """SSH into the Virtual Machine and run a command."""
     status = subprocess.run("""sshpass -p "{password}" ssh {ssh_opts} {ip} -p {port} -l {user} '{command}'""".format(password=password, ip=ip, port=port, user=user, command=command, ssh_opts=ssh_opts), shell=True, check=False).returncode
     return status
-def scp_vm(ip: str, filepath: str, destination: str, port: int = 22, user: str = "root", password: str = "asdf"):
+def scp_vm(ip: str, filepath: str, destination: str, port: int = 22, user: str = "root", password: str = "asdf", folder: bool = False):
     """Copy files into the Virtual Machine."""
-    status = subprocess.run("""sshpass -p "{password}" scp -P {port} "{filepath}" {user}@{ip}:{destination}""".format(password=password, ip=ip, port=port, user=user, filepath=filepath, destination=destination), shell=True, check=False).returncode
+    scp_opts = ""
+    if folder is True:
+        scp_opts += "-r"
+    status = subprocess.run("""sshpass -p "{password}" scp -P {port} {opts} "{filepath}" {user}@{ip}:{destination}""".format(password=password, ip=ip, port=port, user=user, filepath=filepath, destination=destination, opts=scp_opts), shell=True, check=False).returncode
     return status
 def ssh_wait(ip: str, port: int = 22, user: str = "root", password: str = "asdf", retries: int = 10000):
     """Wait for ssh to connect successfully to the VM."""
@@ -186,6 +189,7 @@ if __name__ == '__main__':
     # Get arguments
     parser = argparse.ArgumentParser(description='Create and run a Virtual Machine.')
     parser.add_argument("-a", "--ostype", type=int, help="OS type (1=Arch)", default="1")
+    parser.add_argument("-c", "--nixconfig", help="Path of folder configuration for nix")
     parser.add_argument("-d", "--debug", help='Use Debug Logging', action="store_true")
     parser.add_argument("-e", "--desktopenv", help="Desktop Environment (defaults to mate)", default="mate")
     parser.add_argument("-f", "--fullname", help="Full Name", default="User Name")
@@ -239,6 +243,15 @@ if __name__ == '__main__':
         vmbootstrap_cmd = 'cd /opt/CustomScripts && git fetch && git checkout {gitbranch} -f && cd ~ && curl -sL https://raw.githubusercontent.com/picodotdev/alis/master/download.sh | bash && cp /root/alis_new.conf /root/alis.conf && cp /root/alis-packages_new.conf /root/alis-packages.conf && export LANG=en_US.UTF-8 && yes | ./alis.sh && echo "PermitRootLogin yes" >> /mnt/etc/ssh/sshd_config && poweroff'.format(gitbranch=git_branch_retrieve())
         vmprovision_cmd = "mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{vmuser}/.ssh; echo '{sshkey}' > ~{vmuser}/.ssh/authorized_keys; chown {vmuser}:users -R ~{vmuser}; pacman -Sy --noconfirm git; {gitcmd}; /opt/CustomScripts/MArch.py -d {desktop}".format(vmuser=args.vmuser, sshkey=sshkey, gitcmd=git_cmdline(), desktop=args.desktopenv)
         kvm_variant = "archlinux"
+    if args.ostype == 2:
+        vm_name = "CC-NixOS-kvm"
+        if not os.path.isdir(args.nixconfig):
+            print("ERROR: nixconfig {0} must be a folder.".format(args.nixconfig))
+            sys.exit()
+        # VM commands
+        vmbootstrap_cmd = 'mkdir -p /var/opt && cd /var/opt && git clone https://github.com/ramesh45345/CustomScripts && cd ~ && /var/opt/CustomScripts/ZSlimDrive.py -n -g && mkdir -p /mnt/etc && mv /nixos_config /mnt/etc/nixos && ln -sfr /mnt/etc/nixos/machines/qemu/configuration.nix /mnt/etc/nixos/ && ln -sfr /mnt/etc/nixos/machines/qemu/hardware-configuration.nix /mnt/etc/nixos/ && nix-channel --update && nixos-install && poweroff'
+        vmprovision_cmd = "mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{vmuser}/.ssh; echo '{sshkey}' > ~{vmuser}/.ssh/authorized_keys; chown {vmuser}:users -R ~{vmuser}; {gitcmd}; /var/opt/CustomScripts/MNixOS.py".format(vmuser=args.vmuser, sshkey=sshkey, gitcmd=git_cmdline())
+        kvm_variant = "nixos-unstable"
 
     # Override VM Name if provided
     if args.vmname is not None:
@@ -280,6 +293,9 @@ if __name__ == '__main__':
     if args.ostype == 1:
         scp_vm(ip=sship, port=localsshport, user=args.livesshuser, password=args.livesshpass, filepath=temp_alis, destination="/root/alis_new.conf")
         scp_vm(ip=sship, port=localsshport, user=args.livesshuser, password=args.livesshpass, filepath=os.path.join(SCRIPTDIR, "unattend", "alis-packages.conf"), destination="/root/alis-packages_new.conf")
+    if args.ostype == 2:
+        scp_vm(ip=sship, port=localsshport, user=args.livesshuser, password=args.livesshpass, filepath=args.nixconfig, destination="/nixos_config", folder=True)
+        scp_vm(ip=sship, port=localsshport, user=args.livesshuser, password=args.livesshpass, filepath=SCRIPTDIR, destination="/CustomScripts", folder=True)
     ssh_vm(ip=sship, port=localsshport, user=args.livesshuser, password=args.livesshpass, command=vmbootstrap_cmd)
     vm_shutdown(vm_name)
     # Eject cdrom

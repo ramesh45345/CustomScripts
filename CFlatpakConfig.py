@@ -4,6 +4,7 @@
 # Python includes.
 import argparse
 import os
+import shutil
 import sys
 # Custom includes
 import CFunc
@@ -45,11 +46,12 @@ if args.configure_remotes is False:
     # Browser
     CFunc.flatpak_install("flathub", "com.github.Eloston.UngoogledChromium")
     # Meld
-    CFunc.flatpak_install("flathub", "org.gnome.meld")
-    meld_bin_path = os.path.join(os.sep, "usr", "local", "bin", "meld")
-    with open(meld_bin_path, 'w') as f:
-        f.write("#!/bin/sh\nflatpak run org.gnome.meld $@")
-    os.chmod(meld_bin_path, 0o755)
+    if not CFunc.is_nixos():
+        CFunc.flatpak_install("flathub", "org.gnome.meld")
+        meld_bin_path = os.path.join(os.sep, "usr", "local", "bin", "meld")
+        with open(meld_bin_path, 'w') as f:
+            f.write("#!/bin/sh\nflatpak run org.gnome.meld $@")
+        os.chmod(meld_bin_path, 0o755)
 
     # Configure permissions for apps
     CFunc.flatpak_override("org.atheme.audacious", "--filesystem=host")

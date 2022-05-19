@@ -34,8 +34,8 @@ if __name__ == '__main__':
         # Start the VM if it is not started.
         PCreateChrootVM.vm_start(vm_name)
         PCreateChrootVM.ssh_wait(ip=ssh_ip, user=ssh_user)
-        # Update CustomScripts in VM.
-        subprocess.run("ssh {0} -l {1} 'cd /opt/CustomScripts ; git checkout -f ; git pull'".format(ssh_ip, ssh_user), shell=True, check=True)
+        # Sync CustomScripts on host to VM.
+        subprocess.run("rsync -axHAX --info=progress2 {0}/ {1}@{2}:/opt/CustomScripts/".format(sys.path[0], ssh_user, ssh_ip), shell=True, check=True)
         # Execute Stage 2
         stagetwocmd = "ssh {0} -l {1} /opt/CustomScripts/Aiso_MakeISO.py -s 2 -t {2}".format(ssh_ip, ssh_user, args.distrotype)
         if args.clean:

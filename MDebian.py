@@ -10,6 +10,7 @@ import sys
 # Custom includes
 import CFunc
 import CFuncExt
+import MUbuntu
 
 print("Running {0}".format(__file__))
 
@@ -169,13 +170,8 @@ if args.nogui is False:
     CFunc.aptinstall("fonts-powerline fonts-noto fonts-roboto")
     # Tilix
     CFunc.aptinstall("tilix")
-    # Visual Studio Code
-    subprocess.run("""curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
-    mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg""", shell=True, check=True)
-    # Install repo
-    subprocess.run('echo "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list', shell=True, check=True)
-    CFunc.aptupdate()
-    CFunc.aptinstall("code")
+    # VSCodium
+    MUbuntu.vscode_deb()
     # Install snapd
     CFunc.aptinstall("snapd")
     CFunc.AddLineToSudoersFile(sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("snap")))
@@ -214,7 +210,7 @@ if args.desktop == "gnome":
     CFunc.run_as_user(USERNAMEVAR, "{0} --yes 1160".format(gs_installer[0]))
     # https://github.com/kgshank/gse-sound-output-device-chooser
     CFunc.run_as_user(USERNAMEVAR, "{0} --yes 906".format(gs_installer[0]))
-    # https://github.com/mymindstorm/gnome-volume-mixer 
+    # https://github.com/mymindstorm/gnome-volume-mixer
     CFunc.run_as_user(USERNAMEVAR, "{0} --yes 3499".format(gs_installer[0]))
     # Kstatusnotifier
     CFunc.run_as_user(USERNAMEVAR, "{0} --yes 615".format(gs_installer[0]))

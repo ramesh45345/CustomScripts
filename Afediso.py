@@ -7,7 +7,6 @@ from datetime import datetime
 import os
 import shutil
 import subprocess
-import sys
 import time
 # Custom includes
 import CFunc
@@ -82,6 +81,22 @@ selinux --disabled
 @mate-desktop
 @mate-applications
 @networkmanager-submodules
+NetworkManager-wifi
+network-manager-applet
+
+# Firmware
+iwl4965-firmware
+iwl5000-firmware
+iwl5150-firmware
+iwl6000-firmware
+iwl6000g2a-firmware
+iwl6000g2b-firmware
+iwl6050-firmware
+iwl7260-firmware
+libertas-sd8686-firmware
+libertas-sd8787-firmware
+libertas-usb8388-firmware
+iwlax2xx-firmware
 
 # CLI Utils
 git
@@ -128,6 +143,7 @@ xset
 # For clonezilla
 dialog
 make
+bc
 
 # Exclusions
 -thunderbird
@@ -139,6 +155,7 @@ make
 %post
 
 # Set DNS nameservers
+rm -f /etc/resolv.conf
 echo -e "nameserver 1.0.0.1\\nnameserver 1.1.1.1\\nnameserver 2606:4700:4700::1111\\nnameserver 2606:4700:4700::1001" > /etc/resolv.conf
 
 # Pull CustomScripts

@@ -48,7 +48,7 @@ workfolder_default = os.path.join(USERHOME, "ubulive")
 parser = argparse.ArgumentParser(description='Build LiveCD.')
 parser.add_argument("-n", "--noprompt", help='Do not prompt.', action="store_true")
 parser.add_argument("-w", "--workfolder", help='Location of Working Folder (default: %(default)s)', default=workfolder_default)
-parser.add_argument("-r", "--release", help='Ubuntu Release, default: %(default)s', default="impish")
+parser.add_argument("-r", "--release", help='Ubuntu Release, default: %(default)s', default="jammy")
 
 # Save arguments.
 args = parser.parse_args()
@@ -124,7 +124,6 @@ echo "console-setup	console-setup/charmap47	select	UTF-8" | debconf-set-selectio
 # Live System software
 apt-get install -y \
 casper \
-lupin-casper \
 discover \
 laptop-detect \
 os-prober \
@@ -146,8 +145,7 @@ curl \
 debootstrap \
 dmraid \
 efibootmgr \
-exfat-utils \
-exfat-fuse \
+exfatprogs \
 f2fs-tools \
 fonts-powerline \
 fsarchiver \
@@ -197,7 +195,8 @@ network-manager \
 network-manager-gnome \
 net-tools \
 wireless-tools \
-xserver-xorg
+xserver-xorg \
+x11-xserver-utils
 
 # Install VM software
 apt-get install -y \
