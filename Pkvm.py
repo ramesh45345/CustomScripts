@@ -262,7 +262,7 @@ if 1 <= args.ostype <= 5:
     vmwareid = "fedora-64"
     kvm_os = "linux"
     kvm_variant = "fedora-rawhide"
-    isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/35/Server/x86_64/iso/Fedora-Server-dvd-x86_64-35-1.2.iso"
+    isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/36/Server/x86_64/iso/Fedora-Server-dvd-x86_64-36-1.5.iso"
 if args.ostype == 1:
     vmname = "Packer-Fedora-{0}".format(hvname)
     vmprovision_defopts = "-d {0}".format(args.desktopenv)
@@ -284,7 +284,7 @@ if args.ostype == 8:
     vmwareid = "fedora-64"
     kvm_os = "linux"
     kvm_variant = "silverblue-rawhide"
-    isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/35/Kinoite/x86_64/iso/Fedora-Kinoite-ostree-x86_64-35-1.2.iso"
+    isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/36/Kinoite/x86_64/iso/Fedora-Kinoite-ostree-x86_64-36-1.5.iso"
     vmname = "Packer-FedoraKinoite-{0}".format(hvname)
     vmprovision_defopts = ""
 if args.ostype == 9:
@@ -293,7 +293,7 @@ if args.ostype == 9:
     vmwareid = "fedora-64"
     kvm_os = "linux"
     kvm_variant = "silverblue-rawhide"
-    isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/35/Silverblue/x86_64/iso/Fedora-Silverblue-ostree-x86_64-35-1.2.iso"
+    isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/36/Silverblue/x86_64/iso/Fedora-Silverblue-ostree-x86_64-36-1.5.iso"
     vmname = "Packer-FedoraSilverblue-{0}".format(hvname)
     vmprovision_defopts = ""
 if 10 <= args.ostype <= 19:
@@ -304,7 +304,7 @@ if 10 <= args.ostype <= 19:
 # Ubuntu latest
 if 10 <= args.ostype <= 14:
     kvm_variant = "ubuntu20.04"
-    isourl = "https://releases.ubuntu.com/21.10/ubuntu-21.10-live-server-amd64.iso"
+    isourl = "https://releases.ubuntu.com/22.04/ubuntu-22.04-live-server-amd64.iso"
 # Ubuntu LTS
 if 15 <= args.ostype <= 19:
     kvm_variant = "ubuntu20.04"
