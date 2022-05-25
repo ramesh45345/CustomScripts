@@ -260,7 +260,6 @@ if 1 <= args.ostype <= 5:
     vmprovisionscript = "MFedora.py"
     vboxosid = "Fedora_64"
     vmwareid = "fedora-64"
-    kvm_os = "linux"
     kvm_variant = "fedora-rawhide"
     isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/36/Server/x86_64/iso/Fedora-Server-dvd-x86_64-36-1.5.iso"
 if args.ostype == 1:
@@ -282,7 +281,6 @@ if args.ostype == 8:
     vmprovisionscript = "MFedoraSilverblue.py"
     vboxosid = "Fedora_64"
     vmwareid = "fedora-64"
-    kvm_os = "linux"
     kvm_variant = "silverblue-rawhide"
     isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/36/Kinoite/x86_64/iso/Fedora-Kinoite-ostree-x86_64-36-1.5.iso"
     vmname = "Packer-FedoraKinoite-{0}".format(hvname)
@@ -291,7 +289,6 @@ if args.ostype == 9:
     vmprovisionscript = "MFedoraSilverblue.py"
     vboxosid = "Fedora_64"
     vmwareid = "fedora-64"
-    kvm_os = "linux"
     kvm_variant = "silverblue-rawhide"
     isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/36/Silverblue/x86_64/iso/Fedora-Silverblue-ostree-x86_64-36-1.5.iso"
     vmname = "Packer-FedoraSilverblue-{0}".format(hvname)
@@ -300,7 +297,6 @@ if 10 <= args.ostype <= 19:
     vboxosid = "Ubuntu_64"
     vmwareid = "ubuntu-64"
     vmprovisionscript = "MUbuntu.py"
-    kvm_os = "linux"
 # Ubuntu latest
 if 10 <= args.ostype <= 14:
     kvm_variant = "ubuntu20.04"
@@ -327,7 +323,6 @@ if args.ostype == 16:
 if 20 <= args.ostype <= 29:
     vboxosid = "Fedora_64"
     vmwareid = "fedora-64"
-    kvm_os = "linux"
     kvm_variant = "rhel8.0"
     isourl = "http://www.gtlib.gatech.edu/pub/centos/8-stream/isos/x86_64/CentOS-Stream-8-x86_64-latest-boot.iso"
     vmprovisionscript = "MCentOS.py"
@@ -341,7 +336,6 @@ if 30 <= args.ostype <= 39:
     vboxosid = "Debian_64"
     vmwareid = "debian-64"
     vmprovisionscript = "MDebian.py"
-    kvm_os = "linux"
     kvm_variant = "debiantesting"
 # Debian Testing and Unstable
 if 30 <= args.ostype <= 39:
@@ -364,13 +358,11 @@ if args.ostype == 40:
     vmwareid = "freebsd-64"
     vmprovisionscript = "MFreeBSD.py"
     vmprovision_defopts = "-d {0}".format(args.desktopenv)
-    kvm_os = "freebsd"
     kvm_variant = "freebsd12.0"
     isourl = "https://download.freebsd.org/ftp/releases/amd64/amd64/ISO-IMAGES/13.0/FreeBSD-13.0-RELEASE-amd64-disc1.iso"
 if 50 <= args.ostype <= 59:
     vboxosid = "Windows10_64"
     vmwareid = "windows9-64"
-    kvm_os = "windows"
     kvm_variant = "win10"
     vmprovision_defopts = " "
     isourl = None
@@ -384,7 +376,6 @@ if args.ostype == 50:
 if 55 <= args.ostype <= 59:
     vboxosid = "Windows2019_64"
     vmwareid = "windows9srv-64"
-    kvm_os = "windows"
     kvm_variant = "win2k19"
     vmprovision_defopts = " "
 if args.ostype == 55:
@@ -785,7 +776,7 @@ if args.vmtype == 2:
         kvm_video = "virtio"
     # virt-install manual: https://www.mankier.com/1/virt-install
     # List of os: osinfo-query os
-    CREATESCRIPT_KVM = """virt-install --connect qemu:///system --name={vmname} --disk path={fullpathtoimg}.qcow2,bus={kvm_diskinterface} --disk device=cdrom,bus=sata,target=sda,readonly=on --graphics spice --vcpu={cpus} --ram={memory} --network bridge=virbr0,model={kvm_netdevice} --filesystem source=/,target=root,mode=mapped --os-type={kvm_os} --os-variant={kvm_variant} --import --noautoconsole --noreboot --video={kvm_video} --channel unix,target_type=virtio,name=org.qemu.guest_agent.0 --channel spicevmc,target_type=virtio,name=com.redhat.spice.0""".format(vmname=vmname, memory=args.memory, cpus=CPUCORES, fullpathtoimg=os.path.join(vmpath, vmname), kvm_os=kvm_os, kvm_variant=kvm_variant, kvm_video=kvm_video, kvm_diskinterface=kvm_diskinterface, kvm_netdevice=kvm_netdevice)
+    CREATESCRIPT_KVM = """virt-install --connect qemu:///system --name={vmname} --disk path={fullpathtoimg}.qcow2,bus={kvm_diskinterface} --disk device=cdrom,bus=sata,target=sda,readonly=on --graphics spice --vcpu={cpus} --ram={memory} --network bridge=virbr0,model={kvm_netdevice} --filesystem source=/,target=root,mode=mapped --os-variant={kvm_variant} --import --noautoconsole --noreboot --video={kvm_video} --channel unix,target_type=virtio,name=org.qemu.guest_agent.0 --channel spicevmc,target_type=virtio,name=com.redhat.spice.0""".format(vmname=vmname, memory=args.memory, cpus=CPUCORES, fullpathtoimg=os.path.join(vmpath, vmname), kvm_variant=kvm_variant, kvm_video=kvm_video, kvm_diskinterface=kvm_diskinterface, kvm_netdevice=kvm_netdevice)
     if useefi is True:
         # Add efi loading
         CREATESCRIPT_KVM += " --boot loader={0},loader_ro=yes,loader_type=pflash,nvram={1}".format(efi_bin, efi_nvram)
