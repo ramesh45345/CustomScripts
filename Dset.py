@@ -404,6 +404,12 @@ if shutil.which("kwriteconfig5") and shutil.which("plasma_session"):
     kwriteconfig("PlasmaUserFeedback", "Global", "FeedbackLevel", "48")
     # System bell
     kwriteconfig("kaccessrc", "Bell", "SystemBell", "false")
+    # Trash
+    kwriteconfig("ktrashrc", "{0}/.local/share/Trash".format(USERHOME), "Days", "15")
+    kwriteconfig("ktrashrc", "{0}/.local/share/Trash".format(USERHOME), "LimitReachedAction", "1")
+    kwriteconfig("ktrashrc", "{0}/.local/share/Trash".format(USERHOME), "Percent", "2")
+    kwriteconfig("ktrashrc", "{0}/.local/share/Trash".format(USERHOME), "UseSizeLimit", "true")
+    kwriteconfig("ktrashrc", "{0}/.local/share/Trash".format(USERHOME), "UseTimeLimit", "true")
 
     # Notification settings
     subprocess.run('kwriteconfig5 --file plasma_workspace.notifyrc --group "Event/Textcompletion: no match" --key "Execute" ""', shell=True, check=False)
