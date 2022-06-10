@@ -29,7 +29,7 @@ SCRIPTDIR = sys.path[0]
 def cmd_check(cmd: str):
     """Check if a command exists. Exit if it doesn't exist"""
     if not shutil.which(cmd):
-        print("ERROR: {0} does not exist. Exiting.")
+        print("ERROR: {0} does not exist. Exiting.".format(cmd))
         sys.exit()
 def md5sum(md5_filename, blocksize=65536):
     """
