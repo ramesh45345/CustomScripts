@@ -21,6 +21,8 @@ def icon_theme_is_present():
     theme_exists = False
     if os.path.isdir("/usr/share/icons/Numix-Circle") or os.path.isdir("/usr/local/share/icons/Numix-Circle"):
         theme_exists = True
+    elif CFunc.is_nixos() is True:
+        theme_exists = True
     return theme_exists
 def gsettings_set(schema: str, key: str, value: str):
     """Set dconf setting using gsettings."""
