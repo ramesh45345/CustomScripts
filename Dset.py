@@ -221,7 +221,7 @@ if shutil.which("gnome-software"):
 
 
 # Gnome specific settings
-if shutil.which("gnome-session"):
+if shutil.which("gnome-session") or shutil.which("gnome-shell"):
     gsettings_set("org.gnome.gedit.preferences.editor", "create-backup-copy", "false")
     gsettings_set("org.gnome.gedit.preferences.editor", "display-line-numbers", "true")
     gsettings_set("org.gnome.gedit.preferences.editor", "highlight-current-line", "true")
