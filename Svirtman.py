@@ -23,14 +23,6 @@ parser.add_argument("-u", "--uninstall", help='Uninstall libvirt and virt-manage
 args = parser.parse_args()
 
 
-### Functions ###
-def gsettings_set(schema: str, key: str, value: str):
-    """Set dconf setting using gsettings."""
-    subprocess.run(['sudo', '-i', '-u', USERNAMEVAR, 'gsettings', 'set', schema, key, value], check=False)
-    # Needed for platforms which don't have dbus-launcher
-    subprocess.run(['sudo', '-i', '-u', USERNAMEVAR, "dbus-run-session", "--", 'gsettings', 'set', schema, key, value], check=False)
-
-
 # Get non-root user information.
 USERNAMEVAR, USERGROUP, USERHOME = CFunc.getnormaluser()
 print("Username is:", USERNAMEVAR)
@@ -120,11 +112,14 @@ if args.uninstall is False:
 """)
 
     # https://wiki.gentoo.org/wiki/QEMU/KVM_IPv6_Support
+    zoneinfo = ""
+    if shutil.which("firewall-cmd"):
+        zoneinfo = r"zone='trusted'"
     NetXMLPath = os.path.join(tempfile.gettempdir(), "default.xml")
     NetXMLText = """<network>
   <name>default</name>
   <forward mode='nat'/>
-  <bridge name='virbr0' zone='trusted' stp='off'/>
+  <bridge name='virbr0' {2} stp='off'/>
   <ip address='{0}.1' netmask='255.255.255.0'>
     <dhcp>
       <range start='{0}.2' end='{0}.254'/>
@@ -136,7 +131,7 @@ if args.uninstall is False:
     </dhcp>
   </ip>
 </network>
-""".format(ipv4_range_addr, ipv6_range_addr)
+""".format(ipv4_range_addr, ipv6_range_addr, zoneinfo)
     with open(NetXMLPath, mode='w') as f:
         f.write(NetXMLText)
     subprocess.run("virsh net-destroy default", shell=True, check=False)
@@ -159,22 +154,6 @@ if args.uninstall is False:
         subprocess.run("firewall-cmd --permanent --zone=libvirt --add-port=0-65535/udp", shell=True, check=True)
         subprocess.run("firewall-cmd --permanent --zone=libvirt --add-port=0-65535/tcp", shell=True, check=True)
         subprocess.run("firewall-cmd --reload", shell=True, check=True)
-
-    # Set dconf info
-    if shutil.which("gsettings") and shutil.which("virt-manager"):
-        gsettings_set("org.virt-manager.virt-manager.stats", "enable-cpu-poll", "true")
-        gsettings_set("org.virt-manager.virt-manager.stats", "enable-disk-poll", "true")
-        gsettings_set("org.virt-manager.virt-manager.stats", "enable-memory-poll", "true")
-        gsettings_set("org.virt-manager.virt-manager.stats", "enable-net-poll", "true")
-        gsettings_set("org.virt-manager.virt-manager.vmlist-fields", "cpu-usage", "true")
-        gsettings_set("org.virt-manager.virt-manager.vmlist-fields", "disk-usage", "false")
-        gsettings_set("org.virt-manager.virt-manager.vmlist-fields", "memory-usage", "true")
-        gsettings_set("org.virt-manager.virt-manager.vmlist-fields", "network-traffic", "true")
-        gsettings_set("org.virt-manager.virt-manager.console", "resize-guest", "1")
-        gsettings_set("org.virt-manager.virt-manager", "enable-libguestfs-vm-inspection", "true")
-        gsettings_set("org.virt-manager.virt-manager", "xmleditor-enabled", "true")
-    else:
-        print("WARNING: gsettings or virt-manager command not found. Install to set virt-manager defaults.")
 
 # Uninstallation Code
 if args.uninstall is True:
