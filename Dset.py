@@ -102,8 +102,8 @@ USERHOME = str(pathlib.Path.home())
 
 ### Begin Code ###
 # Mime Settings
-CMimeSet.HandlePredefines("text", "code-oss.desktop")
-CMimeSet.HandlePredefines("text", "code.desktop")
+CMimeSet.HandlePredefines("text", "codium.desktop")
+CMimeSet.HandlePredefines("audio", "org.atheme.audacious.desktop")
 
 # Commented statements to set default text editor
 # xdg-mime default pluma.desktop text/plain
