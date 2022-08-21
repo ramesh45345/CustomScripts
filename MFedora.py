@@ -111,7 +111,7 @@ if __name__ == '__main__':
         CFunc.dnfinstall("ffmpeg smplayer mpv")
         CFuncExt.ytdlp_install()
         # Editors
-        CFunc.dnfinstall("code")
+        CFunc.dnfinstall("codium")
         # Syncthing
         CFunc.dnfinstall("syncthing")
         # Flameshot

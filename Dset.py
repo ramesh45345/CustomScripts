@@ -21,6 +21,8 @@ def icon_theme_is_present():
     theme_exists = False
     if os.path.isdir("/usr/share/icons/Numix-Circle") or os.path.isdir("/usr/local/share/icons/Numix-Circle"):
         theme_exists = True
+    elif CFunc.is_nixos() is True:
+        theme_exists = True
     return theme_exists
 def gsettings_set(schema: str, key: str, value: str):
     """Set dconf setting using gsettings."""
@@ -100,8 +102,8 @@ USERHOME = str(pathlib.Path.home())
 
 ### Begin Code ###
 # Mime Settings
-CMimeSet.HandlePredefines("text", "code-oss.desktop")
-CMimeSet.HandlePredefines("text", "code.desktop")
+CMimeSet.HandlePredefines("text", "codium.desktop")
+CMimeSet.HandlePredefines("audio", "org.atheme.audacious.desktop")
 
 # Commented statements to set default text editor
 # xdg-mime default pluma.desktop text/plain
@@ -219,7 +221,7 @@ if shutil.which("gnome-software"):
 
 
 # Gnome specific settings
-if shutil.which("gnome-session"):
+if shutil.which("gnome-session") or shutil.which("gnome-shell"):
     gsettings_set("org.gnome.gedit.preferences.editor", "create-backup-copy", "false")
     gsettings_set("org.gnome.gedit.preferences.editor", "display-line-numbers", "true")
     gsettings_set("org.gnome.gedit.preferences.editor", "highlight-current-line", "true")
@@ -404,6 +406,12 @@ if shutil.which("kwriteconfig5") and shutil.which("plasma_session"):
     kwriteconfig("PlasmaUserFeedback", "Global", "FeedbackLevel", "48")
     # System bell
     kwriteconfig("kaccessrc", "Bell", "SystemBell", "false")
+    # Trash
+    kwriteconfig("ktrashrc", "{0}/.local/share/Trash".format(USERHOME), "Days", "15")
+    kwriteconfig("ktrashrc", "{0}/.local/share/Trash".format(USERHOME), "LimitReachedAction", "1")
+    kwriteconfig("ktrashrc", "{0}/.local/share/Trash".format(USERHOME), "Percent", "2")
+    kwriteconfig("ktrashrc", "{0}/.local/share/Trash".format(USERHOME), "UseSizeLimit", "true")
+    kwriteconfig("ktrashrc", "{0}/.local/share/Trash".format(USERHOME), "UseTimeLimit", "true")
 
     # Notification settings
     subprocess.run('kwriteconfig5 --file plasma_workspace.notifyrc --group "Event/Textcompletion: no match" --key "Execute" ""', shell=True, check=False)
@@ -639,6 +647,7 @@ if shutil.which("kwriteconfig5") and shutil.which("plasma_session"):
     subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "8" --group "Applets" --group "12" --group "Configuration" --key "PreloadWeight" "42"', shell=True, check=False)
     subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "8" --group "Applets" --group "13" --key "immutability" "1"', shell=True, check=False)
     subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "8" --group "Applets" --group "13" --key "plugin" "org.kde.plasma.volume"', shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "8" --group "Applets" --group "13" --group "Configuration" --group "General" --key "showVirtualDevices" "true"', shell=True, check=False)
     subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "8" --group "Applets" --group "13" --group "Configuration" --key "PreloadWeight" "42"', shell=True, check=False)
     subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "8" --group "Applets" --group "14" --key "immutability" "1"', shell=True, check=False)
     subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "8" --group "Applets" --group "14" --key "plugin" "org.kde.plasma.notifications"', shell=True, check=False)

@@ -401,6 +401,22 @@ if type nix &> /dev/null; then
     }
 fi
 
+# kubectl
+if type kubectl &> /dev/null; then
+    function kc () {
+        echo "\n Get Nodes"
+        kubectl get nodes -A -o wide
+        echo "\n Get Pods"
+        kubectl get pods -A -o wide
+        echo "\n Get Services"
+        kubectl get svc -A
+        echo "\n Get Persistent Volumes"
+        kubectl get pv -A
+        echo "\n Get Persistent Volume Claims"
+        kubectl get pvc -A
+    }
+fi
+
 # Load tmux upon interactive ssh connection
 # References:
 # https://stackoverflow.com/questions/27613209/how-to-automatically-start-tmux-on-ssh-session
