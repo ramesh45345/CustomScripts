@@ -11,6 +11,7 @@ import tempfile
 # Custom includes
 import CFunc
 import CFuncExt
+import MFedora
 
 print("Running {0}".format(__file__))
 
@@ -47,12 +48,10 @@ CFunc.dnfinstall("https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.no
 # RPMFusion
 CFunc.dnfinstall("https://download1.rpmfusion.org/free/el/rpmfusion-free-release-9.noarch.rpm https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-9.noarch.rpm")
 # Visual Studio Code
-CFunc.rpmimport("https://packages.microsoft.com/keys/microsoft.asc")
-with open("/etc/yum.repos.d/vscode.repo", 'w') as vscoderepofile_write:
-    vscoderepofile_write.write('[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc"')
+MFedora.repo_vscode()
 # EL Repo
 # https://elrepo.org
-subprocess.run("rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org ; dnf install -y https://elrepo.org/linux/elrepo/el9/x86_64/RPMS/elrepo-release-9.0-1.el9.elrepo.noarch.rpm ; dnf config-manager --enable elrepo-kernel", shell=True)
+subprocess.run("rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org ; dnf install -y https://elrepo.org/linux/elrepo/el9/x86_64/RPMS/elrepo-release-9.0-1.el9.elrepo.noarch.rpm", shell=True)
 
 # Update system after enabling repos.
 CFunc.dnfupdate()
@@ -73,7 +72,8 @@ subprocess.run("sudo chmod u+s /sbin/mount.cifs", shell=True)
 # NTP Configuration
 subprocess.run("systemctl enable systemd-timesyncd; timedatectl set-local-rtc false; timedatectl set-ntp 1", shell=True)
 # Install kernel
-# CFunc.dnfinstall("kernel-ml kernel-ml-devel kernel-ml-modules-extra")
+subprocess.run("dnf copr enable -y rmnscnce/kernel-lqx", shell=True, check=True)
+CFunc.dnfinstall("kernel-lqx kernel-lqx-devel")
 # Install powerline fonts
 powerline_git_path = os.path.join(tempfile.gettempdir(), "pl-fonts")
 CFunc.gitclone("https://github.com/powerline/fonts", powerline_git_path)
@@ -93,7 +93,7 @@ if not args.nogui:
     # Browsers
     CFunc.dnfinstall("firefox")
     # Editors
-    CFunc.dnfinstall("code")
+    CFunc.dnfinstall("codium")
 
     # Numix Icon Theme
     CFuncExt.numix_icons(os.path.join(os.sep, "usr", "local", "share", "icons"))
@@ -191,7 +191,7 @@ subprocess.run('grubby --update-kernel=ALL --args="mitigations=off"', shell=True
 
 # Extra scripts
 subprocess.run("{0}/Csshconfig.sh".format(SCRIPTDIR), shell=True)
-subprocess.run("{0}/CShellConfig.py -z -d".format(SCRIPTDIR), shell=True)
+subprocess.run("{0}/CShellConfig.py -f -z -d".format(SCRIPTDIR), shell=True)
 subprocess.run("{0}/CCSClone.py".format(SCRIPTDIR), shell=True)
 subprocess.run("{0}/CDisplayManagerConfig.py".format(SCRIPTDIR), shell=True)
 subprocess.run("{0}/CVMGeneral.py".format(SCRIPTDIR), shell=True)
