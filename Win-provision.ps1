@@ -221,16 +221,16 @@ function Fcn-Software {
   choco upgrade -y setdefaultbrowser
   SetDefaultBrowser.exe HKLM Firefox-308046B0AF4A39CB
 
-  # Install scoop
-  if ( -not (Get-Command "scoop")){
-    Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh') -ErrorAction SilentlyContinue
-  }
-
   # Tablacus
   Fcn-Tablacus
 
   # Create shortcut for Windows Terminal
-  $TargetPath =  "shell:AppsFolder\Microsoft.WindowsTerminal_8wekyb3d8bbwe!App"
+  if (Test-Path "$env:LOCALAPPDATA\Microsoft\WindowsApps\wt.exe") {
+    # Use the local wt.exe if it is found.
+    $TargetPath = "$env:LOCALAPPDATA\Microsoft\WindowsApps\wt.exe"
+  } else {
+    $TargetPath =  "shell:AppsFolder\Microsoft.WindowsTerminal_8wekyb3d8bbwe!App"
+  }
   $ShortcutFile = "$env:PUBLIC\Desktop\Windows Terminal.lnk"
   $WScriptShell = New-Object -ComObject WScript.Shell
   $Shortcut = $WScriptShell.CreateShortcut($ShortcutFile)

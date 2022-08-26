@@ -59,9 +59,9 @@ powershell_cmd_fullpath = shutil.which(powershell_cmd)
 print("Install powershell modules.")
 subprocess.run("""Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
 Install-Module -Name 'posh-git' -AllowClobber
-Install-Module -Name 'oh-my-posh' -AllowClobber
 Install-Module -Name 'Get-ChildItemColor' -AllowClobber
-Install-Module -Name 'PSReadLine' -AllowClobber
+Install-Module -Name 'PSReadLine' -AllowClobber -Force
+Set-ExecutionPolicy Bypass -Scope Process -Force; Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://ohmyposh.dev/install.ps1'))
 """, shell=True, check=True, executable=powershell_cmd_fullpath)
 subprocess.run("choco upgrade -y cascadiacodepl", shell=True, check=False, executable=powershell_cmd_fullpath)
 
@@ -81,10 +81,7 @@ Import-Module Get-ChildItemColor
 Import-Module -Name posh-git
 
 # Ensure oh-my-posh is loaded
-Import-Module -Name oh-my-posh
-
-# Default the prompt to agnoster oh-my-posh theme
-Set-PoshPrompt -Theme agnosterplus
+oh-my-posh init pwsh --config "$env:POSH_THEMES_PATH/agnoster.omp.json" | Invoke-Expression
 
 
 ### Functions ###

@@ -115,7 +115,7 @@ code_array[2]["path"] = os.path.join(userhome, ".var", "app", "com.visualstudio.
 # Windows
 code_array[3]["cmd"] = [os.path.join("C:", os.sep, "Program Files", "Microsoft VS Code", "bin", "code.cmd")]
 # Since the command is in an array, index the 0th element to run which on it.
-if CFunc.is_windows() and shutil.which(code_array[4]["cmd"][0]):
+if CFunc.is_windows() and shutil.which(code_array[3]["cmd"][0]):
     code_array[3]["en"] = True
 else:
     code_array[3]["en"] = False
