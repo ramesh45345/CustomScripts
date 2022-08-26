@@ -214,6 +214,8 @@ function Fcn-Software {
 
   # Install desktop apps.
   Write-Output "Installing Desktop Apps"
+  # Workaround for windows-terminal https://github.com/mkevenaar/chocolatey-packages/issues/136
+  Add-AppxPackage https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx
   # GUI Apps
   choco upgrade -y firefox notepadplusplus tortoisegit bleachbit putty chocolateygui conemu cascadiafonts microsoft-windows-terminal vscode sumatrapdf WizTree
   choco upgrade -y ShutUp10
@@ -225,12 +227,7 @@ function Fcn-Software {
   Fcn-Tablacus
 
   # Create shortcut for Windows Terminal
-  if (Test-Path "$env:LOCALAPPDATA\Microsoft\WindowsApps\wt.exe") {
-    # Use the local wt.exe if it is found.
-    $TargetPath = "$env:LOCALAPPDATA\Microsoft\WindowsApps\wt.exe"
-  } else {
-    $TargetPath =  "shell:AppsFolder\Microsoft.WindowsTerminal_8wekyb3d8bbwe!App"
-  }
+  $TargetPath =  "shell:AppsFolder\Microsoft.WindowsTerminal_8wekyb3d8bbwe!App"
   $ShortcutFile = "$env:PUBLIC\Desktop\Windows Terminal.lnk"
   $WScriptShell = New-Object -ComObject WScript.Shell
   $Shortcut = $WScriptShell.CreateShortcut($ShortcutFile)
