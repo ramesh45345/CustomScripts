@@ -659,7 +659,7 @@ if __name__ == '__main__':
         # Provision with generic windows script
         data['provisioners'][1]["scripts"] = [os.path.join(tempscriptfolderpath, "Win-provision.ps1")]
         # Press enter at the cdrom prompt.
-        data['builders'][0]["boot_command"] = ["<enter><wait><enter><wait><enter><wait><enter><wait><enter>"]
+        data['builders'][0]["boot_command"] = ["<enter><wait 2><enter><wait 2><enter><wait 2><enter><wait 2><enter><wait 2><enter><wait 2><enter><wait 2><enter><wait 2><enter><wait 2><enter><wait 2><enter><wait 2>"]
         data['builders'][0]["boot_wait"] = "1s"
         data['builders'][0]["shutdown_command"] = "shutdown /s /t 60"
         data['builders'][0]["shutdown_timeout"] = "15m"
