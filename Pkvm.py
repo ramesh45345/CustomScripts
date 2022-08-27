@@ -136,8 +136,8 @@ def ovmf_bin_nvramcopy(destpath: str, vmname: str, secureboot: bool = False):
     # Search paths for efi files.
     ovmf_bin_options = [os.path.join(destpath, "OVMF_CODE.fd"), "/usr/share/OVMF/OVMF_CODE.fd", "/usr/share/ovmf/x64/OVMF_CODE.fd", "/bin/OVMF_CODE.fd"]
     ovmf_vars_options = [os.path.join(destpath, "OVMF_VARS.fd"), "/usr/share/OVMF/OVMF_VARS.fd", "/usr/share/ovmf/x64/OVMF_VARS.fd", "/bin/OVMF_VARS.fd"]
-    ovmf_bin_secboot_options = ["/usr/share/OVMF/OVMF_CODE.secboot.fd", "/usr/share/ovmf/x64/OVMF_CODE.secboot.fd"] + ovmf_bin_options
-    ovmf_vars_secboot_options = ["/usr/share/OVMF/OVMF_VARS.secboot.fd"] + ovmf_vars_options
+    ovmf_bin_secboot_options = ["/usr/share/OVMF/OVMF_CODE.secboot.fd", "/usr/share/ovmf/x64/OVMF_CODE.secboot.fd", "/bin/OVMF_CODE.secboot.fd"] + ovmf_bin_options
+    ovmf_vars_secboot_options = ["/usr/share/OVMF/OVMF_VARS.secboot.fd", "/bin/OVMF_VARS.secboot.fd"] + ovmf_vars_options
     # Search for efi bin
     if secureboot is True:
         ovmf_bin_fullpath = file_ifexists(ovmf_bin_secboot_options)
@@ -384,7 +384,6 @@ if __name__ == '__main__':
         windows_key = "VDYBN-27WPP-V4HQT-9VMD4-VMK7H"
         vmname = "Packer-Windows2022-{0}".format(hvname)
 
-
     # Override provision opts if provided.
     if args.vmprovision is None:
         vmprovision_opts = vmprovision_defopts
@@ -483,7 +482,6 @@ if __name__ == '__main__':
         import crypt
         sha512_password = crypt.crypt(args.vmpass, crypt.mksalt(crypt.METHOD_SHA512))
 
-
     # Copy unattend script folder
     if os.path.isdir(os.path.join(SCRIPTDIR, "unattend")):
         tempscriptbasename = os.path.basename(SCRIPTDIR)
@@ -499,7 +497,6 @@ if __name__ == '__main__':
         CFunc.find_replace(tempunattendfolder, "INSERTHOSTNAMENAMEHERE", vmname, "*")
         CFunc.find_replace(tempunattendfolder, "INSERTHASHEDPASSWORDHERE", sha512_password, "*")
         CFunc.find_replace(tempunattendfolder, "INSERTSSHKEYHERE", sshkey, "*")
-
 
     # Get hash for iso.
     if md5_isourl:
@@ -675,8 +672,8 @@ if __name__ == '__main__':
         data['builders'][0]["winrm_use_ntlm"] = True
         data['builders'][0]["ssh_username"] = "{0}".format(args.vmuser)
         data['builders'][0]["floppy_files"] = [os.path.join(tempscriptbasename, "unattend", "autounattend.xml"),
-                                            os.path.join(tempscriptbasename, "unattend", "win_initial.bat"),
-                                            os.path.join(tempscriptbasename, "unattend", "win_enablerm.ps1")]
+                                               os.path.join(tempscriptbasename, "unattend", "win_initial.bat"),
+                                               os.path.join(tempscriptbasename, "unattend", "win_enablerm.ps1")]
         # Register the namespace to avoid nsX in namespace.
         ET.register_namespace('', "urn:schemas-microsoft-com:unattend")
         ET.register_namespace('wcm', "http://schemas.microsoft.com/WMIConfig/2002/State")
@@ -710,7 +707,6 @@ if __name__ == '__main__':
     if 50 <= args.ostype <= 59 and qemu_virtio_diskpath is not None:
         # Insert the virtio driver disk
         xml_insertqemudisk(os.path.join(tempunattendfolder, "autounattend.xml"))
-
 
     # Write packer json file.
     with open(os.path.join(packer_temp_folder, 'file.json'), 'w') as file_json_wr:
