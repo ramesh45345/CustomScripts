@@ -36,14 +36,9 @@ def GetJsonFromFile(filePath):
     contents = ""
     fh = open(filePath)
     for line in fh:
-        # Hack to prevent mangling of the schema line.
-        if "schema" not in line:
-            cleanedLine = line.split("//", 1)[0]
-        else:
-            cleanedLine = line
-        if len(cleanedLine) > 0 and line.endswith("\n") and "\n" not in cleanedLine:
-            cleanedLine += "\n"
-        contents += cleanedLine
+        if len(line) > 0 and line.endswith("\n") and "\n" not in line:
+            line += "\n"
+        contents += line
     fh.close()
     while "/*" in contents:
         preComment, postComment = contents.split("/*", 1)
@@ -55,6 +50,8 @@ def GetJsonFromFile(filePath):
 # Get powershell command
 powershell_cmd = "pwsh.exe"
 powershell_cmd_fullpath = shutil.which(powershell_cmd)
+# Remove profile
+subprocess.run(r"rm $PROFILE", shell=True, check=False, executable=powershell_cmd_fullpath)
 # Install powershell modules
 print("Install powershell modules.")
 subprocess.run("""Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
