@@ -73,7 +73,7 @@ ks_text = r"""
 %include /usr/share/spin-kickstarts/fedora-live-minimization.ks
 
 part / --size 7168
-selinux --disabled
+inst.selinux --disabled
 
 %packages
 
