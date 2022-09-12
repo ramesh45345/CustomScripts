@@ -223,6 +223,9 @@ function Fcn-Software {
   choco upgrade -y setdefaultbrowser
   SetDefaultBrowser.exe HKLM Firefox-308046B0AF4A39CB
 
+  # sshfs
+  winget install --accept-package-agreements --accept-source-agreements WinFsp.WinFsp; winget install --accept-package-agreements --accept-source-agreements SSHFS-Win.SSHFS-Win
+
   # Tablacus
   Fcn-Tablacus
 
