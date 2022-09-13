@@ -334,6 +334,8 @@ function Fcn-Customize {
   New-ItemProperty -Path Registry::HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\ControlPanel -Name StartupPage -Value 1 -Force -ErrorAction SilentlyContinue | Out-Null
   # Right click menu for Windows 11
   New-Item -Path 'Registry::HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32' -Value "" -Force -ErrorAction SilentlyContinue | Out-Null
+  # Enable option to login without password in netplwiz
+  New-ItemProperty -Path "Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\PasswordLess\Device" -Name DevicePasswordLessBuildVersion -Value 0 -Force -ErrorAction SilentlyContinue | Out-Null
 
   # Set max password age as unlimited
   net accounts /MAXPWAGE:UNLIMITED
