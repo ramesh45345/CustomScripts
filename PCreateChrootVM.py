@@ -253,7 +253,7 @@ if __name__ == '__main__':
             sys.exit()
         # VM commands
         vmbootstrap_cmd = 'cd ~ && /CustomScripts/ZSlimDrive.py -n -g && mkdir -p /mnt/etc && mv /nixos_config /mnt/etc/nixos && ln -sfr /mnt/etc/nixos/machines/qemu/configuration.nix /mnt/etc/nixos/ && nix-channel --update && nixos-install && poweroff'
-        vmprovision_cmd = "mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{vmuser}/.ssh; echo '{sshkey}' > ~{vmuser}/.ssh/authorized_keys; chown {vmuser}:users -R ~{vmuser}; {gitcmd}; /var/opt/CustomScripts/MNixOS.py".format(vmuser=args.vmuser, sshkey=sshkey, gitcmd=git_cmdline())
+        vmprovision_cmd = "mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{vmuser}/.ssh; echo '{sshkey}' > ~{vmuser}/.ssh/authorized_keys; chown {vmuser}:users -R ~{vmuser}; {gitcmd}; /var/opt/CustomScripts/MNixOS.py".format(vmuser=args.vmuser, sshkey=sshkey, gitcmd=git_cmdline(destination=os.path.join(os.sep, "var", "opt", "CustomScripts")))
         kvm_variant = "nixos-unstable"
 
     # Override VM Name if provided
