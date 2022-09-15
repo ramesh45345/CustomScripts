@@ -739,13 +739,16 @@ if shutil.which("xfconf-query") and shutil.which("xfce4-panel"):
         xfconf("xfce4-power-manager", "/xfce4-power-manager/dpms-on-ac-sleep", "int", "10")
 
     # Thunar settings
-    xfconf("xfce4-panel", "/default-view", "string", "ThunarDetailsView")
-    xfconf("xfce4-panel", "/last-view", "string", "ThunarDetailsView")
-    xfconf("xfce4-panel", "/last-icon-view-zoom-level", "string", "THUNAR_ZOOM_LEVEL_75_PERCENT")
-    xfconf("xfce4-panel", "/last-show-hidden", "bool", "true")
-    xfconf("xfce4-panel", "/misc-show-delete-action", "bool", "true")
-    xfconf("xfce4-panel", "/misc-single-click", "bool", "false")
-    xfconf("xfce4-panel", "/misc-middle-click-in-tab", "bool", "true")
+    xfconf("thunar", "/default-view", "string", "ThunarDetailsView")
+    xfconf("thunar", "/last-view", "string", "ThunarDetailsView")
+    xfconf("thunar", "/last-icon-view-zoom-level", "string", "THUNAR_ZOOM_LEVEL_50_PERCENT")
+    xfconf("thunar", "/last-details-view-zoom-level", "string", "THUNAR_ZOOM_LEVEL_38_PERCENT")
+    xfconf("thunar", "/last-show-hidden", "bool", "true")
+    xfconf("thunar", "/misc-show-delete-action", "bool", "true")
+    xfconf("thunar", "/misc-single-click", "bool", "false")
+    xfconf("thunar", "/misc-middle-click-in-tab", "bool", "true")
+    xfconf("thunar", "/misc-date-style", "string", "THUNAR_DATE_STYLE_SHORT")
+    xfconf("thunar", "/misc-middle-click-in-tab", "bool", "true")
 
     # List panels
     # xfconf-query -c xfce4-panel -p /panels -lv
@@ -788,17 +791,18 @@ if shutil.which("xfconf-query") and shutil.which("xfce4-panel"):
     xfconf("xfce4-panel", "/plugins/plugin-13", "string", "diskperf")
     xfconf("xfce4-panel", "/plugins/plugin-14", "string", "xfce4-clipman-plugin")
     xfconf("xfce4-panel", "/plugins/plugin-15", "string", "pulseaudio")
-    xfconf("xfce4-panel", "/plugins/plugin-20", "string", "launcher")
-    xfconf("xfce4-panel", "/plugins/plugin-20/items", "string", "firefox.desktop", extra_options=['--force-array'])
-    xfconf("xfce4-panel", "/plugins/plugin-21", "string", "launcher")
-    if os.path.isfile("/usr/share/applications/Thunar.desktop"):
-        xfconf("xfce4-panel", "/plugins/plugin-21/items", "string", "Thunar.desktop", extra_options=['--force-array'])
-    else:
-        xfconf("xfce4-panel", "/plugins/plugin-21/items", "string", "thunar.desktop", extra_options=['--force-array'])
-    xfconf("xfce4-panel", "/plugins/plugin-22", "string", "launcher")
-    xfconf("xfce4-panel", "/plugins/plugin-22/items", "string", "xfce4-terminal.desktop", extra_options=['--force-array'])
-    xfconf("xfce4-panel", "/plugins/plugin-23", "string", "launcher")
-    xfconf("xfce4-panel", "/plugins/plugin-23/items", "string", "com.gexperts.Tilix.desktop", extra_options=['--force-array'])
+    # Panel shortcuts
+    xfce_search_list = ["firefox.desktop", "UngoogledChromium.desktop", "chrome.desktop", 'thunderbird.desktop', 'thunar.desktop', "tilix.desktop", "xfce4-terminal.desktop", 'virt-manager.desktop', 'xfce4-taskmanager.desktop']
+    xfce_file_list = []
+    xfce_panel_string = ""
+    xfce_panel_id = 20
+    for d in xfce_search_list:
+        ds = CMimeSet.LocateDesktopFileName(d)
+        if ds:
+            xfconf("xfce4-panel", "/plugins/plugin-{0}".format(xfce_panel_id), "string", "launcher")
+            xfconf("xfce4-panel", "/plugins/plugin-{0}/items".format(xfce_panel_id), "string", ds, extra_options=['--force-array'])
+            xfce_panel_string += " -t int -s {0}".format(xfce_panel_id)
+            xfce_panel_id = xfce_panel_id + 1
 
     # List existing array
     # xfconf-query -c xfce4-panel -p /panels/panel-2/plugin-ids
@@ -806,7 +810,7 @@ if shutil.which("xfconf-query") and shutil.which("xfce4-panel"):
     subprocess.run("xfconf-query -c xfce4-panel -p /panels/panel-1/plugin-ids -rR", shell=True, check=False)
     subprocess.run("xfconf-query -c xfce4-panel -p /panels/panel-2/plugin-ids -rR", shell=True, check=False)
     # Create plugins for panels
-    subprocess.run("xfconf-query -c xfce4-panel -p /panels/panel-1/plugin-ids -t int -s 9 -t int -s 1 -t int -s 20 -t int -s 21 -t int -s 22 -t int -s 23 -t int -s 11 -t int -s 12 -t int -s 13 -t int -s 14 -t int -s 15 -t int -s 6 -t int -s 5 -t int -s 2 --force-array --create", shell=True, check=False)
+    subprocess.run("xfconf-query -c xfce4-panel -p /panels/panel-1/plugin-ids -t int -s 9 -t int -s 1 -t int{0} -s 11 -t int -s 12 -t int -s 13 -t int -s 14 -t int -s 15 -t int -s 6 -t int -s 5 -t int -s 2 --force-array --create".format(xfce_panel_string), shell=True, check=False)
     subprocess.run("xfconf-query -c xfce4-panel -p /panels/panel-2/plugin-ids -t int -s 3 --force-array --create", shell=True, check=False)
 
     # Reset the panel
