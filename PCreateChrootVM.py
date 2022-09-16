@@ -233,21 +233,19 @@ if __name__ == '__main__':
 
     # Determine VM Name
     if args.ostype == 1:
-        vm_name = "CC-Arch-kvm"
-        # Modify alis
-        temp_folder = os.path.join(os.sep, "tmp")
-        temp_alis = os.path.join(temp_folder, "alis.conf")
-        shutil.copy(os.path.join(SCRIPTDIR, "unattend", "alis.conf"), temp_alis)
-        # Set usernames and passwords
-        CFunc.find_replace(temp_folder, "INSERTUSERHERE", args.vmuser, "alis.conf")
-        CFunc.find_replace(temp_folder, "INSERTPASSWORDHERE", args.vmpass, "alis.conf")
-        CFunc.find_replace(temp_folder, "INSERTHOSTNAMENAMEHERE", vm_name, "alis.conf")
+        if args.vmname is not None:
+            vm_name = args.vmname
+        else:
+            vm_name = "CC-Arch-kvm"
         # VM commands
-        vmbootstrap_cmd = 'cd /opt/CustomScripts && git fetch && git checkout {gitbranch} -f && cd ~ && curl -sL https://raw.githubusercontent.com/picodotdev/alis/master/download.sh | bash && cp /root/alis_new.conf /root/alis.conf && cp /root/alis-packages_new.conf /root/alis-packages.conf && export LANG=en_US.UTF-8 && yes | ./alis.sh && echo "PermitRootLogin yes" >> /mnt/etc/ssh/sshd_config && poweroff'.format(gitbranch=git_branch_retrieve())
+        vmbootstrap_cmd = 'cd ~ && export LANG=en_US.UTF-8 && /opt/CustomScripts/ZSlimDrive.py -n -g && /opt/CustomScripts/BArch.py -n -g 3 -i /dev/vda2 -c "{hostname}" -u {username} -q "{password}" -f "{fullname}" /mnt && echo "PermitRootLogin yes" >> /mnt/etc/ssh/sshd_config && poweroff'.format(hostname=vm_name, username=args.vmuser, password=args.vmpass, fullname=args.fullname)
         vmprovision_cmd = "mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{vmuser}/.ssh; echo '{sshkey}' > ~{vmuser}/.ssh/authorized_keys; chown {vmuser}:users -R ~{vmuser}; pacman -Sy --noconfirm git; {gitcmd}; /opt/CustomScripts/MArch.py -d {desktop}".format(vmuser=args.vmuser, sshkey=sshkey, gitcmd=git_cmdline(), desktop=args.desktopenv)
         kvm_variant = "archlinux"
     if args.ostype == 2:
-        vm_name = "CC-NixOS-kvm"
+        if args.vmname is not None:
+            vm_name = args.vmname
+        else:
+            vm_name = "CC-NixOS-kvm"
         if not os.path.isdir(args.nixconfig):
             print("ERROR: nixconfig {0} must be a folder.".format(args.nixconfig))
             sys.exit()
@@ -257,8 +255,6 @@ if __name__ == '__main__':
         kvm_variant = "nixos-unstable"
 
     # Override VM Name if provided
-    if args.vmname is not None:
-        vm_name = args.vmname
     print("VM Name is {0}".format(vm_name))
     print("Path to LiveCD/ISO is {0}".format(iso_path))
     print("OS Type is {0}".format(args.ostype))
@@ -294,8 +290,7 @@ if __name__ == '__main__':
     ssh_wait(ip=sship, port=localsshport, user=args.livesshuser, password=args.livesshpass)
     # Pre-bootstrap commands
     if args.ostype == 1:
-        scp_vm(ip=sship, port=localsshport, user=args.livesshuser, password=args.livesshpass, filepath=temp_alis, destination="/root/alis_new.conf")
-        scp_vm(ip=sship, port=localsshport, user=args.livesshuser, password=args.livesshpass, filepath=os.path.join(SCRIPTDIR, "unattend", "alis-packages.conf"), destination="/root/alis-packages_new.conf")
+        scp_vm(ip=sship, port=localsshport, user=args.livesshuser, password=args.livesshpass, filepath=SCRIPTDIR, destination="/opt/", folder=True)
     if args.ostype == 2:
         scp_vm(ip=sship, port=localsshport, user=args.livesshuser, password=args.livesshpass, filepath=args.nixconfig, destination="/nixos_config", folder=True)
         scp_vm(ip=sship, port=localsshport, user=args.livesshuser, password=args.livesshpass, filepath=SCRIPTDIR, destination="/CustomScripts", folder=True)
