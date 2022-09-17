@@ -116,8 +116,8 @@ CMimeSet.HandlePredefines("audio", "org.atheme.audacious.desktop")
 
 # Tilix configuration
 if shutil.which("tilix"):
-    gsettings_set("com.gexperts.Tilix.Settings", "warn-vte-config-issue", "false")
-    gsettings_set("com.gexperts.Tilix.Settings", "terminal-title-style", "small")
+    dconf_write("/com/gexperts/Tilix/Settings/warn-vte-config-issue", "false")
+    dconf_write("/com/gexperts/Tilix/Settings/terminal-title-style", "'small'")
     dconf_write("/com/gexperts/Tilix/profiles/2b7c4080-0ddd-46c5-8f23-563fd3ba789d/login-shell", "true")
     dconf_write("/com/gexperts/Tilix/profiles/2b7c4080-0ddd-46c5-8f23-563fd3ba789d/scrollback-unlimited", "true")
     dconf_write("/com/gexperts/Tilix/profiles/2b7c4080-0ddd-46c5-8f23-563fd3ba789d/terminal-bell", "'icon'")
@@ -125,6 +125,8 @@ if shutil.which("tilix"):
     dconf_write("/com/gexperts/Tilix/profiles/2b7c4080-0ddd-46c5-8f23-563fd3ba789d/background-color", "'#263238'")
     dconf_write("/com/gexperts/Tilix/profiles/2b7c4080-0ddd-46c5-8f23-563fd3ba789d/foreground-color", "'#A1B0B8'")
     dconf_write("/com/gexperts/Tilix/profiles/2b7c4080-0ddd-46c5-8f23-563fd3ba789d/palette", "['#252525', '#FF5252', '#C3D82C', '#FFC135', '#42A5F5', '#D81B60', '#00ACC1', '#F5F5F5', '#708284', '#FF5252', '#C3D82C', '#FFC135', '#42A5F5', '#D81B60', '#00ACC1', '#F5F5F5']")
+    # Set system font used by tilix
+    dconf_write("/org/gnome/desktop/interface/monospace-font-name", "'Liberation Mono 11'")
     # Fish config for tilix
     if shutil.which("fish"):
         dconf_write("/com/gexperts/Tilix/profiles/2b7c4080-0ddd-46c5-8f23-563fd3ba789d/use-custom-command", "true")
