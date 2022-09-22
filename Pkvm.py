@@ -192,7 +192,7 @@ if __name__ == '__main__':
     parser.add_argument("-a", "--ostype", type=int, help="OS type (default: %(default)s)", default="1")
     parser.add_argument("-b", "--getpacker", help="Force refresh packer", action="store_true")
     parser.add_argument("-d", "--debug", help="Enable Debug output from packer", action="store_true")
-    parser.add_argument("-e", "--desktopenv", help="Desktop Environment (default: %(default)s)", default="kde")
+    parser.add_argument("-e", "--desktopenv", help="Desktop Environment")
     parser.add_argument("-i", "--iso", help="Path to live cd")
     parser.add_argument("-m", "--memory", help="Memory for VM (default: %(default)s)", default=mem_mib)
     parser.add_argument("-n", "--vmname", help="Name of Virtual Machine")
@@ -218,7 +218,6 @@ if __name__ == '__main__':
     print("VM Memory is {0}".format(args.memory))
     print("VM Hard Disk size is {0} GB".format(args.imgsize))
     print("VM User is {0}".format(args.vmuser))
-    print("Desktop Environment:", args.desktopenv)
     print("Headless:", args.headless)
 
     # Get Packer
@@ -264,6 +263,8 @@ if __name__ == '__main__':
         vmwareid = "fedora-64"
         kvm_variant = "fedora-rawhide"
         isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/36/Server/x86_64/iso/Fedora-Server-dvd-x86_64-36-1.5.iso"
+        if args.desktopenv is None:
+            args.desktopenv = "gnome"
     if args.ostype == 1:
         vmname = "Packer-Fedora-{0}".format(hvname)
         vmprovision_defopts = "-d {0}".format(args.desktopenv)
@@ -299,6 +300,8 @@ if __name__ == '__main__':
         vboxosid = "Ubuntu_64"
         vmwareid = "ubuntu-64"
         vmprovisionscript = "MUbuntu.py"
+        if args.desktopenv is None:
+            args.desktopenv = "mate"
     # Ubuntu latest
     if 10 <= args.ostype <= 14:
         kvm_variant = "ubuntu20.04"
@@ -328,6 +331,8 @@ if __name__ == '__main__':
         kvm_variant = "rhel8.0"
         isourl = "http://mirror.stream.centos.org/9-stream/BaseOS/x86_64/iso/CentOS-Stream-9-latest-x86_64-boot.iso"
         vmprovisionscript = "MCentOS.py"
+        if args.desktopenv is None:
+            args.desktopenv = "gnome"
     if args.ostype == 20:
         vmname = "Packer-CentOS-{0}".format(hvname)
         vmprovision_defopts = "-d {0}".format(args.desktopenv)
@@ -339,6 +344,8 @@ if __name__ == '__main__':
         vmwareid = "debian-64"
         vmprovisionscript = "MDebian.py"
         kvm_variant = "debiantesting"
+        if args.desktopenv is None:
+            args.desktopenv = "gnome"
     # Debian Testing and Unstable
     if 30 <= args.ostype <= 39:
         isourl = "https://cdimage.debian.org/cdimage/weekly-builds/amd64/iso-cd/debian-testing-amd64-netinst.iso"
@@ -355,6 +362,8 @@ if __name__ == '__main__':
         vmname = "Packer-DebianTestingCLI-{0}".format(hvname)
         vmprovision_defopts = "-x"
     if args.ostype == 40:
+        if args.desktopenv is None:
+            args.desktopenv = "mate"
         vmname = "Packer-FreeBSD-{0}".format(hvname)
         vboxosid = "FreeBSD_64"
         vmwareid = "freebsd-64"
@@ -395,6 +404,7 @@ if __name__ == '__main__':
     if args.vmname is not None:
         vmname = args.vmname
     print("VM Name is {0}".format(vmname))
+    print("Desktop Environment:", args.desktopenv)
 
     # Determine disk size in mb
     size_disk_mb = args.imgsize * 1024

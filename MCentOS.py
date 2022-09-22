@@ -112,14 +112,17 @@ if args.desktop == "gnome":
     os.chmod(gs_installer[0], 0o777)
     # Install volume extension
     CFunc.run_as_user(USERNAMEVAR, "{0} --yes 858".format(gs_installer[0]))
-    # Install dashtodock extension
-    CFunc.run_as_user(USERNAMEVAR, "{0} --yes 307".format(gs_installer[0]))
+    # Install Dash to Panel extension
+    CFunc.run_as_user(USERNAMEVAR, "{0} --yes 1160".format(gs_installer[0]))
     # Topicons plus
     CFunc.run_as_user(USERNAMEVAR, "{0} --yes 1031".format(gs_installer[0]))
 elif args.desktop == "kde":
     # Plasma
     CFunc.dnfinstall('--skip-broken install @"KDE Plasma Workspaces" --exclude kf5-akonadi-server-mysql')
     CFunc.sysctl_enable("sddm")
+elif args.desktop == "xfce":
+    # Xfce
+    CFunc.dnfinstall('@xfce xfce4-whiskermenu-plugin xfce4-systemload-plugin xfce4-datetime-plugin xfce4-cpugraph-plugin xfce4-netload-plugin xfce4-genmon-plugin xfce4-mount-plugin')
 
 # Install software for VMs
 if vmstatus == "kvm":

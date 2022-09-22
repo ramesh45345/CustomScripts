@@ -194,7 +194,7 @@ if __name__ == '__main__':
     parser.add_argument("-a", "--ostype", type=int, help="OS type (1=Arch)", default="1")
     parser.add_argument("-c", "--nixconfig", help="Path of folder configuration for nix")
     parser.add_argument("-d", "--debug", help='Use Debug Logging', action="store_true")
-    parser.add_argument("-e", "--desktopenv", help="Desktop Environment (defaults to mate)", default="mate")
+    parser.add_argument("-e", "--desktopenv", help="Desktop Environment (default: %(default)s)", default="xfce")
     parser.add_argument("-f", "--fullname", help="Full Name", default="User Name")
     parser.add_argument("-i", "--iso", help="Path to live cd", required=True)
     parser.add_argument("-n", "--vmname", help="Name of Virtual Machine")
