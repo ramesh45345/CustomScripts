@@ -897,6 +897,8 @@ for ff_path in firefox_profiles_paths:
                         firefox_modify_settings("media.autoplay.default", "5", prefsjs_file)
                         # Sponsored suggest
                         firefox_modify_settings("browser.urlbar.suggest.quicksuggest.sponsored", "false", prefsjs_file)
+                        # New tab recommends
+                        firefox_modify_settings("browser.newtabpage.activity-stream.feeds.recommendationprovider", "false", prefsjs_file)
                         if "librewolf" in ff_path:
                             firefox_modify_settings("network.dns.disableIPv6", "false", prefsjs_file)
                             firefox_modify_settings("webgl.disabled", "false", prefsjs_file)
