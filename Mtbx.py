@@ -90,7 +90,7 @@ RUN pacman -Syu --needed --noconfirm reflector
 RUN reflector --country 'United States' --latest 10 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
 RUN pacman -Syy
 # Software setup
-RUN pacman -Syu --needed --noconfirm nano sudo git zsh python3 shadow
+RUN pacman -Syu --needed --noconfirm nano sudo git zsh python3 shadow tmux
 RUN pacman -Syu --needed --noconfirm ttf-dejavu ttf-liberation powerline-fonts
 # Enable multilib
 RUN echo -e '\n[multilib]\nInclude = /etc/pacman.d/mirrorlist' >> /etc/pacman.conf ; pacman -Syu --needed --noconfirm
@@ -111,7 +111,7 @@ addtext(r"""
 # From stock image.
 RUN sed -i '/tsflags=nodocs/d' /etc/dnf/dnf.conf
 RUN dnf -y reinstall acl bash curl gawk grep gzip libcap openssl p11-kit pam python3 rpm sed systemd tar
-RUN dnf -y install bash-completion bzip2 diffutils dnf-plugins-core findutils flatpak-spawn fpaste git gnupg gnupg2-smime gvfs-client hostname iputils jwhois keyutils krb5-libs less lsof man-db man-pages mlocate mtr nano-default-editor nss-mdns openssh-clients passwd pigz procps-ng rsync shadow-utils sudo tcpdump time traceroute tree unzip vte-profile wget which words xorg-x11-xauth xz zip
+RUN dnf -y install bash-completion bzip2 diffutils dnf-plugins-core findutils flatpak-spawn fpaste git gnupg gnupg2-smime gvfs-client hostname iputils jwhois keyutils krb5-libs less lsof man-db man-pages mlocate mtr nano-default-editor nss-mdns openssh-clients passwd pigz procps-ng rsync shadow-utils sudo tcpdump time tmux traceroute tree unzip vte-profile wget which words xorg-x11-xauth xz zip
 
 # Shell Tools
 RUN dnf -y install zsh
@@ -123,7 +123,7 @@ RUN dnf -y install wine winetricks
 addtext(r"""
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update; apt-get -y upgrade
-RUN apt-get install -y sudo libcap2-bin bash zsh fish nano p7zip-full p7zip-rar unrar wget curl rsync less python-is-python3 git lsb-release software-properties-common apt-transport-https gnupg
+RUN apt-get install -y sudo libcap2-bin bash zsh fish nano p7zip-full p7zip-rar unrar wget curl rsync less python-is-python3 git lsb-release software-properties-common apt-transport-https gnupg tmux
 
 # Install locales
 RUN apt-get install -y locales && \
@@ -203,23 +203,30 @@ currentpath = os.getcwd()
 if args.distro == "all" or args.distro == "arch":
     os.chdir(tempfolder_arch)
     subprocess.run(["podman", "build", "--pull=true", "-t", "arch-shared", "-f", os.path.basename(tempfile_arch)], check=True)
-    print('Run "toolbox create -i arch-shared ; toolbox enter arch-shared" to create and run a container.')
 if args.distro == "all" or args.distro == "fedora":
     os.chdir(tempfolder_fedora)
     subprocess.run(["podman", "build", "--pull=true", "-t", "fedora-shared", "-f", os.path.basename(tempfile_fedora)], check=True)
-    print('Run "toolbox create -i fedora-shared ; toolbox enter fedora-shared" to create and run a container.')
 if args.distro == "all" or args.distro == "ubuntu":
     os.chdir(tempfolder_ubuntu)
     subprocess.run(["podman", "build", "--pull=true", "-t", "ubuntu-shared", "-f", os.path.basename(tempfile_ubuntu)], check=True)
-    print('Run "toolbox create -i ubuntu-shared ; toolbox enter ubuntu-shared" to create and run a container.')
 os.chdir(currentpath)
 
-if args.distro == "all":
-    print("""
+print("""
 The following commands can be used to create and run containers:
 toolbox create -i arch-shared ; toolbox enter arch-shared
 toolbox create -i fedora-shared ; toolbox enter fedora-shared
 toolbox create -i ubuntu-shared ; toolbox enter ubuntu-shared
+
+Distrobox:
+distrobox create -n test -i arch-shared ; distrobox enter arch-shared
+distrobox create -n test -i fedora-shared ; distrobox enter fedora-shared
+distrobox create -n test -i ubuntu-shared ; distrobox enter ubuntu-shared
+
+Distrobox (non-shared home):
+distrobox create -n arch-shared -i arch-shared -H /mnt/Storage/VMs/arch-shared-home ; distrobox enter arch-shared
+distrobox create -n fedora-shared -i fedora-shared -H /mnt/Storage/VMs/fedora-shared-home ; distrobox enter fedora-shared
+distrobox create -n ubuntu-shared -i ubuntu-shared -H /mnt/Storage/VMs/ubuntu-shared-home ; distrobox enter ubuntu-shared
+
 """)
 
 print("\nScript End")
