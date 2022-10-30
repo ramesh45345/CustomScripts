@@ -38,28 +38,6 @@ if ( $VMstring.Model -imatch "vmware" ) {
 
 ### Functions ###
 
-# External, From: https://gallery.technet.microsoft.com/scriptcenter/How-to-associate-file-3898f323
-Function AssociateFileExtensions
-{
-    Param
-    (
-        [Parameter(Mandatory=$true)]
-        [String[]] $FileExtensions,
-        [Parameter(Mandatory=$true)]
-        [String] $OpenAppPath
-    ) 
-    if (-not (Test-Path $OpenAppPath))
-    {
-	   throw "$OpenAppPath does not exist."
-    }   
-    foreach ($extension in $FileExtensions)
-    {
-        $fileType = (cmd /c "assoc $extension")
-        $fileType = $fileType.Split("=")[-1] 
-        cmd /c "ftype $fileType=""$OpenAppPath"" ""%1"""
-    }
-}
-
 # Install chocolatey
 function Fcn-InstallChocolatey {
   iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
@@ -226,9 +204,6 @@ function Fcn-Software {
   # sshfs
   winget install --accept-package-agreements --accept-source-agreements WinFsp.WinFsp; winget install --accept-package-agreements --accept-source-agreements SSHFS-Win.SSHFS-Win
 
-  # Tablacus
-  Fcn-Tablacus
-
   # Create shortcut for Windows Terminal
   $TargetPath =  "shell:AppsFolder\Microsoft.WindowsTerminal_8wekyb3d8bbwe!App"
   $ShortcutFile = "$env:PUBLIC\Desktop\Windows Terminal.lnk"
@@ -242,28 +217,6 @@ function Fcn-Software {
 
   # Remove IE11
   Disable-WindowsOptionalFeature -FeatureName Internet-Explorer-Optional-amd64 -Online -NoRestart -Force -ErrorAction SilentlyContinue | Out-Null
-}
-
-# Tablacus Function
-function Fcn-Tablacus {
-  # Install/upgrade Tablacus
-  choco upgrade -y tablacus
-
-  # Tablacus configuration
-  $pathtotablacus = "$env:PROGRAMDATA\chocolatey\lib\tablacus\tools\"
-  if(Test-Path -Path $pathtotablacus){
-    # Set rwx everyone permissions for tablacus folder
-    $Acl = Get-ACL $pathtotablacus
-    $AccessRule= New-Object System.Security.AccessControl.FileSystemAccessRule("everyone","full","ContainerInherit,Objectinherit","none","Allow")
-    $Acl.AddAccessRule($AccessRule)
-    Set-Acl $pathtotablacus $Acl
-    # Create shortcut for tablacus
-    $WshShell = New-Object -comObject WScript.Shell
-    $Shortcut = $WshShell.CreateShortcut("$env:PUBLIC\Desktop\Tablacus.lnk")
-    $Shortcut.TargetPath = "$pathtotablacus\TE64.exe"
-    $Shortcut.WorkingDirectory = "$pathtotablacus"
-    $Shortcut.Save()
-  }
 }
 
 # Customize Function
@@ -340,16 +293,11 @@ function Fcn-Customize {
   # Set max password age as unlimited
   net accounts /MAXPWAGE:UNLIMITED
 
-  # Set file associations
   # Remove Compressed Folders association
   New-PSDrive -PSProvider "Registry" -Root "HKEY_CLASSES_ROOT" -Name "HKCR" | Out-Null
   Remove-Item -Path "HKCR:\SystemFileAssociations\.zip" -Recurse -ErrorAction SilentlyContinue
   Remove-Item -Path "HKCR:\CompressedFolder" -Recurse -ErrorAction SilentlyContinue
   Remove-PSDrive "HKCR"
-  cmd /c assoc .7z=7zipfile
-  cmd /c "ftype 7zipfile=""C:\Program Files\7-Zip\7zFM.exe"" ""%1"""
-  AssociateFileExtensions -FileExtensions .zip -OpenAppPath "C:\Program Files\7-Zip\7zFM.exe"
-  AssociateFileExtensions -FileExtensions .txt,.log -OpenAppPath "C:\Program Files\Notepad++\Notepad++.exe"
 
 
   # Disable password complexity.
