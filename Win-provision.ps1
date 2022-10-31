@@ -41,6 +41,9 @@ if ( $VMstring.Model -imatch "vmware" ) {
 # Install chocolatey
 function Fcn-InstallChocolatey {
   iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+  # Workaround for multiple install issue with powershell.
+  choco upgrade chocolatey -y --allow-downgrade --version=1.1.0
+  choco pin add --name=chocolatey --version=1.1.0 -y
 }
 
 # Add path to environment.
