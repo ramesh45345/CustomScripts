@@ -212,6 +212,7 @@ for idx in range(1, 6):
         data["vsicons.dontShowNewVersionMessage"] = True
         data["gitlens.showWelcomeOnInstall"] = False
         data["git.confirmSync"] = False
+        data["[nix]"] = {"editor.tabSize": 2}
         # Python Config
         data["python.linting.maxNumberOfProblems"] = 500
         data["python.linting.pylintArgs"] = ["--disable=C0301,C0103"]
