@@ -159,12 +159,12 @@ if __name__ == '__main__':
     # Install Desktop Software
     if args.desktop == "gnome":
         # Gnome
-        CFunc.pacman_install("baobab eog evince file-roller gdm gedit gnome-backgrounds gnome-calculator gnome-characters gnome-clocks gnome-color-manager gnome-control-center gnome-font-viewer gnome-getting-started-docs gnome-keyring gnome-logs gnome-menus gnome-remote-desktop gnome-screenshot gnome-session gnome-settings-daemon gnome-shell gnome-shell-extensions gnome-system-monitor gnome-terminal gnome-themes-extra gnome-user-docs gnome-video-effects gnome-weather gvfs gvfs-google gvfs-gphoto2 gvfs-mtp gvfs-nfs gvfs-smb mutter nautilus orca sushi tracker tracker-miners vino xdg-user-dirs-gtk xdg-desktop-portal-gtk yelp gnome-firmware")
+        CFunc.pacman_install("gnome dconf-editor gedit gnome-tweaks gnome-firmware")
         CFunc.sysctl_enable("-f gdm", error_on_fail=True)
         # Some Gnome Extensions
-        CFunc.pacman_install("gnome-tweaks")
-        CFunc.pacman_install("gpaste chrome-gnome-shell")
-        yay_install(USERNAMEVAR, "aur/gnome-shell-extension-topicons-plus-git")
+        CFunc.pacman_install("gpaste")
+        yay_install(USERNAMEVAR, "aur/gnome-browser-connector")
+        yay_install(USERNAMEVAR, "aur/gnome-shell-extension-topicons-plus")
         # Install gs installer script.
         gs_installer = CFunc.downloadfile("https://raw.githubusercontent.com/brunelli/gnome-shell-extension-installer/master/gnome-shell-extension-installer", os.path.join(os.sep, "usr", "local", "bin"), overwrite=True)
         os.chmod(gs_installer[0], 0o777)
