@@ -45,16 +45,11 @@ def install_nix():
 def install_homemanager():
     """Install home-manager."""
     setup_nix_envvars()
-    # Detect nixos version
-    hm_version = None
-    if CFunc.is_nixos():
-        nixstring = CFunc.subpout("nixos-version").split(".")
-        hm_version = "{0}.{1}".format(nixstring[0], nixstring[1])
     # Add channel
-    if hm_version is not None:
-        channel_url = "https://github.com/nix-community/home-manager/archive/release-{0}.tar.gz".format(hm_version)
-    else:
-        channel_url = "https://github.com/nix-community/home-manager/archive/master.tar.gz"
+    print("WARNING: This script assumes you are using master channel.")
+    if CFunc.is_nixos() is True:
+        subprocess.run("nix-channel --add https://nixos.org/channels/nixos-unstable nixos", shell=True, check=True)
+    channel_url = "https://github.com/nix-community/home-manager/archive/master.tar.gz"
     subprocess.run("nix-channel --add {0} home-manager".format(channel_url), shell=True, check=True)
     subprocess.run("nix-channel --update", shell=True, check=True)
     # Set nix path if not on nixos
