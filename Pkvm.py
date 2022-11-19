@@ -262,7 +262,7 @@ if __name__ == '__main__':
         vboxosid = "Fedora_64"
         vmwareid = "fedora-64"
         kvm_variant = "fedora-rawhide"
-        isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/36/Server/x86_64/iso/Fedora-Server-dvd-x86_64-36-1.5.iso"
+        isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/37/Server/x86_64/iso/Fedora-Server-dvd-x86_64-37-1.7.iso"
         if args.desktopenv is None:
             args.desktopenv = "gnome"
     if args.ostype == 1:
@@ -285,7 +285,7 @@ if __name__ == '__main__':
         vboxosid = "Fedora_64"
         vmwareid = "fedora-64"
         kvm_variant = "silverblue-rawhide"
-        isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/36/Kinoite/x86_64/iso/Fedora-Kinoite-ostree-x86_64-36-1.5.iso"
+        isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/37/Kinoite/x86_64/iso/Fedora-Kinoite-ostree-x86_64-37-1.7.iso "
         vmname = "Packer-FedoraKinoite-{0}".format(hvname)
         vmprovision_defopts = ""
     if args.ostype == 9:
@@ -293,7 +293,7 @@ if __name__ == '__main__':
         vboxosid = "Fedora_64"
         vmwareid = "fedora-64"
         kvm_variant = "silverblue-rawhide"
-        isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/36/Silverblue/x86_64/iso/Fedora-Silverblue-ostree-x86_64-36-1.5.iso"
+        isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/37/Silverblue/x86_64/iso/Fedora-Silverblue-ostree-x86_64-37-1.7.iso"
         vmname = "Packer-FedoraSilverblue-{0}".format(hvname)
         vmprovision_defopts = ""
     if 10 <= args.ostype <= 19:
@@ -304,12 +304,12 @@ if __name__ == '__main__':
             args.desktopenv = "mate"
     # Ubuntu latest
     if 10 <= args.ostype <= 14:
-        kvm_variant = "ubuntu20.04"
-        isourl = "https://releases.ubuntu.com/22.04/ubuntu-22.04-live-server-amd64.iso"
+        kvm_variant = "ubuntu22.04"
+        isourl = "https://releases.ubuntu.com/22.10/ubuntu-22.10-live-server-amd64.iso"
     # Ubuntu LTS
     if 15 <= args.ostype <= 19:
-        kvm_variant = "ubuntu20.04"
-        isourl = "https://releases.ubuntu.com/20.04/ubuntu-20.04.1-live-server-amd64.iso"
+        kvm_variant = "ubuntu22.04"
+        isourl = "https://releases.ubuntu.com/22.04/ubuntu-22.04-live-server-amd64.iso"
     if args.ostype == 10:
         vmname = "Packer-Ubuntu-{0}".format(hvname)
         vmprovision_defopts = "-d {0}".format(args.desktopenv)
@@ -603,7 +603,7 @@ if __name__ == '__main__':
     data['provisioners'] = ['']
     data['provisioners'][0] = {}
     if 1 <= args.ostype <= 5:
-        data['builders'][0]["boot_command"] = ["<tab> inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/fedora.cfg<enter><wait>"]
+        data['builders'][0]["boot_command"] = ["<up><wait>e<wait><down><wait><down><wait><end> inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/fedora.cfg<wait><f10>"]
         data['provisioners'][0]["type"] = "shell"
         data['provisioners'][0]["inline"] = "dnf install -y git; {2}; /opt/CustomScripts/{0} {1}".format(vmprovisionscript, vmprovision_opts, git_cmdline())
     if args.ostype == 5:
