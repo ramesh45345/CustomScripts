@@ -193,6 +193,9 @@ with open(os.path.join(os.sep, "etc", "network", "interfaces"), 'w') as writefil
 auto lo
 iface lo net loopback
 """)
+# Add dns server after installing network manager.
+with open(os.path.join(os.sep, "etc", "resolv.conf"), 'a') as writefile:
+    writefile.write("\nnameserver 8.8.8.8")
 
 # Install Desktop Software
 if args.desktop == "gnome":
