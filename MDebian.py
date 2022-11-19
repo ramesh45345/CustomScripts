@@ -172,9 +172,6 @@ if args.nogui is False:
     CFunc.aptinstall("tilix")
     # VSCodium
     MUbuntu.vscode_deb()
-    # Install snapd
-    CFunc.aptinstall("snapd")
-    CFunc.AddLineToSudoersFile(sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("snap")))
     # Flatpak
     CFunc.aptinstall("flatpak")
     CFunc.flatpak_addremote("flathub", "https://flathub.org/repo/flathub.flatpakrepo")
