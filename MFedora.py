@@ -229,18 +229,17 @@ if __name__ == '__main__':
         CFunc.dnfinstall("flatpak xdg-desktop-portal")
         CFunc.AddLineToSudoersFile(fedora_sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("flatpak")))
 
-    CFunc.dnfinstall("grubby")
-
+    # Plymouth and grub
+    subprocess.run("plymouth-set-default-theme spinner -R")
+    grub_config = os.path.join(os.sep, "etc", "default", "grub")
+    # Comment grub console
+    subprocess.run("sed -i '/GRUB_CONSOLE/ s/^#*/#/' {0}".format(grub_config), shell=True, check=True)
     # Disable Selinux
     # To get selinux status: sestatus, getenforce
-    CFuncExt.GrubEnvAdd(os.path.join(os.sep, "etc", "default", "grub"), "GRUB_CMDLINE_LINUX", "selinux=0")
-    CFuncExt.GrubUpdate()
-    subprocess.run('grubby --update-kernel=ALL --args="selinux=0"', shell=True, check=True)
-
+    CFuncExt.GrubEnvAdd(grub_config, "GRUB_CMDLINE_LINUX", "selinux=0")
     # Disable mitigations
-    CFuncExt.GrubEnvAdd(os.path.join(os.sep, "etc", "default", "grub"), "GRUB_CMDLINE_LINUX", "mitigations=off")
+    CFuncExt.GrubEnvAdd(grub_config, "GRUB_CMDLINE_LINUX", "mitigations=off")
     CFuncExt.GrubUpdate()
-    subprocess.run('grubby --update-kernel=ALL --args="mitigations=off"', shell=True, check=True)
 
     # Extra scripts
     subprocess.run(os.path.join(SCRIPTDIR, "CCSClone.py"), shell=True, check=True)
