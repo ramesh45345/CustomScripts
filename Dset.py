@@ -335,7 +335,8 @@ if shutil.which("kwriteconfig5") and shutil.which("plasma_session"):
         kwriteconfig("dolphinrc", "CompactMode", "PreviewSize", "16")
     # KDE Globals
     subprocess.run('kwriteconfig5 --file kdeglobals --group KDE --key SingleClick --type bool false', shell=True, check=False)
-    subprocess.run('kwriteconfig5 --file kdeglobals --group General    --key XftSubPixel "rgb"', shell=True, check=False)
+    kwriteconfig("kdeglobals", "General", "XftSubPixel", "rgb")
+    kwriteconfig("kdeglobals", "General", "XftHintStyle", "hintmedium")
     os.makedirs("{0}/.kde/share/config".format(USERHOME), exist_ok=True)
     if icon_theme_is_present():
         subprocess.run('kwriteconfig5 --file kdeglobals --group Icons --key Theme "Numix-Circle"', shell=True, check=False)
@@ -379,7 +380,7 @@ if shutil.which("kwriteconfig5") and shutil.which("plasma_session"):
     subprocess.run('kwriteconfig5 --file ksmserverrc --group General --key offerShutdown true', shell=True, check=False)
     # Konsole settings
     kwriteconfig("konsolerc", "Desktop Entry", "DefaultProfile", "Profile 1.profile")
-    kwriteconfig("konsolerc", "KonsoleWindow", "SaveGeometryOnExit", "false")
+    kwriteconfig("konsolerc", "KonsoleWindow", "RememberWindowSize", "false")
     kwriteconfig("konsolerc", "TabBar", "CloseTabOnMiddleMouseButton", "true")
     kwriteconfig("konsolerc", "TabBar", "ExpandTabWidth", "true")
     kwriteconfig("konsolerc", "TabBar", "NewTabButton", "true")
