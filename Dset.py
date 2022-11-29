@@ -335,8 +335,6 @@ if shutil.which("kwriteconfig5") and shutil.which("plasma_session"):
         kwriteconfig("dolphinrc", "CompactMode", "PreviewSize", "16")
     # KDE Globals
     subprocess.run('kwriteconfig5 --file kdeglobals --group KDE --key SingleClick --type bool false', shell=True, check=False)
-    kwriteconfig("kdeglobals", "General", "XftSubPixel", "rgb")
-    kwriteconfig("kdeglobals", "General", "XftHintStyle", "hintmedium")
     os.makedirs("{0}/.kde/share/config".format(USERHOME), exist_ok=True)
     if icon_theme_is_present():
         subprocess.run('kwriteconfig5 --file kdeglobals --group Icons --key Theme "Numix-Circle"', shell=True, check=False)
