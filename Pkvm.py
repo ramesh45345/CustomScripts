@@ -639,10 +639,8 @@ if __name__ == '__main__':
         pathlib.Path(os.path.join(tempscriptfolderpath, "unattend", "meta-data")).touch(exist_ok=True)
         # Needed to hit enter quickly at the LTS grub screen (with the assistance/keyboard logo)
         data['builders'][0]["boot_wait"] = "1s"
-    if 10 <= args.ostype <= 14:
+    if 10 <= args.ostype <= 19:
         data['builders'][0]["boot_command"] = ["<wait>c<wait>linux /casper/vmlinuz quiet autoinstall 'ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/'<enter><wait>initrd /casper/initrd<enter><wait5>boot<enter>"]
-    if 15 <= args.ostype <= 19:
-        data['builders'][0]["boot_command"] = ["<space><wait><enter><wait><f6><wait><esc><home>ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ autoinstall <enter>"]
     if 20 <= args.ostype <= 29:
         data['builders'][0]["boot_command"] = ["<tab> inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/centos.cfg<enter><wait>"]
         data['provisioners'][0]["type"] = "shell"
