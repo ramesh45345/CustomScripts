@@ -136,9 +136,9 @@ RUN apt-get install -y locales && \
 
 # Wine
 RUN dpkg --add-architecture i386 && \
-    wget -nc https://dl.winehq.org/wine-builds/winehq.key -O /tmp/winehq.key && \
-    apt-key add /tmp/winehq.key && rm /tmp/winehq.key && \
-    add-apt-repository "deb https://dl.winehq.org/wine-builds/ubuntu/ $(lsb_release -sc) main" && \
+    mkdir -pm755 /etc/apt/keyrings && \
+    wget -O /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key && \
+    wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/ubuntu/dists/$(lsb_release -sc)/winehq-$(lsb_release -sc).sources && \
     apt-get update && apt install -y --install-recommends winehq-devel
 """, "ubuntu")
 
