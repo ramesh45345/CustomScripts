@@ -348,7 +348,7 @@ if __name__ == '__main__':
             args.desktopenv = "gnome"
     # Debian Testing and Unstable
     if 30 <= args.ostype <= 39:
-        isourl = "https://cdimage.debian.org/cdimage/weekly-builds/amd64/iso-cd/debian-testing-amd64-netinst.iso"
+        isourl = "https://cdimage.debian.org/cdimage/daily-builds/daily/current/amd64/iso-cd/debian-testing-amd64-netinst.iso"
     if args.ostype == 30:
         vmname = "Packer-DebianUnstable-{0}".format(hvname)
         vmprovision_defopts = "-u -d {0}".format(args.desktopenv)
