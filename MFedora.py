@@ -230,6 +230,7 @@ if __name__ == '__main__':
         CFunc.AddLineToSudoersFile(fedora_sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("flatpak")))
 
     # Plymouth and grub
+    CFunc.dnfinstall("plymouth-theme-spinner")
     subprocess.run("plymouth-set-default-theme spinner -R", shell=True, check=True)
     grub_config = os.path.join(os.sep, "etc", "default", "grub")
     # Comment grub console
