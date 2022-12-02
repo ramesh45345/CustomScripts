@@ -140,6 +140,10 @@ function Fcn-Software {
   choco upgrade -y 7zip
   # Libraries
   choco upgrade -y vcredist-all git python
+  # Remove execution alias, which prevents python scripts from being run in powershell.
+  # https://superuser.com/questions/1728816/manage-windows-app-execution-aliases-from-powershell
+  Remove-Item $env:LOCALAPPDATA\Microsoft\WindowsApps\python.exe
+  Remove-Item $env:LOCALAPPDATA\Microsoft\WindowsApps\python3.exe
   $gitcmdpath = "C:\Program Files\Git\bin"
 
   # Install VM Tools
