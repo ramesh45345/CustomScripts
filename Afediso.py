@@ -47,22 +47,22 @@ else:
     print("Creating work folder {0}.".format(buildfolder))
     os.makedirs(buildfolder, 0o777)
 
-# Modify lorax grub config
-subprocess.run('sed -i "s/^default=.*/default=0/g" /usr/share/lorax/templates.d/99-generic/live/config_files/x86/grub.conf /usr/share/lorax/templates.d/99-generic/config_files/x86/grub.conf', shell=True, check=True)
-subprocess.run('sed -i "s/^timeout.*/timeout 1/g" /usr/share/lorax/templates.d/99-generic/live/config_files/x86/grub.conf /usr/share/lorax/templates.d/99-generic/config_files/x86/grub.conf', shell=True, check=True)
-subprocess.run('sed -i "s/^timeout.*/timeout 10/g" /usr/share/lorax/templates.d/99-generic/config_files/x86/isolinux.cfg /usr/share/lorax/templates.d/99-generic/live/config_files/x86/isolinux.cfg', shell=True, check=True)
-subprocess.run('sed -i "/menu default/d" /usr/share/lorax/templates.d/99-generic/config_files/x86/isolinux.cfg /usr/share/lorax/templates.d/99-generic/live/config_files/x86/isolinux.cfg', shell=True, check=True)
-subprocess.run(r'sed -i "/label linux/a \ \ menu default" /usr/share/lorax/templates.d/99-generic/config_files/x86/isolinux.cfg /usr/share/lorax/templates.d/99-generic/live/config_files/x86/isolinux.cfg', shell=True, check=True)
-# EFI settings
-subprocess.run('sed -i "s/^set default=.*/set default=0/g" /usr/share/lorax/templates.d/99-generic/live/config_files/x86/grub2-efi.cfg /usr/share/lorax/templates.d/99-generic/config_files/x86/grub2-efi.cfg', shell=True, check=True)
-subprocess.run('sed -i "s/^set timeout=.*/set timeout=1/g" /usr/share/lorax/templates.d/99-generic/live/config_files/x86/grub2-efi.cfg /usr/share/lorax/templates.d/99-generic/config_files/x86/grub2-efi.cfg', shell=True, check=True)
+# Modify lorax isolinux config
+subprocess.run('sed -i "s/^timeout.*/timeout 10/g" /usr/share/lorax/templates.d/99-generic/config_files/x86/isolinux.cfg', shell=True, check=True)
+subprocess.run('sed -i "/menu default/d" /usr/share/lorax/templates.d/99-generic/config_files/x86/isolinux.cfg', shell=True, check=True)
+subprocess.run(r'sed -i "/label linux/a \ \ menu default" /usr/share/lorax/templates.d/99-generic/config_files/x86/isolinux.cfg', shell=True, check=True)
+# Grub settings
+subprocess.run('sed -i "s/^set default=.*/set default=0/g" /usr/share/lorax/templates.d/99-generic/live/config_files/x86/grub2-efi.cfg /usr/share/lorax/templates.d/99-generic/config_files/x86/grub2-efi.cfg /usr/share/lorax/templates.d/99-generic/live/config_files/x86/grub2-bios.cfg /usr/share/lorax/templates.d/99-generic/config_files/x86/grub2-bios.cfg', shell=True, check=True)
+subprocess.run('sed -i "s/^set timeout=.*/set timeout=1/g" /usr/share/lorax/templates.d/99-generic/live/config_files/x86/grub2-efi.cfg /usr/share/lorax/templates.d/99-generic/config_files/x86/grub2-efi.cfg /usr/share/lorax/templates.d/99-generic/live/config_files/x86/grub2-bios.cfg /usr/share/lorax/templates.d/99-generic/config_files/x86/grub2-bios.cfg', shell=True, check=True)
 # Disable selinux and mitigations
-subprocess.run('sed -i "s/ quiet$/ quiet selinux=0 mitigations=off/g" /usr/share/lorax/templates.d/99-generic/live/config_files/x86/grub.conf /usr/share/lorax/templates.d/99-generic/config_files/x86/grub.conf /usr/share/lorax/templates.d/99-generic/config_files/x86/isolinux.cfg /usr/share/lorax/templates.d/99-generic/live/config_files/x86/isolinux.cfg /usr/share/lorax/templates.d/99-generic/live/config_files/x86/grub2-efi.cfg /usr/share/lorax/templates.d/99-generic/config_files/x86/grub2-efi.cfg', shell=True, check=True)
+subprocess.run('sed -i "s/ quiet$/ quiet selinux=0 mitigations=off/g" /usr/share/lorax/templates.d/99-generic/live/config_files/x86/grub2-bios.cfg /usr/share/lorax/templates.d/99-generic/config_files/x86/grub2-bios.cfg /usr/share/lorax/templates.d/99-generic/config_files/x86/isolinux.cfg /usr/share/lorax/templates.d/99-generic/live/config_files/x86/grub2-efi.cfg /usr/share/lorax/templates.d/99-generic/config_files/x86/grub2-efi.cfg', shell=True, check=True)
 # Modify kickstart repos
 with open(os.path.join(os.sep, "usr", "share", "spin-kickstarts", "fedora-repo.ks"), 'w') as f:
     f.write("%include fedora-repo-not-rawhide.ks")
 # Remove auth statements. Temporary workaround, to be removed.
 subprocess.run("sed -i '/^auth */d' /usr/share/spin-kickstarts/fedora-live-base.ks", shell=True, check=False)
+# Remove x86-baremetal-tools. Temporary workaround, to be removed when https://github.com/rhinstaller/kickstart-tests/issues/740 is fixed.
+subprocess.run("sed -i '/x86-baremetal-tools/d' /usr/share/spin-kickstarts/fedora-live-base.ks", shell=True, check=False)
 
 
 ### Prep Environment ###
@@ -73,7 +73,7 @@ ks_text = r"""
 %include /usr/share/spin-kickstarts/fedora-live-minimization.ks
 
 part / --size 7168
-inst.selinux --disabled
+selinux --disabled
 
 %packages
 
@@ -280,7 +280,7 @@ subprocess.run("livemedia-creator --ks {ks} --resultdir {resultdir} --logfile {o
 subprocess.run("chmod a+rw -R {0}".format(buildfolder), shell=True, check=True)
 if os.path.isfile(os.path.join(buildfolder, "results", isoname)):
     shutil.move(os.path.join(buildfolder, "results", isoname), outfolder)
-    print('Run to test: "qemu-system-x86_64 -enable-kvm -m 2048 {0}"'.format(os.path.join(outfolder, isoname)))
+    print('Run to test: "qemu-system-x86_64 -enable-kvm -m 4096 {0}"'.format(os.path.join(outfolder, isoname)))
 else:
     print("ERROR: Build failed, iso not found.")
 print("Build completed in :", datetime.now() - beforetime)
