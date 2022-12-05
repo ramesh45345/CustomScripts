@@ -188,11 +188,12 @@ if __name__ == '__main__':
 
     # Get arguments
     parser = argparse.ArgumentParser(description='Create and run a Virtual Machine.')
-    parser.add_argument("-a", "--ostype", type=int, help="OS type (1=Arch)", default="1")
+    parser.add_argument("-a", "--ostype", type=int, help="OS type (1=Arch. 2=NixOS, 3=Ubuntu)", default="1")
     parser.add_argument("-c", "--nixconfig", help="Path of folder configuration for nix")
     parser.add_argument("-d", "--debug", help='Use Debug Logging', action="store_true")
     parser.add_argument("-e", "--desktopenv", help="Desktop Environment (default: %(default)s)", default="xfce")
     parser.add_argument("-f", "--fullname", help="Full Name", default="User Name")
+    parser.add_argument("-g", "--debversion", help="Ubuntu/Debian version to install.")
     parser.add_argument("-i", "--iso", help="Path to live cd", required=True)
     parser.add_argument("-n", "--vmname", help="Name of Virtual Machine")
     parser.add_argument("-p", "--vmpath", help="Path of Virtual Machine folders", required=True)
@@ -250,6 +251,19 @@ if __name__ == '__main__':
         vmbootstrap_cmd = 'cd ~ && /CustomScripts/ZSlimDrive.py -n -g && mkdir -p /mnt/etc && mv /nixos_config /mnt/etc/nixos && ln -sfr /mnt/etc/nixos/machines/qemu/configuration.nix /mnt/etc/nixos/ && nix-channel --update && nixos-install && poweroff'
         vmprovision_cmd = "mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; export UNVAR=$(id -un 1000); mkdir -m 700 -p ~$UNVAR/.ssh; echo '{sshkey}' > ~$UNVAR/.ssh/authorized_keys; chown $UNVAR:users -R ~$UNVAR; while ! test -f /var/opt/CustomScripts/MNixOS.py; do sleep 1; done; /var/opt/CustomScripts/MNixOS.py".format(sshkey=sshkey)
         kvm_variant = "nixos-unstable"
+    if args.ostype == 3:
+        if args.vmname is not None:
+            vm_name = args.vmname
+        else:
+            vm_name = "CC-Ubuntu-kvm"
+        if args.debversion is not None:
+            debversion = args.debversion
+        else:
+            debversion = "jammy"
+        # VM commands
+        vmbootstrap_cmd = 'cd ~ && export LANG=en_US.UTF-8 && /opt/CustomScripts/ZSlimDrive.py -n -g && /opt/CustomScripts/BDebian.py -n -z -t ubuntu -r {debversion} -g 3 -i /dev/vda2 -c "{hostname}" -u {username} -q "{password}" -f "{fullname}" /mnt && echo "PermitRootLogin yes" >> /mnt/etc/ssh/sshd_config && poweroff'.format(hostname=vm_name, username=args.vmuser, password=args.vmpass, fullname=args.fullname, debversion=debversion)
+        vmprovision_cmd = """mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{vmuser}/.ssh; echo '{sshkey}' > ~{vmuser}/.ssh/authorized_keys; chown {vmuser}:users -R ~{vmuser}; rm -f /etc/resolv.conf ; echo -e "nameserver 1.0.0.1\\nnameserver 1.1.1.1\\nnameserver 2606:4700:4700::1111\\nnameserver 2606:4700:4700::1001" > /etc/resolv.conf; /opt/CustomScripts/MUbuntu.py -d {desktop}""".format(vmuser=args.vmuser, sshkey=sshkey, desktop=args.desktopenv)
+        kvm_variant = "ubuntu22.04"
 
     # Override VM Name if provided
     print("VM Name is {0}".format(vm_name))
