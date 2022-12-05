@@ -370,6 +370,14 @@ elif type nix &> /dev/null && ! [[ "$(which nix)" == *"$USER"* ]]; then
         echo "Updating system."
         $SUDOCMD nixos-rebuild switch --upgrade
     }
+    function upp () {
+        echo "Updating system and nixos config."
+        if [ $(id -u) != "0" ]; then
+            cd /etc/nixos
+            git pull
+        fi
+        $SUDOCMD nixos-rebuild switch --upgrade
+    }
     function nsed () {
         echo "Editing nix config."
         $SUDOCMD nano /etc/nixos/configuration.nix
@@ -972,6 +980,14 @@ else if type -q nix; and not string match -qr $USER (which nix);
     end
     function up
         echo "Updating system."
+        sudo nixos-rebuild switch --upgrade
+    end
+    function upp
+        echo "Updating system and NixOS config."
+        if [ (id -u) != "0" ]
+            cd /etc/nixos
+            git pull
+        end
         sudo nixos-rebuild switch --upgrade
     end
     function nsed
