@@ -349,10 +349,6 @@ if os.path.exists("/etc/resolv.conf"):
     shutil.copy2("/etc/resolv.conf", "{0}/etc/resolv.conf".format(absinstallpath))
 # Run the grub script.
 subprocess.run("{1}/zch.py {0} -c /grubscript.sh".format(absinstallpath, SCRIPTDIR), shell=True)
-# Restore resolv.conf as symlink
-if os.path.exists("{0}/etc/resolv.conf".format(absinstallpath)):
-    os.remove("{0}/etc/resolv.conf".format(absinstallpath))
-os.symlink("../run/resolvconf/resolv.conf", "{0}/etc/resolv.conf".format(absinstallpath))
 # Remove after running
 os.remove(SETUPSCRIPT_PATH)
 os.remove(GRUBSCRIPT_PATH)

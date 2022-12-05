@@ -195,7 +195,7 @@ iface lo net loopback
 """)
 # Add dns server after installing network manager.
 with open(os.path.join(os.sep, "etc", "resolv.conf"), 'a') as writefile:
-    writefile.write("\nnameserver 8.8.8.8")
+    writefile.write("\nnameserver 1.0.0.1\nnameserver 1.1.1.1\nnameserver 2606:4700:4700::1111\nnameserver 2606:4700:4700::1001")
 
 # Install Desktop Software
 if args.desktop == "gnome":

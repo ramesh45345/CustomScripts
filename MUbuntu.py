@@ -153,7 +153,7 @@ if __name__ == '__main__':
     CFunc.AddLineToSudoersFile(sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("snap")))
 
     # Network Manager
-    CFunc.aptinstall("network-manager network-manager-ssh resolvconf")
+    CFunc.aptinstall("network-manager network-manager-ssh")
     subprocess.run("apt-get install -y network-manager-config-connectivity-ubuntu", shell=True, check=False)
     subprocess.run("sed -i 's/managed=.*/managed=true/g' /etc/NetworkManager/NetworkManager.conf", shell=True, check=True)
     # https://askubuntu.com/questions/882806/ethernet-device-not-managed
@@ -161,7 +161,8 @@ if __name__ == '__main__':
         writefile.write("""[keyfile]
     unmanaged-devices=none""")
     # Ensure DNS resolution is working
-    subprocess.run("dpkg-reconfigure --frontend=noninteractive resolvconf", shell=True, check=True)
+    with open(os.path.join(os.sep, "etc", "resolv.conf"), 'a') as writefile:
+        writefile.write("\nnameserver 1.0.0.1\nnameserver 1.1.1.1\nnameserver 2606:4700:4700::1111\nnameserver 2606:4700:4700::1001")
     # Set netplan to use Network Manager
     if os.path.isfile('/etc/netplan/01-netcfg.yaml'):
         with open('/etc/netplan/01-netcfg.yaml', 'w') as writefile:
