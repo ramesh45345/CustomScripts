@@ -722,6 +722,9 @@ if shutil.which("xfconf-query") and shutil.which("xfce4-panel"):
     xfconf("xfce4-keyboard-shortcuts", "/commands/custom/Super_L", "string", "xfce4-popup-whiskermenu")
     xfconf("xfce4-keyboard-shortcuts", "/commands/custom/Print", "string", "xfce4-screenshooter")
     # Lock Screen and Power Management
+    xfconf("xfce4-screensaver", "/saver/enabled", "bool", "true")
+    xfconf("xfce4-screensaver", "/saver/idle-activation/enabled", "bool", "false")
+    xfconf("xfce4-screensaver", "/saver/fullscreen-inhibit", "bool", "true")
     if vmstatus or args.disable_powersave:
         xfconf("xfce4-power-manager", "/xfce4-power-manager/blank-on-ac", "int", "0")
         xfconf("xfce4-power-manager", "/xfce4-power-manager/dpms-on-ac-off", "int", "0")
@@ -729,8 +732,9 @@ if shutil.which("xfconf-query") and shutil.which("xfce4-panel"):
         xfconf("xfce4-power-manager", "/xfce4-power-manager/dpms-enabled", "bool", "false")
         # xfce-screensaver settings
         xfconf("xfce4-screensaver", "/lock/enabled", "bool", "false")
-        xfconf("xfce4-screensaver", "/saver/enabled", "bool", "false")
     else:
+        xfconf("xfce4-screensaver", "/lock/enabled", "bool", "true")
+        xfconf("xfce4-screensaver", "/saver/idle-activation/delay", "int", "10")
         xfconf("xfce4-power-manager", "/xfce4-power-manager/blank-on-ac", "int", "10")
         xfconf("xfce4-power-manager", "/xfce4-power-manager/dpms-on-ac-off", "int", "10")
         xfconf("xfce4-power-manager", "/xfce4-power-manager/dpms-on-ac-sleep", "int", "10")
