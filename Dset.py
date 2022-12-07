@@ -885,8 +885,13 @@ for ff_path in firefox_profiles_paths:
                         firefox_modify_settings("browser.startup.page", "3", prefsjs_file)
                         firefox_modify_settings("app.shield.optoutstudies.enabled", "false", prefsjs_file)
                         firefox_modify_settings("browser.newtabpage.activity-stream.showSponsored", "false", prefsjs_file)
+                        firefox_modify_settings("browser.newtabpage.activity-stream.showSponsoredTopSites", "false", prefsjs_file)
                         firefox_modify_settings("browser.newtabpage.enabled", "false", prefsjs_file)
                         firefox_modify_settings("browser.startup.homepage", '"about:blank"', prefsjs_file)
+                        # https://mozilla.github.io/normandy/
+                        firefox_modify_settings("app.normandy.enabled", "false", prefsjs_file)
+                        # Firefox view
+                        firefox_modify_settings("browser.tabs.firefox-view", "false", prefsjs_file)
                         # DNS-over-HTTPS
                         firefox_modify_settings("network.trr.mode", "2", prefsjs_file)
                         firefox_modify_settings("network.trr.bootstrapAddress", '"1.1.1.1"', prefsjs_file)
