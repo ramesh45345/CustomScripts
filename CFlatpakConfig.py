@@ -47,8 +47,6 @@ if args.configure_remotes is False:
     CFunc.flatpak_install("flathub", "org.atheme.audacious")
     CFunc.flatpak_install("flathub", "io.github.quodlibet.QuodLibet")
     CFunc.flatpak_install("flathub", "org.gnome.EasyTAG")
-    # Browser
-    CFunc.flatpak_install("flathub", "com.github.Eloston.UngoogledChromium")
     # Meld
     if not CFunc.is_nixos():
         CFunc.flatpak_install("flathub", "org.gnome.meld")
@@ -60,4 +58,3 @@ if args.configure_remotes is False:
     # Configure permissions for apps
     CFunc.flatpak_override("org.atheme.audacious", "--filesystem=host")
     CFunc.flatpak_override("org.gnome.EasyTAG", "--filesystem=host")
-    CFunc.flatpak_override("com.github.Eloston.UngoogledChromium", "--filesystem=/mnt --filesystem=/media")
