@@ -134,6 +134,9 @@ if shutil.which("tilix"):
     else:
         dconf_write("/com/gexperts/Tilix/profiles/2b7c4080-0ddd-46c5-8f23-563fd3ba789d/use-custom-command", "false")
 
+# Gnome System Monitor
+if shutil.which("gnome-system-monitor"):
+    dconf_write("/org/gnome/gnome-system-monitor/cpu-stacked-area-chart", "true")
 
 # MATE specific settings
 if shutil.which("mate-session"):
@@ -519,7 +522,7 @@ if shutil.which("kwriteconfig5") and shutil.which("plasma_session"):
     subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --key "PreloadWeight" "42"'.format(toppanel_appletgroup_id), shell=True, check=False)
 
     plasma_desktop_string = ""
-    plasma_desktop_search_list = ["firefox.desktop", "UngoogledChromium.desktop", "chrome.desktop", 'thunderbird.desktop', 'kde.dolphin.desktop', "tilix.desktop", "org.kde.konsole.desktop", 'virt-manager.desktop', 'org.kde.plasma-systemmonitor.desktop']
+    plasma_desktop_search_list = ["firefox.desktop", "UngoogledChromium.desktop", "chrome.desktop", 'thunderbird.desktop', 'kde.dolphin.desktop', "tilix.desktop", "org.kde.konsole.desktop", 'virt-manager.desktop', 'org.kde.plasma-systemmonitor.desktop', 'gnome-system-monitor.desktop']
     plasma_desktop_file_list = []
     for d in plasma_desktop_search_list:
         ds = CMimeSet.LocateDesktopFileName(d)
