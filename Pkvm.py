@@ -566,7 +566,6 @@ if __name__ == '__main__':
         data['builders'][0]["qemuargs"] = ['']
         data['builders'][0]["qemuargs"][0] = ["-m", "{0}M".format(args.memory)]
         data['builders'][0]["qemuargs"].append(["--cpu", "host"])
-        data['builders'][0]["qemuargs"].append(["--smp", "cores={0}".format(CPUCORES)])
         if useefi is True:
             efi_bin, efi_nvram = ovmf_bin_nvramcopy(packer_temp_folder, vmname, secureboot=secureboot)
             # nvram
@@ -667,7 +666,7 @@ if __name__ == '__main__':
         # Provision with generic windows script
         data['provisioners'][1]["scripts"] = [os.path.join(tempscriptfolderpath, "Win-provision.ps1")]
         # Press enter at the cdrom prompt.
-        data['builders'][0]["boot_command"] = ["<enter><wait 2><enter><wait 2><enter><wait 2><enter><wait 2><enter><wait 2><enter><wait 2><enter><wait 2><enter><wait 2><enter><wait 2><enter><wait 2><enter><wait 2>"]
+        data['builders'][0]["boot_command"] = ["<enter><wait2><enter><wait2><enter><wait2><enter><wait2><enter><wait2><enter><wait2><enter>"]
         data['builders'][0]["boot_wait"] = "1s"
         data['builders'][0]["shutdown_command"] = "shutdown /s /t 60"
         data['builders'][0]["shutdown_timeout"] = "15m"
