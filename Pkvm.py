@@ -565,7 +565,8 @@ if __name__ == '__main__':
         data['builders'][0]["vm_name"] = "{0}.qcow2".format(vmname)
         data['builders'][0]["qemuargs"] = ['']
         data['builders'][0]["qemuargs"][0] = ["-m", "{0}M".format(args.memory)]
-        data['builders'][0]["qemuargs"].append(["--cpu", "host"])
+        data['builders'][0]["qemuargs"].append(["-cpu", "host"])
+        data['builders'][0]["qemuargs"].append(["-smp", "cores={0},sockets=1,maxcpus={0}".format(CPUCORES)])
         if useefi is True:
             efi_bin, efi_nvram = ovmf_bin_nvramcopy(packer_temp_folder, vmname, secureboot=secureboot)
             # nvram
