@@ -69,6 +69,9 @@ def install_homemanager():
                 line = line.replace(line, line + """
   home.packages = with pkgs; [
   ];
+
+  news.display = "silent";
+  manual.manpages.enable = false;
 """)
             print(line, end='')
     else:
