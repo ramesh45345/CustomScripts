@@ -752,7 +752,10 @@ if shutil.which("xfconf-query") and shutil.which("xfce4-panel"):
     xfconf("thunar", "/misc-single-click", "bool", "false")
     xfconf("thunar", "/misc-middle-click-in-tab", "bool", "true")
     xfconf("thunar", "/misc-date-style", "string", "THUNAR_DATE_STYLE_SHORT")
-    xfconf("thunar", "/misc-middle-click-in-tab", "bool", "true")
+    # Task manager settings
+    xfconf("xfce4-taskmanager", "/interface/show-all-processes", "bool", "true")
+    xfconf("xfce4-taskmanager", "/interface/refresh-rate", "int", "1000")
+    xfconf("xfce4-taskmanager", "/columns/column-uid", "bool", "true")
 
     # List panels
     # xfconf-query -c xfce4-panel -p /panels -lv
