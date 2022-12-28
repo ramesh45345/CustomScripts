@@ -39,6 +39,11 @@ print("Release is {0}.".format(release))
 
 
 ### Generic Section ###
+# Set root git config for safe directories.
+if rootstate is True:
+    gitconfig_safedir = CFunc.subpout("git config --get safe.directory", error_on_fail=False)
+    if gitconfig_safedir != "*":
+        subprocess.run("git config --global --add safe.directory '*'", shell=True, check=True)
 # Create bash-like shell rc additions
 rc_additions = """
 # Set root and non-root cmds.
