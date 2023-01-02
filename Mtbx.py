@@ -48,7 +48,9 @@ parser.add_argument("-p", "--prune", help='Remove all existing images.', action=
 args = parser.parse_args()
 
 # Exit if root.
-CFunc.is_root(False)
+rootstate = CFunc.is_root(checkstate=True, state_exit=False)
+if rootstate is True:
+    print("WARNING: Running as root.")
 
 # Print details
 print("Distro:", args.distro)
@@ -219,9 +221,6 @@ os.chdir(currentpath)
 
 print("""
 The following commands can be used to create and run containers:
-toolbox create -i arch-shared ; toolbox enter arch-shared
-toolbox create -i fedora-shared ; toolbox enter fedora-shared
-toolbox create -i ubuntu-shared ; toolbox enter ubuntu-shared
 
 Distrobox:
 distrobox create -n test -i arch-shared ; distrobox enter arch-shared
@@ -233,6 +232,7 @@ distrobox create -n arch-shared -i arch-shared -H /mnt/Storage/VMs/arch-shared-h
 distrobox create -n fedora-shared -i fedora-shared -H /mnt/Storage/VMs/fedora-shared-home ; distrobox enter fedora-shared
 distrobox create -n ubuntu-shared -i ubuntu-shared -H /mnt/Storage/VMs/ubuntu-shared-home ; distrobox enter ubuntu-shared
 
+Add --root to both create and run container to use as root.
 """)
 
 print("\nScript End")
