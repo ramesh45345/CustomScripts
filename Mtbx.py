@@ -97,6 +97,12 @@ RUN echo -e '\n[multilib]\nInclude = /etc/pacman.d/mirrorlist' >> /etc/pacman.co
 # Wine
 RUN pacman -Syu --needed --noconfirm wine wine-mono wine-gecko zenity winetricks
 
+# Locales
+ENV LANG=en_US.UTF-8
+RUN echo "LANG=en_US.UTF-8" > "/etc/locale.conf"
+RUN sed -i 's/#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/g' "/etc/locale.gen"
+RUN locale-gen
+
 # User Setup
 RUN echo "root:asdf" | chpasswd && \
     echo -e "nobody ALL=(ALL) NOPASSWD: /usr/sbin/pacman" > /etc/sudoers.d/nopw && \
