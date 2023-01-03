@@ -108,7 +108,7 @@ if __name__ == '__main__':
         # Multimedia
         CFunc.dnfinstall("@multimedia")
         CFunc.dnfinstall("gstreamer1-vaapi")
-        CFunc.dnfinstall("ffmpeg smplayer mpv")
+        CFunc.dnfinstall("ffmpeg mpv")
         CFuncExt.ytdlp_install()
         # Editors
         CFunc.dnfinstall("codium")

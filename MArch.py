@@ -127,7 +127,7 @@ if __name__ == '__main__':
         CFunc.pacman_install("remmina")
         # Tilix
         CFunc.pacman_install("tilix")
-        CFunc.pacman_install("ffmpeg smplayer mpv yt-dlp")
+        CFunc.pacman_install("ffmpeg mpv yt-dlp")
         yay_install(USERNAMEVAR, "yt-dlp-drop-in")
         # Editors
         CFunc.pacman_install("code")

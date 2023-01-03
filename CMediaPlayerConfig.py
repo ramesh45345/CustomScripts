@@ -26,7 +26,8 @@ def cmd_silent(cmd=list):
 ######################### Begin Code ##########################
 
 ### Smplayer ###
-if shutil.which("smplayer"):
+smplayer_fp_cmd = ["flatpak", "run", "--command=smplayer", "info.smplayer.SMPlayer", "-help"]
+if shutil.which("flatpak") and cmd_silent(smplayer_fp_cmd) == 0:
     smplayer_config_text = r"""[%General]
 add_blackborders_on_fullscreen=false
 alang=
@@ -124,7 +125,7 @@ gui=DefaultGUI
 hide_video_window_on_audio_files=true
 pause_when_hidden=false
 precise_seeking=true
-qt_style=Adwaita
+qt_style=
 relative_seeking=false
 reset_stop=false
 save_window_size_on_exit=true
@@ -150,9 +151,12 @@ streaming\youtube\use_60fps=true
 streaming\youtube\use_av1=false
 streaming\youtube\use_dash=true
 streaming_type=1
+
+[update_checker]
+enabled=false
 """.format(userhome)
     # Write smplayer config
-    smplayer_config_folder = os.path.join(userhome, ".config", "smplayer")
+    smplayer_config_folder = os.path.join(userhome, ".var", "app", "info.smplayer.SMPlayer", "config", "smplayer")
     smplayer_config_file = os.path.join(smplayer_config_folder, "smplayer.ini")
     os.makedirs(smplayer_config_folder, 0o755, exist_ok=True)
     with open(smplayer_config_file, 'w') as f:

@@ -162,7 +162,7 @@ if args.nogui is False:
     # Cups-pdf
     CFunc.aptinstall("printer-driver-cups-pdf")
     # Media Playback
-    CFunc.aptinstall("ffmpeg smplayer")
+    CFunc.aptinstall("ffmpeg")
     CFuncExt.ytdlp_install()
     CFunc.aptinstall("alsa-utils pavucontrol pulseaudio-module-zeroconf pulseaudio-module-bluetooth swh-plugins")
     CFunc.aptinstall("paprefs")

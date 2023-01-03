@@ -44,6 +44,7 @@ if args.configure_remotes is False:
     CFunc.flatpak_install("flathub", "org.libreoffice.LibreOffice")
     # Media apps
     CFunc.flatpak_install("flathub", "org.videolan.VLC")
+    CFunc.flatpak_install("flathub", "info.smplayer.SMPlayer")
     CFunc.flatpak_install("flathub", "org.atheme.audacious")
     CFunc.flatpak_install("flathub", "io.github.quodlibet.QuodLibet")
     CFunc.flatpak_install("flathub", "org.gnome.EasyTAG")
