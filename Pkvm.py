@@ -618,7 +618,7 @@ if __name__ == '__main__':
     if args.ostype == 8:
         CFunc.find_replace(tempunattendfolder, "silverblue", "kinoite", "silverblue.cfg")
     if 8 <= args.ostype <= 9:
-        data['builders'][0]["boot_command"] = ["<tab> inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/silverblue.cfg<enter><wait>"]
+        data['builders'][0]["boot_command"] = ["<up><wait>e<wait><down><wait><down><wait><end> inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/silverblue.cfg<wait><f10>"]
         data['provisioners'][0]["type"] = "shell"
         data['provisioners'][0]["inline"] = "{1}; /opt/CustomScripts/{0} -s 1; systemctl reboot".format(vmprovisionscript, git_cmdline())
         data['provisioners'][0]["expect_disconnect"] = True
