@@ -3,6 +3,7 @@
 
 # Python includes.
 import argparse
+import fileinput
 import os
 import shutil
 import subprocess
@@ -112,7 +113,7 @@ if args.stage == 1:
 
     ### OSTree Apps ###
     # Cli tools
-    rostreeinstall("fish zsh tmux iotop p7zip util-linux-user fuse-sshfs redhat-lsb-core powerline-fonts google-roboto-fonts samba hdparm cups-pdf syncthing numix-icon-theme numix-icon-theme-circle tigervnc xrandr xset python3-pip")
+    rostreeinstall("fish zsh tmux util-linux-user redhat-lsb-core powerline-fonts google-roboto-fonts samba cups-pdf syncthing numix-icon-theme numix-icon-theme-circle")
     subprocess.run("systemctl enable sshd", shell=True, check=True)
     # NTP Configuration
     subprocess.run("systemctl enable systemd-timesyncd; timedatectl set-local-rtc false; timedatectl set-ntp 1", shell=True, check=True)
@@ -167,20 +168,45 @@ if args.stage == 1:
         # Gnome Disk Utility
         rostreeinstall("gnome-disk-utility")
 
+    # Install nix
+    subprocess.run("{0}/CNixRootSetup.py -i".format(SCRIPTDIR), shell=True, check=True)
+    # Add apps to home.nix
+    homeman_filepath = os.path.join(USERHOME, ".config", "nixpkgs", "home.nix")
+    # Check if the pattern isn't found
+    if os.path.isfile(homeman_filepath) and not CFunc.find_pattern_infile(homeman_filepath, "home.packages = with pkgs;"):
+        print("Adding home.packages to Home Manager config.")
+        for line in fileinput.FileInput(homeman_filepath, inplace=1):
+            # Insert the package line after the homedirectory entry.
+            if "home.packages = with pkgs; [" in line:
+                line = line.replace(line, line + """
+    # CLI Tools
+    (python3.withPackages(ps: with ps; [ pip wheel setuptools ]))
+    iotop
+    hdparm
+    _7zz
+    unrar
+    tigervnc
+    xorg.xrandr
+    xorg.xset
+    # Media tools
+    mpv
+    ffmpeg
+    yt-dlp
+    # GUI Tools
+    vscodium
+""")
+            print(line, end='')
+    else:
+        print("home.packages found in config file. Not editing.")
+    # Nix upgrade
+    subprocess.run('su -l {0} -c "nix-channel --update; home-manager switch"'.format(USERNAMEVAR), shell=True, check=True)
+
     print("Stage 1 Complete! Please reboot and run Stage 2.")
 if args.stage == 2:
     print("Stage 2")
     systemd_resostreed()
-    rostreeinstall("rpmfusion-free-release-tainted rpmfusion-nonfree-release-tainted unrar")
+    rostreeinstall("rpmfusion-free-release-tainted rpmfusion-nonfree-release-tainted")
     subprocess.run("systemctl enable smb", shell=True, check=True)
-
-    # Media apps
-    rostreeinstall("ffmpeg mpv")
-    CFuncExt.ytdlp_install()
-
-    # VSCode
-    MFedora.repo_vscode()
-    rostreeinstall("codium")
 
     # Add normal user to all reasonable groups
     group_silverblueadd("disk")
