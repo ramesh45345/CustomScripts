@@ -285,7 +285,7 @@ if __name__ == '__main__':
         vboxosid = "Fedora_64"
         vmwareid = "fedora-64"
         kvm_variant = "silverblue-rawhide"
-        isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/37/Kinoite/x86_64/iso/Fedora-Kinoite-ostree-x86_64-37-1.7.iso "
+        isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/37/Kinoite/x86_64/iso/Fedora-Kinoite-ostree-x86_64-37-1.7.iso"
         vmname = "Packer-FedoraKinoite-{0}".format(hvname)
         vmprovision_defopts = ""
     if args.ostype == 9:
