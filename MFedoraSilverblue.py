@@ -173,7 +173,7 @@ if args.stage == 1:
     # Add apps to home.nix
     homeman_filepath = os.path.join(USERHOME, ".config", "nixpkgs", "home.nix")
     # Check if the pattern isn't found
-    if os.path.isfile(homeman_filepath) and not CFunc.find_pattern_infile(homeman_filepath, "home.packages = with pkgs;"):
+    if os.path.isfile(homeman_filepath) and not CFunc.find_pattern_infile(homeman_filepath, "unrar"):
         print("Adding home.packages to Home Manager config.")
         for line in fileinput.FileInput(homeman_filepath, inplace=1):
             # Insert the package line after the homedirectory entry.
