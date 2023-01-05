@@ -78,7 +78,7 @@ def install_homemanager():
 
     # Initial rsync into .nix-share, to enable desktop shortcuts
     os.makedirs(os.path.join(homepath, ".nix-share"), exist_ok=True)
-    subprocess.run('rsync -axHAXL --del "{0}/.nix-profile/share" "{0}/.nix-share/"'.format(homepath), shell=True, check=True)
+    subprocess.run('rsync -aL --del "{0}/.nix-profile/share" "{0}/.nix-share/"'.format(homepath), shell=True, check=True)
 def configure_nix():
     """Insert nix configuration."""
     # nix.conf
