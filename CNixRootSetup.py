@@ -73,8 +73,8 @@ def install_profile_config():
 [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ] && . $HOME/.nix-profile/etc/profile.d/nix.sh
 [ -e "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh" ] && . $HOME/.nix-profile/etc/profile.d/hm-session-vars.sh
 
-if [ -d "$HOME/.nix-profile/share" ] && [[ ":$XDG_DATA_DIRS:" != *":$HOME/.nix-profile/share:"* ]]; then
-    XDG_DATA_DIRS="${XDG_DATA_DIRS:+"$XDG_DATA_DIRS:"}$HOME/.nix-profile/share"
+if [ -d "$HOME/.nix-share/share" ] && [[ ":$XDG_DATA_DIRS:" != *":$HOME/.nix-share/share:"* ]]; then
+    XDG_DATA_DIRS="${XDG_DATA_DIRS:+"$XDG_DATA_DIRS:"}$HOME/.nix-share/share"
 fi
 """)
 def call_install_script(user: str):
