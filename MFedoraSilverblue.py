@@ -157,7 +157,7 @@ if args.stage == 1:
         rostreeinstall("google-noto-sans-fonts smartmontools p7zip-plugins tilix tilix-nautilus")
         # Some Gnome Extensions
         rostreeinstall("gnome-tweak-tool dconf-editor")
-        rostreeinstall("gnome-shell-extension-gpaste gnome-shell-extension-topicons-plus")
+        rostreeinstall("gnome-shell-extension-gpaste")
 
         # Remove gnome-software
         gnome_startup_file = os.path.join(os.sep, "etc", "xdg", "autostart", "gnome-software-service.desktop")
@@ -246,10 +246,6 @@ if args.stage == 2:
         os.chmod(gs_installer[0], 0o777)
         # Dash to panel
         CFunc.run_as_user(USERNAMEVAR, "{0} --yes 1160".format(gs_installer[0]))
-        # https://github.com/kgshank/gse-sound-output-device-chooser
-        CFunc.run_as_user(USERNAMEVAR, "{0} --yes 906".format(gs_installer[0]))
-        # https://github.com/mymindstorm/gnome-volume-mixer
-        CFunc.run_as_user(USERNAMEVAR, "{0} --yes 3499".format(gs_installer[0]))
         # Kstatusnotifier
         CFunc.run_as_user(USERNAMEVAR, "{0} --yes 615".format(gs_installer[0]))
 

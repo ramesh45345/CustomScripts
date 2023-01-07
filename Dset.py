@@ -259,7 +259,7 @@ if shutil.which("gnome-session") or shutil.which("gnome-shell"):
         gsettings_set("org.gnome.desktop.session", "idle-delay", "300")
     dconf_write("/org/gnome/desktop/interface/font-antialiasing", "'rgba'")
     dconf_write("/org/gnome/desktop/interface/font-hinting", "'full'")
-    gsettings_set("org.gnome.shell", "enabled-extensions", "['window-list@gnome-shell-extensions.gcampax.github.com', 'dash-to-dock@micxgx.gmail.com', 'dash-to-panel@jderose9.github.com', 'GPaste@gnome-shell-extensions.gnome.org', 'user-theme@gnome-shell-extensions.gcampax.github.com', 'sound-output-device-chooser@kgshank.net', 'volume-mixer@evermiss.net', 'appindicatorsupport@rgcjonas.gmail.com']")
+    gsettings_set("org.gnome.shell", "enabled-extensions", "['window-list@gnome-shell-extensions.gcampax.github.com', 'dash-to-dock@micxgx.gmail.com', 'dash-to-panel@jderose9.github.com', 'GPaste@gnome-shell-extensions.gnome.org', 'user-theme@gnome-shell-extensions.gcampax.github.com', 'appindicatorsupport@rgcjonas.gmail.com']")
     # Check current variable for gnome-system-monitor. If it doesn't exist, set the variable.
     gnome_desktop_read_list = subprocess.run("gsettings get org.gnome.shell favorite-apps", shell=True, check=False, stdout=subprocess.PIPE).stdout.decode().strip()
     if "gnome-system-monitor.desktop" not in gnome_desktop_read_list:
