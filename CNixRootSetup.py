@@ -73,13 +73,13 @@ def install_profile_config():
 [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ] && . $HOME/.nix-profile/etc/profile.d/nix.sh
 [ -e "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh" ] && . $HOME/.nix-profile/etc/profile.d/hm-session-vars.sh
 
-if [ -d "$HOME/.nix-profile/share" ] && [[ ":$XDG_DATA_DIRS:" != *":$HOME/.nix-profile/share:"* ]]; then
-    XDG_DATA_DIRS="${XDG_DATA_DIRS:+"$XDG_DATA_DIRS:"}$HOME/.nix-profile/share"
+if [ -d "$HOME/.nix-share/share" ] && [[ ":$XDG_DATA_DIRS:" != *":$HOME/.nix-share/share:"* ]]; then
+    XDG_DATA_DIRS="${XDG_DATA_DIRS:+"$XDG_DATA_DIRS:"}$HOME/.nix-share/share"
 fi
 """)
 def call_install_script(user: str):
     """Run the installation script as a normal user."""
-    CFunc.run_as_user(user, "{0}/CNixUserSetup.py -n".format(SCRIPTDIR), error_on_fail=True)
+    subprocess.run('su -l {0} -c "{1}/CNixUserSetup.py -n"'.format(user, SCRIPTDIR), shell=True, check=True)
 
 
 ### Begin Code ###
@@ -103,13 +103,13 @@ if __name__ == '__main__':
 
     # Create nix root.
     immutable_root = immutable_root_detect()
-    if os.path.isdir(args.nixpath) and immutable_root is True:
+    if args.nixpath is not None and os.path.isdir(args.nixpath) and immutable_root is True:
         create_nix_root_immutable(USERNAMEVAR, os.path.abspath(args.nixpath))
     # If no path specified and immutable root.
-    elif os.path.isdir(args.nixpath) is False and immutable_root is True:
+    elif (args.nixpath is None or os.path.isdir(args.nixpath) is False) and immutable_root is True:
         create_nix_root_immutable(USERNAMEVAR)
     # If path specified and no immutable root.
-    elif os.path.isdir(args.nixpath) is True and immutable_root is False:
+    elif args.nixpath is not None and os.path.isdir(args.nixpath) is True and immutable_root is False:
         create_nix_root_mutable_bind(USERNAMEVAR, os.path.abspath(args.nixpath))
     # If no path specified and no immutable root.
     else:

@@ -114,8 +114,6 @@ if args.desktop == "gnome":
     CFunc.run_as_user(USERNAMEVAR, "{0} --yes 858".format(gs_installer[0]))
     # Install Dash to Panel extension
     CFunc.run_as_user(USERNAMEVAR, "{0} --yes 1160".format(gs_installer[0]))
-    # Topicons plus
-    CFunc.run_as_user(USERNAMEVAR, "{0} --yes 1031".format(gs_installer[0]))
 elif args.desktop == "kde":
     # Plasma
     CFunc.dnfinstall('--skip-broken install @"KDE Plasma Workspaces" --exclude kf5-akonadi-server-mysql')

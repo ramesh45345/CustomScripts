@@ -187,10 +187,6 @@ renderer: NetworkManager""")
         os.chmod(gs_installer[0], 0o777)
         # Dash to panel
         CFunc.run_as_user(USERNAMEVAR, "{0} --yes 1160".format(gs_installer[0]))
-        # https://github.com/kgshank/gse-sound-output-device-chooser
-        CFunc.run_as_user(USERNAMEVAR, "{0} --yes 906".format(gs_installer[0]))
-        # https://github.com/mymindstorm/gnome-volume-mixer
-        CFunc.run_as_user(USERNAMEVAR, "{0} --yes 3499".format(gs_installer[0]))
         # Kstatusnotifier
         CFunc.run_as_user(USERNAMEVAR, "{0} --yes 615".format(gs_installer[0]))
     elif args.desktop == "kde":

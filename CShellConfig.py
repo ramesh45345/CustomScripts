@@ -399,6 +399,10 @@ if type nix &> /dev/null; then
         echo "Updating Nix userspace."
         nix-channel --update
         home-manager switch
+        if [ -d "$HOME/.nix-share" ] && [ -d "$HOME/.nix-profile" ]; then
+            rsync -aL --del "$HOME/.nix-profile/share" "$HOME/.nix-share/"
+            find "$HOME/.nix-share/share/applications/" -exec touch {{}} +
+        fi
     }
     function ncln () {
         echo "Performing Nix garbage collection."
@@ -1011,6 +1015,10 @@ if type -q nix;
         echo "Updating Nix userspace."
         nix-channel --update
         home-manager switch
+        if test -d "$HOME/.nix-share"; and test -L "$HOME/.nix-profile"
+            rsync -aL --del "$HOME/.nix-profile/share" "$HOME/.nix-share/"
+            find "$HOME/.nix-share/share/applications/" -exec touch {{}} +
+        end
     end
     function ncln
         echo "Performing Nix garbage collection."

@@ -5,7 +5,6 @@
 import argparse
 import fileinput
 import os
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -76,6 +75,10 @@ def install_homemanager():
             print(line, end='')
     else:
         print("home.packages found in config file. Not editing.")
+
+    # Initial rsync into .nix-share, to enable desktop shortcuts
+    os.makedirs(os.path.join(homepath, ".nix-share"), exist_ok=True)
+    subprocess.run('rsync -aL --del "{0}/.nix-profile/share" "{0}/.nix-share/"'.format(homepath), shell=True, check=True)
 def configure_nix():
     """Insert nix configuration."""
     # nix.conf
@@ -96,7 +99,7 @@ def configure_nix():
 """)
 def uninstall_nix():
     """Uninstall nix."""
-    subprocess.run("sudo rm -rf $HOME/.nix-profile $HOME/.nix-profile $HOME/.nix-channels $HOME/.nix-defexpr $HOME/.config/nix/ $HOME/.config/nixpkgs/", shell=True, check=False)
+    subprocess.run("sudo rm -rf $HOME/.nix-profile $HOME/.nix-profile $HOME/.nix-channels $HOME/.nix-defexpr $HOME/.config/nix/ $HOME/.config/nixpkgs/ $HOME/.nix-share/", shell=True, check=False)
     subprocess.run("sudo rm -rf /etc/profile.d/rcustom_nix.sh", shell=True, check=False)
     # Immutable os instructions
     if os.path.isfile("/etc/systemd/system/mount-nix-prepare.service"):
@@ -121,10 +124,6 @@ if __name__ == '__main__':
 
     # Save arguments.
     args = parser.parse_args()
-
-    # Get non-root user information.
-    USERNAMEVAR, USERGROUP, USERHOME = CFunc.getnormaluser(currentusername)
-    print("Username is:", USERNAMEVAR)
 
     # Warn if root.
     if CFunc.is_root(checkstate=True, state_exit=False):
