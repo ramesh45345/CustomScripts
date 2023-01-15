@@ -68,15 +68,22 @@ def create_nix_root_mutable_nobind(user: str):
     shutil.chown("/nix", user)
 def install_profile_config():
     """Install system profile script."""
-    with open(os.path.join(os.sep, "etc", "profile.d", "rcustom_nix.sh"), 'w') as f:
-        f.write(r"""
+    profile_text = r"""
 [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ] && . $HOME/.nix-profile/etc/profile.d/nix.sh
 [ -e "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh" ] && . $HOME/.nix-profile/etc/profile.d/hm-session-vars.sh
 
 if [ -d "$HOME/.nix-share/share" ] && [[ ":$XDG_DATA_DIRS:" != *":$HOME/.nix-share/share:"* ]]; then
     XDG_DATA_DIRS="${XDG_DATA_DIRS:+"$XDG_DATA_DIRS:"}$HOME/.nix-share/share"
 fi
-""")
+"""
+    with open(os.path.join(os.sep, "etc", "profile.d", "rcustom_nix.sh"), 'w') as f:
+        f.write(profile_text)
+    # Needed for Debian
+    # https://unix.stackexchange.com/a/281923
+    # https://unix.stackexchange.com/a/440617
+    if os.path.isdir(os.path.join(os.sep, "etc", "X11", "Xsession.d")):
+        with open(os.path.join(os.sep, "etc", "X11", "Xsession.d", "60nixcustom"), 'w') as f:
+            f.write(profile_text)
 def call_install_script(user: str):
     """Run the installation script as a normal user."""
     subprocess.run('su -l {0} -c "{1}/CNixUserSetup.py -n"'.format(user, SCRIPTDIR), shell=True, check=True)
