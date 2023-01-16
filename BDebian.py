@@ -13,6 +13,8 @@ import sys
 import subprocess
 import shutil
 import stat
+# Custom includes
+import CFunc
 
 # Folder of this script
 SCRIPTDIR = sys.path[0]
@@ -43,7 +45,7 @@ absinstallpath = os.path.realpath(args.installpath)
 print("Path of Installation:", absinstallpath)
 print("OS Type:", args.type)
 print("Release Distribution:", args.release)
-DEVPART = subprocess.run('sh -c df -m | grep " \+'+absinstallpath+'$" | grep -Eo "/dev/[a-z]d[a-z]"', shell=True, stdout=subprocess.PIPE, universal_newlines=True)
+DEVPART = subprocess.run('sh -c df -m | grep " \+{0}$" | grep -Eo "/dev/[a-z]d[a-z]"'.format(absinstallpath), shell=True, stdout=subprocess.PIPE, universal_newlines=True)
 grubautopart = format(DEVPART.stdout.strip())
 print("Autodetect grub partition:", grubautopart)
 if args.grubpartition is not None and stat.S_ISBLK(os.stat(args.grubpartition).st_mode) is True:
@@ -61,8 +63,7 @@ else:
 print("URL to use:", osurl)
 
 # Exit if not root.
-if os.geteuid() is not 0:
-    sys.exit("\nError: Please run this script as root.\n")
+CFunc.is_root(True)
 
 # Ensure that certain commands exist.
 cmdcheck = ["debootstrap"]
@@ -177,7 +178,7 @@ apt-get install -y network-manager
 sed -i 's/managed=.*/managed=true/g' /etc/NetworkManager/NetworkManager.conf
 # https://askubuntu.com/questions/882806/ethernet-device-not-managed
 if [ -f /etc/NetworkManager/conf.d/10-globally-managed-devices.conf ]; then
-	rm /etc/NetworkManager/conf.d/10-globally-managed-devices.conf
+    rm /etc/NetworkManager/conf.d/10-globally-managed-devices.conf
 fi
 touch /etc/NetworkManager/conf.d/10-globally-managed-devices.conf
 # Ensure DNS resolution is installed and working
@@ -203,17 +204,17 @@ add-apt-repository restricted
 add-apt-repository universe
 add-apt-repository multiverse
 if ! grep -i "{DEBRELEASE}-updates main" /etc/apt/sources.list; then
-	add-apt-repository "deb {URL} {DEBRELEASE}-updates main restricted universe multiverse"
+    add-apt-repository "deb {URL} {DEBRELEASE}-updates main restricted universe multiverse"
 fi
 if ! grep -i "{DEBRELEASE}-security main" /etc/apt/sources.list; then
-	add-apt-repository "deb {URL} {DEBRELEASE}-security main restricted universe multiverse"
+    add-apt-repository "deb {URL} {DEBRELEASE}-security main restricted universe multiverse"
 fi
 if ! grep -i "{DEBRELEASE}-backports main" /etc/apt/sources.list; then
-	add-apt-repository "deb {URL} {DEBRELEASE}-backports main restricted universe multiverse"
+    add-apt-repository "deb {URL} {DEBRELEASE}-backports main restricted universe multiverse"
 fi
 # Install firmware for armhf architecture.
 if [[ "{DEBARCH}" = "armhf" || "{DEBARCH}" = "arm64" ]]; then
-	apt install -y linux-firmware
+    apt install -y linux-firmware
 fi
 """.format(DEBRELEASE=args.release, URL=osurl, DEBARCH=args.architecture)
 else:
@@ -223,20 +224,20 @@ add-apt-repository main
 add-apt-repository contrib
 add-apt-repository non-free
 if [[ "{DEBRELEASE}" != "sid" && "{DEBRELEASE}" != "unstable" && "{DEBRELEASE}" != "testing" ]] && ! grep -i "{DEBRELEASE}-updates main" /etc/apt/sources.list; then
-	add-apt-repository "deb http://ftp.us.debian.org/debian {DEBRELEASE}-updates main contrib non-free"
+    add-apt-repository "deb http://ftp.us.debian.org/debian {DEBRELEASE}-updates main contrib non-free"
 fi
 # Comment out lines containing httpredir.
 sed -i '/httpredir/ s/^#*/#/' /etc/apt/sources.list
 # Install firmware for armhf architecture.
 if [[ "{DEBARCH}" = "armhf" || "{DEBARCH}" = "arm64" ]]; then
-	apt install -y firmware-linux
+    apt install -y firmware-linux
 fi
 """.format(DEBRELEASE=args.release, DEBARCH=args.architecture)
 
 SETUPSCRIPT += """
 # Enable 32-bit support for 64-bit arch.
 if [[ "{DEBARCH}" = "amd64" ]]; then
-	dpkg --add-architecture i386
+    dpkg --add-architecture i386
 fi
 apt update
 apt dist-upgrade -y
@@ -251,9 +252,9 @@ systemctl disable NetworkManager-wait-online
 
 # Delete defaults in sudoers for Debian.
 if grep -iq $'^Defaults\tenv_reset' /etc/sudoers; then
-	sed -i $'/^Defaults\tenv_reset/ s/^#*/#/' /etc/sudoers
-	sed -i $'/^Defaults\tmail_badpass/ s/^#*/#/' /etc/sudoers
-	sed -i $'/^Defaults\tsecure_path/ s/^#*/#/' /etc/sudoers
+    sed -i $'/^Defaults\tenv_reset/ s/^#*/#/' /etc/sudoers
+    sed -i $'/^Defaults\tmail_badpass/ s/^#*/#/' /etc/sudoers
+    sed -i $'/^Defaults\tsecure_path/ s/^#*/#/' /etc/sudoers
 fi
 visudo -c
 
@@ -283,10 +284,10 @@ DEBIAN_FRONTEND=noninteractive apt install -y gfxboot gfxboot-theme-ubuntu linux
     else:
         GRUBSCRIPT += """
 if [[ "{DEBARCH}" = "amd64" ]]; then
-	DEBIAN_FRONTEND=noninteractive apt install -y linux-image-amd64
+    DEBIAN_FRONTEND=noninteractive apt install -y linux-image-amd64
 fi
 if [[ "{DEBARCH}" = "i386" || "{DEBARCH}" = "i686" ]]; then
-	DEBIAN_FRONTEND=noninteractive apt install -y linux-image-686-pae
+    DEBIAN_FRONTEND=noninteractive apt install -y linux-image-686-pae
 fi
 
 apt install -y firmware-linux gfxboot
@@ -301,6 +302,7 @@ if args.grubtype == 1:
 else:
     # Create fstab for other grub scenarios
     subprocess.run("genfstab -U {INSTALLPATH} > {INSTALLPATH}/etc/fstab".format(INSTALLPATH=absinstallpath), shell=True)
+    subprocess.run("sed -i '/zram0/d' {INSTALLPATH}/etc/fstab".format(INSTALLPATH=absinstallpath), shell=True)
 # Use autodetected or specified grub partition.
 if args.grubtype == 2:
     # Add if partition is a block device
@@ -325,13 +327,13 @@ grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id={0} -
         print("ERROR Grub Mode 3, {0}/boot/efi isn't a mount point or {1} is not a block device.".format(absinstallpath, grubpart))
 
 # Close the setup script.
-SETUPSCRIPT_PATH = absinstallpath+"/setupscript.sh"
+SETUPSCRIPT_PATH = os.path.join(absinstallpath, "setupscript.sh")
 SETUPSCRIPT_VAR = open(SETUPSCRIPT_PATH, mode='w')
 SETUPSCRIPT_VAR.write(SETUPSCRIPT)
 SETUPSCRIPT_VAR.close()
 os.chmod(SETUPSCRIPT_PATH, 0o777)
 # Close the grub script.
-GRUBSCRIPT_PATH = absinstallpath+"/grubscript.sh"
+GRUBSCRIPT_PATH = os.path.join(absinstallpath, "grubscript.sh")
 GRUBSCRIPT_VAR = open(GRUBSCRIPT_PATH, mode='w')
 GRUBSCRIPT_VAR.write(GRUBSCRIPT)
 GRUBSCRIPT_VAR.close()

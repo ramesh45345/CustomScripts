@@ -264,6 +264,19 @@ if __name__ == '__main__':
         vmbootstrap_cmd = 'cd ~ && export LANG=en_US.UTF-8 && /opt/CustomScripts/ZSlimDrive.py -n -g && /opt/CustomScripts/BDebian.py -n -z -t ubuntu -r {debversion} -g 3 -i /dev/vda2 -c "{hostname}" -u {username} -q "{password}" -f "{fullname}" /mnt && echo "PermitRootLogin yes" >> /mnt/etc/ssh/sshd_config && poweroff'.format(hostname=vm_name, username=args.vmuser, password=args.vmpass, fullname=args.fullname, debversion=debversion)
         vmprovision_cmd = """mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{vmuser}/.ssh; echo '{sshkey}' > ~{vmuser}/.ssh/authorized_keys; chown {vmuser}:users -R ~{vmuser}; rm -f /etc/resolv.conf ; echo -e "nameserver 1.0.0.1\\nnameserver 1.1.1.1\\nnameserver 2606:4700:4700::1111\\nnameserver 2606:4700:4700::1001" > /etc/resolv.conf; /opt/CustomScripts/MUbuntu.py -d {desktop}""".format(vmuser=args.vmuser, sshkey=sshkey, desktop=args.desktopenv)
         kvm_variant = "ubuntu22.04"
+    if args.ostype == 4:
+        if args.vmname is not None:
+            vm_name = args.vmname
+        else:
+            vm_name = "CC-Debian-kvm"
+        if args.debversion is not None:
+            debversion = args.debversion
+        else:
+            debversion = "unstable"
+        # VM commands
+        vmbootstrap_cmd = 'cd ~ && export LANG=en_US.UTF-8 && /opt/CustomScripts/ZSlimDrive.py -n -g && /opt/CustomScripts/BDebian.py -n -z -t debian -r {debversion} -g 3 -i /dev/vda2 -c "{hostname}" -u {username} -q "{password}" -f "{fullname}" /mnt && echo "PermitRootLogin yes" >> /mnt/etc/ssh/sshd_config && poweroff'.format(hostname=vm_name, username=args.vmuser, password=args.vmpass, fullname=args.fullname, debversion=debversion)
+        vmprovision_cmd = """mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{vmuser}/.ssh; echo '{sshkey}' > ~{vmuser}/.ssh/authorized_keys; chown {vmuser}:users -R ~{vmuser}; rm -f /etc/resolv.conf ; echo -e "nameserver 1.0.0.1\\nnameserver 1.1.1.1\\nnameserver 2606:4700:4700::1111\\nnameserver 2606:4700:4700::1001" > /etc/resolv.conf; /opt/CustomScripts/MDebian.py -d {desktop}""".format(vmuser=args.vmuser, sshkey=sshkey, desktop=args.desktopenv)
+        kvm_variant = "debiantesting"
 
     # Override VM Name if provided
     print("VM Name is {0}".format(vm_name))
@@ -300,11 +313,12 @@ if __name__ == '__main__':
     sship = vm_getip(vm_name)
     ssh_wait(ip=sship, port=localsshport, user=args.livesshuser, password=args.livesshpass)
     # Pre-bootstrap commands
-    if args.ostype == 1:
-        scp_vm(ip=sship, port=localsshport, user=args.livesshuser, password=args.livesshpass, filepath=SCRIPTDIR, destination="/opt/", folder=True)
     if args.ostype == 2:
         scp_vm(ip=sship, port=localsshport, user=args.livesshuser, password=args.livesshpass, filepath=args.nixconfig, destination="/nixos_config", folder=True)
         scp_vm(ip=sship, port=localsshport, user=args.livesshuser, password=args.livesshpass, filepath=SCRIPTDIR, destination="/CustomScripts", folder=True)
+    # All else besides nixos, sync the CustomScripts folder into the live environment.
+    else:
+        scp_vm(ip=sship, port=localsshport, user=args.livesshuser, password=args.livesshpass, filepath=SCRIPTDIR, destination="/opt/", folder=True)
     ssh_vm(ip=sship, port=localsshport, user=args.livesshuser, password=args.livesshpass, command=vmbootstrap_cmd)
     vm_shutdown(vm_name)
     # Eject cdrom

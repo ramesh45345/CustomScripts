@@ -63,6 +63,8 @@ os.environ['DEBIAN_FRONTEND'] = "noninteractive"
 # Get Ubuntu Release
 CFunc.aptupdate()
 CFunc.aptinstall("lsb-release software-properties-common apt-transport-https gnupg")
+# Needed for add-apt-repositories
+CFunc.aptinstall("python3-lazr.restfulclient python3-lazr.uri")
 # Detect OS information
 distro, debrelease = CFunc.detectdistro()
 print("Distro is {0}.".format(distro))
@@ -78,9 +80,9 @@ if args.unstable:
     CFunc.aptupdate()
 # Main, Contrib, Non-Free for Debian.
 subprocess.run("""
-add-apt-repository main
-add-apt-repository contrib
-add-apt-repository non-free
+add-apt-repository -y main
+add-apt-repository -y contrib
+add-apt-repository -y non-free
 """, shell=True, check=True)
 
 
@@ -125,6 +127,7 @@ CFunc.aptinstall("dbus-user-session")
 # Samba
 CFunc.aptinstall("samba cifs-utils")
 # NTP
+CFunc.aptinstall("systemd-timesyncd")
 CFunc.sysctl_enable("systemd-timesyncd")
 subprocess.run(["timedatectl", "set-local-rtc", "false"], check=True)
 subprocess.run(["timedatectl", "set-ntp", "1"], check=True)
@@ -147,18 +150,10 @@ CFunc.AddLineToSudoersFile(sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USE
 CFunc.AddLineToSudoersFile(sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("apt-get")))
 CFunc.AddLineToSudoersFile(sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("podman")))
 
-# GUI programs
+# General GUI software
 if args.nogui is False:
     CFunc.aptinstall("synaptic gnome-disk-utility gdebi gparted xdg-utils")
     CFunc.aptinstall("dconf-cli dconf-editor")
-    # Browsers
-    if args.unstable:
-        CFunc.aptinstall("firefox")
-    else:
-        CFunc.aptinstall("firefox-esr")
-
-# General GUI software
-if args.nogui is False:
     # Cups-pdf
     CFunc.aptinstall("printer-driver-cups-pdf")
     # Media Playback
@@ -176,6 +171,10 @@ if args.nogui is False:
     CFunc.aptinstall("flatpak")
     CFunc.flatpak_addremote("flathub", "https://flathub.org/repo/flathub.flatpakrepo")
     CFunc.AddLineToSudoersFile(sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("flatpak")))
+    subprocess.run(os.path.join(SCRIPTDIR, "CFlatpakConfig.py"), shell=True, check=True)
+    # Firefox
+    CFunc.flatpak_install("flathub", "org.mozilla.firefox")
+    CFunc.flatpak_override("org.mozilla.firefox", "--filesystem=host")
 
 # Network Manager
 CFunc.aptinstall("network-manager network-manager-ssh")
@@ -289,11 +288,9 @@ if os.path.isfile(logindefs_file):
         subprocess.run("""sed -i '/^ENV_PATH.*PATH.*/ s@$@:/sbin:/usr/sbin:/usr/local/sbin@' {0}""".format(logindefs_file), shell=True, check=True)
 
 # Extra scripts
-subprocess.run(os.path.join(SCRIPTDIR, "CCSClone.py"), shell=True, check=True)
-if not args.nogui:
-    subprocess.run(os.path.join(SCRIPTDIR, "CFlatpakConfig.py"), shell=True, check=True)
-subprocess.run(os.path.join(SCRIPTDIR, "Csshconfig.py"), shell=True, check=True)
 subprocess.run(os.path.join(SCRIPTDIR, "CShellConfig.py") + " -f -z -d", shell=True, check=True)
+subprocess.run(os.path.join(SCRIPTDIR, "CCSClone.py"), shell=True, check=True)
+subprocess.run(os.path.join(SCRIPTDIR, "Csshconfig.py"), shell=True, check=True)
 subprocess.run(os.path.join(SCRIPTDIR, "CDisplayManagerConfig.py"), shell=True, check=True)
 subprocess.run(os.path.join(SCRIPTDIR, "CVMGeneral.py"), shell=True, check=True)
 subprocess.run(os.path.join(SCRIPTDIR, "Cxdgdirs.py"), shell=True, check=True)
