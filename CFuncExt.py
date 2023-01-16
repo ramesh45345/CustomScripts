@@ -141,6 +141,8 @@ def ytdlp_install(install_path: str = os.path.join(os.sep, "usr", "local", "bin"
     CFunc.downloadfile("https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp", install_path, overwrite=True)
     os.chmod(os.path.join(install_path, "yt-dlp"), 0o755)
     # Symlink youtube-dl
+    if os.path.islink(os.path.join(install_path, "youtube-dl")):
+        os.unlink(os.path.join(install_path, "youtube-dl"))
     os.chdir(install_path)
     os.symlink("yt-dlp", "youtube-dl")
 
