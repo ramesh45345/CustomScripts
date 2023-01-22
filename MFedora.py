@@ -93,8 +93,10 @@ if __name__ == '__main__':
     CFunc.dnfinstall("podman")
     # GUI Packages
     if not args.nogui:
-        # Toolbox
-        CFunc.dnfinstall("toolbox")
+        # Mesa freeworld
+        CFunc.dnfinstall("--best --allowerasing mesa-va-drivers-freeworld mesa-vdpau-drivers-freeworld")
+        # Distrobox
+        CFunc.dnfinstall("distrobox")
         # Base Packages
         CFunc.dnfinstall("@fonts @base-x @networkmanager-submodules xrandr xset")
         # Browsers

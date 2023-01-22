@@ -208,6 +208,9 @@ if args.stage == 2:
     rostreeinstall("rpmfusion-free-release-tainted rpmfusion-nonfree-release-tainted")
     subprocess.run("systemctl enable smb", shell=True, check=True)
 
+    # Mesa
+    subprocess.run("rpm-ostree override remove mesa-va-drivers --install mesa-va-drivers-freeworld --install mesa-vdpau-drivers-freeworld", shell=True, check=False)
+
     # Add normal user to all reasonable groups
     group_silverblueadd("disk")
     group_silverblueadd("lp")
