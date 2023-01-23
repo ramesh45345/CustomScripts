@@ -74,23 +74,22 @@ def vm_create(vmname: str, img_path: str, isopath: str):
     # virt-install manual: https://www.mankier.com/1/virt-install
     # List of os: osinfo-query os
     CREATESCRIPT_KVM = """virt-install --connect qemu:///system --name={vmname} --install bootdev=cdrom --boot=hd,cdrom --disk device=cdrom,path="{isopath}",bus=sata,target=sda,readonly=on --disk path={fullpathtoimg},bus={kvm_diskinterface} --graphics spice --vcpu={cpus} --ram={memory} --network bridge=virbr0,model={kvm_netdevice} --filesystem source=/,target=root,mode=mapped --os-variant={kvm_variant} --import --noautoconsole --noreboot --video={kvm_video} --channel unix,target_type=virtio,name=org.qemu.guest_agent.0 --channel spicevmc,target_type=virtio,name=com.redhat.spice.0 --boot loader={efi_bin},loader_ro=yes,loader_type=pflash,nvram={efi_nvram}""".format(vmname=vmname, memory=args.memory, cpus=CPUCORES, fullpathtoimg=img_path, kvm_variant=kvm_variant, kvm_video=kvm_video, kvm_diskinterface=kvm_diskinterface, kvm_netdevice=kvm_netdevice, isopath=isopath, efi_bin=efi_bin, efi_nvram=efi_nvram)
-    logging.info("KVM launch command: {0}".format(CREATESCRIPT_KVM))
     subprocess.run(CREATESCRIPT_KVM, shell=True, check=True)
-    with open(os.path.join(os.path.dirname(img_path), "{0}.txt".format(vmname)), 'w') as f:
-        f.write("""virt-install --connect qemu:///system --name={vmname} --disk path={fullpathtoimg},bus={kvm_diskinterface} --disk device=cdrom,bus=sata,target=sda,readonly=on --graphics spice --vcpu={cpus} --ram={memory} --network bridge=virbr0,model={kvm_netdevice} --filesystem source=/,target=root,mode=mapped --os-variant={kvm_variant} --import --noautoconsole --noreboot --video={kvm_video} --channel unix,target_type=virtio,name=org.qemu.guest_agent.0 --channel spicevmc,target_type=virtio,name=com.redhat.spice.0 --boot loader={efi_bin},loader_ro=yes,loader_type=pflash,nvram={efi_nvram}""".format(vmname=vmname, memory=args.memory, cpus=CPUCORES, fullpathtoimg=img_path, kvm_variant=kvm_variant, kvm_video=kvm_video, kvm_diskinterface=kvm_diskinterface, kvm_netdevice=kvm_netdevice, efi_bin=efi_bin, efi_nvram=efi_nvram))
+    # Log the launch command.
+    logging.info("""KVM launch command: virt-install --connect qemu:///system --name={vmname} --disk path={fullpathtoimg},bus={kvm_diskinterface} --disk device=cdrom,bus=sata,target=sda,readonly=on --graphics spice --vcpu={cpus} --ram={memory} --network bridge=virbr0,model={kvm_netdevice} --filesystem source=/,target=root,mode=mapped --os-variant={kvm_variant} --import --noautoconsole --noreboot --video={kvm_video} --channel unix,target_type=virtio,name=org.qemu.guest_agent.0 --channel spicevmc,target_type=virtio,name=com.redhat.spice.0 --boot loader={efi_bin},loader_ro=yes,loader_type=pflash,nvram={efi_nvram}""".format(vmname=vmname, memory=args.memory, cpus=CPUCORES, fullpathtoimg=img_path, kvm_variant=kvm_variant, kvm_video=kvm_video, kvm_diskinterface=kvm_diskinterface, kvm_netdevice=kvm_netdevice, efi_bin=efi_bin, efi_nvram=efi_nvram))
 def vm_ejectiso(vmname: str):
     """Eject an iso from a VM."""
     subprocess.run("virsh --connect qemu:///system change-media {0} sda --eject --config".format(vmname), shell=True, check=False)
 def ssh_vm(ip: str, command: str, ssh_opts: str = "", port: int = 22, user: str = "root", password: str = "asdf"):
     """SSH into the Virtual Machine and run a command."""
-    status = subprocess.run("""sshpass -p "{password}" ssh {ssh_opts} {ip} -p {port} -l {user} '{command}'""".format(password=password, ip=ip, port=port, user=user, command=command, ssh_opts=ssh_opts), shell=True, check=False).returncode
+    status = CFunc.subpout_logger("""sshpass -p "{password}" ssh {ssh_opts} {ip} -p {port} -l {user} '{command}'""".format(password=password, ip=ip, port=port, user=user, command=command, ssh_opts=ssh_opts))
     return status
 def scp_vm(ip: str, filepath: str, destination: str, port: int = 22, user: str = "root", password: str = "asdf", folder: bool = False):
     """Copy files into the Virtual Machine."""
     scp_opts = ""
     if folder is True:
         scp_opts += "-r"
-    status = subprocess.run("""sshpass -p "{password}" scp -P {port} {opts} "{filepath}" {user}@{ip}:{destination}""".format(password=password, ip=ip, port=port, user=user, filepath=filepath, destination=destination, opts=scp_opts), shell=True, check=False).returncode
+    status = CFunc.subpout_logger("""sshpass -p "{password}" scp -P {port} {opts} "{filepath}" {user}@{ip}:{destination}""".format(password=password, ip=ip, port=port, user=user, filepath=filepath, destination=destination, opts=scp_opts))
     return status
 def ssh_wait(ip: str, port: int = 22, user: str = "root", password: str = "asdf", retries: int = 10000):
     """Wait for ssh to connect successfully to the VM."""
@@ -190,7 +189,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Create and run a Virtual Machine.')
     parser.add_argument("-a", "--ostype", type=int, help="OS type (1=Arch. 2=NixOS, 3=Ubuntu)", default="1")
     parser.add_argument("-c", "--nixconfig", help="Path of folder configuration for nix")
-    parser.add_argument("-d", "--debug", help='Use Debug Logging', action="store_true")
     parser.add_argument("-e", "--desktopenv", help="Desktop Environment (default: %(default)s)", default="xfce")
     parser.add_argument("-f", "--fullname", help="Full Name", default="User Name")
     parser.add_argument("-g", "--debversion", help="Ubuntu/Debian version to install.")
@@ -206,12 +204,6 @@ if __name__ == '__main__':
     parser.add_argument("-m", "--memory", help="Memory for VM", default="4096")
     parser.add_argument("--noprompt", help='Do not prompt to continue.', action="store_true")
     args = parser.parse_args()
-
-    # Enable logging
-    if args.debug:
-        logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(message)s')
-    else:
-        logging.basicConfig(level=logging.INFO, format='%(message)s')
 
     # Set paths
     vmpath = os.path.abspath(args.vmpath)
@@ -300,6 +292,12 @@ if __name__ == '__main__':
 
     ### Begin Code ###
 
+    # Save start time.
+    beforetime = datetime.datetime.now()
+    # Initiate logger
+    buildlog_path = os.path.join(vmpath, "{0}.log".format(vm_name))
+    CFunc.log_config(buildlog_path)
+
     # Run this if we are destroying (not keeping) the VM.
     imgpath = vm_getimgpath(vm_name, vmpath)
     vm_cleanup(vm_name, imgpath)
@@ -330,3 +328,6 @@ if __name__ == '__main__':
     ssh_wait(ip=sship, port=localsshport, user="root", password=args.vmpass)
     ssh_vm(ip=sship, port=localsshport, user="root", password=args.vmpass, command=vmprovision_cmd)
     vm_shutdown(vm_name)
+    # Save finish time.
+    fullfinishtime = datetime.datetime.now()
+    logging.info("Creation completed in {0}".format(str(fullfinishtime - beforetime)))
