@@ -252,6 +252,8 @@ def run_as_user(user_name, cmd, shell_cmd=None, error_on_fail=False):
     env['LOGNAME'] = user_name
     env['PWD'] = cwd
     env['USER'] = user_name
+    env['DBUS_SESSION_BUS_ADDRESS'] = "unix:path=/run/user/{0}/bus".format(user_uid)
+    env['XDG_RUNTIME_DIR'] = "/run/user/{0}".format(user_uid)
     print("Running {0} as {1}".format(cmd, user_name))
     process = subprocess.Popen(cmd, preexec_fn=demote(user_uid, user_gid), cwd=cwd, env=env, shell=True, executable=shell_cmd)
     process.wait()
