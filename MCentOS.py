@@ -111,9 +111,9 @@ if args.desktop == "gnome":
     gs_installer = CFunc.downloadfile("https://raw.githubusercontent.com/brunelli/gnome-shell-extension-installer/master/gnome-shell-extension-installer", os.path.join(os.sep, "usr", "local", "bin"), overwrite=True)
     os.chmod(gs_installer[0], 0o777)
     # Install volume extension
-    CFunc.run_as_user(USERNAMEVAR, "{0} --yes 858".format(gs_installer[0]))
+    CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 858".format(gs_installer[0]))
     # Install Dash to Panel extension
-    CFunc.run_as_user(USERNAMEVAR, "{0} --yes 1160".format(gs_installer[0]))
+    CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 1160".format(gs_installer[0]))
 elif args.desktop == "kde":
     # Plasma
     CFunc.dnfinstall('--skip-broken install @"KDE Plasma Workspaces" --exclude kf5-akonadi-server-mysql')

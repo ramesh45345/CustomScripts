@@ -86,7 +86,7 @@ fi
             f.write(profile_text)
 def call_install_script(user: str):
     """Run the installation script as a normal user."""
-    subprocess.run('su -l {0} -c "{1}/CNixUserSetup.py -n"'.format(user, SCRIPTDIR), shell=True, check=True)
+    CFunc.run_as_user_su(user, "{0}/CNixUserSetup.py -n".format(SCRIPTDIR), error_on_fail=True)
 
 
 ### Begin Code ###

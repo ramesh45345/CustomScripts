@@ -248,9 +248,9 @@ if args.stage == 2:
         gs_installer = CFunc.downloadfile("https://raw.githubusercontent.com/brunelli/gnome-shell-extension-installer/master/gnome-shell-extension-installer", os.path.join(os.sep, "usr", "local", "bin"), overwrite=True)
         os.chmod(gs_installer[0], 0o777)
         # Dash to panel
-        CFunc.run_as_user(USERNAMEVAR, "{0} --yes 1160".format(gs_installer[0]))
+        CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 1160".format(gs_installer[0]))
         # Kstatusnotifier
-        CFunc.run_as_user(USERNAMEVAR, "{0} --yes 615".format(gs_installer[0]))
+        CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 615".format(gs_installer[0]))
 
         # Gnome Apps
         CFunc.flatpak_install("flathub", "org.gnome.Firmware")

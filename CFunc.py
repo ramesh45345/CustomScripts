@@ -260,6 +260,10 @@ def run_as_user(user_name, cmd, shell_cmd=None, error_on_fail=False):
     if error_on_fail is True and process.returncode != 0:
         sys.exit("ERROR: {0} ran as user {1} returned status code {2}. Exiting.".format(cmd, user_name, process.returncode))
     return process.returncode
+def run_as_user_su(user_name, cmd, shell_cmd="/bin/sh", error_on_fail=False):
+    """Run a command as the specified username using the su command."""
+    process = subprocess.run(["su", "-l", user_name, "-s", shell_cmd, "-c", cmd], check=error_on_fail)
+    return process.returncode
 def chown_recursive(path, user_name, group_name):
     """Recursive chown."""
     print("Running chown on {0}.".format(path))
