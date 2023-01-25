@@ -91,6 +91,14 @@ if __name__ == '__main__':
     CFuncExt.FirewalldConfig()
     # Podman
     CFunc.dnfinstall("podman")
+    # Sudoers changes
+    CFuncExt.SudoersEnvSettings()
+    # Edit sudoers to add dnf.
+    fedora_sudoersfile = os.path.join(os.sep, "etc", "sudoers.d", "pkmgt")
+    CFunc.AddLineToSudoersFile(fedora_sudoersfile, "%wheel ALL=(ALL) ALL", overwrite=True)
+    CFunc.AddLineToSudoersFile(fedora_sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("dnf")))
+    CFunc.AddLineToSudoersFile(fedora_sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("podman")))
+
     # GUI Packages
     if not args.nogui:
         # Mesa freeworld
@@ -122,6 +130,10 @@ if __name__ == '__main__':
         # Start flameshot on user login.
         shutil.copy(os.path.join(os.sep, "usr", "share", "applications", "org.flameshot.Flameshot.desktop"), os.path.join(USERHOME, ".config", "autostart"))
         CFunc.chown_recursive(os.path.join(USERHOME, ".config", ), USERNAMEVAR, USERGROUP)
+        # Flatpak setup
+        CFunc.dnfinstall("flatpak xdg-desktop-portal")
+        CFunc.AddLineToSudoersFile(fedora_sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("flatpak")))
+        subprocess.run(os.path.join(SCRIPTDIR, "CFlatpakConfig.py"), shell=True, check=True)
 
     # Install software for VMs
     if vmstatus == "kvm":
@@ -211,21 +223,8 @@ if __name__ == '__main__':
     CFunc.AddUserToGroup("nm-openconnect")
     CFunc.AddUserToGroup("vboxsf")
 
-    # Sudoers changes
-    CFuncExt.SudoersEnvSettings()
-    # Edit sudoers to add dnf.
-    fedora_sudoersfile = os.path.join(os.sep, "etc", "sudoers.d", "pkmgt")
-    CFunc.AddLineToSudoersFile(fedora_sudoersfile, "%wheel ALL=(ALL) ALL", overwrite=True)
-    CFunc.AddLineToSudoersFile(fedora_sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("dnf")))
-    CFunc.AddLineToSudoersFile(fedora_sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("podman")))
-
     # Hdparm
     CFunc.dnfinstall("smartmontools hdparm")
-
-    if not args.nogui:
-        # Flatpak setup
-        CFunc.dnfinstall("flatpak xdg-desktop-portal")
-        CFunc.AddLineToSudoersFile(fedora_sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("flatpak")))
 
     # Plymouth and grub
     CFunc.dnfinstall("plymouth-theme-spinner")
@@ -242,8 +241,6 @@ if __name__ == '__main__':
 
     # Extra scripts
     subprocess.run(os.path.join(SCRIPTDIR, "CCSClone.py"), shell=True, check=True)
-    if not args.nogui:
-        subprocess.run(os.path.join(SCRIPTDIR, "CFlatpakConfig.py"), shell=True, check=True)
     subprocess.run(os.path.join(SCRIPTDIR, "Csshconfig.py"), shell=True, check=True)
     subprocess.run(os.path.join(SCRIPTDIR, "CShellConfig.py") + " -f -z -d", shell=True, check=True)
     subprocess.run(os.path.join(SCRIPTDIR, "CDisplayManagerConfig.py"), shell=True, check=True)
