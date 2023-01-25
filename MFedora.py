@@ -98,7 +98,7 @@ if __name__ == '__main__':
         # Distrobox
         CFunc.dnfinstall("distrobox")
         # Base Packages
-        CFunc.dnfinstall("@fonts @base-x @networkmanager-submodules xrandr xset")
+        CFunc.dnfinstall("@fonts @base-x @networkmanager-submodules xrandr xset --exclude mesa-va-drivers")
         # Browsers
         # Official Google Chrome
         # CFunc.dnfinstall("https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm")
