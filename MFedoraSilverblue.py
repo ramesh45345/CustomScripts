@@ -254,7 +254,6 @@ if args.stage == 2:
 
         # Gnome Apps
         CFunc.flatpak_install("flathub", "org.gnome.Firmware")
-        CFunc.flatpak_install("flathub", "org.gnome.Extensions")
         # Configure permissions for apps
         CFunc.flatpak_override("org.gnome.FileRoller", "--filesystem=host")
     elif fedora_version.endswith("kinoite"):
