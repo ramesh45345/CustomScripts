@@ -193,6 +193,12 @@ qt-max-volume=100
         with open(vlc_config_file, 'w') as f:
             f.write(vlc_config_text)
 
+### mpv ###
+if os.path.isdir(os.path.join(userhome, ".config")):
+    os.makedirs(os.path.join(userhome, ".config", "mpv"), exist_ok=True)
+    with open(os.path.join(userhome, ".config", "mpv", "mpv.conf"), 'w') as f:
+        f.write("hwdec=auto")
+
 ### Calibre ###
 # Check for flatpak
 calibre_fp_cmd = ["flatpak", "run", "--command=ebook-viewer", "com.calibre_ebook.calibre", "--version"]
