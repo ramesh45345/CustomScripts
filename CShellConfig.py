@@ -401,7 +401,7 @@ if type nix &> /dev/null; then
         home-manager switch
         if [ -d "$HOME/.nix-share" ] && [ -d "$HOME/.nix-profile" ]; then
             rsync -aL --del "$HOME/.nix-profile/share" "$HOME/.nix-share/"
-            find "$HOME/.nix-share/share/applications/" -exec touch {{}} +
+            find "$HOME/.nix-share/share/applications/" -exec touch {} +
         fi
     }
     function ncln () {
@@ -410,7 +410,7 @@ if type nix &> /dev/null; then
     }
     function nroots () {
         echo "Show gc roots"
-        find -H /nix/var/nix/gcroots/auto -type l | xargs -I {{}} sh -c 'readlink {{}}; realpath {{}}; echo'
+        find -H /nix/var/nix/gcroots/auto -type l | xargs -I {} sh -c 'readlink {}; realpath {}; echo'
     }
     function nse () {
         echo "Search nix packages"
