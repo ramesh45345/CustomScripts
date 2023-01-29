@@ -12,7 +12,7 @@ import time
 # Custom includes
 import CFunc
 import CFuncExt
-import MFedora
+import CNixRootSetup
 
 print("Running {0}".format(__file__))
 
@@ -199,7 +199,7 @@ if args.stage == 1:
     else:
         print("home.packages found in config file. Not editing.")
     # Nix upgrade
-    subprocess.run('su -l {0} -c "nix-channel --update; home-manager switch"'.format(USERNAMEVAR), shell=True, check=True)
+    CNixRootSetup.call_nix_update_user(USERNAMEVAR)
 
     print("Stage 1 Complete! Please reboot and run Stage 2.")
 if args.stage == 2:

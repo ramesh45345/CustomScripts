@@ -87,6 +87,13 @@ fi
 def call_install_script(user: str):
     """Run the installation script as a normal user."""
     CFunc.run_as_user_su(user, "{0}/CNixUserSetup.py -n".format(SCRIPTDIR), error_on_fail=True)
+def call_nix_update_user(user: str):
+    """
+    Run nix update as a normal user.
+    This function is intended for use in scripts that run as root.
+    """
+    CFunc.run_as_user_su(user, "nix-channel --update; home-manager switch")
+    CFunc.run_as_user_su(user, 'if [ -d "$HOME/.nix-share" ] && [ -d "$HOME/.nix-profile" ]; then rsync -aL --del "$HOME/.nix-profile/share" "$HOME/.nix-share/"; find "$HOME/.nix-share/share/applications/" -exec touch {} +; echo "Synced .nix-share"; fi', shell_cmd=shutil.which("bash"))
 
 
 ### Begin Code ###
