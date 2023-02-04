@@ -905,6 +905,8 @@ for ff_path in firefox_profiles_paths:
                         firefox_modify_settings("dom.webnotifications.enabled", "false", prefsjs_file)
                         # Autoplay (5 blocks audio and video for all sites by default)
                         firefox_modify_settings("media.autoplay.default", "5", prefsjs_file)
+                        # Enable vaapi
+                        firefox_modify_settings("media.ffmpeg.vaapi.enabled", "true", prefsjs_file)
                         # Sponsored suggest
                         firefox_modify_settings("browser.urlbar.suggest.quicksuggest.sponsored", "false", prefsjs_file)
                         # New tab recommends
