@@ -61,7 +61,7 @@ CFunc.dnfupdate()
 CFunc.dnfinstall("zsh fish nano tmux iotop rsync p7zip p7zip-plugins zip unzip xdg-utils xdg-user-dirs util-linux-user openssh-server openssh-clients avahi")
 # CFunc.dnfinstall("redhat-lsb-core")
 CFunc.sysctl_enable("sshd avahi-daemon")
-CFunc.dnfinstall("google-noto-sans-fonts")
+CFunc.dnfinstall("google-noto-sans-fonts google-noto-sans-mono-fonts google-roboto-fonts")
 # Samba
 CFunc.dnfinstall("samba")
 CFunc.sysctl_enable("smb")
