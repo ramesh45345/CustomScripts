@@ -239,13 +239,14 @@ renderer: NetworkManager""")
         CFunc.aptinstall("gstreamer1.0-vaapi")
         # For Office 2010
         CFunc.aptinstall("winbind")
-        # Browsers
-        CFunc.aptinstall("firefox")
         # Tilix
         CFunc.aptinstall("tilix")
         # Flatpak
         CFunc.aptinstall("flatpak")
         CFunc.AddLineToSudoersFile(sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("flatpak")))
+        subprocess.run(os.path.join(SCRIPTDIR, "CFlatpakConfig.py"), shell=True, check=True)
+        # Browsers
+        CFunc.flatpak_install("flathub", "org.mozilla.firefox")
         # Visual Studio Code
         vscode_deb()
 
@@ -298,8 +299,6 @@ renderer: NetworkManager""")
 
     # Run these extra scripts even in bare config.
     subprocess.run("{0}/CCSClone.py".format(SCRIPTDIR), shell=True, check=True)
-    if not args.nogui:
-        subprocess.run(os.path.join(SCRIPTDIR, "CFlatpakConfig.py"), shell=True, check=True)
     subprocess.run("{0}/CShellConfig.py -z -f -d".format(SCRIPTDIR), shell=True, check=True)
     subprocess.run("{0}/Csshconfig.py".format(SCRIPTDIR), shell=True, check=True)
     subprocess.run("{0}/CDisplayManagerConfig.py".format(SCRIPTDIR), shell=True, check=True)
