@@ -173,6 +173,9 @@ renderer: NetworkManager""")
     # Due to odd GUI recommends on 19.04 and above, the following packages should be held for other desktop environments. They should be unheld for gnome.
     held_pkgs = "gnome-shell gdm3 gnome-session gnome-session-bin ubuntu-session gnome-control-center cheese"
 
+    # Hold firefox (install flatpak later)
+    if args.nogui is False:
+        CFunc.aptmark("firefox")
     # Install Desktop Software
     if args.desktop == "gnome":
         print("\n Installing gnome desktop")
