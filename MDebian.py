@@ -84,6 +84,9 @@ add-apt-repository -y main
 add-apt-repository -y contrib
 add-apt-repository -y non-free
 """, shell=True, check=True)
+# Make non-free-firmware unconditional when stable becomes bookworm.
+if debrelease != "bullseye":
+    subprocess.run("add-apt-repository -y non-free-firmware", shell=True, check=True)
 
 
 # Comment out lines containing httpredir.
