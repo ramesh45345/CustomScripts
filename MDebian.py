@@ -60,7 +60,7 @@ os.environ['DEBIAN_FRONTEND'] = "noninteractive"
 
 ### Begin Code ###
 
-# Get Ubuntu Release
+# Get Debian Release
 CFunc.aptupdate()
 CFunc.aptinstall("lsb-release software-properties-common apt-transport-https gnupg")
 # Needed for add-apt-repositories
@@ -119,7 +119,7 @@ CFunc.aptupdate()
 CFunc.aptdistupg()
 
 # Cli Software
-CFunc.aptinstall("ssh tmux zsh fish btrfs-progs f2fs-tools xfsprogs dmraid mdadm nano p7zip-full p7zip-rar unrar curl rsync less iotop sshfs sudo python-is-python3")
+CFunc.aptinstall("ssh tmux zsh fish btrfs-progs f2fs-tools xfsprogs dmraid mdadm nano p7zip-full p7zip-rar unrar curl wget rsync less iotop sshfs sudo python-is-python3")
 # Firmware
 CFunc.aptinstall("firmware-linux")
 subprocess.run("""echo "firmware-ipw2x00 firmware-ipw2x00/license/accepted boolean true" | debconf-set-selections
