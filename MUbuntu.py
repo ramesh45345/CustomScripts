@@ -10,6 +10,7 @@ import sys
 # Custom includes
 import CFunc
 import CFuncExt
+import MDebian
 
 # Folder of this script
 SCRIPTDIR = sys.path[0]
@@ -51,14 +52,6 @@ Acquire::ftp::Timeout "5";''')
     # Enable rolling if requested.
     if rolling:
         CFunc.find_replace(os.path.join(os.sep, "etc", "apt"), debrelease, "devel", "sources.list")
-def vscode_deb():
-    """Install vscode deb and repository."""
-    subprocess.run("""curl https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/raw/master/pub.gpg | gpg --dearmor > /tmp/vscodium-archive-keyring.gpg
-    mv /tmp/vscodium-archive-keyring.gpg /etc/apt/trusted.gpg.d/vscodium-archive-keyring.gpg""", shell=True, check=True)
-    # Install repo
-    subprocess.run('echo "deb [ signed-by=/etc/apt/trusted.gpg.d/vscodium-archive-keyring.gpg ] https://paulcarroty.gitlab.io/vscodium-deb-rpm-repo/debs vscodium main" > /etc/apt/sources.list.d/vscodium.list', shell=True, check=True)
-    CFunc.aptupdate()
-    CFunc.aptinstall("codium")
 
 
 if __name__ == '__main__':
@@ -251,7 +244,7 @@ renderer: NetworkManager""")
         # Browsers
         CFunc.flatpak_install("flathub", "org.mozilla.firefox")
         # Visual Studio Code
-        vscode_deb()
+        MDebian.vscode_deb()
 
     # Post-install mate configuration
     if args.desktop == "mate":

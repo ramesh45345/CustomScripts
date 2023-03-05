@@ -63,6 +63,7 @@ if args.distro == "arch":
     import MArch
     check_cmds(["pacman"])
 if args.distro == "ubuntu":
+    import MDebian
     import MUbuntu
     check_cmds(["apt-get"])
 if args.distro == "fedora":
@@ -178,7 +179,7 @@ unmanaged-devices=none""")
         held_pkgs = "gnome-shell gdm3 gnome-session gnome-session-bin ubuntu-session gnome-control-center cheese"
         CFunc.aptmark(held_pkgs)
         CFunc.aptinstall("mate-desktop-environment marco mate-polkit mate-menus mate-terminal mate-applet-appmenu mate-applet-brisk-menu mate-tweak xdg-utils dconf-editor epiphany pluma caja caja-open-terminal tilix mate-terminal mate-themes fonts-roboto fonts-noto-extra fonts-noto-ui-extra fonts-liberation2 numix-icon-theme numix-icon-theme-circle gnome-icon-theme network-manager-gnome tigervnc-viewer tigervnc-standalone-server tigervnc-xorg-extension xrdp xorgxrdp")
-        MUbuntu.vscode_deb()
+        MDebian.vscode_deb()
     if args.distro == "fedora":
         CFunc.dnfinstall("mate-panel mate-session-manager mate-control-center marco")
         MFedora.repo_vscode()
