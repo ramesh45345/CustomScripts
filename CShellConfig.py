@@ -393,7 +393,7 @@ fi
 if type nix &> /dev/null; then
     function ned () {
         echo "Editing home-manager config"
-        nano $HOME/.config/nixpkgs/home.nix
+        nano $HOME/.config/home-manager/home.nix
     }
     function nup () {
         echo "Updating Nix userspace."
@@ -1009,7 +1009,7 @@ end
 if type -q nix;
     function ned
         echo "Editing home-manager config"
-        nano $HOME/.config/nixpkgs/home.nix
+        nano $HOME/.config/home-manager/home.nix
     end
     function nup
         echo "Updating Nix userspace."

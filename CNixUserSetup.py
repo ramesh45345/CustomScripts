@@ -58,7 +58,8 @@ def install_homemanager():
     subprocess.run("nix-shell '<home-manager>' -A install", shell=True, check=True)
 
     # home.nix
-    homeman_filepath = os.path.join(homepath, ".config", "nixpkgs", "home.nix")
+    homeman_dirpath = os.path.join(homepath, ".config", "home-manager")
+    homeman_filepath = os.path.join(homeman_dirpath, "home.nix")
     # Check if the pattern isn't found
     if os.path.isfile(homeman_filepath) and not CFunc.find_pattern_infile(homeman_filepath, "home.packages = with pkgs;"):
         print("Adding home.packages to Home Manager config.")
@@ -66,13 +67,11 @@ def install_homemanager():
             # Insert the package line after the homedirectory entry.
             if "home.homeDirectory = " in line:
                 line = line.replace(line, line + """
-  home.packages = with pkgs; [
-  ];
-
   news.display = "silent";
   manual.manpages.enable = false;
 """)
             print(line, end='')
+        CFunc.find_replace(homeman_dirpath, "home.packages = [", "home.packages = with pkgs; [", "home.nix")
     else:
         print("home.packages found in config file. Not editing.")
 
@@ -99,7 +98,7 @@ def configure_nix():
 """)
 def uninstall_nix():
     """Uninstall nix."""
-    subprocess.run("sudo rm -rf $HOME/.nix-profile $HOME/.nix-profile $HOME/.nix-channels $HOME/.nix-defexpr $HOME/.config/nix/ $HOME/.config/nixpkgs/ $HOME/.nix-share/", shell=True, check=False)
+    subprocess.run("sudo rm -rf $HOME/.nix-profile $HOME/.nix-profile $HOME/.nix-channels $HOME/.nix-defexpr $HOME/.config/nix/ $HOME/.config/nixpkgs/ $HOME/.nix-share/ $HOME/.config/home-manager/", shell=True, check=False)
     subprocess.run("sudo rm -rf /etc/profile.d/rcustom_nix.sh", shell=True, check=False)
     # Immutable os instructions
     if os.path.isfile("/etc/systemd/system/mount-nix-prepare.service"):
