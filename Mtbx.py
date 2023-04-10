@@ -158,6 +158,8 @@ RUN echo '%wheel ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/user-group && \
 """)
 # Scripts setup
 addtext("RUN git clone https://github.com/ramesh45345/CustomScripts /opt/CustomScripts && chown 1000:1000 -R /opt/CustomScripts")
+# Run shell config when zsh loads for the first time.
+addtext("RUN echo '/opt/CustomScripts/CShellConfig.py -z' > /etc/skel/.zshrc")
 # Timezone
 addtext("RUN ln -sf /usr/share/zoneinfo/US/Eastern /etc/localtime")
 
@@ -184,6 +186,7 @@ if args.distro == "all" or args.distro == "arch":
     # Write containerfile
     with open(tempfile_arch, 'w') as f:
         f.write(containerfile_arch)
+    os.chmod(tempfile_arch, 0o666)
     print("File written to {0}".format(tempfile_arch))
 if args.distro == "all" or args.distro == "fedora":
     # Remove old folder if it exists.
@@ -194,6 +197,7 @@ if args.distro == "all" or args.distro == "fedora":
     # Write containerfile
     with open(tempfile_fedora, 'w') as f:
         f.write(containerfile_fedora)
+    os.chmod(tempfile_fedora, 0o666)
     print("File written to {0}".format(tempfile_fedora))
 if args.distro == "all" or args.distro == "ubuntu":
     # Remove old folder if it exists.
@@ -204,6 +208,7 @@ if args.distro == "all" or args.distro == "ubuntu":
     # Write containerfile
     with open(tempfile_ubuntu, 'w') as f:
         f.write(containerfile_ubuntu)
+    os.chmod(tempfolder_ubuntu, 0o666)
     print("File written to {0}".format(tempfile_ubuntu))
 
 ### Build ###
