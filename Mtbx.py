@@ -208,7 +208,7 @@ if args.distro == "all" or args.distro == "ubuntu":
     # Write containerfile
     with open(tempfile_ubuntu, 'w') as f:
         f.write(containerfile_ubuntu)
-    os.chmod(tempfolder_ubuntu, 0o666)
+    os.chmod(tempfile_ubuntu, 0o666)
     print("File written to {0}".format(tempfile_ubuntu))
 
 ### Build ###
