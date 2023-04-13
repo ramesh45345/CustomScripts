@@ -76,7 +76,7 @@ FROM registry.fedoraproject.org/fedora:latest
 ENV NAME=fedora-shared
 """
 containerfile_ubuntu = """
-FROM docker.io/library/ubuntu:rolling
+FROM docker.io/library/ubuntu:latest
 ENV NAME=ubuntu-shared
 """
 
