@@ -198,6 +198,22 @@ if os.path.isdir(os.path.join(userhome, ".config")):
     os.makedirs(os.path.join(userhome, ".config", "mpv"), exist_ok=True)
     with open(os.path.join(userhome, ".config", "mpv", "mpv.conf"), 'w') as f:
         f.write("hwdec=auto")
+    with open(os.path.join(userhome, ".config", "mpv", "input.conf"), 'w') as f:
+        f.write("""
+F     script-binding quality_menu/video_formats_toggle
+Alt+f script-binding quality_menu/audio_formats_toggle
+""")
+    os.makedirs(os.path.join(userhome, ".config", "mpv", "scripts"), exist_ok=True)
+    os.makedirs(os.path.join(userhome, ".config", "mpv", "script-opts"), exist_ok=True)
+    # User Scripts: https://github.com/mpv-player/mpv/wiki/User-Scripts
+    # Quality Menu
+    CFunc.downloadfile("https://raw.githubusercontent.com/christoph-heinrich/mpv-quality-menu/master/quality-menu.lua", os.path.join(userhome, ".config", "mpv", "scripts"))
+    CFunc.downloadfile("https://raw.githubusercontent.com/christoph-heinrich/mpv-quality-menu/master/quality-menu.conf", os.path.join(userhome, ".config", "mpv", "script-opts"))
+    # Sponsorblock
+    CFunc.downloadfile("https://raw.githubusercontent.com/po5/mpv_sponsorblock/master/sponsorblock.lua", os.path.join(userhome, ".config", "mpv", "scripts"))
+    os.makedirs(os.path.join(userhome, ".config", "mpv", "scripts", "sponsorblock_shared"), exist_ok=True)
+    CFunc.downloadfile("https://raw.githubusercontent.com/po5/mpv_sponsorblock/master/sponsorblock_shared/main.lua", os.path.join(userhome, ".config", "mpv", "scripts", "sponsorblock_shared"))
+    CFunc.downloadfile("https://raw.githubusercontent.com/po5/mpv_sponsorblock/master/sponsorblock_shared/sponsorblock.py", os.path.join(userhome, ".config", "mpv", "scripts", "sponsorblock_shared"))
 
 ### Calibre ###
 # Check for flatpak
