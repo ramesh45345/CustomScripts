@@ -111,6 +111,7 @@ fi
 
 # Set editor to nano
 export EDITOR=nano
+export XZ_OPT="-T0"
 
 # Functions
 function sst () {
