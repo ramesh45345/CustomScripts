@@ -329,6 +329,8 @@ if shutil.which("gnome-session") or shutil.which("gnome-shell"):
 # https://askubuntu.com/questions/839647/gsettings-like-tools-for-kde#839773
 # https://manned.org/kwriteconfig/d47c2de0
 if shutil.which("kwriteconfig5") and shutil.which("plasma_session"):
+    # Archiver settings
+    CMimeSet.HandlePredefines("archive", "org.kde.ark.desktop")
     # Dolphin settings
     if shutil.which("dolphin"):
         kwriteconfig("dolphinrc", "General", "GlobalViewProps", "true")
