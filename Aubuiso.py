@@ -138,6 +138,7 @@ memtest86+
 
 # Install CLI Software
 apt-get install -y \
+btop \
 btrfs-progs \
 chntpw \
 clonezilla \
@@ -160,6 +161,7 @@ nfs-common \
 rsync \
 screen \
 ssh \
+s-tui \
 testdisk \
 tilix \
 tmux \

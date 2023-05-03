@@ -105,6 +105,8 @@ powerline-fonts
 nano
 tmux
 iotop
+btop
+s-tui
 rsync
 p7zip
 p7zip-plugins

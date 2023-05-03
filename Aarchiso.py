@@ -90,6 +90,8 @@ nss-mdns
 tmux
 zsh
 fish
+btop
+s-tui
 
 # Virtual Machine guest
 spice-vdagent
