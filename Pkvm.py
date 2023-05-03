@@ -262,7 +262,7 @@ if __name__ == '__main__':
         vboxosid = "Fedora_64"
         vmwareid = "fedora-64"
         kvm_variant = "fedora-rawhide"
-        isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/37/Server/x86_64/iso/Fedora-Server-dvd-x86_64-37-1.7.iso"
+        isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/38/Server/x86_64/iso/Fedora-Server-dvd-x86_64-38-1.6.iso"
         if args.desktopenv is None:
             args.desktopenv = "xfce"
     if args.ostype == 1:
@@ -285,7 +285,7 @@ if __name__ == '__main__':
         vboxosid = "Fedora_64"
         vmwareid = "fedora-64"
         kvm_variant = "silverblue-rawhide"
-        isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/37/Kinoite/x86_64/iso/Fedora-Kinoite-ostree-x86_64-37-1.7.iso"
+        isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/38/Kinoite/x86_64/iso/Fedora-Kinoite-ostree-x86_64-38-1.6.iso"
         vmname = "Packer-FedoraKinoite-{0}".format(hvname)
         vmprovision_defopts = ""
     if args.ostype == 9:
@@ -293,7 +293,7 @@ if __name__ == '__main__':
         vboxosid = "Fedora_64"
         vmwareid = "fedora-64"
         kvm_variant = "silverblue-rawhide"
-        isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/37/Silverblue/x86_64/iso/Fedora-Silverblue-ostree-x86_64-37-1.7.iso"
+        isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/38/Silverblue/x86_64/iso/Fedora-Silverblue-ostree-x86_64-38-1.6.iso"
         vmname = "Packer-FedoraSilverblue-{0}".format(hvname)
         vmprovision_defopts = ""
     if 10 <= args.ostype <= 19:
@@ -305,7 +305,7 @@ if __name__ == '__main__':
     # Ubuntu latest
     if 10 <= args.ostype <= 14:
         kvm_variant = "ubuntu22.04"
-        isourl = "https://releases.ubuntu.com/22.10/ubuntu-22.10-live-server-amd64.iso"
+        isourl = "https://releases.ubuntu.com/23.04/ubuntu-23.04-live-server-amd64.iso"
     # Ubuntu LTS
     if 15 <= args.ostype <= 19:
         kvm_variant = "ubuntu22.04"
