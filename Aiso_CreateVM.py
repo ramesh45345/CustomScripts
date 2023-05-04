@@ -63,7 +63,7 @@ def create_chroot_ubuntu(path: str, packages: str = "systemd-container"):
 
 ### Begin Code ###
 # Host packges
-CFunc.dnfinstall("podman pacman arch-install-scripts systemd-container debootstrap zstd")
+CFunc.dnfinstall("podman pacman arch-install-scripts systemd-container debootstrap zstd libblockdev-nvdimm")
 
 # Clean
 if args.clean is True:
@@ -79,7 +79,7 @@ if args.clean is True:
 if not os.path.isdir(fedora_chroot_location) and shutil.which("dnf"):
     os.makedirs(fedora_chroot_location)
     subprocess.run('dnf -y --installroot={0} --releasever $(rpm -q --qf "%{{version}}" -f /etc/fedora-release) install @minimal-environment'.format(fedora_chroot_location), shell=True, check=True)
-    zch.ChrootCommand(fedora_chroot_location, "sh -c 'dnf install -y nano livecd-tools spin-kickstarts pykickstart anaconda util-linux'")
+    zch.ChrootCommand(fedora_chroot_location, "sh -c 'dnf install -y nano livecd-tools spin-kickstarts pykickstart anaconda util-linux libblockdev-nvdimm'")
 if os.path.isdir(fedora_chroot_location):
     # Update packages
     zch.ChrootCommand(fedora_chroot_location, "sh -c 'dnf upgrade -y'")
