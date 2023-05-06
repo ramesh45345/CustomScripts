@@ -376,6 +376,10 @@ if shutil.which("kwriteconfig5") and shutil.which("plasma_session"):
         subprocess.run('kwriteconfig5 --file powermanagementprofilesrc --group AC --group DPMSControl --key idleTime 300000', shell=True, check=False)
     else:
         subprocess.run('kwriteconfig5 --file powermanagementprofilesrc --group AC --group DPMSControl --key idleTime 600', shell=True, check=False)
+    # Disable AC suspend
+    subprocess.run('kwriteconfig5 --file powermanagementprofilesrc --group AC --group SuspendSession --key idleTime --delete', shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file powermanagementprofilesrc --group AC --group SuspendSession --key suspendThenHibernate --delete', shell=True, check=False)
+    subprocess.run('kwriteconfig5 --file powermanagementprofilesrc --group AC --group SuspendSession --key suspendType --delete', shell=True, check=False)
     subprocess.run('kwriteconfig5 --file kscreenlockerrc --group Daemon --key Autolock --type bool false', shell=True, check=False)
     subprocess.run('kwriteconfig5 --file kscreenlockerrc --group Daemon --key LockOnResume --type bool false', shell=True, check=False)
     subprocess.run('kwriteconfig5 --file kscreenlockerrc --group Daemon --key Timeout 10', shell=True, check=False)
