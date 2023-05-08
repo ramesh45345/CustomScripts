@@ -137,6 +137,8 @@ if shutil.which("tilix"):
 # Gnome System Monitor
 if shutil.which("gnome-system-monitor"):
     dconf_write("/org/gnome/gnome-system-monitor/cpu-stacked-area-chart", "true")
+    dconf_write("/org/gnome/gnome-system-monitor/resources-memory-in-iec", "true")
+    dconf_write("/org/gnome/gnome-system-monitor/process-memory-in-iec", "true")
 
 # MATE specific settings
 if shutil.which("mate-session"):
