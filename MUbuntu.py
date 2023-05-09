@@ -118,7 +118,7 @@ if __name__ == '__main__':
     CFunc.aptinstall("syncthing")
 
     # Cli Software
-    CFunc.aptinstall("ssh tmux zsh fish btrfs-progs f2fs-tools xfsprogs dmraid mdadm nano p7zip-full p7zip-rar unrar curl rsync less iotop sshfs sudo python-is-python3")
+    CFunc.aptinstall("ssh tmux zsh fish btrfs-progs f2fs-tools xfsprogs dmraid mdadm nano p7zip-full p7zip-rar unrar curl rsync less iotop sshfs sudo python-is-python3 nala")
     # Timezone stuff
     subprocess.run("dpkg-reconfigure -f noninteractive tzdata", shell=True, check=True)
     # Needed for systemd user sessions.
@@ -229,8 +229,6 @@ renderer: NetworkManager""")
         # Cups-pdf
         CFunc.aptinstall("printer-driver-cups-pdf")
         # Media Playback
-        CFunc.aptinstall("ffmpeg")
-        CFuncExt.ytdlp_install()
         CFunc.aptinstall("alsa-utils pavucontrol paprefs pulseaudio-module-zeroconf pulseaudio-module-bluetooth swh-plugins")
         CFunc.aptinstall("gstreamer1.0-vaapi")
         # For Office 2010
@@ -265,6 +263,13 @@ renderer: NetworkManager""")
             CFunc.aptinstall("open-vm-tools-desktop")
 
     subprocess.run("apt-get install -y --no-install-recommends smartmontools", shell=True, check=True)
+
+    # Install nix
+    CFuncExt.nix_standalone_install(USERNAMEVAR, """
+    # Media tools
+    mpv
+    ffmpeg
+    yt-dlp""")
 
     # Disable mitigations
     CFuncExt.GrubEnvAdd(os.path.join(os.sep, "etc", "default", "grub"), "GRUB_CMDLINE_LINUX_DEFAULT", "mitigations=off")

@@ -215,7 +215,40 @@ function snap_search () {
     fi
 }
 
-if type -p apt-get &> /dev/null; then
+if type -p nala &> /dev/null; then
+    function ins () {
+        echo "Installing $@."
+        $SUDOCMD nala install $@
+    }
+    function rmv () {
+        echo "Removing $@."
+        $SUDOCMD nala purge $@
+    }
+    function agu () {
+        echo "Updating Repos."
+        $SUDOCMD nala update
+    }
+    function se () {
+        echo "Searching for $@."
+        apt-cache search $@
+        echo "Policy for $@."
+        apt-cache policy $@
+        snap_search "$@"
+        flatpak_search "$@"
+    }
+    function cln () {
+        echo "Cleaning cache."
+        $SUDOCMD nala clean
+        echo "Auto-removing packages."
+        $SUDOCMD apt-get autoremove --purge
+        flatpak_clean
+    }
+    function up () {
+        echo "Updating and Dist-upgrading system."
+        $SUDOCMD nala update
+        $SUDOCMD nala upgrade
+    }
+elif type -p apt-get &> /dev/null; then
     function ins () {
         echo "Installing $@."
         $SUDOCMD apt-get install $@
@@ -845,7 +878,40 @@ function snap_search
 end
 
 # Set package manager functions
-if type -q apt-get
+if type -q nala
+    function ins
+        echo "Installing $argv."
+        sudo nala install $argv
+    end
+    function rmv
+        echo "Removing $argv."
+        sudo nala purge $argv
+    end
+    function agu
+        echo "Updating Repos."
+        sudo nala update
+    end
+    function se
+        echo "Searching for $argv."
+        apt-cache search $argv
+        echo "Policy for $argv."
+        apt-cache policy $argv
+        snap_search $argv
+        flatpak_search $argv
+    end
+    function cln
+        echo "Cleaning cache."
+        sudo nala clean
+        echo "Auto-removing packages."
+        sudo nala autopurge --purge
+        flatpak_clean
+    end
+    function up
+        echo "Updating and Upgrading system."
+        sudo nala update
+        sudo nala upgrade
+    end
+else if type -q apt-get
     function ins
         echo "Installing $argv."
         sudo apt-get install $argv

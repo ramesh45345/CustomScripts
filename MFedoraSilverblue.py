@@ -169,22 +169,12 @@ if args.stage == 1:
         rostreeinstall("gnome-disk-utility")
 
     # Install nix
-    subprocess.run("{0}/CNixRootSetup.py -i".format(SCRIPTDIR), shell=True, check=True)
-    # Add apps to home.nix
-    homeman_filepath = os.path.join(USERHOME, ".config", "nixpkgs", "home.nix")
-    # Check if the pattern isn't found
-    if os.path.isfile(homeman_filepath) and not CFunc.find_pattern_infile(homeman_filepath, "unrar"):
-        print("Adding home.packages to Home Manager config.")
-        for line in fileinput.FileInput(homeman_filepath, inplace=1):
-            # Insert the package line after the homedirectory entry.
-            if "home.packages = with pkgs; [" in line:
-                line = line.replace(line, line + """
+    CFuncExt.nix_standalone_install(USERNAMEVAR, """
     # CLI Tools
     (python3.withPackages(ps: with ps; [ pip wheel setuptools ]))
     iotop
     hdparm
     _7zz
-    unrar
     tigervnc
     xorg.xrandr
     xorg.xset
@@ -193,13 +183,7 @@ if args.stage == 1:
     ffmpeg
     yt-dlp
     # GUI Tools
-    vscodium
-""")
-            print(line, end='')
-    else:
-        print("home.packages found in config file. Not editing.")
-    # Nix upgrade
-    CNixRootSetup.call_nix_update_user(USERNAMEVAR)
+    vscodium""")
 
     print("Stage 1 Complete! Please reboot and run Stage 2.")
 if args.stage == 2:

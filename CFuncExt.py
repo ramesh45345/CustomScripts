@@ -5,6 +5,7 @@ Includes distribution specific and more complex common functions.
 """
 
 # Python includes.
+import fileinput
 import os
 import re
 import shutil
@@ -12,6 +13,7 @@ import subprocess
 import sys
 # Custom includes
 import CFunc
+import CNixRootSetup
 
 # Folder of this script
 SCRIPTDIR = sys.path[0]
@@ -145,6 +147,27 @@ def ytdlp_install(install_path: str = os.path.join(os.sep, "usr", "local", "bin"
         os.unlink(os.path.join(install_path, "youtube-dl"))
     os.chdir(install_path)
     os.symlink("yt-dlp", "youtube-dl")
+def nix_standalone_install(username: str, packages: str):
+    """Install standalone version of nix."""
+    USERNAMEVAR, USERGROUP, USERHOME = CFunc.getnormaluser(username)
+    # Install nix
+    subprocess.run("{0}/CNixRootSetup.py -i".format(SCRIPTDIR), shell=True, check=True)
+    # Add apps to home.nix
+    homeman_filepath = os.path.join(USERHOME, ".config", "home-manager", "home.nix")
+    # Check if the pattern isn't found
+    if os.path.isfile(homeman_filepath) and not CFunc.find_pattern_infile(homeman_filepath, "unrar"):
+        print("Adding home.packages to Home Manager config.")
+        for line in fileinput.FileInput(homeman_filepath, inplace=1):
+            # Insert the package line after the homedirectory entry.
+            if "home.packages = with pkgs; [" in line:
+                line = line.replace(line, line + """{0}
+    unrar
+""".format(packages))
+            print(line, end='')
+    else:
+        print("home.packages found in config file. Not editing.")
+    # Nix upgrade
+    CNixRootSetup.call_nix_update_user(USERNAMEVAR)
 
 
 if __name__ == '__main__':
