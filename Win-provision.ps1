@@ -183,7 +183,7 @@ function Fcn-Software {
       if ((Test-Path "E:\virtio-win-guest-tools.exe") -and -not (Test-Path "$desktop_folder\virtdrivers\")) {
         Copy-Item 'E:\' -Destination "$desktop_folder\virtdrivers\" -Recurse -Force
         # Create script to install drivers post-install.
-        Set-Content -Path "$desktop_folder\virtdrivers.ps1" -Value "Start-Process -Wait -FilePath `"$desktop_folder\virtdrivers\virtio-win-guest-tools.exe`" -ArgumentList `"/install /norestart /passive`"`nGet-ChildItem `"$desktop_folder\virtdrivers`" -Recurse -Filter `"*.inf`" | ForEach-Object { PNPUtil.exe /add-driver `$_.FullName /install }`nRemove-Item -Recurse -Force $desktop_folder\virtdrivers`nRemove-Item -Force `$MyInvocation.MyCommand.Path"
+        Set-Content -Path "$desktop_folder\virtdrivers.ps1" -Value "Start-Process -Wait -FilePath `"$desktop_folder\virtdrivers\virtio-win-guest-tools.exe`" -ArgumentList `"/install /norestart /passive`"`n(Get-ChildItem `"$desktop_folder\virtdrivers`" -Include w11,2k22 -Recurse -Directory).FullName | Select-Object -Unique | Get-ChildItem -Recurse -Filter `"*.inf`" | ForEach-Object { PNPUtil.exe /add-driver `$_.FullName /install }`nRemove-Item -Recurse -Force $desktop_folder\virtdrivers`nRemove-Item -Force `$MyInvocation.MyCommand.Path"
       }
     }
 
