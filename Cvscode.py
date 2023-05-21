@@ -66,6 +66,7 @@ def codeconfig_installext(vscode_cmd=list):
     ce_ins(vscode_cmd, "donjayamanne.githistory")
     ce_ins(vscode_cmd, "vscode-icons-team.vscode-icons")
     ce_ins(vscode_cmd, "yzhang.markdown-all-in-one")
+    ce_ins(vscode_cmd, "davidanson.vscode-markdownlint")
     ce_ins(vscode_cmd, "bbenoist.Nix")
     ce_ins(vscode_cmd, "danielroedl.meld-diff")
 def codeconfig_writeconfiguration(json_data=dict, json_path=str):
@@ -213,6 +214,7 @@ for idx in range(1, 6):
         data["gitlens.showWelcomeOnInstall"] = False
         data["git.confirmSync"] = False
         data["[nix]"] = {"editor.tabSize": 2}
+        data["markdown.extension.preview.autoShowPreviewToSide"] = True
         # Python Config
         data["python.linting.maxNumberOfProblems"] = 500
         data["python.linting.pylintArgs"] = ["--disable=C0301,C0103"]
