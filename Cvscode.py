@@ -67,6 +67,7 @@ def codeconfig_installext(vscode_cmd=list):
     ce_ins(vscode_cmd, "vscode-icons-team.vscode-icons")
     ce_ins(vscode_cmd, "yzhang.markdown-all-in-one")
     ce_ins(vscode_cmd, "davidanson.vscode-markdownlint")
+    ce_ins(vscode_cmd, "dendron.dendron")
     ce_ins(vscode_cmd, "bbenoist.Nix")
     ce_ins(vscode_cmd, "danielroedl.meld-diff")
 def codeconfig_writeconfiguration(json_data=dict, json_path=str):
