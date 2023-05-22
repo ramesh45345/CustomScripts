@@ -231,7 +231,7 @@ for idx in range(1, 6):
         data["gitlens.showWelcomeOnInstall"] = False
         data["git.confirmSync"] = False
         data["[nix]"] = {"editor.tabSize": 2}
-        data["markdown.extension.preview.autoShowPreviewToSide"] = True
+        data["markdown.extension.preview.autoShowPreviewToSide"] = False
         # Python Config
         data["python.linting.maxNumberOfProblems"] = 500
         data["python.linting.pylintArgs"] = ["--disable=C0301,C0103"]
