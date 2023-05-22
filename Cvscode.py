@@ -70,10 +70,10 @@ def codeconfig_installext(vscode_cmd=list):
     ce_ins(vscode_cmd, "dendron.dendron")
     ce_ins(vscode_cmd, "bbenoist.Nix")
     ce_ins(vscode_cmd, "danielroedl.meld-diff")
-def codeconfig_writeconfiguration(json_data=dict, json_path=str):
+def codeconfig_writeconfiguration(json_data=dict, json_path=str, json_file: str = "settings.json"):
     """Write the config.json"""
     if os.path.isdir(json_path):
-        vscode_userconfig = os.path.join(json_path, "settings.json")
+        vscode_userconfig = os.path.join(json_path, json_file)
         print("Writing {0}.".format(vscode_userconfig))
         with open(vscode_userconfig, 'w') as f:
             json.dump(json_data, f, indent=2)
@@ -188,6 +188,22 @@ for idx in range(1, 6):
 
         # Extensions
         codeconfig_installext(code_array[idx]["cmd"])
+
+        # Keyboard bindings
+        kb_data = [
+            {
+                "key": "ctrl+shift+b",
+                "command": "dendron.togglePreview",
+                "when": "dendron:pluginActive"
+            },
+            {
+                "key": "ctrl+k v",
+                "command": "-dendron.togglePreview",
+                "when": "dendron:pluginActive"
+            }
+        ]
+        # print(json.dumps(kb_data, indent=4))
+        codeconfig_writeconfiguration(kb_data, code_array[idx]["path"], "keybindings.json")
 
         # Json data
         data = {}
