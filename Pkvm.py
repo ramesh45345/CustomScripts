@@ -325,10 +325,10 @@ if __name__ == '__main__':
     if args.ostype == 16:
         vmname = "Packer-UbuntuLTSCLI-{0}".format(hvname)
         vmprovision_defopts = "-l -x"
-    if 20 <= args.ostype <= 29:
+    if 20 <= args.ostype <= 24:
         vboxosid = "Fedora_64"
         vmwareid = "fedora-64"
-        kvm_variant = "rhel8.0"
+        kvm_variant = "rhel9.0"
         isourl = "http://mirror.stream.centos.org/9-stream/BaseOS/x86_64/iso/CentOS-Stream-9-latest-x86_64-boot.iso"
         vmprovisionscript = "MCentOS.py"
         if args.desktopenv is None:
@@ -339,6 +339,17 @@ if __name__ == '__main__':
     if args.ostype == 21:
         vmname = "Packer-CentOSCLI-{0}".format(hvname)
         vmprovision_defopts = "-x"
+    if 25 <= args.ostype <= 29:
+        vboxosid = "Fedora_64"
+        vmwareid = "fedora-64"
+        kvm_variant = "rhel9.0"
+        isourl = "https://na.edge.kernel.org/almalinux/9/isos/x86_64/AlmaLinux-9-latest-x86_64-boot.iso"
+        vmprovisionscript = "MCentOS.py"
+        if args.desktopenv is None:
+            args.desktopenv = "gnome"
+    if args.ostype == 25:
+        vmname = "Packer-AlmaLinux-{0}".format(hvname)
+        vmprovision_defopts = "-d {0}".format(args.desktopenv)
     if 30 <= args.ostype <= 39:
         vboxosid = "Debian_64"
         vmwareid = "debian-64"
@@ -641,8 +652,12 @@ if __name__ == '__main__':
         data['builders'][0]["boot_wait"] = "1s"
     if 10 <= args.ostype <= 19:
         data['builders'][0]["boot_command"] = ["<wait>c<wait>linux /casper/vmlinuz quiet autoinstall 'ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/'<enter><wait>initrd /casper/initrd<enter><wait5>boot<enter>"]
-    if 20 <= args.ostype <= 29:
-        data['builders'][0]["boot_command"] = ["<tab> inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/centos.cfg<enter><wait>"]
+    if 20 <= args.ostype <= 24:
+        data['builders'][0]["boot_command"] = ["<up><tab> inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/centos.cfg<enter><wait>"]
+        data['provisioners'][0]["type"] = "shell"
+        data['provisioners'][0]["inline"] = "{2}; /opt/CustomScripts/{0} {1}".format(vmprovisionscript, vmprovision_opts, git_cmdline())
+    if 25 <= args.ostype <= 29:
+        data['builders'][0]["boot_command"] = ["<up><tab> inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/almalinux.cfg<enter><wait>"]
         data['provisioners'][0]["type"] = "shell"
         data['provisioners'][0]["inline"] = "{2}; /opt/CustomScripts/{0} {1}".format(vmprovisionscript, vmprovision_opts, git_cmdline())
     if 30 <= args.ostype <= 39:
