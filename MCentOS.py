@@ -70,6 +70,7 @@ CFunc.dnfinstall("cifs-utils")
 # Enable setuid for mount.cifs to enable mounting as a normal user
 subprocess.run("sudo chmod u+s /sbin/mount.cifs", shell=True)
 # NTP Configuration
+CFunc.dnfinstall("systemd-timesyncd")
 subprocess.run("systemctl enable systemd-timesyncd; timedatectl set-local-rtc false; timedatectl set-ntp 1", shell=True)
 # Install kernel
 CFunc.dnfinstall("kernel-ml kernel-ml-devel kernel-ml-modules-extra")
