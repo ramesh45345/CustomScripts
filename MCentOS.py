@@ -106,6 +106,7 @@ if args.desktop == "gnome":
     CFunc.dnfinstall("dconf-editor chrome-gnome-shell")
     # Gnome Stuff
     CFunc.dnfinstall("gnome-tweaks gnome-extensions-app")
+    CFunc.dnfinstall("tilix tilix-nautilus")
     # Gnome Shell extensions
     # Install gs installer script.
     gs_installer = CFunc.downloadfile("https://raw.githubusercontent.com/brunelli/gnome-shell-extension-installer/master/gnome-shell-extension-installer", os.path.join(os.sep, "usr", "local", "bin"), overwrite=True)
