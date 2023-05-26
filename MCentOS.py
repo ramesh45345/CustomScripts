@@ -72,8 +72,7 @@ subprocess.run("sudo chmod u+s /sbin/mount.cifs", shell=True)
 # NTP Configuration
 subprocess.run("systemctl enable systemd-timesyncd; timedatectl set-local-rtc false; timedatectl set-ntp 1", shell=True)
 # Install kernel
-subprocess.run("dnf copr enable -y rmnscnce/kernel-lqx centos-stream-9-x86_64", shell=True, check=True)
-CFunc.dnfinstall("kernel-lqx kernel-lqx-devel")
+CFunc.dnfinstall("kernel-ml kernel-ml-devel kernel-ml-modules-extra")
 # Install powerline fonts
 powerline_git_path = os.path.join(tempfile.gettempdir(), "pl-fonts")
 CFunc.gitclone("https://github.com/powerline/fonts", powerline_git_path)
