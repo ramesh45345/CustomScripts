@@ -179,6 +179,13 @@ if not args.nogui:
     shutil.chown(os.path.join(USERHOME, ".config", "autostart"), USERNAMEVAR, USERGROUP)
     shutil.chown(os.path.join(USERHOME, ".config", "autostart", "org.flameshot.Flameshot.desktop"), USERNAMEVAR, USERGROUP)
 
+    # Install nix
+    CFuncExt.nix_standalone_install(USERNAMEVAR, """
+# Media tools
+mpv
+ffmpeg
+yt-dlp""")
+
 # Disable Selinux
 # To get selinux status: sestatus, getenforce
 CFuncExt.GrubEnvAdd(os.path.join(os.sep, "etc", "default", "grub"), "GRUB_CMDLINE_LINUX", "selinux=0")
