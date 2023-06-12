@@ -227,6 +227,7 @@ for idx in range(1, 6):
         data["security.workspace.trust.enabled"] = False
         data["telemetry.telemetryLevel"] = "error"
         data["workbench.iconTheme"] = "vscode-icons"
+        data["workbench.colorTheme"] = "Visual Studio Dark"
         data["vsicons.dontShowNewVersionMessage"] = True
         data["gitlens.showWelcomeOnInstall"] = False
         data["git.confirmSync"] = False
