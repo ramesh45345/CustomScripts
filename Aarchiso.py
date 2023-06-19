@@ -54,9 +54,9 @@ cleanup()
 shutil.copytree("/usr/share/archiso/configs/releng/", workingfolder, symlinks=True)
 
 # Set syslinux timeout
-archiso_sys_path = os.path.join(workingfolder, "syslinux", "archiso_sys.cfg")
-CFunc.find_replace(os.path.join(workingfolder, "syslinux"), 'TIMEOUT 150', 'TIMEOUT 20', "archiso_sys.cfg")
-CFunc.find_replace(os.path.join(workingfolder, "efiboot/loader"), 'timeout 15', 'timeout 2', "loader.conf")
+CFunc.find_replace(os.path.join(workingfolder, "syslinux"), 'TIMEOUT 150', 'TIMEOUT 2', "archiso_sys.cfg")
+CFunc.find_replace(os.path.join(workingfolder, "efiboot", "loader"), 'timeout 15', 'timeout 2', "loader.conf")
+CFunc.find_replace(os.path.join(workingfolder, "grub"), 'timeout=15', 'timeout=2', "grub.cfg")
 
 # Set iso name
 isoname = "Arch-CustomLive"
