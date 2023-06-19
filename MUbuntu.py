@@ -242,6 +242,7 @@ renderer: NetworkManager""")
         subprocess.run(os.path.join(SCRIPTDIR, "CFlatpakConfig.py"), shell=True, check=True)
         # Browsers
         CFunc.flatpak_install("flathub", "org.mozilla.firefox")
+        CFunc.flatpak_override("org.mozilla.firefox", "--filesystem=host")
         # Visual Studio Code
         MDebian.vscode_deb()
 
