@@ -32,6 +32,7 @@ parser.add_argument("-t", "--type", help='OS Type (debian, ubuntu, etc)', defaul
 parser.add_argument("-r", "--release", help='Release Distribution', default="unstable")
 parser.add_argument("-a", "--architecture", help='Architecture (amd64, i386, armhf, arm64, etc)', default="amd64")
 parser.add_argument("-z", "--zch", help='Use zch instead of systemd-nspawn', action="store_true")
+parser.add_argument("--forcelink", help='Force symlink to be created for release. Not to be used unless debootstrap version is out of date. Example: No symlink exists for version "lunar" in ubuntu.', action="store_true")
 parser.add_argument("installpath", help='Path of Installation')
 
 # Save arguments.
@@ -78,6 +79,18 @@ if args.zch is False:
 if args.noprompt is False:
     input("Press Enter to continue.")
 
+# Check symlink for debootstrap.
+if args.forcelink:
+    scriptsfolder = os.path.join(os.sep, "usr", "share", "debootstrap", "scripts")
+    if os.path.isdir(scriptsfolder):
+        # Check that the release exists
+        if not os.path.islink(os.path.join(scriptsfolder, args.release)):
+            currentpath = os.getcwd()
+            os.chdir(scriptsfolder)
+            # Symlink if it doesn't exist
+            os.symlink("gutsy", args.release)
+            os.chdir(currentpath)
+            print("\nNOTE: symlink for {0} created at {1}.\n".format(args.release, scriptsfolder))
 # Bootstrap the chroot environment.
 BOOTSTRAPSCRIPT = ""
 if "arm" in args.architecture:
@@ -101,7 +114,7 @@ else:
     BOOTSTRAPSCRIPT += """
 debootstrap --no-check-gpg --arch {DEBARCH} {DISTROCHOICE} {INSTALLPATH} {URL}
 """.format(DEBARCH=args.architecture, DISTROCHOICE=args.release, INSTALLPATH=absinstallpath, URL=osurl)
-subprocess.run(BOOTSTRAPSCRIPT, shell=True)
+subprocess.run(BOOTSTRAPSCRIPT, shell=True, check=True)
 
 # Create and run setup script.
 SETUPSCRIPT = """#!/bin/bash

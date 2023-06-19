@@ -116,7 +116,7 @@ def vm_start(vmname: str):
         logging.info("Starting VM %s", vmname)
         subprocess.run("virsh --connect qemu:///system start {0}".format(vmname), shell=True, check=True)
         time.sleep(5)
-def vm_shutdown(vmname: str, timeout_minutes: int = 5):
+def vm_shutdown(vmname: str, timeout_seconds: int = 30):
     """Shutdown the VM. Timeout in minutes."""
     logging.info("Shutting down VM %s", vmname)
     vm_is_on = vm_check_onoff(vmname=vmname)
@@ -127,12 +127,12 @@ def vm_shutdown(vmname: str, timeout_minutes: int = 5):
         current_time_saved = datetime.datetime.now()
         current_time_diff = 0
         # Check if VM is shutdown every 5 seconds.
-        while vm_is_on and current_time_diff < timeout_minutes:
+        while vm_is_on and current_time_diff < timeout_seconds:
             time.sleep(5)
             vm_is_on = vm_check_onoff(vmname=vmname)
-            current_time_diff = (datetime.datetime.now() - current_time_saved).total_seconds() / 60
+            current_time_diff = (datetime.datetime.now() - current_time_saved).total_seconds()
         # If after timeout is exceeded, force off the VM.
-        if vm_is_on and current_time_diff >= timeout_minutes:
+        if vm_is_on and current_time_diff >= timeout_seconds:
             logging.debug("Force Shutting down VM %s", vmname)
             subprocess.run("virsh --connect qemu:///system destroy {0}".format(vmname), shell=True, check=True, stdout=subprocess.DEVNULL)
 def vm_cleanup(vmname: str, img_path: str):
@@ -251,9 +251,9 @@ if __name__ == '__main__':
         if args.debversion is not None:
             debversion = args.debversion
         else:
-            debversion = "jammy"
+            debversion = "lunar"
         # VM commands
-        vmbootstrap_cmd = 'cd ~ && export LANG=en_US.UTF-8 && /opt/CustomScripts/ZSlimDrive.py -n -g && /opt/CustomScripts/BDebian.py -n -z -t ubuntu -r {debversion} -g 3 -i /dev/vda2 -c "{hostname}" -u {username} -q "{password}" -f "{fullname}" /mnt && echo "PermitRootLogin yes" >> /mnt/etc/ssh/sshd_config && poweroff'.format(hostname=vm_name, username=args.vmuser, password=args.vmpass, fullname=args.fullname, debversion=debversion)
+        vmbootstrap_cmd = 'cd ~ && export LANG=en_US.UTF-8 && /opt/CustomScripts/ZSlimDrive.py -n -g && /opt/CustomScripts/BDebian.py -n -z -t ubuntu -r {debversion} -g 3 -i /dev/vda2 -c "{hostname}" -u {username} -q "{password}" -f "{fullname}" --forcelink /mnt && echo "PermitRootLogin yes" >> /mnt/etc/ssh/sshd_config && poweroff'.format(hostname=vm_name, username=args.vmuser, password=args.vmpass, fullname=args.fullname, debversion=debversion)
         vmprovision_cmd = """mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{vmuser}/.ssh; echo '{sshkey}' > ~{vmuser}/.ssh/authorized_keys; chown {vmuser}:users -R ~{vmuser}; rm -f /etc/resolv.conf ; echo -e "nameserver 1.0.0.1\\nnameserver 1.1.1.1\\nnameserver 2606:4700:4700::1111\\nnameserver 2606:4700:4700::1001" > /etc/resolv.conf; /opt/CustomScripts/MUbuntu.py -d {desktop}""".format(vmuser=args.vmuser, sshkey=sshkey, desktop=args.desktopenv)
         kvm_variant = "ubuntu22.04"
     if args.ostype == 4:
