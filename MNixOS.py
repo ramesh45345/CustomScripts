@@ -4,14 +4,12 @@
 # Python includes.
 import argparse
 import os
-import shutil
 import subprocess
-import sys
 # Custom includes
 import CFunc
 
 # Folder of this script
-SCRIPTDIR = sys.path[0]
+SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))
 
 CFunc.is_root(checkstate=True)
 

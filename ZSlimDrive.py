@@ -12,7 +12,7 @@ import time
 import CFunc
 
 # Globals
-SCRIPTDIR = sys.path[0]
+SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))
 
 # Get arguments
 parser = argparse.ArgumentParser(description='Automatically create partition scheme for VMs.')

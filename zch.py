@@ -5,13 +5,12 @@
 import argparse
 import os
 import shutil
-import sys
 import subprocess
 # Custom includes
 import CFunc
 
 # Folder of this script
-SCRIPTDIR = sys.path[0]
+SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))
 
 ### Functions ###
 def ChrootMountPaths(RootPath: str):

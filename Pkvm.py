@@ -22,7 +22,7 @@ import xml.etree.ElementTree as ET
 import CFunc
 
 # Folder of this script
-SCRIPTDIR = sys.path[0]
+SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))
 
 
 ### Functions ###

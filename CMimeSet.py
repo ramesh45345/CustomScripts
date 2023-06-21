@@ -13,7 +13,7 @@ import sys
 import subprocess
 
 # Folder of this script
-SCRIPTDIR = sys.path[0]
+SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))
 
 # Global variables
 types_archive = "application/x-7z-compressed,application/x-xz-compressed-tar,application/zip,application/x-compressed-tar,application/x-bzip-compressed-tar,application/x-tar,application/x-xz"

@@ -17,7 +17,7 @@ import stat
 import CFunc
 
 # Folder of this script
-SCRIPTDIR = sys.path[0]
+SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))
 
 # Get arguments
 parser = argparse.ArgumentParser(description='Install Debian/Ubuntu into a folder/chroot.')

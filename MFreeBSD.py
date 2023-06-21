@@ -7,7 +7,6 @@ from datetime import datetime
 import os
 import shutil
 import subprocess
-import sys
 # Custom includes
 import CFunc
 import CFuncExt
@@ -15,7 +14,7 @@ import CFuncExt
 print("Running {0}".format(__file__))
 
 # Folder of this script
-SCRIPTDIR = sys.path[0]
+SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))
 
 # Get arguments
 parser = argparse.ArgumentParser(description='Install FreeBSD Software.')

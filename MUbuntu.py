@@ -13,7 +13,7 @@ import CFuncExt
 import MDebian
 
 # Folder of this script
-SCRIPTDIR = sys.path[0]
+SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))
 
 # Exit if not root.
 CFunc.is_root(True)

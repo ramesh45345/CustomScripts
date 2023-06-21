@@ -3,21 +3,18 @@
 
 # Python includes.
 import argparse
-import fileinput
 import os
 import shutil
 import subprocess
-import sys
 import time
 # Custom includes
 import CFunc
 import CFuncExt
-import CNixRootSetup
 
 print("Running {0}".format(__file__))
 
 # Folder of this script
-SCRIPTDIR = sys.path[0]
+SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))
 
 
 ### Functions ###

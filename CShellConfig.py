@@ -5,7 +5,6 @@
 import argparse
 import os
 import stat
-import sys
 import subprocess
 import shutil
 import tempfile
@@ -15,7 +14,7 @@ import CFunc
 print("Running {0}".format(__file__))
 
 # Folder of this script
-SCRIPTDIR = sys.path[0]
+SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))
 
 # Get arguments
 parser = argparse.ArgumentParser(description='Configure enhancements for shells.')

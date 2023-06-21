@@ -8,11 +8,10 @@ import sys
 import subprocess
 import stat
 # Custom Includes
-import CFunc
 import zch
 
 # Folder of this script
-SCRIPTDIR = sys.path[0]
+SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))
 
 ### Functions ###
 def pacman_install_chroot(chroot_folder: str, packages: str):

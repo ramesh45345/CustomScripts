@@ -4,12 +4,11 @@
 # Python includes.
 import shutil
 import subprocess
-import sys
 
 print("Running {0}".format(__file__))
 
 # Folder of this script
-SCRIPTDIR = sys.path[0]
+SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))
 
 ### Functions ###
 def subpout(cmd):

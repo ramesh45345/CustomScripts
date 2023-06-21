@@ -6,13 +6,12 @@ import argparse
 import fileinput
 import os
 import subprocess
-import sys
 import tempfile
 # Custom includes
 import CFunc
 
 # Folder of this script
-SCRIPTDIR = sys.path[0]
+SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))
 currentusername = os.getenv("USER")
 homepath = CFunc.getnormaluser(currentusername)[2]
 
