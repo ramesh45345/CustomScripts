@@ -193,6 +193,25 @@ for idx in range(1, 6):
         # Keyboard bindings
         kb_data = [
             {
+                "key": "ctrl+shift+v",
+                "command": "markdown.showPreviewToSide"
+            },
+            {
+                "key": "ctrl+k v",
+                "command": "-markdown.showPreviewToSide",
+                "when": "!notebookEditorFocused && editorLangId == 'markdown'"
+            },
+            {
+                "key": "ctrl+k v",
+                "command": "markdown.showPreview",
+                "when": "!notebookEditorFocused && editorLangId == 'markdown'"
+            },
+            {
+                "key": "ctrl+shift+v",
+                "command": "-markdown.showPreview",
+                "when": "!notebookEditorFocused && editorLangId == 'markdown'"
+            },
+            {
                 "key": "ctrl+shift+b",
                 "command": "dendron.togglePreview",
                 "when": "dendron:pluginActive"
