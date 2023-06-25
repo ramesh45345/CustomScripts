@@ -392,6 +392,40 @@ elif type rpm-ostree &> /dev/null; then
         echo "Updating system."
         $SUDOCMD rpm-ostree upgrade
     }
+elif type zypper &> /dev/null; then
+    function ins () {
+        echo "Installing $@."
+        $SUDOCMD zypper install --no-recommends $@
+    }
+    function inr () {
+        echo "Installing $@ with recommends."
+        $SUDOCMD zypper install $@
+    }
+    function iny () {
+        echo "Installing $@."
+        $SUDOCMD zypper install -yl $@
+    }
+    function rmv () {
+        echo "Removing $@."
+        $SUDOCMD zypper remove -u $@
+    }
+    function se () {
+        echo "Searching for $@."
+        $SUDOCMD zypper search "$@"
+        $SUDOCMD zypper info "$@"
+    }
+    function cln () {
+        echo "No clean yet."
+    }
+    function up () {
+        echo "Updating system."
+        $SUDOCMD zypper up -yl --no-recommends
+    }
+    function dup () {
+        echo "Dist-upgrading system."
+        $SUDOCMD zypper dup --no-recommends
+        flatpak_update
+    }
 # NixOS package manager only.
 elif type nix &> /dev/null && ! [[ "$(which nix)" == *"$USER"* ]]; then
     function se () {
@@ -1040,6 +1074,41 @@ else if type -q rpm-ostree
     function up
         echo "Updating system."
         sudo rpm-ostree upgrade
+    end
+else if type -q zypper
+    function ins
+        echo "Installing $argv."
+        sudo zypper install --no-recommends $argv
+    end
+    function inr
+        echo "Installing $argv with recommends."
+        sudo zypper install $argv
+    end
+    function iny
+        echo "Installing $argv."
+        sudo zypper install -yl $argv
+    end
+    function rmv
+        echo "Removing $argv."
+        sudo zypper remove -u $argv
+    end
+    function se
+        echo "Searching for $argv."
+        sudo zypper search $argv
+        sudo zypper info $argv
+    end
+    function cln
+        echo "No clean yet."
+    end
+    function up
+        echo "Updating system."
+        sudo zypper up -yl --no-recommends
+        flatpak_update
+    end
+    function dup
+        echo "Dist-upgrading system."
+        sudo zypper dup --no-recommends
+        flatpak_update
     end
 # NixOS package manager only.
 else if type -q nix; and not string match -qr $USER (which nix);

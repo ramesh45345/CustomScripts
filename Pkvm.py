@@ -403,6 +403,15 @@ if __name__ == '__main__':
     if args.ostype == 55:
         windows_key = "VDYBN-27WPP-V4HQT-9VMD4-VMK7H"
         vmname = "Packer-Windows2022-{0}".format(hvname)
+    if args.ostype == 60:
+        vmname = "Packer-OpenSuseTW-{0}".format(hvname)
+        vboxosid = "OpenSUSE_64"
+        vmwareid = "ubuntu-64"
+        vmprovisionscript = "MOpensuse.py"
+        vmprovision_defopts = "-d {0} -a".format(args.desktopenv)
+        kvm_os = "linux"
+        kvm_variant = "opensusetumbleweed"
+        isourl = "http://download.opensuse.org/tumbleweed/iso/openSUSE-Tumbleweed-NET-x86_64-Current.iso"
 
     # Override provision opts if provided.
     if args.vmprovision is None:
@@ -730,6 +739,10 @@ if __name__ == '__main__':
     if 50 <= args.ostype <= 59 and qemu_virtio_diskpath is not None:
         # Insert the virtio driver disk
         xml_insertqemudisk(os.path.join(tempunattendfolder, "autounattend.xml"))
+    if 60 <= args.ostype <= 61:
+        data['builders'][0]["boot_command"] = ["<wait><down><wait><f4><wait><esc><wait>autoyast2=http://{{ .HTTPIP }}:{{ .HTTPPort }}/opensuse.cfg textmode=1<enter>"]
+        data['provisioners'][0]["type"] = "shell"
+        data['provisioners'][0]["inline"] = "mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{vmuser}/.ssh; echo '{sshkey}' > ~{vmuser}/.ssh/authorized_keys; chown {vmuser}:users -R ~{vmuser}; while ! zypper install -yl --no-recommends git; do sleep 5; done; git clone https://github.com/ramesh45345/CustomScripts /opt/CustomScripts; /opt/CustomScripts/{vmprovisionscript} {vmprovision_opts}".format(vmprovisionscript=vmprovisionscript, vmprovision_opts=vmprovision_opts, sshkey=sshkey, vmuser=args.vmuser)
 
     # Write packer json file.
     with open(os.path.join(packer_temp_folder, 'file.json'), 'w') as file_json_wr:

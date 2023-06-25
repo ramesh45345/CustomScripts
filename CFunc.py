@@ -559,6 +559,11 @@ def pacman_invoke(options: str):
 def pacman_install(packages: str):
     """Install packages with pacman"""
     pacman_invoke("-S --needed {0}".format(packages))
+# Zypper
+def zpinstall(zpapps):
+    """Install application(s) using zypper"""
+    print("\nInstalling {0} using zypper.".format(zpapps))
+    subprocess.run("zypper in -yl {0}".format(zpapps), shell=True)
 # Flatpak
 def flatpak_addremote(remotename, remoteurl):
     """Add a remote to flatpak."""
