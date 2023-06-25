@@ -265,7 +265,7 @@ if shutil.which("gnome-session") or shutil.which("gnome-shell"):
     # Check current variable for gnome-system-monitor. If it doesn't exist, set the variable.
     gnome_desktop_read_list = subprocess.run("gsettings get org.gnome.shell favorite-apps", shell=True, check=False, stdout=subprocess.PIPE).stdout.decode().strip()
     if "gnome-system-monitor.desktop" not in gnome_desktop_read_list:
-        gnome_desktop_search_list = ["firefox.desktop", "UngoogledChromium.desktop", "chrome.desktop", 'evolution.desktop', 'nautilus.desktop', "tilix.desktop", 'virt-manager.desktop', 'gnome-system-monitor.desktop']
+        gnome_desktop_search_list = ["firefox.desktop", "brave-browser.desktop", "chrome.desktop", 'evolution.desktop', 'nautilus.desktop', "tilix.desktop", 'virt-manager.desktop', 'gnome-system-monitor.desktop']
         gnome_desktop_file_list = []
         for d in gnome_desktop_search_list:
             ds = CMimeSet.LocateDesktopFileName(d)
@@ -530,7 +530,7 @@ if shutil.which("kwriteconfig5") and shutil.which("plasma_session"):
     subprocess.run('kwriteconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --key "PreloadWeight" "42"'.format(toppanel_appletgroup_id), shell=True, check=False)
 
     plasma_desktop_string = ""
-    plasma_desktop_search_list = ["firefox.desktop", "UngoogledChromium.desktop", "chrome.desktop", 'thunderbird.desktop', 'kde.dolphin.desktop', "tilix.desktop", "org.kde.konsole.desktop", 'virt-manager.desktop', 'org.kde.plasma-systemmonitor.desktop', 'gnome-system-monitor.desktop']
+    plasma_desktop_search_list = ["firefox.desktop", "brave-browser.desktop", "chrome.desktop", 'thunderbird.desktop', 'kde.dolphin.desktop', "tilix.desktop", "org.kde.konsole.desktop", 'virt-manager.desktop', 'org.kde.plasma-systemmonitor.desktop', 'gnome-system-monitor.desktop']
     plasma_desktop_file_list = []
     for d in plasma_desktop_search_list:
         ds = CMimeSet.LocateDesktopFileName(d)
@@ -807,7 +807,7 @@ if shutil.which("xfconf-query") and shutil.which("xfce4-panel"):
     xfconf("xfce4-panel", "/plugins/plugin-14", "string", "xfce4-clipman-plugin")
     xfconf("xfce4-panel", "/plugins/plugin-15", "string", "pulseaudio")
     # Panel shortcuts
-    xfce_search_list = ["firefox.desktop", "UngoogledChromium.desktop", "chrome.desktop", 'thunderbird.desktop', 'thunar.desktop', "tilix.desktop", "xfce4-terminal.desktop", 'virt-manager.desktop', 'xfce4-taskmanager.desktop']
+    xfce_search_list = ["firefox.desktop", "brave-browser.desktop", "chrome.desktop", 'thunderbird.desktop', 'thunar.desktop', "tilix.desktop", "xfce4-terminal.desktop", 'virt-manager.desktop', 'xfce4-taskmanager.desktop']
     xfce_file_list = []
     xfce_panel_string = ""
     xfce_panel_id = 20

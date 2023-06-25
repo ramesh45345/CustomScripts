@@ -55,7 +55,7 @@ ninja -C build install
         subprocess.run("dnf remove -y gtk3-devel mate-panel-devel mate-menus-devel libnotify-devel", shell=True, check=False)
 
 # Configuration
-desktop_search_list = ["firefox.desktop", "UngoogledChromium.desktop", "chrome.desktop", "mate-terminal.desktop", "tilix.desktop", "caja-browser.desktop", "mate-system-monitor.desktop"]
+desktop_search_list = ["firefox.desktop", "brave-browser.desktop", "chrome.desktop", "mate-terminal.desktop", "tilix.desktop", "caja-browser.desktop", "mate-system-monitor.desktop"]
 desktop_file_list = []
 for d in desktop_search_list:
     ds = CMimeSet.LocateDesktopFile(d)
