@@ -1,0 +1,195 @@
+<?xml version="1.0"?>
+<!DOCTYPE profile>
+<profile xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http://www.suse.com/1.0/configns">
+  <general t="map">
+    <mode t="map">
+      <confirm t="boolean">false</confirm>
+      <final_halt t="boolean">false</final_halt>
+      <final_reboot t="boolean">true</final_reboot>
+      <halt t="boolean">false</halt>
+      <second_stage t="boolean">true</second_stage>
+    </mode>
+    <signature-handling t="map">
+      <accept_file_without_checksum t="boolean">false</accept_file_without_checksum>
+      <accept_non_trusted_gpg_key t="boolean">false</accept_non_trusted_gpg_key>
+      <accept_unknown_gpg_key t="boolean">false</accept_unknown_gpg_key>
+      <accept_unsigned_file t="boolean">false</accept_unsigned_file>
+      <accept_verification_failed t="boolean">false</accept_verification_failed>
+      <import_gpg_key t="boolean">false</import_gpg_key>
+    </signature-handling>
+  </general>
+  <host t="map">
+    <hosts t="list">
+      <hosts_entry t="map">
+        <host_address>127.0.0.1</host_address>
+        <names t="list">
+          <name>localhost</name>
+          <name>localhost.localdomain</name>
+        </names>
+      </hosts_entry>
+      <hosts_entry t="map">
+        <host_address>::1</host_address>
+        <names t="list">
+          <name>localhost ipv6-localhost ipv6-loopback</name>
+        </names>
+      </hosts_entry>
+      <hosts_entry t="map">
+        <host_address>fe00::0</host_address>
+        <names t="list">
+          <name>ipv6-localnet</name>
+        </names>
+      </hosts_entry>
+      <hosts_entry t="map">
+        <host_address>ff00::0</host_address>
+        <names t="list">
+          <name>ipv6-mcastprefix</name>
+        </names>
+      </hosts_entry>
+      <hosts_entry t="map">
+        <host_address>ff02::1</host_address>
+        <names t="list">
+          <name>ipv6-allnodes</name>
+        </names>
+      </hosts_entry>
+      <hosts_entry t="map">
+        <host_address>ff02::2</host_address>
+        <names t="list">
+          <name>ipv6-allrouters</name>
+        </names>
+      </hosts_entry>
+      <hosts_entry t="map">
+        <host_address>ff02::3</host_address>
+        <names t="list">
+          <name>ipv6-allhosts</name>
+        </names>
+      </hosts_entry>
+    </hosts>
+  </host>
+  <networking t="map">
+    <dns t="map">
+      <dhcp_hostname t="boolean">false</dhcp_hostname>
+      <hostname>INSERTHOSTNAMEHERE</hostname>
+      <resolv_conf_policy>auto</resolv_conf_policy>
+    </dns>
+    <ipv6 t="boolean">true</ipv6>
+    <keep_install_network t="boolean">true</keep_install_network>
+    <managed t="boolean">true</managed>
+  </networking>
+  <partitioning t="list">
+    <drive t="map">
+      <device>/dev/vda</device>
+      <disklabel>gpt</disklabel>
+      <enable_snapshots t="boolean">false</enable_snapshots>
+      <initialize t="boolean">true</initialize>
+      <type t="symbol">CT_DISK</type>
+      <use>all</use>
+    </drive>
+  </partitioning>
+  <scripts t="map">
+    <post-scripts t="list">
+      <script t="map">
+        <debug t="boolean">true</debug>
+        <feedback t="boolean">false</feedback>
+        <feedback_type/>
+        <filename>postinst.sh</filename>
+        <interpreter>shell</interpreter>
+        <location/>
+        <notification/>
+        <param-list t="list"/>
+        <rerun t="boolean">false</rerun>
+        <source>mkdir -m 700 -p /root/.ssh
+echo 'INSERTSSHKEYHERE' &gt; /root/.ssh/authorized_keys
+sed -i 's/PermitRootLogin.*/PermitRootLogin yes/g' /etc/ssh/sshd_config
+sed -i '/^#PermitRootLogin.*/s/^#//g' /etc/ssh/sshd_config</source>
+      </script>
+    </post-scripts>
+  </scripts>
+  <security t="map">
+    <console_shutdown>reboot</console_shutdown>
+    <cracklib_dict_path>/usr/lib/cracklib_dict</cracklib_dict_path>
+    <disable_restart_on_update>no</disable_restart_on_update>
+    <disable_stop_on_removal>no</disable_stop_on_removal>
+    <displaymanager_remote_access>no</displaymanager_remote_access>
+    <displaymanager_root_login_remote>no</displaymanager_root_login_remote>
+    <displaymanager_xserver_tcp_port_6000_open>no</displaymanager_xserver_tcp_port_6000_open>
+    <extra_services>no</extra_services>
+    <fail_delay>3</fail_delay>
+    <gid_max>60000</gid_max>
+    <gid_min>1000</gid_min>
+    <hibernate_system>active_console</hibernate_system>
+    <kernel.sysrq>0</kernel.sysrq>
+    <mandatory_services>yes</mandatory_services>
+    <net.ipv4.ip_forward>0</net.ipv4.ip_forward>
+    <net.ipv4.tcp_syncookies>1</net.ipv4.tcp_syncookies>
+    <net.ipv6.conf.all.forwarding>0</net.ipv6.conf.all.forwarding>
+    <pass_max_days>99999</pass_max_days>
+    <pass_min_days>0</pass_min_days>
+    <pass_min_len>5</pass_min_len>
+    <pass_warn_age>7</pass_warn_age>
+    <passwd_encryption>sha512</passwd_encryption>
+    <passwd_remember_history>0</passwd_remember_history>
+    <passwd_use_pwquality>yes</passwd_use_pwquality>
+    <permission_security>secure</permission_security>
+    <run_updatedb_as>nobody</run_updatedb_as>
+    <smtpd_listen_remote>no</smtpd_listen_remote>
+    <sys_gid_max>499</sys_gid_max>
+    <sys_gid_min>100</sys_gid_min>
+    <sys_uid_max>499</sys_uid_max>
+    <sys_uid_min>100</sys_uid_min>
+    <syslog_on_no_error>yes</syslog_on_no_error>
+    <uid_max>60000</uid_max>
+    <uid_min>500</uid_min>
+    <useradd_cmd>/usr/sbin/useradd.local</useradd_cmd>
+    <userdel_postcmd>/usr/sbin/userdel-post.local</userdel_postcmd>
+    <userdel_precmd>/usr/sbin/userdel-pre.local</userdel_precmd>
+  </security>
+  <software t="map">
+    <install_recommended t="boolean">true</install_recommended>
+    <instsource/>
+    <patterns t="list">
+      <pattern>base</pattern>
+      <pattern>enhanced_base</pattern>
+      <pattern>x86_64_v3</pattern>
+    </patterns>
+    <products t="list">
+      <product>openSUSE</product>
+    </products>
+  </software>
+  <ssh_import t="map">
+    <copy_config t="boolean">false</copy_config>
+    <import t="boolean">false</import>
+  </ssh_import>
+  <timezone t="map">
+    <timezone>America/New_York</timezone>
+  </timezone>
+  <user_defaults t="map">
+    <expire/>
+    <group>100</group>
+    <home>/home</home>
+    <inactive>-1</inactive>
+    <shell>/bin/bash</shell>
+    <umask>022</umask>
+  </user_defaults>
+  <users t="list">
+    <user t="map">
+      <authorized_keys t="list"/>
+      <encrypted t="boolean">true</encrypted>
+      <fullname/>
+      <gid>100</gid>
+      <home>/home/INSERTUSERHERE</home>
+      <home_btrfs_subvolume t="boolean">false</home_btrfs_subvolume>
+      <password_settings t="map">
+        <expire/>
+        <flag/>
+        <inact>-1</inact>
+        <max>99999</max>
+        <min>0</min>
+        <warn>7</warn>
+      </password_settings>
+      <shell>/bin/bash</shell>
+      <uid>1000</uid>
+      <user_password>INSERTHASHEDPASSWORDHERE</user_password>
+      <username>INSERTUSERHERE</username>
+    </user>
+  </users>
+</profile>
