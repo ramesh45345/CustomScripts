@@ -159,6 +159,11 @@ echo "firmware-ivtv firmware-ivtv/license/accepted boolean true" | debconf-set-s
     # Container stuff
     CFunc.aptinstall("podman")
 
+    # Install nix
+    CFuncExt.nix_standalone_install(USERNAMEVAR, """
+    # Media tools
+    mpv""")
+
     # Sudoers changes
     CFuncExt.SudoersEnvSettings()
     # Edit sudoers to add apt.
