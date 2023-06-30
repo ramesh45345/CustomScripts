@@ -54,15 +54,7 @@ if os.path.isfile("/etc/lightdm/lightdm.conf"):
 
 
 ### GDM Section ###
-if shutil.which("gdm") or shutil.which("gdm3"):
-    if shutil.which("gdm3"):
-        GDMPATH = "/var/lib/gdm3"
-        GDMETCPATH = "/etc/gdm3"
-    elif shutil.which("gdm"):
-        GDMPATH = "/var/lib/gdm"
-        GDMETCPATH = "/etc/gdm"
-    GDMUID = CFunc.subpout("id -u gdm")
-    GDMGID = CFunc.subpout("id -g gdm")
+if shutil.which("gdm") or shutil.which("gdm3") or shutil.which("/usr/sbin/gdm3"):
     # Enable gdm autologin for virtual machines.
     if vmstatus or args.autologin is True:
         print("Enabling gdm autologin for {0}.".format(USERNAMEVAR))
@@ -75,18 +67,6 @@ if shutil.which("gdm") or shutil.which("gdm3"):
         # Can check options with following command:
         # dbus-send --system --dest=org.freedesktop.Accounts --print-reply --type=method_call $USER_PATH org.freedesktop.DBus.Introspectable.Introspect
         # qdbus --system org.freedesktop.Accounts $USER_PATH org.freedesktop.Accounts.User.AutomaticLogin
-
-    # Pulseaudio gdm fix
-    # http://www.debuntu.org/how-to-disable-pulseaudio-and-sound-in-gdm/
-    # https://bbs.archlinux.org/viewtopic.php?id=202915
-    if os.path.isfile("/etc/pulse/default.pa"):
-        print("Executing gdm pulseaudio fix.")
-        PulsePath = os.path.join(GDMPATH, ".config", "pulse")
-        os.makedirs(PulsePath, exist_ok=True)
-
-        shutil.copy2("/etc/pulse/default.pa", os.path.join(PulsePath, "default.pa"))
-        subprocess.run("""sed -i '/^load-module .*/s/^/#/g' '{0}'""".format(os.path.join(PulsePath, "default.pa")), shell=True)
-        subprocess.run('chown -R {0}:{1} "{2}/"'.format(GDMUID, GDMGID, GDMPATH), shell=True)
 
 
 ### SDDM Section ###

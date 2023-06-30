@@ -219,7 +219,7 @@ iface lo net loopback
         print("\n Installing gnome desktop")
         CFunc.aptinstall("task-gnome-desktop")
         CFunc.aptinstall("gnome-clocks")
-        CFunc.aptinstall("gnome-shell-extensions gnome-shell-extensions-gpaste")
+        CFunc.aptinstall("gnome-shell-extensions gnome-shell-extension-gpaste")
         # Install gs installer script.
         gs_installer = CFunc.downloadfile("https://raw.githubusercontent.com/brunelli/gnome-shell-extension-installer/master/gnome-shell-extension-installer", os.path.join(os.sep, "usr", "local", "bin"), overwrite=True)
         os.chmod(gs_installer[0], 0o777)
