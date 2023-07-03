@@ -185,7 +185,8 @@ def getvmstate():
     """Determine what Virtual Machine guest is running under."""
     # Default state.
     vmstatus = None
-    if os_type() == "Linux":
+    # /sys/devices/virtual/dmi does not exist on Raspberry Pi 4.
+    if os_type() == "Linux" and os.path.isdir("/sys/devices/virtual/dmi"):
         # Detect QEMU
         with open('/sys/devices/virtual/dmi/id/sys_vendor', 'r') as VAR:
             if bool("QEMU" in VAR.read().strip()):
