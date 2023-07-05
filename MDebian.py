@@ -134,7 +134,7 @@ Acquire::ftp::Timeout "5";''')
     CFunc.aptdistupg()
 
     # Cli Software
-    CFunc.aptinstall("ssh tmux zsh fish btrfs-progs f2fs-tools xfsprogs dmraid mdadm nano p7zip-full p7zip-rar unrar curl wget rsync less iotop sshfs sudo python-is-python3")
+    CFunc.aptinstall("ssh tmux zsh fish btrfs-progs f2fs-tools xfsprogs dmraid mdadm nano p7zip-full p7zip-rar unrar curl wget rsync less iotop sshfs sudo python-is-python3 nala")
     # Firmware
     CFunc.aptinstall("firmware-linux")
     subprocess.run("""echo "firmware-ipw2x00 firmware-ipw2x00/license/accepted boolean true" | debconf-set-selections
@@ -172,6 +172,7 @@ echo "firmware-ivtv firmware-ivtv/license/accepted boolean true" | debconf-set-s
     CFunc.AddLineToSudoersFile(sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("apt")))
     CFunc.AddLineToSudoersFile(sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("apt-get")))
     CFunc.AddLineToSudoersFile(sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("podman")))
+    CFunc.AddLineToSudoersFile(sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("nala")))
 
     # General GUI software
     if args.nogui is False:
