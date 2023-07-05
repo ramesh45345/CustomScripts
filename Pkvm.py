@@ -177,9 +177,6 @@ def signal_handler(sig, frame):
 if __name__ == '__main__':
     print("Running {0}".format(__file__))
 
-    # Exit if root.
-    CFunc.is_root(False)
-
     # Get system and user information.
     USERHOME = os.path.expanduser("~")
     CPUCORES = multiprocessing.cpu_count()
@@ -206,9 +203,16 @@ if __name__ == '__main__':
     parser.add_argument("--vmuser", help="VM Username", default="user")
     parser.add_argument("--vmpass", help="VM Password", default="asdf")
     parser.add_argument("--sshkey", help="SSH authorizaiton key")
+    parser.add_argument("--root", help='Allow running script as root.', action="store_true")
 
     # Save arguments.
     args = parser.parse_args()
+
+    # Exit if root.
+    if not args.root:
+        CFunc.is_root(False)
+    elif args.root and CFunc.is_root(checkstate=False, state_exit=False):
+        print("WARNING: Running script as root. Proceeding.")
 
     # Variables most likely to change.
     vmpath = os.path.abspath(args.vmpath)
