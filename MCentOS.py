@@ -100,7 +100,7 @@ if not args.nogui:
 # Desktop Environments
 if args.desktop == "gnome":
     # Workstation
-    CFunc.dnfinstall("@workstation --skip-broken")
+    CFunc.dnfinstall('@workstation --disablerepo="rpmfusion*"')
     # Misc tools
     CFunc.dnfinstall("dconf-editor chrome-gnome-shell")
     # Gnome Stuff
