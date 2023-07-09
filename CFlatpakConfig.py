@@ -36,7 +36,6 @@ if args.configure_remotes is False:
     # Flatpak apps
     CFunc.flatpak_install("flathub", "com.calibre_ebook.calibre")
     CFunc.flatpak_install("flathub", "com.github.tchx84.Flatseal")
-    CFunc.flatpak_install("flathub", "net.cozic.joplin_desktop")
     CFunc.flatpak_install("flathub", "org.mozilla.Thunderbird")
     CFunc.flatpak_install("flathub", "com.borgbase.Vorta")
     CFunc.flatpak_install("flathub", "org.libreoffice.LibreOffice")
