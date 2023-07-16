@@ -927,3 +927,90 @@ for ff_path in firefox_profiles_paths:
                             firefox_modify_settings("privacy.clearOnShutdown.downloads", "false", prefsjs_file)
                             firefox_modify_settings("privacy.sanitize.sanitizeOnShutdown", "false", prefsjs_file)
                             firefox_modify_settings("security.OCSP.require", "false", prefsjs_file)
+                        # user.js config. Only write the config if prefs.js exists.
+                        # https://github.com/arkenfox/user.js/wiki/2.1-User.js
+                        # https://github.com/yokoffing/Betterfox/blob/main/user.js
+                        userjs_file = os.path.join(firefox_profilefolder, "user.js")
+                        userjs_text = """
+/** GFX ***/
+user_pref("gfx.webrender.all", true);
+user_pref("gfx.webrender.precache-shaders", true);
+user_pref("gfx.webrender.compositor", true);
+user_pref("layers.gpu-process.enabled", true);
+user_pref("media.hardware-video-decoding.enabled", true);
+user_pref("gfx.canvas.accelerated", true);
+/** HTTPS-FIRST MODE ***/
+user_pref("dom.security.https_first", true);
+/** MOZILLA ***/
+user_pref("browser.tabs.firefox-view", false);
+/** TELEMETRY ***/
+user_pref("toolkit.telemetry.unified", false);
+user_pref("toolkit.telemetry.enabled", false);
+user_pref("toolkit.telemetry.server", "data:,");
+user_pref("toolkit.telemetry.archive.enabled", false);
+user_pref("toolkit.telemetry.newProfilePing.enabled", false);
+user_pref("toolkit.telemetry.shutdownPingSender.enabled", false);
+user_pref("toolkit.telemetry.updatePing.enabled", false);
+user_pref("toolkit.telemetry.bhrPing.enabled", false);
+user_pref("toolkit.telemetry.firstShutdownPing.enabled", false);
+user_pref("toolkit.telemetry.coverage.opt-out", true);
+user_pref("toolkit.coverage.opt-out", true);
+user_pref("datareporting.healthreport.uploadEnabled", false);
+user_pref("datareporting.policy.dataSubmissionEnabled", false);
+user_pref("app.shield.optoutstudies.enabled", false);
+user_pref("breakpad.reportURL", "");
+user_pref("browser.tabs.crashReporting.sendReport", false);
+user_pref("browser.crashReports.unsubmittedCheck.autoSubmit2", false);
+user_pref("app.normandy.enabled", false);
+user_pref("app.normandy.api_url", "");
+user_pref("browser.ping-centre.telemetry", false);
+user_pref("browser.newtabpage.activity-stream.feeds.telemetry", false);
+user_pref("browser.newtabpage.activity-stream.telemetry", false);
+/** MOZILLA UI ***/
+user_pref("browser.preferences.moreFromMozilla", false);
+user_pref("browser.aboutwelcome.enabled", false);
+/** NEW TAB PAGE ***/
+user_pref("browser.newtabpage.activity-stream.feeds.topsites", false);
+user_pref("browser.newtabpage.activity-stream.feeds.section.topstories", false);
+user_pref("browser.newtabpage.activity-stream.feeds.recommendationprovider", false);
+/*** POCKET ***/
+user_pref("extensions.pocket.enabled", false);
+/** DOWNLOADS ***/
+user_pref("browser.download.useDownloadDir", false);
+
+user_pref("dom.webnotifications.enabled", false);
+user_pref("general.autoScroll", true);
+user_pref("browser.tabs.drawInTitlebar", true);
+user_pref("browser.aboutConfig.showWarning", false);
+user_pref("browser.startup.page", 3)
+user_pref("browser.newtabpage.activity-stream.showSponsored", false);
+user_pref("browser.newtabpage.activity-stream.showSponsoredTopSites", false);
+// Autoplay (5 blocks audio and video for all sites by default)
+user_pref("media.autoplay.default", 5);
+// Enable vaapi
+user_pref("media.ffmpeg.vaapi.enabled", true);
+"""
+                        # user.js for librewolf
+                        if "librewolf" in ff_path:
+                            userjs_text += """
+/** Librewolf ***/
+user_pref("privacy.clearOnShutdown.cache", false);
+user_pref("privacy.clearOnShutdown.cookies", false);
+user_pref("privacy.clearOnShutdown.download", false);
+user_pref("privacy.clearOnShutdown.formdata", false);
+user_pref("privacy.clearOnShutdown.history", false);
+user_pref("privacy.clearOnShutdown.offlineApps", false);
+user_pref("privacy.clearOnShutdown.openWindows", false);
+user_pref("privacy.clearOnShutdown.sessions", false);
+user_pref("privacy.clearOnShutdown.siteSettings", false);
+user_pref("privacy.sanitize.sanitizeOnShutdown", false);
+user_pref("identity.fxaccounts.enabled", true);
+user_pref("network.dns.disableIPv6", false);
+user_pref("privacy.resistFingerprinting.autoDeclineNoUserInputCanvasPrompts", false);
+user_pref("webgl.disabled", false);
+user_pref("security.OCSP.require", false);
+"""
+                        # Write the user.js file.
+                        print("Writing Firefox user preferences in {0}.".format(userjs_file))
+                        with open(userjs_file, 'w') as f:
+                            f.write(userjs_text)
