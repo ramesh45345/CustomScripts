@@ -62,7 +62,7 @@ def codeconfig_installext(vscode_cmd=list):
     ce_ins(vscode_cmd, "ms-azuretools.vscode-docker")
     ce_ins(vscode_cmd, "mikestead.dotenv")
     ce_ins(vscode_cmd, "timonwong.shellcheck")
-    ce_ins(vscode_cmd, "eamodio.gitlens")
+    ce_ins(vscode_cmd, "huizhou.githd")
     ce_ins(vscode_cmd, "donjayamanne.githistory")
     ce_ins(vscode_cmd, "vscode-icons-team.vscode-icons")
     ce_ins(vscode_cmd, "yzhang.markdown-all-in-one")
@@ -71,6 +71,7 @@ def codeconfig_installext(vscode_cmd=list):
     ce_ins(vscode_cmd, "dendron.dendron-paste-image")
     ce_ins(vscode_cmd, "bbenoist.Nix")
     ce_ins(vscode_cmd, "danielroedl.meld-diff")
+    ce_ins(vscode_cmd, "aaron-bond.better-comments")
 def codeconfig_writeconfiguration(json_data=dict, json_path=str, json_file: str = "settings.json"):
     """Write the config.json"""
     if os.path.isdir(json_path):
@@ -249,8 +250,6 @@ for idx in range(1, 6):
         data["workbench.iconTheme"] = "vscode-icons"
         data["workbench.colorTheme"] = "Visual Studio Dark"
         data["vsicons.dontShowNewVersionMessage"] = True
-        data["gitlens.showWelcomeOnInstall"] = False
-        data["gitlens.plusFeatures.enabled"] = False
         data["git.confirmSync"] = False
         data["git.autofetch"] = True
         data["[nix]"] = {"editor.tabSize": 2}
