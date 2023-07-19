@@ -250,6 +250,7 @@ for idx in range(1, 6):
         data["workbench.colorTheme"] = "Visual Studio Dark"
         data["vsicons.dontShowNewVersionMessage"] = True
         data["gitlens.showWelcomeOnInstall"] = False
+        data["gitlens.plusFeatures.enabled"] = False
         data["git.confirmSync"] = False
         data["git.autofetch"] = True
         data["[nix]"] = {"editor.tabSize": 2}
