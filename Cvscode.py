@@ -62,7 +62,7 @@ def codeconfig_installext(vscode_cmd=list):
     ce_ins(vscode_cmd, "ms-azuretools.vscode-docker")
     ce_ins(vscode_cmd, "mikestead.dotenv")
     ce_ins(vscode_cmd, "timonwong.shellcheck")
-    ce_ins(vscode_cmd, "huizhou.githd")
+    ce_ins(vscode_cmd, "eamodio.gitlens")
     ce_ins(vscode_cmd, "donjayamanne.githistory")
     ce_ins(vscode_cmd, "vscode-icons-team.vscode-icons")
     ce_ins(vscode_cmd, "yzhang.markdown-all-in-one")
@@ -255,6 +255,10 @@ for idx in range(1, 6):
         data["[nix]"] = {"editor.tabSize": 2}
         data["markdown.extension.preview.autoShowPreviewToSide"] = False
         data["pasteImage.path"] = "${currentFileDir}/assets/images"
+        data["gitlens.plusFeatures.enabled"] = False
+        data["gitlens.showWelcomeOnInstall"] = False
+        data["gitlens.showWhatsNewAfterUpgrades"] = False
+        data["gitlens.telemetry.enabled"] = False
         # Markdown lint config
         data["markdownlint.config"] = {
             "default": True,
