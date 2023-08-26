@@ -357,6 +357,19 @@ function Fcn-Customize {
   Add-MpPreference -ExclusionPath "$env:windir\AutoKMS"
 }
 
+function Fcn-debloat {
+    Set-Location "$CSRootPath"
+    $DebloatLocalPath = "$CSRootPath\Windows-Optimize-Debloat"
+    if (-Not (Test-Path "$DebloatLocalPath")) {
+      Start-Process -Wait "C:\Program Files\Git\bin\git.exe" -ArgumentList "clone","https://github.com/simeononsecurity/Windows-Optimize-Debloat.git"
+    }
+    Set-Location "$DebloatLocalPath"
+    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force
+    Get-ChildItem -Recurse *.ps1 | Unblock-File
+    powershell.exe -ExecutionPolicy Bypass -Command $DebloatLocalPath\sos-optimize-windows.ps1 -cleargpos:0 -installupdates:0 -diskcompression:0
+    Set-Location "$CSRootPath"
+}
+
 # Set system clock as UTC
 function Fcn-UTC {
   New-ItemProperty -Path Registry::HKLM\System\CurrentControlSet\Control\TimeZoneInformation -Name RealTimeIsUniversal -Value 1 -Force -ErrorAction SilentlyContinue | Out-Null
@@ -472,6 +485,7 @@ if (-Not $isDotSourced) {
   Fcn-oosu
   Fcn-OnedriveDisable
   Fcn-Customize
+  Fcn-debloat
   if ( $IsVM -eq $true ) {
     Fcn-DisableDefender
   }
