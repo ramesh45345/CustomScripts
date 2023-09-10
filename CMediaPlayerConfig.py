@@ -210,10 +210,10 @@ Alt+f script-binding quality_menu/audio_formats_toggle
     CFunc.downloadfile("https://raw.githubusercontent.com/christoph-heinrich/mpv-quality-menu/master/quality-menu.lua", os.path.join(userhome, ".config", "mpv", "scripts"))
     CFunc.downloadfile("https://raw.githubusercontent.com/christoph-heinrich/mpv-quality-menu/master/quality-menu.conf", os.path.join(userhome, ".config", "mpv", "script-opts"))
     # Sponsorblock
-    CFunc.downloadfile("https://raw.githubusercontent.com/po5/mpv_sponsorblock/master/sponsorblock.lua", os.path.join(userhome, ".config", "mpv", "scripts"))
+    CFunc.downloadfile("https://raw.githubusercontent.com/l-jared/mpv_sponsorblock/master/sponsorblock.lua", os.path.join(userhome, ".config", "mpv", "scripts"))
     os.makedirs(os.path.join(userhome, ".config", "mpv", "scripts", "sponsorblock_shared"), exist_ok=True)
-    CFunc.downloadfile("https://raw.githubusercontent.com/po5/mpv_sponsorblock/master/sponsorblock_shared/main.lua", os.path.join(userhome, ".config", "mpv", "scripts", "sponsorblock_shared"))
-    CFunc.downloadfile("https://raw.githubusercontent.com/po5/mpv_sponsorblock/master/sponsorblock_shared/sponsorblock.py", os.path.join(userhome, ".config", "mpv", "scripts", "sponsorblock_shared"))
+    CFunc.downloadfile("https://raw.githubusercontent.com/l-jared/mpv_sponsorblock/master/sponsorblock_shared/main.lua", os.path.join(userhome, ".config", "mpv", "scripts", "sponsorblock_shared"))
+    CFunc.downloadfile("https://raw.githubusercontent.com/l-jared/mpv_sponsorblock/master/sponsorblock_shared/sponsorblock.py", os.path.join(userhome, ".config", "mpv", "scripts", "sponsorblock_shared"))
 
 ### Calibre ###
 # Check for flatpak
