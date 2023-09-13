@@ -68,6 +68,10 @@ def install_homemanager():
                 line = line.replace(line, line + """
   news.display = "silent";
   manual.manpages.enable = false;
+  # https://github.com/nix-community/home-manager/issues/1439#issuecomment-1605851533
+  targets.genericLinux.enable = true;
+  xdg.mime.enable = true;
+  xdg.systemDirs.data = [ "${config.home.homeDirectory}/.nix-profile/share/applications" ];
 """)
             print(line, end='')
         CFunc.find_replace(homeman_dirpath, "home.packages = [", "home.packages = with pkgs; [", "home.nix")
