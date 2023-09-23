@@ -249,6 +249,7 @@ for idx in range(1, 6):
         data["telemetry.telemetryLevel"] = "error"
         data["workbench.iconTheme"] = "vscode-icons"
         data["workbench.colorTheme"] = "Visual Studio Dark"
+        data["window.commandCenter"] = False
         data["vsicons.dontShowNewVersionMessage"] = True
         data["git.confirmSync"] = False
         data["git.autofetch"] = True
