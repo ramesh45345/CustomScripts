@@ -7,6 +7,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 # Custom includes
 import CFunc
 import CFuncExt
@@ -52,6 +53,14 @@ Acquire::ftp::Timeout "5";''')
     # Enable rolling if requested.
     if rolling:
         CFunc.find_replace(os.path.join(os.sep, "etc", "apt"), debrelease, "devel", "sources.list")
+def pacstall_install():
+    """Setup pacstall."""
+    tempfolder = tempfile.gettempdir()
+    pacstall_script_file = CFunc.downloadfile("https://pacstall.dev/q/install", tempfolder)[0]
+    os.chmod(pacstall_script_file, 0o777)
+    # Remove the read line, so that the script installs unattended. Change this find/replace if the script changes.
+    CFunc.find_replace(tempfolder, "read -r reply <&0", "", os.path.basename(pacstall_script_file))
+    subprocess.run(pacstall_script_file, shell=True, check=True, executable=shutil.which("bash"))
 
 
 if __name__ == '__main__':
@@ -272,6 +281,9 @@ renderer: NetworkManager""")
     mpv
     ffmpeg
     yt-dlp""")
+
+    # Install pacstall
+    pacstall_install()
 
     # Disable mitigations
     CFuncExt.GrubEnvAdd(os.path.join(os.sep, "etc", "default", "grub"), "GRUB_CMDLINE_LINUX_DEFAULT", "mitigations=off")
