@@ -34,6 +34,18 @@ def kernel_liquorix():
     liquorix_script_file = CFunc.downloadfile("https://liquorix.net/install-liquorix.sh", tempfolder)[0]
     os.chmod(liquorix_script_file, 0o777)
     subprocess.run(liquorix_script_file, shell=True, check=True, executable=shutil.which("bash"))
+def mpr_install(normaluser: str):
+    """Install mpr and mist tool."""
+    # Install makedeb
+    subprocess.run("wget -qO - 'https://proget.makedeb.org/debian-feeds/makedeb.pub' | gpg --dearmor | sudo tee /usr/share/keyrings/makedeb-archive-keyring.gpg 1> /dev/null", shell=True, check=True)
+    subprocess.run("echo 'deb [signed-by=/usr/share/keyrings/makedeb-archive-keyring.gpg arch=all] https://proget.makedeb.org/ makedeb main' | sudo tee /etc/apt/sources.list.d/makedeb.list", shell=True, check=True)
+    CFunc.aptupdate()
+    CFunc.aptinstall("makedeb")
+    # Install mist
+    tempfolder = tempfile.gettempdir()
+    CFunc.gitclone("https://mpr.makedeb.org/mist-bin.git", os.path.join(tempfolder, "mist-bin"))
+    CFunc.chmod_recursive(os.path.join(tempfolder, "mist-bin"), 0o777)
+    CFunc.run_as_user_su(normaluser, "cd {0}; makedeb -si --no-confirm".format(os.path.join(tempfolder, "mist-bin")), error_on_fail=True)
 
 
 if __name__ == '__main__':

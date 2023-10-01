@@ -284,6 +284,8 @@ renderer: NetworkManager""")
 
     # Install pacstall
     pacstall_install()
+    # Install makedeb and mist
+    MDebian.mpr_install(USERNAMEVAR)
 
     # Disable mitigations
     CFuncExt.GrubEnvAdd(os.path.join(os.sep, "etc", "default", "grub"), "GRUB_CMDLINE_LINUX_DEFAULT", "mitigations=off")
