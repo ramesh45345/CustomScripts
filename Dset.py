@@ -983,7 +983,7 @@ user_pref("dom.webnotifications.enabled", false);
 user_pref("general.autoScroll", true);
 user_pref("browser.tabs.drawInTitlebar", true);
 user_pref("browser.aboutConfig.showWarning", false);
-user_pref("browser.startup.page", 3)
+user_pref("browser.startup.page", 3);
 user_pref("browser.newtabpage.activity-stream.showSponsored", false);
 user_pref("browser.newtabpage.activity-stream.showSponsoredTopSites", false);
 // Autoplay (5 blocks audio and video for all sites by default)
