@@ -50,11 +50,14 @@ def install_homemanager():
     channel_url = "https://github.com/nix-community/home-manager/archive/master.tar.gz"
     subprocess.run("nix-channel --add {0} home-manager".format(channel_url), shell=True, check=True)
     subprocess.run("nix-channel --update", shell=True, check=True)
-    # Set nix path if not on nixos
-    if not CFunc.is_nixos():
-        os.environ['NIX_PATH'] = "{0}/.nix-defexpr/channels:/nix/var/nix/profiles/per-user/{1}/channels".format(homepath, currentusername)
+    # Set nix path
+    customenv = os.environ
+    customnixpath = customenv.get("NIX_PATH", '')
+    if customnixpath:
+        customnixpath += ":"
+    customenv["NIX_PATH"] = customnixpath + "{0}/.nix-defexpr/channels:/nix/var/nix/profiles/per-user/{1}/channels".format(homepath, currentusername)
     # Install
-    subprocess.run("nix-shell '<home-manager>' -A install", shell=True, check=True)
+    subprocess.run("nix-shell '<home-manager>' -A install", shell=True, check=True, env=customenv)
 
     # home.nix
     homeman_dirpath = os.path.join(homepath, ".config", "home-manager")
