@@ -251,6 +251,7 @@ for idx in range(1, 6):
         data["workbench.colorTheme"] = "Visual Studio Dark"
         data["window.commandCenter"] = False
         data["vsicons.dontShowNewVersionMessage"] = True
+        data["update.showReleaseNotes"] = False
         data["git.confirmSync"] = False
         data["git.autofetch"] = True
         data["[nix]"] = {"editor.tabSize": 2}
