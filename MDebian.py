@@ -41,11 +41,14 @@ def mpr_install(normaluser: str):
     subprocess.run("echo 'deb [signed-by=/usr/share/keyrings/makedeb-archive-keyring.gpg arch=all] https://proget.makedeb.org/ makedeb main' | sudo tee /etc/apt/sources.list.d/makedeb.list", shell=True, check=True)
     CFunc.aptupdate()
     CFunc.aptinstall("makedeb")
-    # Install mist
-    tempfolder = tempfile.gettempdir()
-    CFunc.gitclone("https://mpr.makedeb.org/mist-bin.git", os.path.join(tempfolder, "mist-bin"))
-    CFunc.chmod_recursive(os.path.join(tempfolder, "mist-bin"), 0o777)
-    CFunc.run_as_user_su(normaluser, "cd {0}; makedeb -si --no-confirm".format(os.path.join(tempfolder, "mist-bin")), error_on_fail=True)
+    # # Install rustup (for mist)
+    # print("Installing rustup")
+    # subprocess.run("curl -sSf https://sh.rustup.rs | sh -s -- -y", shell=True, check=True)
+    # # Install mist
+    # tempfolder = tempfile.gettempdir()
+    # CFunc.gitclone("https://mpr.makedeb.org/mist.git", os.path.join(tempfolder, "mist"))
+    # CFunc.chmod_recursive(os.path.join(tempfolder, "mist"), 0o777)
+    # CFunc.run_as_user_su(normaluser, "cd {0}; makedeb -si -H 'MPR-Package: yes' --no-confirm".format(os.path.join(tempfolder, "mist")), error_on_fail=True)
 
 
 if __name__ == '__main__':
