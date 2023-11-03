@@ -61,6 +61,9 @@ def pacstall_install():
     # Remove the read line, so that the script installs unattended. Change this find/replace if the script changes.
     CFunc.find_replace(tempfolder, "read -r reply <&0", "", os.path.basename(pacstall_script_file))
     subprocess.run(pacstall_script_file, shell=True, check=True, executable=shutil.which("bash"))
+    # Cleanup
+    if os.path.isfile(pacstall_script_file):
+        os.remove(pacstall_script_file)
 
 
 if __name__ == '__main__':
