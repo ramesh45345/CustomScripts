@@ -40,6 +40,9 @@ def install_nix():
     setup_nix_envvars()
     # Upgrade nix
     subprocess.run("nix-channel --update; nix-env -iA nixpkgs.nix", shell=True, check=True)
+    # Cleanup
+    if os.path.isfile(nix_install_script):
+        os.remove(nix_install_script)
 def install_homemanager():
     """Install home-manager."""
     setup_nix_envvars()
