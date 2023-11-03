@@ -32,7 +32,7 @@ parser.add_argument("-t", "--type", help='OS Type (debian, ubuntu, etc)', defaul
 parser.add_argument("-r", "--release", help='Release Distribution', default="unstable")
 parser.add_argument("-a", "--architecture", help='Architecture (amd64, i386, armhf, arm64, etc)', default="amd64")
 parser.add_argument("-z", "--zch", help='Use zch instead of systemd-nspawn', action="store_true")
-parser.add_argument("--forcelink", help='Force symlink to be created for release. Not to be used unless debootstrap version is out of date. Example: No symlink exists for version "lunar" in ubuntu.', action="store_true")
+parser.add_argument("--forcelink", help='Force symlink to be created for release. Not to be used unless debootstrap version is out of date. Example: No symlink exists for version "mantic" in ubuntu.', action="store_true")
 parser.add_argument("installpath", help='Path of Installation')
 
 # Save arguments.
