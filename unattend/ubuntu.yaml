@@ -11,9 +11,9 @@ autoinstall:
         layout:
             name: direct
     identity:
-        hostname: INSERTHOSTNAMENAMEHERE
+        hostname: 'INSERTHOSTNAMENAMEHERE'
         username: INSERTUSERHERE
-        password: INSERTHASHEDPASSWORDHERE
+        password: 'INSERTHASHEDPASSWORDHERE'
         realname: INSERTFULLNAMEHERE
     ssh:
         install-server: yes

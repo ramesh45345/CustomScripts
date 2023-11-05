@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Create a virtual machine image using Packer"""
+"""
+Create a virtual machine image using Packer
+Qemu: https://github.com/hashicorp/packer-plugin-qemu/ , https://developer.hashicorp.com/packer/integrations/hashicorp/qemu/latest/components/builder/qemu
+Virtualbox: https://github.com/hashicorp/packer-plugin-virtualbox , https://developer.hashicorp.com/packer/integrations/hashicorp/virtualbox/latest/components/builder/iso
+Libvirt: https://github.com/thomasklein94/packer-plugin-libvirt , https://developer.hashicorp.com/packer/plugins/builders/libvirt
+"""
 
 # Python includes.
 import argparse
@@ -19,6 +24,7 @@ import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 # Custom includes
+import passlib
 import CFunc
 
 # Folder of this script
@@ -247,8 +253,13 @@ if __name__ == '__main__':
     # Determine VM hypervisor
     if args.vmtype == 1:
         hvname = "vbox"
+        packer_type = "virtualbox-iso"
     elif args.vmtype == 2:
         hvname = "kvm"
+        packer_type = "qemu"
+    elif args.vmtype == 3:
+        hvname = "virt"
+        packer_type = "libvirt"
 
     # Variables
     tpm_tempdir = None
@@ -498,14 +509,7 @@ if __name__ == '__main__':
     print("SSH Key is \"{0}\"".format(sshkey))
 
     # Generate hashed password
-    # https://serverfault.com/questions/330069/how-to-create-an-sha-512-hashed-password-for-shadow#330072
-
-    if CFunc.is_windows() is True:
-        from passlib import hash
-        sha512_password = hash.sha512_crypt.hash(args.vmpass, rounds=5000)
-    else:
-        import crypt
-        sha512_password = crypt.crypt(args.vmpass, crypt.mksalt(crypt.METHOD_SHA512))
+    sha512_password = passlib.hash.sha512_crypt.hash(args.vmpass, rounds=5000)
 
     # Copy unattend script folder
     if os.path.isdir(os.path.join(SCRIPTDIR, "unattend")):
@@ -533,172 +537,189 @@ if __name__ == '__main__':
     # Create Packer json configuration
     # Packer Builder Configuration
     data = {}
-    data['builders'] = ['']
-    data['builders'][0] = {}
+    data['packer'] = {}
+    data['packer']["required_plugins"] = {}
+    data['build'] = {}
+    data['build']['sources'] = ['']
+    data['build']['sources'][0] = "sources.{0}.local".format(packer_type)
+    data['source'] = {}
+    data['source'][packer_type] = {}
+    data['source'][packer_type]['local'] = {}
     if args.headless is True:
-        data['builders'][0]["headless"] = "true"
+        data['source'][packer_type]['local']["headless"] = "true"
     else:
-        data['builders'][0]["headless"] = "false"
+        data['source'][packer_type]['local']["headless"] = "false"
     if args.vmtype == 1:
-        data['builders'][0]["type"] = "virtualbox-iso"
-        data['builders'][0]["guest_os_type"] = "{0}".format(vboxosid)
-        data['builders'][0]["vm_name"] = "{0}".format(vmname)
-        data['builders'][0]["hard_drive_interface"] = "sata"
-        data['builders'][0]["sata_port_count"] = 2
-        data['builders'][0]["iso_interface"] = "sata"
-        data['builders'][0]["vboxmanage"] = ['']
-        data['builders'][0]["vboxmanage"][0] = ["modifyvm", "{{.Name}}", "--memory", "{0}".format(args.memory)]
-        data['builders'][0]["vboxmanage"].append(["modifyvm", "{{.Name}}", "--vram", "64"])
-        data['builders'][0]["vboxmanage"].append(["modifyvm", "{{.Name}}", "--cpus", "{0}".format(CPUCORES)])
-        data['builders'][0]["vboxmanage"].append(["modifyvm", "{{.Name}}", "--nic2", "hostonly"])
-        data['builders'][0]["vboxmanage"].append(["modifyvm", "{{.Name}}", "--hostonlyadapter2", vbox_hostonlyif_name])
-        data['builders'][0]["vboxmanage_post"] = ['']
-        data['builders'][0]["vboxmanage_post"][0] = ["modifyvm", "{{.Name}}", "--clipboard", "bidirectional"]
-        data['builders'][0]["vboxmanage_post"].append(["modifyvm", "{{.Name}}", "--accelerate3d", "on"])
-        data['builders'][0]["vboxmanage_post"].append(["modifyvm", "{{.Name}}", "--mouse", "usbtablet"])
-        data['builders'][0]["vboxmanage_post"].append(["modifyvm", "{{.Name}}", "--vrde", "off"])
-        data['builders'][0]["vboxmanage_post"].append(["modifyvm", "{{.Name}}", "--audioin", "on"])
-        data['builders'][0]["vboxmanage_post"].append(["modifyvm", "{{.Name}}", "--audioout", "on"])
-        data['builders'][0]["vboxmanage_post"].append(["modifyvm", "{{.Name}}", "--audiocontroller", "hda"])
+        data['packer']["required_plugins"]["virtualbox"] = {}
+        data['packer']["required_plugins"]["virtualbox"]["version"] = ">= 1.0.5"
+        data['packer']["required_plugins"]["virtualbox"]["source"] = "github.com/hashicorp/virtualbox"
+        data['source'][packer_type]['local']["guest_os_type"] = "{0}".format(vboxosid)
+        data['source'][packer_type]['local']["vm_name"] = "{0}".format(vmname)
+        data['source'][packer_type]['local']["hard_drive_interface"] = "sata"
+        data['source'][packer_type]['local']["sata_port_count"] = 2
+        data['source'][packer_type]['local']["iso_interface"] = "sata"
+        data['source'][packer_type]['local']["vboxmanage"] = ['']
+        data['source'][packer_type]['local']["vboxmanage"][0] = ["modifyvm", "{{.Name}}", "--memory", "{0}".format(args.memory)]
+        data['source'][packer_type]['local']["vboxmanage"].append(["modifyvm", "{{.Name}}", "--vram", "64"])
+        data['source'][packer_type]['local']["vboxmanage"].append(["modifyvm", "{{.Name}}", "--cpus", "{0}".format(CPUCORES)])
+        data['source'][packer_type]['local']["vboxmanage"].append(["modifyvm", "{{.Name}}", "--nic2", "hostonly"])
+        data['source'][packer_type]['local']["vboxmanage"].append(["modifyvm", "{{.Name}}", "--hostonlyadapter2", vbox_hostonlyif_name])
+        data['source'][packer_type]['local']["vboxmanage_post"] = ['']
+        data['source'][packer_type]['local']["vboxmanage_post"][0] = ["modifyvm", "{{.Name}}", "--clipboard", "bidirectional"]
+        data['source'][packer_type]['local']["vboxmanage_post"].append(["modifyvm", "{{.Name}}", "--accelerate3d", "on"])
+        data['source'][packer_type]['local']["vboxmanage_post"].append(["modifyvm", "{{.Name}}", "--mouse", "usbtablet"])
+        data['source'][packer_type]['local']["vboxmanage_post"].append(["modifyvm", "{{.Name}}", "--vrde", "off"])
+        data['source'][packer_type]['local']["vboxmanage_post"].append(["modifyvm", "{{.Name}}", "--audioin", "on"])
+        data['source'][packer_type]['local']["vboxmanage_post"].append(["modifyvm", "{{.Name}}", "--audioout", "on"])
+        data['source'][packer_type]['local']["vboxmanage_post"].append(["modifyvm", "{{.Name}}", "--audiocontroller", "hda"])
         if CFunc.is_windows() is False:
-            data['builders'][0]["vboxmanage_post"].append(["sharedfolder", "add", "{{.Name}}", "--name", "root", "--hostpath", "/", "--automount"])
-        data['builders'][0]["post_shutdown_delay"] = "30s"
+            data['source'][packer_type]['local']["vboxmanage_post"].append(["sharedfolder", "add", "{{.Name}}", "--name", "root", "--hostpath", "/", "--automount"])
+        data['source'][packer_type]['local']["post_shutdown_delay"] = "30s"
         if 1 <= args.ostype <= 39 or 70 <= args.ostype <= 99:
-            data['builders'][0]["vboxmanage"].append(["modifyvm", "{{.Name}}", "--nictype1", "virtio"])
-            data['builders'][0]["vboxmanage"].append(["modifyvm", "{{.Name}}", "--nictype2", "virtio"])
+            data['source'][packer_type]['local']["vboxmanage"].append(["modifyvm", "{{.Name}}", "--nictype1", "virtio"])
+            data['source'][packer_type]['local']["vboxmanage"].append(["modifyvm", "{{.Name}}", "--nictype2", "virtio"])
         if 50 <= args.ostype <= 59:
             # https://hodgkins.io/best-practices-with-packer-and-windows#use-headless-mode
-            data['builders'][0]["headless"] = "true"
-            data['builders'][0]["guest_additions_mode"] = "upload"
-            data['builders'][0]["guest_additions_path"] = "c:/Windows/Temp/windows.iso"
+            data['source'][packer_type]['local']["headless"] = "true"
+            data['source'][packer_type]['local']["guest_additions_mode"] = "upload"
+            data['source'][packer_type]['local']["guest_additions_path"] = "c:/Windows/Temp/windows.iso"
     elif args.vmtype == 2:
-        data['builders'][0]["type"] = "qemu"
-        data['builders'][0]["accelerator"] = "kvm"
+        data['packer']["required_plugins"]["qemu"] = {}
+        data['packer']["required_plugins"]["qemu"]["version"] = ">= 1.0.10"
+        data['packer']["required_plugins"]["qemu"]["source"] = "github.com/hashicorp/qemu"
+        data['source'][packer_type]['local']["accelerator"] = "kvm"
         # Note: if virtio iso driver disk not present, then ide and e1000 are needed for Windows generic drivers. Virtio was chosen due to issues with ide.
-        data['builders'][0]["disk_interface"] = "virtio"
-        data['builders'][0]["net_device"] = "virtio-net"
-        data['builders'][0]["vm_name"] = "{0}.qcow2".format(vmname)
-        data['builders'][0]["qemuargs"] = ['']
-        data['builders'][0]["qemuargs"][0] = ["-m", "{0}M".format(args.memory)]
-        data['builders'][0]["qemuargs"].append(["-cpu", "host"])
-        data['builders'][0]["qemuargs"].append(["-smp", "cores={0},sockets=1,maxcpus={0}".format(CPUCORES)])
+        data['source'][packer_type]['local']["disk_interface"] = "virtio"
+        data['source'][packer_type]['local']["net_device"] = "virtio-net"
+        data['source'][packer_type]['local']["vm_name"] = "{0}.qcow2".format(vmname)
+        data['source'][packer_type]['local']["qemuargs"] = ['']
+        data['source'][packer_type]['local']["qemuargs"][0] = ["-m", "{0}M".format(args.memory)]
+        data['source'][packer_type]['local']["qemuargs"].append(["-cpu", "host"])
+        data['source'][packer_type]['local']["qemuargs"].append(["-smp", "cores={0},sockets=1,maxcpus={0}".format(CPUCORES)])
         if useefi is True:
             efi_bin, efi_nvram = ovmf_bin_nvramcopy(packer_temp_folder, vmname, secureboot=secureboot)
             # nvram
-            data['builders'][0]["qemuargs"].append(["--drive", "if=pflash,format=raw,file={0},readonly=on".format(efi_bin)])
-            data['builders'][0]["qemuargs"].append(["--drive", "if=pflash,format=raw,file={0}".format(efi_nvram)])
+            data['source'][packer_type]['local']["qemuargs"].append(["--drive", "if=pflash,format=raw,file={0},readonly=on".format(efi_bin)])
+            data['source'][packer_type]['local']["qemuargs"].append(["--drive", "if=pflash,format=raw,file={0}".format(efi_nvram)])
             if secureboot is True:
                 tpm_tempdir = tempfile.TemporaryDirectory(prefix="packer-tpm-")
                 tpm_process = subprocess.Popen(["swtpm", "socket", "--tpm2", "--tpmstate", "dir={0}".format(tpm_tempdir.name), "--ctrl", "type=unixio,path={0}/swtpm-sock".format(tpm_tempdir.name), "--daemon"], stdout=subprocess.PIPE)
-                data['builders'][0]["qemuargs"].append(["--chardev", "socket,id=chrtpm,path={0}/swtpm-sock".format(tpm_tempdir.name)])
-                data['builders'][0]["qemuargs"].append(["--tpmdev", "emulator,id=tpm0,chardev=chrtpm"])
-                data['builders'][0]["qemuargs"].append(["--device", "tpm-tis,tpmdev=tpm0"])
+                data['source'][packer_type]['local']["qemuargs"].append(["--chardev", "socket,id=chrtpm,path={0}/swtpm-sock".format(tpm_tempdir.name)])
+                data['source'][packer_type]['local']["qemuargs"].append(["--tpmdev", "emulator,id=tpm0,chardev=chrtpm"])
+                data['source'][packer_type]['local']["qemuargs"].append(["--device", "tpm-tis,tpmdev=tpm0"])
                 # According to https://github.com/tianocore/edk2/blob/master/OvmfPkg/README , smm must be enabled for secureboot, which can only be done by q35 machine type. However, if you run the secureboot VM without disabling s3 suspend, the machine will not boot (black screen).
                 # Override the machine type to be q35, and enable smm.
-                data['builders'][0]["machine_type"] = "q35,smm=on"
+                data['source'][packer_type]['local']["machine_type"] = "q35,smm=on"
                 # Force s3 to be disabled.
-                data['builders'][0]["qemuargs"].append(["--global", "ICH9-LPC.disable_s3=1"])
+                data['source'][packer_type]['local']["qemuargs"].append(["--global", "ICH9-LPC.disable_s3=1"])
         if 50 <= args.ostype <= 59:
             # Grab the virtio drivers
             # https://docs.fedoraproject.org/en-US/quick-docs/creating-windows-virtual-machines-using-virtio-drivers/
             qemu_virtio_diskpath = CFunc.downloadfile("https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/latest-virtio/virtio-win.iso", vmpath)[0]
             # Set the iso as a new cdrom drive.
-            data['builders'][0]["qemuargs"].append(["--drive", "file={0},media=cdrom,index=1".format(qemu_virtio_diskpath)])
-    data['builders'][0]["shutdown_command"] = "shutdown -P now"
-    data['builders'][0]["iso_url"] = "{0}".format(isopath)
-    data['builders'][0]["iso_checksum"] = "md5:{0}".format(md5)
-    data['builders'][0]["output_directory"] = "{0}".format(vmname)
-    data['builders'][0]["http_directory"] = tempunattendfolder
-    data['builders'][0]["disk_size"] = "{0}".format(size_disk_mb)
-    data['builders'][0]["boot_wait"] = "5s"
-    data['builders'][0]["ssh_username"] = "root"
-    data['builders'][0]["ssh_password"] = "{0}".format(args.vmpass)
-    data['builders'][0]["ssh_timeout"] = "90m"
+            data['source'][packer_type]['local']["qemuargs"].append(["--drive", "file={0},media=cdrom,index=1".format(qemu_virtio_diskpath)])
+    elif args.vmtype == 3:
+        data['packer']["required_plugins"]["libvirt"] = {}
+        data['packer']["required_plugins"]["libvirt"]["version"] = ">= 0.5.0"
+        data['packer']["required_plugins"]["libvirt"]["source"] = "github.com/thomasklein94/libvirt"
+    data['source'][packer_type]['local']["shutdown_command"] = "shutdown -P now"
+    data['source'][packer_type]['local']["iso_url"] = "{0}".format(isopath)
+    data['source'][packer_type]['local']["iso_checksum"] = "md5:{0}".format(md5)
+    data['source'][packer_type]['local']["output_directory"] = "{0}".format(vmname)
+    data['source'][packer_type]['local']["http_directory"] = tempunattendfolder
+    data['source'][packer_type]['local']["disk_size"] = "{0}".format(size_disk_mb)
+    data['source'][packer_type]['local']["boot_wait"] = "5s"
+    data['source'][packer_type]['local']["ssh_username"] = "root"
+    data['source'][packer_type]['local']["ssh_password"] = "{0}".format(args.vmpass)
+    data['source'][packer_type]['local']["ssh_timeout"] = "90m"
     # Packer Provisioning Configuration
-    data['provisioners'] = ['']
-    data['provisioners'][0] = {}
+    data['build']['provisioner'] = ['']
+    data['build']['provisioner'][0] = {}
     if 1 <= args.ostype <= 5:
-        data['builders'][0]["boot_command"] = ["<up><wait>e<wait><down><wait><down><wait><end> inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/fedora.cfg<wait><f10>"]
-        data['provisioners'][0]["type"] = "shell"
-        data['provisioners'][0]["inline"] = "dnf install -y git; {2}; /opt/CustomScripts/{0} {1}".format(vmprovisionscript, vmprovision_opts, git_cmdline())
+        data['source'][packer_type]['local']["boot_command"] = ["<up><wait>e<wait><down><wait><down><wait><end> inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/fedora.cfg<wait><f10>"]
+        data['build']['provisioner'][0]["shell"] = {}
+        data['build']['provisioner'][0]["shell"]["inline"] = ["dnf install -y git; {2}; /opt/CustomScripts/{0} {1}".format(vmprovisionscript, vmprovision_opts, git_cmdline())]
     if args.ostype == 5:
-        data['provisioners'][0]["inline"] = "dnf install -y git; {2}; /opt/CustomScripts/{0} {1}; systemctl reboot".format(vmprovisionscript, vmprovision_opts, git_cmdline())
-        data['provisioners'][0]["expect_disconnect"] = True
-        data['provisioners'].append('')
-        data['provisioners'][1] = {}
-        data['provisioners'][1]["type"] = "shell"
-        data['provisioners'][1]["inline"] = "/opt/CustomScripts/Aiso_CreateVM.py"
-        data['provisioners'][1]["pause_before"] = "15s"
-        data['provisioners'][1]["timeout"] = "90m"
+        data['build']['provisioner'][0]["shell"]["inline"] = ["dnf install -y git; {2}; /opt/CustomScripts/{0} {1}; systemctl reboot".format(vmprovisionscript, vmprovision_opts, git_cmdline())]
+        data['build']['provisioner'][0]["shell"]["expect_disconnect"] = True
+        data['build']['provisioner'].append('')
+        data['build']['provisioner'][1]["shell"] = {}
+        data['build']['provisioner'][1]["shell"]["inline"] = ["/opt/CustomScripts/Aiso_CreateVM.py"]
+        data['build']['provisioner'][1]["shell"]["pause_before"] = "15s"
+        data['build']['provisioner'][1]["shell"]["timeout"] = "90m"
     if args.ostype == 8:
         CFunc.find_replace(tempunattendfolder, "silverblue", "kinoite", "silverblue.cfg")
     if 8 <= args.ostype <= 9:
-        data['builders'][0]["boot_command"] = ["<up><wait>e<wait><down><wait><down><wait><end> inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/silverblue.cfg<wait><f10>"]
-        data['provisioners'][0]["type"] = "shell"
-        data['provisioners'][0]["inline"] = "{1}; /opt/CustomScripts/{0} -s 1; systemctl reboot".format(vmprovisionscript, git_cmdline())
-        data['provisioners'][0]["expect_disconnect"] = True
-        data['provisioners'].append('')
-        data['provisioners'][1] = {}
-        data['provisioners'][1]["type"] = "shell"
-        data['provisioners'][1]["inline"] = "/opt/CustomScripts/{0} -s 2".format(vmprovisionscript)
-        data['provisioners'][1]["pause_before"] = "15s"
-        data['provisioners'][1]["timeout"] = "90m"
+        data['source'][packer_type]['local']["boot_command"] = ["<up><wait>e<wait><down><wait><down><wait><end> inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/silverblue.cfg<wait><f10>"]
+        data['build']['provisioner'][0]["shell"] = {}
+        data['build']['provisioner'][0]["shell"]["inline"] = ["{1}; /opt/CustomScripts/{0} -s 1; systemctl reboot".format(vmprovisionscript, git_cmdline())]
+        data['build']['provisioner'][0]["shell"]["expect_disconnect"] = True
+        data['build']['provisioner'].append('')
+        data['build']['provisioner'][1] = {}
+        data['build']['provisioner'][1]["shell"] = {}
+        data['build']['provisioner'][1]["shell"]["inline"] = ["/opt/CustomScripts/{0} -s 2".format(vmprovisionscript)]
+        data['build']['provisioner'][1]["shell"]["pause_before"] = "15s"
+        data['build']['provisioner'][1]["shell"]["timeout"] = "90m"
     if 10 <= args.ostype <= 19:
-        data['provisioners'][0]["type"] = "shell"
-        data['provisioners'][0]["inline"] = "mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{vmuser}/.ssh; echo '{sshkey}' > ~{vmuser}/.ssh/authorized_keys; chown {vmuser}:{vmuser} -R ~{vmuser}; apt install -y git; {gitcmd}; /opt/CustomScripts/{vmprovisionscript} {vmprovision_opts}".format(vmprovisionscript=vmprovisionscript, vmprovision_opts=vmprovision_opts, sshkey=sshkey, vmuser=args.vmuser, gitcmd=git_cmdline())
+        data['build']['provisioner'][0]["shell"] = {}
+        
+        data['build']['provisioner'][0]["shell"]["inline"] = ["mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{vmuser}/.ssh; echo '{sshkey}' > ~{vmuser}/.ssh/authorized_keys; chown {vmuser}:{vmuser} -R ~{vmuser}; apt install -y git; {gitcmd}; /opt/CustomScripts/{vmprovisionscript} {vmprovision_opts}".format(vmprovisionscript=vmprovisionscript, vmprovision_opts=vmprovision_opts, sshkey=sshkey, vmuser=args.vmuser, gitcmd=git_cmdline())]
         # Workaround for ssh being enabled on livecd. Remove this when a method to disable ssh on livecd is found.
-        data['builders'][0]["ssh_handshake_attempts"] = "9999"
+        data['source'][packer_type]['local']["ssh_handshake_attempts"] = "9999"
         # Create user-data and meta-data.
         # https://cloudinit.readthedocs.io/en/latest/topics/datasources/nocloud.html
         shutil.move(os.path.join(tempscriptfolderpath, "unattend", "ubuntu.yaml"), os.path.join(tempscriptfolderpath, "unattend", "user-data"))
         pathlib.Path(os.path.join(tempscriptfolderpath, "unattend", "meta-data")).touch(exist_ok=True)
         # Needed to hit enter quickly at the LTS grub screen (with the assistance/keyboard logo)
-        data['builders'][0]["boot_wait"] = "1s"
+        data['source'][packer_type]['local']["boot_wait"] = "1s"
     if 10 <= args.ostype <= 19:
-        data['builders'][0]["boot_command"] = ["<wait>c<wait>linux /casper/vmlinuz quiet autoinstall 'ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/'<enter><wait>initrd /casper/initrd<enter><wait5>boot<enter>"]
+        data['source'][packer_type]['local']["boot_command"] = ["<wait>c<wait>linux /casper/vmlinuz quiet autoinstall 'ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/'<enter><wait>initrd /casper/initrd<enter><wait5>boot<enter>"]
     if 20 <= args.ostype <= 24:
-        data['builders'][0]["boot_command"] = ["<up><tab> inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/centos.cfg<enter><wait>"]
-        data['provisioners'][0]["type"] = "shell"
-        data['provisioners'][0]["inline"] = "{2}; /opt/CustomScripts/{0} {1}".format(vmprovisionscript, vmprovision_opts, git_cmdline())
+        data['source'][packer_type]['local']["boot_command"] = ["<up><tab> inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/centos.cfg<enter><wait>"]
+        data['build']['provisioner'][0]["shell"] = {}
+        
+        data['build']['provisioner'][0]["shell"]["inline"] = ["{2}; /opt/CustomScripts/{0} {1}".format(vmprovisionscript, vmprovision_opts, git_cmdline())]
     if 25 <= args.ostype <= 29:
-        data['builders'][0]["boot_command"] = ["<up><tab> inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/almalinux.cfg<enter><wait>"]
-        data['provisioners'][0]["type"] = "shell"
-        data['provisioners'][0]["inline"] = "{2}; /opt/CustomScripts/{0} {1}".format(vmprovisionscript, vmprovision_opts, git_cmdline())
+        data['source'][packer_type]['local']["boot_command"] = ["<up><tab> inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/almalinux.cfg<enter><wait>"]
+        data['build']['provisioner'][0]["shell"] = {}
+        
+        data['build']['provisioner'][0]["shell"]["inline"] = ["{2}; /opt/CustomScripts/{0} {1}".format(vmprovisionscript, vmprovision_opts, git_cmdline())]
     if 30 <= args.ostype <= 39:
-        data['provisioners'][0]["type"] = "shell"
-        data['provisioners'][0]["inline"] = "hostnamectl set-hostname '{vmname}'; mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{vmuser}/.ssh; echo '{sshkey}' > ~{vmuser}/.ssh/authorized_keys; chown {vmuser}:{vmuser} -R ~{vmuser}; apt install -y git dhcpcd5 avahi-daemon sudo; systemctl enable --now avahi-daemon; {gitcmd}; /opt/CustomScripts/{vmprovisionscript} {vmprovision_opts}".format(vmprovisionscript=vmprovisionscript, vmprovision_opts=vmprovision_opts, sshkey=sshkey, vmuser=args.vmuser, gitcmd=git_cmdline(), vmname=vmname)
-        data['builders'][0]["boot_command"] = ["<esc>auto url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/debian.cfg hostname=debian locale=en_US keyboard-configuration/modelcode=SKIP netcfg/choose_interface=auto <enter>"]
+        data['build']['provisioner'][0]["shell"] = {}
+        
+        data['build']['provisioner'][0]["shell"]["inline"] = ["hostnamectl set-hostname '{vmname}'; mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{vmuser}/.ssh; echo '{sshkey}' > ~{vmuser}/.ssh/authorized_keys; chown {vmuser}:{vmuser} -R ~{vmuser}; apt install -y git dhcpcd5 avahi-daemon sudo; systemctl enable --now avahi-daemon; {gitcmd}; /opt/CustomScripts/{vmprovisionscript} {vmprovision_opts}".format(vmprovisionscript=vmprovisionscript, vmprovision_opts=vmprovision_opts, sshkey=sshkey, vmuser=args.vmuser, gitcmd=git_cmdline(), vmname=vmname)]
+        data['source'][packer_type]['local']["boot_command"] = ["<esc>auto url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/debian.cfg hostname=debian locale=en_US keyboard-configuration/modelcode=SKIP netcfg/choose_interface=auto <enter>"]
     if 40 <= args.ostype <= 41:
-        data['builders'][0]["boot_command"] = ["<wait2><enter><wait30><right><wait><enter><wait>dhclient -b vtnet0<enter><wait>dhclient -b em0<enter><wait10>fetch -o /tmp/installerconfig http://{{ .HTTPIP }}:{{ .HTTPPort }}/freebsd<wait><enter><wait>bsdinstall script /tmp/installerconfig<wait><enter>"]
-        data['provisioners'][0]["type"] = "shell"
+        data['source'][packer_type]['local']["boot_command"] = ["<wait2><enter><wait30><right><wait><enter><wait>dhclient -b vtnet0<enter><wait>dhclient -b em0<enter><wait10>fetch -o /tmp/installerconfig http://{{ .HTTPIP }}:{{ .HTTPPort }}/freebsd<wait><enter><wait>bsdinstall script /tmp/installerconfig<wait><enter>"]
+        data['build']['provisioner'][0]["shell"] = {}
         # Needed for freebsd: https://www.packer.io/docs/provisioners/shell.html#execute_command
-        data['provisioners'][0]["execute_command"] = "chmod +x {{ .Path }}; env {{ .Vars }} {{ .Path }}"
-        data['provisioners'][0]["inline"] = '''export ASSUME_ALWAYS_YES=yes; pw useradd -n {vmuser} -m; pw usermod {vmuser} -c "{fullname}"; chpass -p '{encpass}' {vmuser}; mkdir -m 700 -p /root/.ssh; echo "{sshkey}" > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{vmuser}/.ssh; echo "{sshkey}" > ~{vmuser}/.ssh/authorized_keys; chown -R {vmuser}:{vmuser} ~{vmuser}; pkg update -f; pkg install -y git python3; {gitcmd}; /opt/CustomScripts/{vmprovisionscript} {vmprovision_opts}'''.format(vmprovisionscript=vmprovisionscript, vmprovision_opts=vmprovision_opts, sshkey=sshkey, vmuser=args.vmuser, encpass=sha512_password, fullname=args.fullname, gitcmd=git_cmdline())
-        data['builders'][0]["shutdown_command"] = "shutdown -p now"
+        data['build']['provisioner'][0]["shell"]["execute_command"] = "chmod +x {{ .Path }}; env {{ .Vars }} {{ .Path }}"
+        data['build']['provisioner'][0]["shell"]["inline"] = ['''export ASSUME_ALWAYS_YES=yes; pw useradd -n {vmuser} -m; pw usermod {vmuser} -c "{fullname}"; chpass -p '{encpass}' {vmuser}; mkdir -m 700 -p /root/.ssh; echo "{sshkey}" > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{vmuser}/.ssh; echo "{sshkey}" > ~{vmuser}/.ssh/authorized_keys; chown -R {vmuser}:{vmuser} ~{vmuser}; pkg update -f; pkg install -y git python3; {gitcmd}; /opt/CustomScripts/{vmprovisionscript} {vmprovision_opts}'''.format(vmprovisionscript=vmprovisionscript, vmprovision_opts=vmprovision_opts, sshkey=sshkey, vmuser=args.vmuser, encpass=sha512_password, fullname=args.fullname, gitcmd=git_cmdline())]
+        data['source'][packer_type]['local']["shutdown_command"] = "shutdown -p now"
     if 50 <= args.ostype <= 59:
         # Reboot after initial script
-        data['provisioners'][0]["type"] = "windows-restart"
-        data['provisioners'][0]["restart_timeout"] = "10m"
+        data['build']['provisioner'][0]["windows-restart"] = {}
+        data['build']['provisioner'][0]["windows-restart"]["restart_timeout"] = "10m"
         # Set up provisioner for powershell script
-        data['provisioners'].append('')
-        data['provisioners'][1] = {}
-        data['provisioners'][1]["type"] = "powershell"
+        data['build']['provisioner'].append('')
+        data['build']['provisioner'][1] = {}
+        data['build']['provisioner'][1]["powershell"] = {}
         # Provision with generic windows script
-        data['provisioners'][1]["scripts"] = [os.path.join(tempscriptfolderpath, "Win-provision.ps1")]
+        data['build']['provisioner'][1]["powershell"]["scripts"] = [os.path.join(tempscriptfolderpath, "Win-provision.ps1")]
         # Press enter at the cdrom prompt.
-        data['builders'][0]["boot_command"] = ["<enter><wait2><enter><wait2><enter><wait2><enter><wait2><enter><wait2><enter><wait2><enter>"]
-        data['builders'][0]["boot_wait"] = "1s"
-        data['builders'][0]["shutdown_command"] = "shutdown /s /t 60"
-        data['builders'][0]["shutdown_timeout"] = "15m"
-        data['builders'][0]["communicator"] = "winrm"
-        data['builders'][0]["winrm_insecure"] = True
-        data['builders'][0]["winrm_username"] = "{0}".format(args.vmuser)
-        data['builders'][0]["winrm_password"] = "{0}".format(args.vmpass)
-        data['builders'][0]["winrm_timeout"] = "90m"
-        data['builders'][0]["winrm_use_ssl"] = False
-        data['builders'][0]["winrm_use_ntlm"] = True
-        data['builders'][0]["ssh_username"] = "{0}".format(args.vmuser)
-        data['builders'][0]["floppy_files"] = [os.path.join(tempscriptbasename, "unattend", "autounattend.xml"),
+        data['source'][packer_type]['local']["boot_command"] = ["<enter><wait2><enter><wait2><enter><wait2><enter><wait2><enter><wait2><enter><wait2><enter>"]
+        data['source'][packer_type]['local']["boot_wait"] = "1s"
+        data['source'][packer_type]['local']["shutdown_command"] = "shutdown /s /t 60"
+        data['source'][packer_type]['local']["shutdown_timeout"] = "15m"
+        data['source'][packer_type]['local']["communicator"] = "winrm"
+        data['source'][packer_type]['local']["winrm_insecure"] = True
+        data['source'][packer_type]['local']["winrm_username"] = "{0}".format(args.vmuser)
+        data['source'][packer_type]['local']["winrm_password"] = "{0}".format(args.vmpass)
+        data['source'][packer_type]['local']["winrm_timeout"] = "90m"
+        data['source'][packer_type]['local']["winrm_use_ssl"] = False
+        data['source'][packer_type]['local']["winrm_use_ntlm"] = True
+        data['source'][packer_type]['local']["ssh_username"] = "{0}".format(args.vmuser)
+        data['source'][packer_type]['local']["floppy_files"] = [os.path.join(tempscriptbasename, "unattend", "autounattend.xml"),
                                                os.path.join(tempscriptbasename, "unattend", "win_initial.bat"),
                                                os.path.join(tempscriptbasename, "unattend", "win_enablerm.ps1")]
         # Register the namespace to avoid nsX in namespace.
@@ -736,7 +757,7 @@ if __name__ == '__main__':
         xml_insertqemudisk(os.path.join(tempunattendfolder, "autounattend.xml"))
 
     # Write packer json file.
-    with open(os.path.join(packer_temp_folder, 'file.json'), 'w') as file_json_wr:
+    with open(os.path.join(packer_temp_folder, 'file.pkr.json'), 'w') as file_json_wr:
         json.dump(data, file_json_wr, indent=2)
 
     # Set debug environment variable
@@ -749,7 +770,8 @@ if __name__ == '__main__':
     buildlog_path = os.path.join(vmpath, "{0}.log".format(vmname))
     CFunc.log_config(buildlog_path)
     # Call packer.
-    packer_buildcmd = "packer build file.json"
+    CFunc.subpout_logger("packer init file.pkr.json")
+    packer_buildcmd = "packer build file.pkr.json"
     CFunc.subpout_logger(packer_buildcmd)
     # Save packer finish time.
     packerfinishtime = datetime.now()
