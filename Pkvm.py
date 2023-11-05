@@ -24,7 +24,7 @@ import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 # Custom includes
-import passlib
+from passlib import hash
 import CFunc
 
 # Folder of this script
@@ -509,7 +509,7 @@ if __name__ == '__main__':
     print("SSH Key is \"{0}\"".format(sshkey))
 
     # Generate hashed password
-    sha512_password = passlib.hash.sha512_crypt.hash(args.vmpass, rounds=5000)
+    sha512_password = hash.sha512_crypt.hash(args.vmpass, rounds=5000)
 
     # Copy unattend script folder
     if os.path.isdir(os.path.join(SCRIPTDIR, "unattend")):
