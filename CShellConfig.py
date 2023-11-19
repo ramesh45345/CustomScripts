@@ -653,6 +653,8 @@ if shutil.which("tmux"):
     # Rebind n and p to cycle windows
     with open(tmux_cfg_common_local, 'a') as f:
         f.write("\nbind p previous-window\nbind n next-window\n")
+        if args.fish and shutil.which('fish'):
+            f.write("\nset -g default-command {0}\nset -g default-shell {0}\n".format(shutil.which("fish")))
     # Install tmux config
     if not os.path.exists(os.path.join(USERVARHOME, ".tmux.conf")):
         os.symlink(tmux_cfg_common, os.path.join(USERVARHOME, ".tmux.conf"))
