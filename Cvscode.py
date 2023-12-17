@@ -59,6 +59,7 @@ def codeconfig_installext(vscode_cmd=list):
     ce_ins(vscode_cmd, "ms-pyright.pyright")
     ce_ins(vscode_cmd, "ms-python.python")
     ce_unins(vscode_cmd, "ms-python.vscode-pylance")
+    ce_ins(vscode_cmd, "ms-python.flake8")
     ce_ins(vscode_cmd, "ms-azuretools.vscode-docker")
     ce_ins(vscode_cmd, "mikestead.dotenv")
     ce_ins(vscode_cmd, "timonwong.shellcheck")
@@ -267,12 +268,7 @@ for idx in range(1, 6):
             "MD033": False,
         }
         # Python Config
-        data["python.linting.maxNumberOfProblems"] = 500
-        data["python.linting.pylintArgs"] = ["--disable=C0301,C0103"]
-        data["python.linting.pylamaEnabled"] = True
-        data["python.linting.pylamaArgs"] = ["-i", "E501,E266,E302"]
-        data["python.linting.flake8Enabled"] = True
-        data["python.linting.flake8Args"] = ["--ignore=E501,E302,E266"]
+        data["flake8.args"] = ["--ignore=E501,E302,E266"]
         data["python.analysis.typeCheckingMode"] = "off"
 
         # Print the json data for debugging purposes.
