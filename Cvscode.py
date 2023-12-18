@@ -73,6 +73,7 @@ def codeconfig_installext(vscode_cmd=list):
     ce_ins(vscode_cmd, "bbenoist.Nix")
     ce_ins(vscode_cmd, "danielroedl.meld-diff")
     ce_ins(vscode_cmd, "aaron-bond.better-comments")
+    ce_ins(vscode_cmd, "ms-toolsai.jupyter")
 def codeconfig_writeconfiguration(json_data=dict, json_path=str, json_file: str = "settings.json"):
     """Write the config.json"""
     if os.path.isdir(json_path):
@@ -194,6 +195,7 @@ for idx in range(1, 6):
 
         # Keyboard bindings
         kb_data = [
+            # Dendron/markdown preview fixes
             {
                 "key": "ctrl+shift+v",
                 "command": "markdown.showPreviewToSide"
@@ -222,7 +224,15 @@ for idx in range(1, 6):
                 "key": "ctrl+k v",
                 "command": "-dendron.togglePreview",
                 "when": "dendron:pluginActive"
-            }
+            },
+            # Fix jupyter undo cells issue
+            # https://stackoverflow.com/a/69421121
+            {"key": "ctrl+z", "command": "-undo"},
+            {"key": "ctrl+z", "command": "undo", "when": "!notebookEditorFocused || inputFocus"},
+            {"key": "ctrl+shift+z", "command": "-redo"},
+            {"key": "ctrl+shift+z", "command": "redo", "when": "!notebookEditorFocused || inputFocus"},
+            {"key": "ctrl+y", "command": "-redo"},
+            {"key": "ctrl+y", "command": "redo", "when": "!notebookEditorFocused || inputFocus"},
         ]
         # print(json.dumps(kb_data, indent=4))
         codeconfig_writeconfiguration(kb_data, code_array[idx]["path"], "keybindings.json")
