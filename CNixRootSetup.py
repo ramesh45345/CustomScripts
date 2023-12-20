@@ -70,10 +70,6 @@ def install_profile_config():
     profile_text = r"""
 [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ] && . $HOME/.nix-profile/etc/profile.d/nix.sh
 [ -e "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh" ] && . $HOME/.nix-profile/etc/profile.d/hm-session-vars.sh
-
-if [ -d "$HOME/.nix-share/share" ] && [ ":$XDG_DATA_DIRS:" != *":$HOME/.nix-share/share:"* ]; then
-    XDG_DATA_DIRS="${XDG_DATA_DIRS:+"$XDG_DATA_DIRS:"}$HOME/.nix-share/share"
-fi
 """
     with open(os.path.join(os.sep, "etc", "profile.d", "rcustom_nix.sh"), 'w') as f:
         f.write(profile_text)
@@ -92,7 +88,6 @@ def call_nix_update_user(user: str):
     This function is intended for use in scripts that run as root.
     """
     CFunc.run_as_user_su(user, "nix-channel --update; home-manager switch")
-    CFunc.run_as_user_su(user, 'if [ -d "$HOME/.nix-share" ] && [ -d "$HOME/.nix-profile" ]; then rsync -aL --del "$HOME/.nix-profile/share" "$HOME/.nix-share/"; find "$HOME/.nix-share/share/applications/" -exec touch {} +; echo "Synced .nix-share"; fi', shell_cmd=shutil.which("bash"))
 
 
 ### Begin Code ###

@@ -78,12 +78,30 @@ def install_homemanager():
   targets.genericLinux.enable = true;
   xdg.mime.enable = true;
   xdg.systemDirs.data = [ "${config.home.homeDirectory}/.nix-profile/share/applications" ];
+  # https://github.com/nix-community/home-manager/issues/1439#issuecomment-1106208294
+  # Sync the desktop files (except for excludes) and ensure they have current timestamps.
+  home.activation = {
+    linkDesktopApplications = {
+      after = [ "installPackages" "createXdgUserDirectories" ];
+      before = [ ];
+      data = ''
+        touch "${config.home.homeDirectory}/.exclude_nix.txt"
+        ${pkgs.rsync}/bin/rsync -azL --exclude-from="${config.home.homeDirectory}/.exclude_nix.txt" "${config.home.homeDirectory}/.nix-profile/share/applications/" "${config.xdg.dataHome}/applications/"
+        chmod a+rwx -R "${config.xdg.dataHome}/applications"
+        find "${config.xdg.dataHome}/applications/" -type f -name "*.desktop" -exec touch {} +
+        ${pkgs.desktop-file-utils}/bin/update-desktop-database "${config.xdg.dataHome}/applications/"
+      '';
+    };
+  };
 """)
             print(line, end='')
         CFunc.find_replace(homeman_dirpath, "home.packages = [", "home.packages = with pkgs; [", "home.nix")
     else:
         print("home.packages found in config file. Not editing.")
 
+    # Create exclulde file for rsync activation command.
+    with open(os.path.join(homepath, ".exclude_nix.txt"), 'w') as f:
+        f.write("mimeinfo.cache\n")
     # Initial rsync into .nix-share, to enable desktop shortcuts
     os.makedirs(os.path.join(homepath, ".nix-share"), exist_ok=True)
     subprocess.run('rsync -aL --del "{0}/.nix-profile/share" "{0}/.nix-share/"'.format(homepath), shell=True, check=True)
@@ -107,7 +125,7 @@ def configure_nix():
 """)
 def uninstall_nix():
     """Uninstall nix."""
-    subprocess.run("sudo rm -rf $HOME/.nix-profile $HOME/.nix-profile $HOME/.nix-channels $HOME/.nix-defexpr $HOME/.config/nix/ $HOME/.config/nixpkgs/ $HOME/.nix-share/ $HOME/.config/home-manager/", shell=True, check=False)
+    subprocess.run("sudo rm -rf $HOME/.nix-profile $HOME/.nix-profile $HOME/.nix-channels $HOME/.nix-defexpr $HOME/.config/nix/ $HOME/.config/nixpkgs/ $HOME/.config/home-manager/", shell=True, check=False)
     subprocess.run("sudo rm -rf /etc/profile.d/rcustom_nix.sh", shell=True, check=False)
     # Immutable os instructions
     if os.path.isfile("/etc/systemd/system/mount-nix-prepare.service"):
