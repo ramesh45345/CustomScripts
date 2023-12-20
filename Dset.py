@@ -302,6 +302,9 @@ if shutil.which("gnome-session") or shutil.which("gnome-shell"):
     dconf_write("/org/gnome/shell/extensions/window-list/show-on-all-monitors", "true")
     # Set gnome-terminal scrollback
     dconf_write("/org/gnome/terminal/legacy/profiles:/:b1dcc9dd-5262-4d8d-a863-c897e6d979b9/scrollback-unlimited", "true")
+    # Fish config for gnome terminal
+    if shutil.which("fish"):
+        dconf_write("/org/gnome/terminal/legacy/profiles:/:b1dcc9dd-5262-4d8d-a863-c897e6d979b9/custom-command", "'{0}'".format(shutil.which("fish")))
     # Set Fonts
     gsettings_set("org.gnome.desktop.interface", "document-font-name", "'Noto Sans 11'")
     gsettings_set("org.gnome.desktop.interface", "font-name", "'Roboto 11'")
