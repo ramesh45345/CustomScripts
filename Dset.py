@@ -273,6 +273,7 @@ if shutil.which("gnome-session") or shutil.which("gnome-shell"):
                 gnome_desktop_file_list.append(ds)
         gsettings_set("org.gnome.shell", "favorite-apps", str(gnome_desktop_file_list))
     gsettings_set("org.gnome.desktop.wm.preferences", "button-layout", ":minimize,maximize,close")
+    gsettings_set("org.gnome.desktop.wm.preferences", "num-workspaces", "1")
     gsettings_set("org.gnome.desktop.interface", "locate-pointer", "true")
     gsettings_set("org.gnome.mutter", "locate-pointer-key", "'Control_R'")
     dconf_write("/org/gnome/mutter/edge-tiling", "true")
