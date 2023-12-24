@@ -199,15 +199,17 @@ function Fcn-Software {
   # Workaround for windows-terminal https://github.com/mkevenaar/chocolatey-packages/issues/136
   Add-AppxPackage https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx
   # GUI Apps
-  choco upgrade -y firefox notepadplusplus tortoisegit bleachbit putty chocolateygui conemu cascadiafonts microsoft-windows-terminal vscode sumatrapdf WizTree
+  choco upgrade -y firefox notepadplusplus tortoisegit bleachbit putty chocolateygui conemu cascadiafonts vscode sumatrapdf winget WizTree
   choco upgrade -y ShutUp10
   # Set default browser.
   choco upgrade -y setdefaultbrowser
   SetDefaultBrowser.exe HKLM Firefox-308046B0AF4A39CB
 
   # sshfs
-  winget install --accept-package-agreements --accept-source-agreements WinFsp.WinFsp; winget install --accept-package-agreements --accept-source-agreements SSHFS-Win.SSHFS-Win
+  winget install --accept-package-agreements --accept-source-agreements --disable-interactivity WinFsp.WinFsp; winget install --accept-package-agreements --accept-source-agreements --disable-interactivity SSHFS-Win.SSHFS-Win
 
+  # Windows Terminal
+  winget install --accept-package-agreements --accept-source-agreements --disable-interactivity --id Microsoft.WindowsTerminal -e
   # Create shortcut for Windows Terminal
   $TargetPath =  "shell:AppsFolder\Microsoft.WindowsTerminal_8wekyb3d8bbwe!App"
   $ShortcutFile = "$env:PUBLIC\Desktop\Windows Terminal.lnk"
