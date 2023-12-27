@@ -154,6 +154,12 @@
             <Order>2</Order>
             <RequiresUserInput>true</RequiresUserInput>
         </SynchronousCommand>
+        <SynchronousCommand wcm:action="add">
+            <CommandLine>powershell Rename-Computer -Force -NewName INSERTHOSTNAMENAMEHERE</CommandLine>
+            <Description>Set Hostname</Description>
+            <Order>3</Order>
+            <RequiresUserInput>true</RequiresUserInput>
+        </SynchronousCommand>
       </FirstLogonCommands>
       <TimeZone>Eastern Standard Time</TimeZone>
     </component>
