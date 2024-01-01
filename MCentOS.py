@@ -201,7 +201,7 @@ CFuncExt.GrubUpdate()
 subprocess.run('grubby --update-kernel=ALL --args="mitigations=off"', shell=True, check=True)
 
 # Extra scripts
-subprocess.run("{0}/Csshconfig.sh".format(SCRIPTDIR), shell=True)
+subprocess.run("{0}/Csshconfig.py".format(SCRIPTDIR), shell=True)
 subprocess.run("{0}/CShellConfig.py -f -z -d".format(SCRIPTDIR), shell=True)
 subprocess.run("{0}/CCSClone.py".format(SCRIPTDIR), shell=True)
 subprocess.run("{0}/CDisplayManagerConfig.py".format(SCRIPTDIR), shell=True)
