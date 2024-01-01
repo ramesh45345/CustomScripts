@@ -20,12 +20,12 @@ SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))
 # Get arguments
 parser = argparse.ArgumentParser(description='Install CentOS 9 Software.')
 parser.add_argument("-d", "--desktop", help='Desktop Environment (choices: %(choices)s) (default: %(default)s)', default="kde", choices=["gnome", "kde"])
+parser.add_argument("-k", "--kerneltype", type=int, help="Kernel type (0=stock kernel, 1=Mainline kernel, 2=LTS kernel (default: %(default)s)", default=1, choices=[0, 1, 2])
 parser.add_argument("-x", "--nogui", help='Configure script to disable GUI.', action="store_true")
-
-# Save arguments.
 args = parser.parse_args()
-print("Desktop Environment:", args.desktop)
-print("No GUI:", args.nogui)
+print(f"Desktop Environment: {args.desktop}")
+print(f"No GUI: {args.nogui}")
+print(f"Kernel install type: {args.kerneltype}")
 
 # Exit if not root.
 CFunc.is_root(True)
@@ -72,7 +72,10 @@ subprocess.run("sudo chmod u+s /sbin/mount.cifs", shell=True)
 CFunc.dnfinstall("systemd-timesyncd")
 subprocess.run("systemctl enable systemd-timesyncd; timedatectl set-local-rtc false; timedatectl set-ntp 1", shell=True)
 # Install kernel
-CFunc.dnfinstall("kernel-ml kernel-ml-devel kernel-ml-modules-extra")
+if args.kerneltype == 1:
+    CFunc.dnfinstall("kernel-ml kernel-ml-devel kernel-ml-modules-extra")
+elif args.kerneltype == 2:
+    CFunc.dnfinstall("kernel-lt kernel-lt-devel kernel-lt-modules-extra")
 # Install powerline fonts
 powerline_git_path = os.path.join(tempfile.gettempdir(), "pl-fonts")
 CFunc.gitclone("https://github.com/powerline/fonts", powerline_git_path)
