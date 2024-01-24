@@ -648,7 +648,18 @@ if shutil.which("tmux"):
     CFunc.find_replace(tmux_cfg_path, "#set -g history-limit 10000", "set -g history-limit 10000", ".tmux.conf.local")
     # Rebind n and p to cycle windows
     with open(tmux_cfg_common_local, 'a') as f:
-        f.write("\nbind p previous-window\nbind n next-window\n")
+        f.write(r"""
+bind p previous-window
+bind n next-window
+# Powerline patched separators
+tmux_conf_theme_left_separator_main='\uE0B0'
+tmux_conf_theme_left_separator_sub='\uE0B1'
+tmux_conf_theme_right_separator_main='\uE0B2'
+tmux_conf_theme_right_separator_sub='\uE0B3'
+# Updates for status bar
+tmux_conf_theme_status_left="↑#{?uptime_y, #{uptime_y}y,}#{?uptime_d, #{uptime_d}d,}#{?uptime_h, #{uptime_h}h,}#{?uptime_m, #{uptime_m}m,} "
+tmux_conf_theme_status_right=" #{battery_percentage} | #{username}#{root} | #{hostname} "
+""")
         if args.fish and shutil.which('fish'):
             f.write("\nset -g default-command {0}\nset -g default-shell {0}\n".format(shutil.which("fish")))
     # Install tmux config
