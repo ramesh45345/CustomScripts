@@ -119,7 +119,7 @@ addtext(r"""
 # From stock image.
 RUN sed -i '/tsflags=nodocs/d' /etc/dnf/dnf.conf
 RUN dnf -y reinstall acl bash curl gawk grep gzip libcap openssl p11-kit pam python3 rpm sed systemd tar
-RUN dnf -y install bash-completion bzip2 diffutils dnf-plugins-core findutils flatpak-spawn fpaste git gnupg gnupg2-smime gvfs-client hostname iputils jwhois keyutils krb5-libs less lsof man-db man-pages mlocate mtr nano-default-editor nss-mdns openssh-clients passwd pigz procps-ng rsync shadow-utils sudo tcpdump time tmux traceroute tree unzip vte-profile wget which words xorg-x11-xauth xz zip
+RUN dnf -y install bash-completion bzip2 diffutils dnf-plugins-core findutils flatpak-spawn fpaste fuse fuse-libs git gnupg gnupg2-smime gvfs-client hostname iputils jwhois keyutils krb5-libs less lsof man-db man-pages mlocate mtr nano-default-editor nss-mdns openssh-clients passwd pigz procps-ng rsync shadow-utils sudo tcpdump time tmux traceroute tree unzip vte-profile wget which words xorg-x11-xauth xz zip
 
 # Shell Tools
 RUN dnf -y install zsh
