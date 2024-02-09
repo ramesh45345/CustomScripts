@@ -119,6 +119,9 @@ if args.uninstall is False:
     NetXMLText = """<network>
   <name>default</name>
   <forward mode='nat'/>
+    <nat ipv6="yes">
+      <port start="1024" end="65535"/>
+    </nat>
   <bridge name='virbr0' {2} stp='off'/>
   <ip address='{0}.1' netmask='255.255.255.0'>
     <dhcp>
