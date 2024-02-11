@@ -716,6 +716,35 @@ if os.path.isfile(places_xml_path):
     # Write the XML file
     xml_indent(root)
     tree.write(places_xml_path)
+# Konsole session
+konsolesession_xml_path = os.path.join(USERHOME, ".local", "share", "kxmlgui5", "konsole", "sessionui.rc")
+if os.path.isfile(konsolesession_xml_path):
+    # Get the xml.
+    tree = ET.parse(konsolesession_xml_path)
+    root = tree.getroot()
+
+    found_key = False
+    # Elements to be added
+    action_left_right = ET.Element("Action", {"name": "split-view-left-right"})
+    action_top_bottom = ET.Element("Action", {"name": "split-view-top-bottom"})
+
+    for element in root.iter():
+        # Search for the toolbar tag.
+        if "ToolBar" in element.tag:
+            # Search for the name of the attribute, to see if it has already been added.
+            for a in element.iter():
+                if a.attrib.get('name') == "split-view-left-right":
+                    found_key = True
+            # If the existing key wasn't found, add it.
+            if found_key == False:
+                print("Modifying Konsole xml")
+                # Insert the elements at the 0 and 1 position.
+                element.insert(0, action_left_right)
+                element.insert(1, action_top_bottom)
+
+    # Write the XML file
+    xml_indent(root)
+    tree.write(konsolesession_xml_path, xml_declaration=True, encoding='UTF-8')
 
 
 # Xfce settings
