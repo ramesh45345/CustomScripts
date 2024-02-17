@@ -188,7 +188,7 @@ if __name__ == '__main__':
     CPUCORES = multiprocessing.cpu_count()
     # Set memory to system memory size / 4.
     mem_mib = int(((os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')) / (1024.**2)) / 4)
-    size_disk_default_gb = 64
+    size_disk_default_gb = 100
 
     # Get arguments
     parser = argparse.ArgumentParser(description='Create a VM using packer.')

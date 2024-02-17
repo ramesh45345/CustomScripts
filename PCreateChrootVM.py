@@ -177,7 +177,7 @@ if __name__ == '__main__':
     # Get non-root user information.
     USERNAMEVAR, USERGROUP, USERHOME = CFunc.getnormaluser()
     CPUCORES = multiprocessing.cpu_count() if multiprocessing.cpu_count() <= 4 else 4
-    imgsize_default = "64"
+    imgsize_default = "100"
 
     # Ensure that certain commands exist.
     cmdcheck = ["ssh", "sshpass", "qemu-img", "virsh", "ip"]
