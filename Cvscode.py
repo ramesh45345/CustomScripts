@@ -16,8 +16,8 @@ print("Running {0}".format(__file__))
 parser = argparse.ArgumentParser(description='Install Visual Studio Code configuration.')
 parser.add_argument("-t", "--type", help='''Type of configuration. Leave blank for autodetect.
     1: Native (Linux)
-    2: Flatpak (OSS)
-    3: Windows
+    2: VSCodium Windows
+    3: VSCode Windows
     4: VSCodium
     5: VSCodium Flatpak
 ''', type=int, default=None)
@@ -38,14 +38,14 @@ def cmd_silent(cmd=list):
 def cmd_pips(cmd_type=int, enabled=bool):
     """Install python pip packages"""
     pip_packages = "pylama pylama-pylint flake8"
-    # Flatpak (OSS)
-    if enabled is True and cmd_type == 2:
-        subprocess.run("flatpak run --command=pip3 com.visualstudio.code-oss install {0} --user".format(pip_packages), shell=True, check=True)
+    # Flatpak
+    if enabled is True and cmd_type == 5:
+        subprocess.run("flatpak run --command=pip3 com.vscodium.codium install {0} --user".format(pip_packages), shell=True, check=True)
     # Windows
-    if enabled is True and cmd_type == 3 and shutil.which("pip"):
+    if enabled is True and (2 <= cmd_type <= 3) and shutil.which("pip"):
         subprocess.run("pip install {0}".format(pip_packages), shell=True, check=True)
     # Other Linux types
-    if cmd_type == 1 or cmd_type == 3 or cmd_type == 5 and enabled is True and shutil.which("pip3") and not CFunc.is_nixos():
+    if (cmd_type == 1 or cmd_type == 4) and enabled is True and shutil.which("pip3") and not CFunc.is_nixos():
         subprocess.run("pip3 install pylama pylama-pylint flake8", shell=True, check=True)
 def ce_ins(vscode_cmd=list, extension=str):
     """Install an extension"""
@@ -104,21 +104,18 @@ if not CFunc.is_windows() and shutil.which("code"):
     code_array[1]["en"] = True
 else:
     code_array[1]["en"] = False
-if os.path.isdir(os.path.join(userhome, ".config", "Code - OSS", "User")):
-    # Native code config path for Manjaro pkg.
-    code_array[1]["path"] = os.path.join(userhome, ".config", "Code - OSS", "User")
-else:
-    code_array[1]["path"] = os.path.join(userhome, ".config", "Code", "User")
+code_array[1]["path"] = os.path.join(userhome, ".config", "Code", "User")
 
-# Flatpak
-code_array[2]["cmd"] = ["flatpak", "run", "--command=code-oss", "com.visualstudio.code-oss"]
-if shutil.which("flatpak") and cmd_silent(code_array[2]["cmd"] + ["-h"]) == 0:
+# VSCodium Windows
+code_array[2]["cmd"] = [os.path.join("C:", os.sep, "Program Files", "VSCodium", "bin", "codium.cmd")]
+# Since the command is in an array, index the 0th element to run which on it.
+if CFunc.is_windows() and shutil.which(code_array[2]["cmd"][0]):
     code_array[2]["en"] = True
 else:
     code_array[2]["en"] = False
-code_array[2]["path"] = os.path.join(userhome, ".var", "app", "com.visualstudio.code-oss", "config", "Code - OSS", "User")
+code_array[2]["path"] = os.path.join(userhome, "AppData", "Roaming", "VSCodium", "User")
 
-# Windows
+# VSCode Windows
 code_array[3]["cmd"] = [os.path.join("C:", os.sep, "Program Files", "Microsoft VS Code", "bin", "code.cmd")]
 # Since the command is in an array, index the 0th element to run which on it.
 if CFunc.is_windows() and shutil.which(code_array[3]["cmd"][0]):
@@ -153,13 +150,13 @@ if args.type is not None:
         if idx != args.type:
             code_array[idx]["en"] = False
 
-print("""Enabled choices:
-1 (Native): {0}
-2 (Flatpak OSS): {1}
-3 (Windows): {2}
-4 (VSCodium): {3}
-5 (VSCodium Flatpak): {4}
-""".format(code_array[1]["en"], code_array[2]["en"], code_array[3]["en"], code_array[4]["en"], code_array[5]["en"]))
+print(f"""Enabled choices:
+1 (Native): {code_array[1]["en"]}
+2 (VSCodium WindowsS): {code_array[2]["en"]}
+3 (VSCode Windows): {code_array[3]["en"]}
+4 (VSCodium): {code_array[4]["en"]}
+5 (VSCodium Flatpak): {code_array[5]["en"]}
+""")
 
 
 ########################## Begin Code ##########################
