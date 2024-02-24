@@ -526,6 +526,7 @@ if __name__ == '__main__':
         CFunc.find_replace(tempunattendfolder, "INSERTHOSTNAMENAMEHERE", vmname, "*")
         CFunc.find_replace(tempunattendfolder, "INSERTHASHEDPASSWORDHERE", sha512_password, "*")
         CFunc.find_replace(tempunattendfolder, "INSERTSSHKEYHERE", sshkey, "*")
+        CFunc.find_replace(tempscriptfolderpath, "INSERTSSHKEYHERE", sshkey, "Win-provision.ps1")
 
     # Get hash for iso.
     if md5_isourl:

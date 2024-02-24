@@ -106,6 +106,10 @@ Function Fcn-List-All {
 Set-Alias l Get-ChildItemColor -option AllScope
 Set-Alias la Get-ChildItemColor -option AllScope
 Set-Alias ls Get-ChildItemColorFormatWide -Option AllScope
+# which
+function which($name) {
+    Get-Command $name | Select-Object -ExpandProperty Definition
+}
 
 """
 os.makedirs(powershell_profile_folder, exist_ok=True)

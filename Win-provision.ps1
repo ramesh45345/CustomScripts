@@ -20,6 +20,7 @@ $Repo = "$RepoUser/$RepoName"
 $RepoLocalPath = "$CSRootPath\$RepoName"
 $cs_userpassword = "INSERTPASSWORDHERE"
 $cs_username = "INSERTUSERHERE"
+$user_sshkey = "INSERTSSHKEYHERE"
 # Check if Virtual Machine
 $VMstring = Get-CimInstance -ClassName Win32_ComputerSystem
 if ( $VMstring.Model -imatch "vmware" ) {
@@ -135,12 +136,12 @@ function Fcn-Software {
   choco upgrade -y dotnetfx dotnet dotnet-desktopruntime
   # Install universal apps
   choco upgrade -y 7zip
-  # Libraries
-  choco upgrade -y vcredist-all git python
   # Remove execution alias, which prevents python scripts from being run in powershell.
   # https://superuser.com/questions/1728816/manage-windows-app-execution-aliases-from-powershell
   Remove-Item $env:LOCALAPPDATA\Microsoft\WindowsApps\python.exe
   Remove-Item $env:LOCALAPPDATA\Microsoft\WindowsApps\python3.exe
+  # Libraries
+  choco upgrade -y vcredist-all git python
   $gitcmdpath = "C:\Program Files\Git\bin"
 
   # Install VM Tools
@@ -199,7 +200,7 @@ function Fcn-Software {
   # Workaround for windows-terminal https://github.com/mkevenaar/chocolatey-packages/issues/136
   Add-AppxPackage https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx
   # GUI Apps
-  choco upgrade -y firefox notepadplusplus tortoisegit bleachbit putty chocolateygui conemu cascadiafonts vscodium sumatrapdf winget WizTree
+  choco upgrade -y firefox notepadplusplus tortoisegit bleachbit gsudo putty chocolateygui conemu cascadiafonts vscodium sumatrapdf winget WizTree
   choco upgrade -y ShutUp10
   # Set default browser.
   choco upgrade -y setdefaultbrowser
@@ -478,6 +479,21 @@ function Fcn-oosu {
   }
 }
 
+function Fcn-ssh {
+  # Check for ssh feature: Get-WindowsCapability -Online | Where-Object Name -like 'OpenSSH*'
+  if (Test-Path "C:\tools\gsudo\Current\gsudo.exe") {
+    Start-Process -Wait "C:\tools\gsudo\Current\gsudo.exe" -ArgumentList "Add-WindowsCapability","-Online","-Name","OpenSSH.Server~~~~0.0.1.0"
+  } else {
+    Add-WindowsCapability -Online -Name "OpenSSH.Server~~~~0.0.1.0"
+  }
+  Start-Service sshd
+  Set-Service -Name sshd -StartupType 'Automatic'
+  New-ItemProperty -Path "HKLM:\SOFTWARE\OpenSSH" -Name DefaultShell -Value "C:\Program Files\PowerShell\7\pwsh.exe" -PropertyType String -Force
+  if ( -Not ( $user_sshkey.Contains("INSERTSSHKEYHERE") ) ) {
+    Set-Content -Path "$env:ProgramData\ssh\administrators_authorized_keys" -Value "$user_sshkey"
+  }
+}
+
 ### Begin Code ###
 if (-Not $isDotSourced) {
   Write-Output "Running provision script."
@@ -490,6 +506,7 @@ if (-Not $isDotSourced) {
   Fcn-debloat
   if ( $IsVM -eq $true ) {
     Fcn-DisableDefender
+    Fcn-ssh
   }
   Fcn-DisableWinRM
 }
