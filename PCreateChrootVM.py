@@ -251,7 +251,7 @@ if __name__ == '__main__':
         if args.debversion is not None:
             debversion = args.debversion
         else:
-            debversion = "mantic"
+            debversion = "noble"
         # VM commands
         vmbootstrap_cmd = 'cd ~ && export LANG=en_US.UTF-8 && /opt/CustomScripts/ZSlimDrive.py -n -g && /opt/CustomScripts/BDebian.py -n -z -t ubuntu -r {debversion} -g 3 -i /dev/vda2 -c "{hostname}" -u {username} -q "{password}" -f "{fullname}" --forcelink /mnt && echo "PermitRootLogin yes" >> /mnt/etc/ssh/sshd_config && poweroff'.format(hostname=vm_name, username=args.vmuser, password=args.vmpass, fullname=args.fullname, debversion=debversion)
         vmprovision_cmd = """mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{vmuser}/.ssh; echo '{sshkey}' > ~{vmuser}/.ssh/authorized_keys; chown {vmuser}:users -R ~{vmuser}; rm -f /etc/resolv.conf ; echo -e "nameserver 1.0.0.1\\nnameserver 1.1.1.1\\nnameserver 2606:4700:4700::1111\\nnameserver 2606:4700:4700::1001" > /etc/resolv.conf; /opt/CustomScripts/MUbuntu.py -d {desktop}""".format(vmuser=args.vmuser, sshkey=sshkey, desktop=args.desktopenv)
