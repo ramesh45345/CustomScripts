@@ -164,7 +164,7 @@ apt install -y passwd
 passwd -u root
 chpasswd <<<"root:{PASSWORD}"
 # Setup normal user
-if ! grep -i {USERNAME} /etc/passwd; then
+if ! grep "^{USERNAME}" /etc/passwd; then
     adduser --disabled-password --gecos "" {USERNAME}
     chfn -f "{FULLNAME}" {USERNAME}
 fi
