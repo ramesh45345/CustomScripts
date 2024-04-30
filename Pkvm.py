@@ -308,7 +308,7 @@ if __name__ == '__main__':
         vboxosid = "Fedora_64"
         vmwareid = "fedora-64"
         kvm_variant = "silverblue-rawhide"
-        isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/40/Silverblue/x86_64/iso/	Fedora-Silverblue-ostree-x86_64-40-1.14.iso"
+        isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/40/Silverblue/x86_64/iso/Fedora-Silverblue-ostree-x86_64-40-1.14.iso"
         vmname = "Packer-FedoraSilverblue-{0}".format(hvname)
         vmprovision_defopts = ""
     if 10 <= args.ostype <= 19:
