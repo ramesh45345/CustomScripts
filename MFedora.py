@@ -100,12 +100,10 @@ if __name__ == '__main__':
 
     # GUI Packages
     if not args.nogui:
-        # Mesa freeworld
-        CFunc.dnfinstall("--best --allowerasing mesa-va-drivers-freeworld mesa-vdpau-drivers-freeworld")
         # Distrobox
         CFunc.dnfinstall("distrobox")
         # Base Packages
-        CFunc.dnfinstall("@fonts @base-x @networkmanager-submodules xrandr xset --exclude mesa-va-drivers")
+        CFunc.dnfinstall("@fonts @base-x @networkmanager-submodules xrandr xset")
         # Browsers
         # Official Google Chrome
         # CFunc.dnfinstall("https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm")
@@ -117,7 +115,7 @@ if __name__ == '__main__':
         # Multimedia
         CFunc.dnfinstall("@multimedia")
         CFunc.dnfinstall("gstreamer1-vaapi")
-        CFunc.dnfinstall("ffmpeg mpv")
+        CFunc.dnfinstall("--allowerasing ffmpeg mpv")
         CFuncExt.ytdlp_install()
         # Editors
         CFunc.dnfinstall("codium")
