@@ -48,7 +48,7 @@ def create_chroot_arch(path: str, packages: str = "base"):
     """Create an arch chroot."""
     print("Creating arch at {0}".format(path))
     os.makedirs(path, exist_ok=False)
-    ctr_create("docker.io/library/archlinux:latest", path, "sed -i 's/^#ParallelDownloads/ParallelDownloads/g' /etc/pacman.conf && pacman -Sy --noconfirm --needed arch-install-scripts && pacstrap -c /chrootfld {0}".format(packages))
+    ctr_create("docker.io/library/archlinux:latest", path, "sed -i 's/^#ParallelDownloads/ParallelDownloads/g' /etc/pacman.conf && pacman -Syu --noconfirm --needed arch-install-scripts && pacstrap -Pc /chrootfld {0}".format(packages))
 def create_chroot_fedora(path: str, packages: str = "systemd passwd dnf fedora-release vim-minimal"):
     """Create a fedora chroot."""
     print("Creating fedora at {0}".format(path))
@@ -102,6 +102,18 @@ if os.path.isdir(arch_chroot_location):
 # Create chroot if it doesn't exist
 if not os.path.isdir(ubuntu_chroot_location) and shutil.which("debootstrap"):
     os.makedirs(ubuntu_chroot_location)
+    # Debootstrap link for ubuntu version.
+    debootstrap_scriptsfolder = os.path.join(os.sep, "usr", "share", "debootstrap", "scripts")
+    if os.path.isdir(debootstrap_scriptsfolder):
+        # Check that the release exists
+        if not os.path.islink(os.path.join(debootstrap_scriptsfolder, ubuntu_version)):
+            currentpath = os.getcwd()
+            os.chdir(debootstrap_scriptsfolder)
+            # Symlink if it doesn't exist
+            os.symlink("gutsy", ubuntu_version)
+            os.chdir(currentpath)
+            print("\nNOTE: symlink for {0} created at {1}.\n".format(ubuntu_version, debootstrap_scriptsfolder))
+    # Run debootstrap
     subprocess.run("debootstrap {0} {1} http://archive.ubuntu.com/ubuntu/".format(ubuntu_version, ubuntu_chroot_location), shell=True, check=True)
     zch.ChrootCommand(ubuntu_chroot_location, "sh -c 'apt install -y debootstrap binutils squashfs-tools grub-pc-bin grub-efi-amd64-bin mtools dosfstools unzip'")
     zch.ChrootCommand(ubuntu_chroot_location, "sh -c 'apt-get install -y --no-install-recommends software-properties-common'")
