@@ -277,7 +277,7 @@ if __name__ == '__main__':
         vboxosid = "Fedora_64"
         vmwareid = "fedora-64"
         kvm_variant = "fedora-rawhide"
-        isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/39/Server/x86_64/iso/Fedora-Server-dvd-x86_64-39-1.5.iso"
+        isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/40/Server/x86_64/iso/Fedora-Server-dvd-x86_64-40-1.14.iso"
         if args.desktopenv is None:
             args.desktopenv = "xfce"
     if args.ostype == 1:
@@ -644,6 +644,7 @@ if __name__ == '__main__':
         data['build']['provisioner'][0]["shell"]["inline"] = ["dnf install -y git; {2}; /opt/CustomScripts/{0} {1}; systemctl reboot".format(vmprovisionscript, vmprovision_opts, git_cmdline())]
         data['build']['provisioner'][0]["shell"]["expect_disconnect"] = True
         data['build']['provisioner'].append('')
+        data['build']['provisioner'][1] = {}
         data['build']['provisioner'][1]["shell"] = {}
         data['build']['provisioner'][1]["shell"]["inline"] = ["/opt/CustomScripts/Aiso_CreateVM.py"]
         data['build']['provisioner'][1]["shell"]["pause_before"] = "15s"
