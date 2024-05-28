@@ -64,8 +64,9 @@ def vm_getimgpath(vmname: str, folder_path: str):
 def vm_createimage(img_path: str, size_gb: int):
     """Create a VM image file."""
     subprocess.run("qemu-img create -f qcow2 -o compat=1.1,lazy_refcounts=on '{0}' {1}G".format(img_path, size_gb), shell=True, check=True)
-def vm_create(vmname: str, img_path: str, isopath: str):
+def vm_create(vmname: str, img_path: str, isopath: str, memory: int):
     """Create the VM in libvirt."""
+    CPUCORES = multiprocessing.cpu_count()
     kvm_video = "virtio"
     kvm_diskinterface = "virtio"
     kvm_netdevice = "virtio"
@@ -73,10 +74,10 @@ def vm_create(vmname: str, img_path: str, isopath: str):
     efi_bin, efi_nvram = Pkvm.ovmf_bin_nvramcopy(os.path.dirname(img_path), vmname, secureboot=False)
     # virt-install manual: https://www.mankier.com/1/virt-install
     # List of os: osinfo-query os
-    CREATESCRIPT_KVM = """virt-install --connect qemu:///system --name={vmname} --install bootdev=cdrom --boot=hd,cdrom --disk device=cdrom,path="{isopath}",bus=sata,target=sda,readonly=on --disk path={fullpathtoimg},bus={kvm_diskinterface} --graphics spice --vcpu={cpus} --ram={memory} --network bridge=virbr0,model={kvm_netdevice} --filesystem source=/,target=root,mode=mapped --os-variant={kvm_variant} --import --noautoconsole --noreboot --video={kvm_video} --channel unix,target_type=virtio,name=org.qemu.guest_agent.0 --channel spicevmc,target_type=virtio,name=com.redhat.spice.0 --boot loader={efi_bin},loader_ro=yes,loader_type=pflash,nvram={efi_nvram}""".format(vmname=vmname, memory=args.memory, cpus=CPUCORES, fullpathtoimg=img_path, kvm_variant=kvm_variant, kvm_video=kvm_video, kvm_diskinterface=kvm_diskinterface, kvm_netdevice=kvm_netdevice, isopath=isopath, efi_bin=efi_bin, efi_nvram=efi_nvram)
+    CREATESCRIPT_KVM = f"""virt-install --connect qemu:///system --name={vmname} --install bootdev=cdrom --boot=hd,cdrom --disk device=cdrom,path="{isopath}",bus=sata,target=sda,readonly=on --disk path={img_path},bus={kvm_diskinterface} --graphics spice --vcpu={CPUCORES},sockets=1,cores={CPUCORES} --ram={args.memory} --network bridge=virbr0,model={kvm_netdevice} --filesystem source=/,target=root,mode=mapped --os-variant={kvm_variant} --import --noautoconsole --noreboot --video={kvm_video} --channel unix,target_type=virtio,name=org.qemu.guest_agent.0 --channel spicevmc,target_type=virtio,name=com.redhat.spice.0 --boot loader={efi_bin},loader_ro=yes,loader_type=pflash,nvram={efi_nvram}"""
     subprocess.run(CREATESCRIPT_KVM, shell=True, check=True)
     # Log the launch command.
-    logging.info("""KVM launch command: virt-install --connect qemu:///system --name={vmname} --disk path={fullpathtoimg},bus={kvm_diskinterface} --disk device=cdrom,bus=sata,target=sda,readonly=on --graphics spice --vcpu={cpus} --ram={memory} --network bridge=virbr0,model={kvm_netdevice} --filesystem source=/,target=root,mode=mapped --os-variant={kvm_variant} --import --noautoconsole --noreboot --video={kvm_video} --channel unix,target_type=virtio,name=org.qemu.guest_agent.0 --channel spicevmc,target_type=virtio,name=com.redhat.spice.0 --boot loader={efi_bin},loader_ro=yes,loader_type=pflash,nvram={efi_nvram}""".format(vmname=vmname, memory=args.memory, cpus=CPUCORES, fullpathtoimg=img_path, kvm_variant=kvm_variant, kvm_video=kvm_video, kvm_diskinterface=kvm_diskinterface, kvm_netdevice=kvm_netdevice, efi_bin=efi_bin, efi_nvram=efi_nvram))
+    logging.info(f"""KVM launch command: virt-install --connect qemu:///system --name={vmname} --disk path={img_path},bus={kvm_diskinterface} --disk device=cdrom,bus=sata,target=sda,readonly=on --graphics spice --vcpu={CPUCORES},sockets=1,cores={CPUCORES} --ram={args.memory} --network bridge=virbr0,model={kvm_netdevice} --filesystem source=/,target=root,mode=mapped --os-variant={kvm_variant} --import --noautoconsole --noreboot --video={kvm_video} --channel unix,target_type=virtio,name=org.qemu.guest_agent.0 --channel spicevmc,target_type=virtio,name=com.redhat.spice.0 --boot loader={efi_bin},loader_ro=yes,loader_type=pflash,nvram={efi_nvram}""")
 def vm_ejectiso(vmname: str):
     """Eject an iso from a VM."""
     subprocess.run("virsh --connect qemu:///system change-media {0} sda --eject --config".format(vmname), shell=True, check=False)
@@ -176,7 +177,6 @@ if __name__ == '__main__':
 
     # Get non-root user information.
     USERNAMEVAR, USERGROUP, USERHOME = CFunc.getnormaluser()
-    CPUCORES = multiprocessing.cpu_count() if multiprocessing.cpu_count() <= 4 else 4
     imgsize_default = "100"
 
     # Ensure that certain commands exist.
@@ -305,7 +305,7 @@ if __name__ == '__main__':
     # Create new VM.
     print("\nCreating VM.")
     vm_createimage(imgpath, args.imgsize)
-    vm_create(vm_name, imgpath, iso_path)
+    vm_create(vm_name, imgpath, iso_path, memory=args.memory)
     # Bootstrap the VM.
     vm_start(vm_name)
     sship = vm_getip(vm_name)

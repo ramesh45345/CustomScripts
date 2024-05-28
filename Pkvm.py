@@ -822,10 +822,10 @@ if __name__ == '__main__':
         graphics_type = "spice"
         # virt-install manual: https://www.mankier.com/1/virt-install
         # List of os: osinfo-query os
-        CREATESCRIPT_KVM = """virt-install --connect qemu:///system --name={vmname} --disk path={fullpathtoimg}.qcow2,bus={kvm_diskinterface} --disk device=cdrom,bus=sata,target=sda,readonly=on --graphics {graphics} --vcpu={cpus} --ram={memory} --network bridge=virbr0,model={kvm_netdevice} --filesystem source=/,target=root,mode=mapped --os-variant={kvm_variant} --import --noautoconsole --noreboot --video={kvm_video} --channel unix,target_type=virtio,name=org.qemu.guest_agent.0 --channel spicevmc,target_type=virtio,name=com.redhat.spice.0""".format(vmname=vmname, memory=args.memory, cpus=CPUCORES, fullpathtoimg=os.path.join(vmpath, vmname), kvm_variant=kvm_variant, kvm_video=kvm_video, kvm_diskinterface=kvm_diskinterface, kvm_netdevice=kvm_netdevice, graphics=graphics_type)
+        CREATESCRIPT_KVM = f"""virt-install --connect qemu:///system --name={vmname} --disk path={os.path.join(vmpath, vmname)}.qcow2,bus={kvm_diskinterface} --disk device=cdrom,bus=sata,target=sda,readonly=on --graphics {graphics_type} --vcpu={CPUCORES},sockets=1,cores={CPUCORES} --ram={args.memory} --network bridge=virbr0,model={kvm_netdevice} --filesystem source=/,target=root,mode=mapped --os-variant={kvm_variant} --import --noautoconsole --noreboot --video={kvm_video} --channel unix,target_type=virtio,name=org.qemu.guest_agent.0 --channel spicevmc,target_type=virtio,name=com.redhat.spice.0"""
         if useefi is True:
             # Add efi loading
-            CREATESCRIPT_KVM += " --boot loader={0},loader_ro=yes,loader_type=pflash,nvram={1}".format(efi_bin, efi_nvram)
+            CREATESCRIPT_KVM += f" --boot loader={efi_bin},loader_ro=yes,loader_type=pflash,nvram={efi_nvram}"
             if secureboot is True:
                 # Add options to efi line. Note that this line (",loader_secure=yes") MUST follow the previous efi line.
                 CREATESCRIPT_KVM += ",loader_secure=yes --features smm.state=on"
