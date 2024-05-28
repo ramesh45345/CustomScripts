@@ -664,7 +664,6 @@ if __name__ == '__main__':
         data['build']['provisioner'][1]["shell"]["timeout"] = "90m"
     if 10 <= args.ostype <= 19:
         data['build']['provisioner'][0]["shell"] = {}
-        
         data['build']['provisioner'][0]["shell"]["inline"] = ["mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{vmuser}/.ssh; echo '{sshkey}' > ~{vmuser}/.ssh/authorized_keys; chown {vmuser}:{vmuser} -R ~{vmuser}; apt install -y git; {gitcmd}; /opt/CustomScripts/{vmprovisionscript} {vmprovision_opts}".format(vmprovisionscript=vmprovisionscript, vmprovision_opts=vmprovision_opts, sshkey=sshkey, vmuser=args.vmuser, gitcmd=git_cmdline())]
         # Workaround for ssh being enabled on livecd. Remove this when a method to disable ssh on livecd is found.
         data['source'][packer_type]['local']["ssh_handshake_attempts"] = "9999"
@@ -679,16 +678,13 @@ if __name__ == '__main__':
     if 20 <= args.ostype <= 24:
         data['source'][packer_type]['local']["boot_command"] = ["<up><tab> inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/centos.cfg<enter><wait>"]
         data['build']['provisioner'][0]["shell"] = {}
-        
         data['build']['provisioner'][0]["shell"]["inline"] = ["{2}; /opt/CustomScripts/{0} {1}".format(vmprovisionscript, vmprovision_opts, git_cmdline())]
     if 25 <= args.ostype <= 29:
         data['source'][packer_type]['local']["boot_command"] = ["<up><tab> inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/almalinux.cfg<enter><wait>"]
         data['build']['provisioner'][0]["shell"] = {}
-        
         data['build']['provisioner'][0]["shell"]["inline"] = ["{2}; /opt/CustomScripts/{0} {1}".format(vmprovisionscript, vmprovision_opts, git_cmdline())]
     if 30 <= args.ostype <= 39:
         data['build']['provisioner'][0]["shell"] = {}
-        
         data['build']['provisioner'][0]["shell"]["inline"] = ["hostnamectl set-hostname '{vmname}'; mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{vmuser}/.ssh; echo '{sshkey}' > ~{vmuser}/.ssh/authorized_keys; chown {vmuser}:{vmuser} -R ~{vmuser}; apt install -y git dhcpcd5 avahi-daemon sudo; systemctl enable --now avahi-daemon; {gitcmd}; /opt/CustomScripts/{vmprovisionscript} {vmprovision_opts}".format(vmprovisionscript=vmprovisionscript, vmprovision_opts=vmprovision_opts, sshkey=sshkey, vmuser=args.vmuser, gitcmd=git_cmdline(), vmname=vmname)]
         data['source'][packer_type]['local']["boot_command"] = ["<esc>auto url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/debian.cfg hostname=debian locale=en_US keyboard-configuration/modelcode=SKIP netcfg/choose_interface=auto <enter>"]
     if 40 <= args.ostype <= 41:

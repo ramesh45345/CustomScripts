@@ -47,6 +47,9 @@ else:
     print("Creating work folder {0}.".format(buildfolder))
     os.makedirs(buildfolder, 0o777)
 
+# Clone fedora-kickstarts to work folder
+spinkickstarts_folder = os.path.join(buildfolder, "fedora-kickstarts")
+CFunc.gitclone("https://pagure.io/fedora-kickstarts.git", spinkickstarts_folder)
 # Modify lorax isolinux config
 subprocess.run('sed -i "s/^timeout.*/timeout 10/g" /usr/share/lorax/templates.d/99-generic/config_files/x86/isolinux.cfg', shell=True, check=True)
 subprocess.run('sed -i "/menu default/d" /usr/share/lorax/templates.d/99-generic/config_files/x86/isolinux.cfg', shell=True, check=True)
@@ -57,20 +60,20 @@ subprocess.run('sed -i "s/^set timeout=.*/set timeout=1/g" /usr/share/lorax/temp
 # Disable selinux and mitigations
 subprocess.run('sed -i "s/ quiet$/ quiet selinux=0 mitigations=off/g" /usr/share/lorax/templates.d/99-generic/live/config_files/x86/grub2-bios.cfg /usr/share/lorax/templates.d/99-generic/config_files/x86/grub2-bios.cfg /usr/share/lorax/templates.d/99-generic/config_files/x86/isolinux.cfg /usr/share/lorax/templates.d/99-generic/live/config_files/x86/grub2-efi.cfg /usr/share/lorax/templates.d/99-generic/config_files/x86/grub2-efi.cfg', shell=True, check=True)
 # Modify kickstart repos
-with open(os.path.join(os.sep, "usr", "share", "spin-kickstarts", "fedora-repo.ks"), 'w') as f:
+with open(os.path.join(spinkickstarts_folder, "fedora-repo.ks"), 'w') as f:
     f.write("%include fedora-repo-not-rawhide.ks")
 # Remove auth statements. Temporary workaround, to be removed.
-subprocess.run("sed -i '/^auth */d' /usr/share/spin-kickstarts/fedora-live-base.ks", shell=True, check=False)
+subprocess.run(f"sed -i '/^auth */d' {spinkickstarts_folder}/fedora-live-base.ks", shell=True, check=False)
 # Remove x86-baremetal-tools. Temporary workaround, to be removed when https://github.com/rhinstaller/kickstart-tests/issues/740 is fixed.
-subprocess.run("sed -i '/x86-baremetal-tools/d' /usr/share/spin-kickstarts/fedora-live-base.ks", shell=True, check=False)
+subprocess.run(f"sed -i '/x86-baremetal-tools/d' {spinkickstarts_folder}/fedora-live-base.ks", shell=True, check=False)
 
 
 ### Prep Environment ###
 # https://fedoraproject.org/wiki/Livemedia-creator-_How_to_create_and_use_a_Live_CD
 # https://github.com/rhinstaller/lorax/blob/master/docs/livemedia-creator.rst
 ks_text = r"""
-%include /usr/share/spin-kickstarts/fedora-live-base.ks
-%include /usr/share/spin-kickstarts/fedora-live-minimization.ks
+%include {0}/fedora-live-base.ks
+%include {0}/fedora-live-minimization.ks
 
 part / --size 7168
 selinux --disabled
@@ -259,7 +262,7 @@ restorecon -R /home/liveuser/
 EOF
 
 %end
-"""
+""".format(spinkickstarts_folder)
 ks_path = os.path.join(buildfolder, "fediso.ks")
 with open(ks_path, 'w') as ks_write:
     ks_write.write(ks_text)
