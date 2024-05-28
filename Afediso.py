@@ -223,7 +223,7 @@ Type=Application
 EOL
 
 # Script run on boot
-cat >> /etc/rc.d/init.d/livesys << EOF
+cat > /var/lib/livesys/livesys-session-late-extra << EOF
 
 # Set root password
 passwd -u root
