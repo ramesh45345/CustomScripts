@@ -65,7 +65,7 @@ if __name__ == '__main__':
         input("Press Enter to continue.")
 
     # Bootstrap the chroot environment.
-    ctr_create(absinstallpath, "sed -i 's/^#ParallelDownloads/ParallelDownloads/g' /etc/pacman.conf && pacman -Sy --noconfirm --needed arch-install-scripts && pacstrap -c /chrootfld base base-devel && genfstab -U /chrootfld > /chrootfld/etc/fstab && sed -i '/zram0/d' /chrootfld/etc/fstab")
+    ctr_create(absinstallpath, "sed -i 's/^#ParallelDownloads/ParallelDownloads/g' /etc/pacman.conf && pacman -Sy --noconfirm --needed arch-install-scripts && pacstrap -Pc /chrootfld base base-devel && genfstab -U /chrootfld > /chrootfld/etc/fstab && sed -i '/zram0/d' /chrootfld/etc/fstab")
 
     # Create and run setup script.
     SETUPSCRIPT = '''#!/bin/bash
