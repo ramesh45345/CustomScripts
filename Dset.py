@@ -536,7 +536,7 @@ if shutil.which("kwriteconfig6") and shutil.which("plasma_session"):
     subprocess.run('kwriteconfig6 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --key "PreloadWeight" "42"'.format(toppanel_appletgroup_id), shell=True, check=False)
 
     plasma_desktop_string = ""
-    plasma_desktop_search_list = ["firefox.desktop", "brave-browser.desktop", "chrome.desktop", 'thunderbird.desktop', 'kde.dolphin.desktop', "org.kde.konsole.desktop", 'virt-manager.desktop', 'org.kde.plasma-systemmonitor.desktop', 'gnome-system-monitor.desktop']
+    plasma_desktop_search_list = ["firefox.desktop", "brave-browser.desktop", "chrome.desktop", 'thunderbird.desktop', 'kde.dolphin.desktop', "org.kde.konsole.desktop", 'virt-manager.desktop', 'org.kde.plasma-systemmonitor.desktop', 'gnome-system-monitor.desktop', 'gnome-system-monitor-kde.desktop']
     plasma_desktop_file_list = []
     for d in plasma_desktop_search_list:
         ds = CMimeSet.LocateDesktopFileName(d)
