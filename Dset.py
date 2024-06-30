@@ -34,11 +34,21 @@ def dconf_write(key: str, value: str):
     status = subprocess.run(['dconf', 'write', key, value], check=False).returncode
     if status != 0:
         print("ERROR, failed to run: dconf write {0} {1}".format(key, value))
-def kwriteconfig(file: str, group: str, key: str, value: str):
+def kwriteconfig(file: str, group, key: str, value: str, type: str = "str"):
     """Set KDE configs using kwriteconfig6."""
-    status = subprocess.run(['kwriteconfig6', '--file', file, "--group", group, "--key", key, value], check=False).returncode
+    cmd = ['kwriteconfig6', '--file', file]
+    # Loop through the group if it is a list.
+    if isinstance(group, list):
+        for x in group:
+            cmd += ["--group", x]
+    else:
+        cmd += ["--group", group]
+    cmd += ["--key", key, "--type", type, value]
+    # Run command
+    status = subprocess.run(cmd, check=False).returncode
+    # Print if error
     if status != 0:
-        print("ERROR, failed to run: kwriteconfig6 --file {0} --group {1} --key {2} {3}".format(file, group, key, value))
+        print(f"ERROR, failed to run: {cmd}")
 def xfconf(channel: str, prop: str, var_type: str, value: str, extra_options: list = None):
     """
     Set value to property using xfconf.
@@ -368,20 +378,20 @@ if shutil.which("kwriteconfig6") and shutil.which("plasma_session"):
     kwriteconfig("kwinrc", "Plugins", "trackmouseEnabled", "true")
     kwriteconfig("kwinrc", "Windows", "ElectricBorderCornerRatio", "0.1")
     # Lock Screen and Power Management
-    subprocess.run('kwriteconfig6 --file powerdevilrc --group AC --group Display --key DimDisplayWhenIdle false', shell=True, check=False)
+    kwriteconfig("powerdevilrc", ["AC", "Display"], "DimDisplayWhenIdle", "false")
     if vmstatus or args.disable_powersave:
-        # subprocess.run('kwriteconfig6 --file powerdevilrc --group AC --group Display --key TurnOffDisplayIdleTimeoutSec "-1"', shell=True, check=False)
-        subprocess.run('kwriteconfig6 --file powerdevilrc --group AC --group Display --key TurnOffDisplayWhenIdle false', shell=True, check=False)
+        kwriteconfig("powerdevilrc", ["AC", "Display"], "TurnOffDisplayWhenIdle", "false")
     else:
-        subprocess.run('kwriteconfig6 --file powerdevilrc --group AC --group Display --key TurnOffDisplayWhenIdle true', shell=True, check=False)
-    subprocess.run('kwriteconfig6 --file powerdevilrc --group AC --group Display --key TurnOffDisplayIdleTimeoutWhenLockedSec 20', shell=True, check=False)
-    subprocess.run('kwriteconfig6 --file powerdevilrc --group AC --group SuspendAndShutdown --key AutoSuspendAction 0', shell=True, check=False)
-    subprocess.run('kwriteconfig6 --file powerdevilrc --group AC --group SuspendAndShutdown --key LidAction 64', shell=True, check=False)
-    subprocess.run('kwriteconfig6 --file powerdevilrc --group AC --group SuspendAndShutdown --key PowerButtonAction 8', shell=True, check=False)
-    subprocess.run('kwriteconfig6 --file powerdevilrc --group Battery --group Display --key DimDisplayWhenIdle false', shell=True, check=False)
-    subprocess.run('kwriteconfig6 --file powerdevilrc --group Battery --group Display --key TurnOffDisplayIdleTimeoutWhenLockedSec 20', shell=True, check=False)
-    subprocess.run('kwriteconfig6 --file powerdevilrc --group Battery --group SuspendAndShutdown --key PowerButtonAction 1', shell=True, check=False)
-    subprocess.run('kwriteconfig6 --file powerdevilrc --group LowBattery --group Display --key TurnOffDisplayIdleTimeoutWhenLockedSec 0', shell=True, check=False)
+        kwriteconfig("powerdevilrc", ["AC", "Display"], "TurnOffDisplayWhenIdle", "true")
+    kwriteconfig("powerdevilrc", ["AC", "Display"], "TurnOffDisplayIdleTimeoutWhenLockedSec", "20")
+    kwriteconfig("powerdevilrc", ["AC", "SuspendAndShutdown"], "AutoSuspendAction", "0")
+    kwriteconfig("powerdevilrc", ["AC", "SuspendAndShutdown"], "LidAction", "64")
+    kwriteconfig("powerdevilrc", ["AC", "SuspendAndShutdown"], "PowerButtonAction", "8")
+
+    kwriteconfig("powerdevilrc", ["Battery", "Display"], "DimDisplayWhenIdle", "false")
+    kwriteconfig("powerdevilrc", ["Battery", "Display"], "TurnOffDisplayIdleTimeoutWhenLockedSec", "20")
+    kwriteconfig("powerdevilrc", ["Battery", "SuspendAndShutdown"], "PowerButtonAction", "1")
+    kwriteconfig("powerdevilrc", ["LowBattery", "Display"], "TurnOffDisplayIdleTimeoutWhenLockedSec", "0")
     subprocess.run('kwriteconfig6 --file kscreenlockerrc --group Daemon --key Autolock --type bool false', shell=True, check=False)
     subprocess.run('kwriteconfig6 --file kscreenlockerrc --group Daemon --key LockOnResume --type bool false', shell=True, check=False)
     subprocess.run('kwriteconfig6 --file kscreenlockerrc --group Daemon --key Timeout 10', shell=True, check=False)
