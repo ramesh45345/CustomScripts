@@ -385,8 +385,9 @@ if shutil.which("kwriteconfig6") and shutil.which("plasma_session"):
     subprocess.run('kwriteconfig6 --file kscreenlockerrc --group Daemon --key Autolock --type bool false', shell=True, check=False)
     subprocess.run('kwriteconfig6 --file kscreenlockerrc --group Daemon --key LockOnResume --type bool false', shell=True, check=False)
     subprocess.run('kwriteconfig6 --file kscreenlockerrc --group Daemon --key Timeout 10', shell=True, check=False)
-    subprocess.run('kwriteconfig6 --file ksmserverrc --group General --key confirmLogout false', shell=True, check=False)
-    subprocess.run('kwriteconfig6 --file ksmserverrc --group General --key offerShutdown true', shell=True, check=False)
+    kwriteconfig("ksmserverrc", "General", "confirmLogout", "false")
+    kwriteconfig("ksmserverrc", "General", "offerShutdown", "true")
+    kwriteconfig("ksmserverrc", "General", "loginMode", "emptySession")
     # Konsole settings
     kwriteconfig("konsolerc", "Desktop Entry", "DefaultProfile", "Profile 1.profile")
     kwriteconfig("konsolerc", "KonsoleWindow", "RememberWindowSize", "false")
