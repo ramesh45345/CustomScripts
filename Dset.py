@@ -922,8 +922,8 @@ CustomCommand={0}
 
 
 # Firefox settings.
-# If prefs.js for firefox was created, set the profile information. Search for natively installed firefox, flatpak firefox, and flatpak librewolf.
-firefox_profiles_paths = [os.path.join(USERHOME, ".mozilla", "firefox"), os.path.join(USERHOME, ".var", "app", "org.mozilla.firefox", ".mozilla", "firefox"), os.path.join(USERHOME, ".var", "app", "io.gitlab.librewolf-community", ".librewolf")]
+# If prefs.js for firefox was created, set the profile information. Search for natively installed firefox, flatpak firefox, librewolf, and flatpak librewolf.
+firefox_profiles_paths = [os.path.join(USERHOME, ".mozilla", "firefox"), os.path.join(USERHOME, ".var", "app", "org.mozilla.firefox", ".mozilla", "firefox"), os.path.join(USERHOME, ".librewolf"), os.path.join(USERHOME, ".var", "app", "io.gitlab.librewolf-community", ".librewolf")]
 for ff_path in firefox_profiles_paths:
     if os.path.isdir(ff_path):
         # Find profile folders
