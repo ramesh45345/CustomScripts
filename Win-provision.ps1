@@ -494,6 +494,13 @@ function Fcn-ssh {
   }
 }
 
+function Fcn-exppatch {
+  # Get explorer patcher
+  Invoke-WebRequest "https://github.com/valinet/ExplorerPatcher/releases/latest/download/ep_setup.exe" -OutFile "$env:USERPROFILE/Downloads/ep_setup.exe"
+  # Run explorer patcher
+  Start-Process "$env:USERPROFILE/Downloads/ep_setup.exe"
+}
+
 ### Begin Code ###
 if (-Not $isDotSourced) {
   Write-Output "Running provision script."
@@ -505,6 +512,7 @@ if (-Not $isDotSourced) {
   Fcn-Customize
   Fcn-debloat
   if ( $IsVM -eq $true ) {
+    Fcn-exppatch
     Fcn-DisableDefender
     Fcn-ssh
   }
