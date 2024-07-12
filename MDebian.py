@@ -149,7 +149,7 @@ Acquire::ftp::Timeout "5";''')
     CFunc.aptdistupg()
 
     # Cli Software
-    CFunc.aptinstall("ssh tmux zsh fish btrfs-progs f2fs-tools xfsprogs dmraid mdadm nano p7zip-full p7zip-rar unrar curl wget rsync less iotop sshfs sudo python-is-python3 nala")
+    CFunc.aptinstall("ssh tmux zsh fish btrfs-progs f2fs-tools xfsprogs mdadm nano p7zip-full p7zip-rar unrar curl wget rsync less iotop sshfs sudo python-is-python3 nala")
     # Firmware
     CFunc.aptinstall("firmware-linux")
     subprocess.run("""echo "firmware-ipw2x00 firmware-ipw2x00/license/accepted boolean true" | debconf-set-selections
@@ -164,7 +164,7 @@ echo "firmware-ivtv firmware-ivtv/license/accepted boolean true" | debconf-set-s
     CFunc.sysctl_enable("systemd-timesyncd")
     subprocess.run(["timedatectl", "set-local-rtc", "false"], check=True)
     subprocess.run(["timedatectl", "set-ntp", "1"], check=True)
-    subprocess.run(["timedatectl", "set-timezone", "US/Eastern"], check=True)
+    subprocess.run(["timedatectl", "set-timezone", "America/New_York"], check=True)
     # Avahi
     CFunc.aptinstall("avahi-daemon avahi-discover libnss-mdns")
     # Firewalld
