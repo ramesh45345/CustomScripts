@@ -69,6 +69,13 @@ user_pref("browser.startup.page", 3);
 user_pref("media.autoplay.default", 5);
 // Enable vaapi
 user_pref("media.ffmpeg.vaapi.enabled", true);
+// Password and autofill
+user_pref("extensions.formautofill.addresses.enabled", false);
+user_pref("extensions.formautofill.creditCards.enabled", false);
+user_pref("signon.rememberSignons", false);
+// Search
+user_pref("browser.urlbar.suggest.quicksuggest.nonsponsored", false);
+user_pref("browser.urlbar.suggest.quicksuggest.sponsored", false);
 
 /*** From Librewolf ***/
 user_pref("privacy.clearOnShutdown.cache", false);
