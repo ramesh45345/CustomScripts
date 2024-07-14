@@ -4,6 +4,7 @@
 # Python includes.
 import argparse
 import datetime
+import functools
 import ipaddress
 import logging
 import multiprocessing
@@ -15,6 +16,9 @@ import time
 # Custom includes
 import CFunc
 import Pkvm
+
+# Disable buffered stdout (to ensure prints are in order)
+print = functools.partial(print, flush=True)
 
 # Folder of this script
 SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))

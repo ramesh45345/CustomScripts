@@ -3,6 +3,7 @@
 
 # Python includes.
 import argparse
+import functools
 import os
 import shutil
 import subprocess
@@ -10,6 +11,9 @@ import sys
 # Custom includes
 import CFunc
 import zch
+
+# Disable buffered stdout (to ensure prints are in order)
+print = functools.partial(print, flush=True)
 
 # Get arguments
 parser = argparse.ArgumentParser(description='Provision VM for ISO building.')

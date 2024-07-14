@@ -8,6 +8,7 @@
 
 # Python includes.
 import argparse
+import functools
 import os
 import sys
 import subprocess
@@ -15,6 +16,9 @@ import shutil
 import stat
 # Custom includes
 import CFunc
+
+# Disable buffered stdout (to ensure prints are in order)
+print = functools.partial(print, flush=True)
 
 # Folder of this script
 SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))

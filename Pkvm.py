@@ -9,6 +9,7 @@ Libvirt: https://github.com/thomasklein94/packer-plugin-libvirt , https://develo
 # Python includes.
 import argparse
 from datetime import datetime
+import functools
 import hashlib
 import json
 import logging
@@ -26,6 +27,9 @@ import xml.etree.ElementTree as ET
 # Custom includes
 from passlib import hash
 import CFunc
+
+# Disable buffered stdout (to ensure prints are in order)
+print = functools.partial(print, flush=True)
 
 # Folder of this script
 SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))

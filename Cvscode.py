@@ -3,12 +3,16 @@
 
 # Python includes.
 import argparse
+import functools
 import json
 import os
 import shutil
 import subprocess
 # Custom includes
 import CFunc
+
+# Disable buffered stdout (to ensure prints are in order)
+print = functools.partial(print, flush=True)
 
 print("Running {0}".format(__file__))
 
