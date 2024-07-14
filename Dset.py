@@ -747,7 +747,7 @@ if os.path.isfile(konsolesession_xml_path):
                 if a.attrib.get('name') == "split-view-left-right":
                     found_key = True
             # If the existing key wasn't found, add it.
-            if found_key == False:
+            if found_key is False:
                 print("Modifying Konsole xml")
                 # Insert the elements at the 0 and 1 position.
                 element.insert(0, action_left_right)

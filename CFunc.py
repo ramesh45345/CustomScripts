@@ -3,6 +3,7 @@
 
 # Python includes.
 import fnmatch
+import functools
 import logging
 import os
 import pathlib
@@ -27,6 +28,9 @@ def is_windows():
 if is_windows() is False:
     import grp
     import pwd
+
+# Disable buffered stdout (to ensure prints are in order)
+print = functools.partial(print, flush=True)
 
 # Folder of this script
 SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))
