@@ -51,6 +51,10 @@ user_pref("media.hardware-video-decoding.enabled", true);
 user_pref("gfx.canvas.accelerated", true);
 /** MOZILLA ***/
 user_pref("browser.tabs.firefox-view", false);
+user_pref("privacy.resistFingerprinting.letterboxing", false);
+user_pref("privacy.resistFingerprinting", false);
+user_pref("privacy.window.maxInnerHeight", 0);
+user_pref("privacy.window.maxInnerWidth", 0);
 /** MOZILLA UI ***/
 user_pref("browser.preferences.moreFromMozilla", false);
 user_pref("browser.aboutwelcome.enabled", false);
