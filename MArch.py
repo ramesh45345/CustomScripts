@@ -121,8 +121,6 @@ if __name__ == '__main__':
         CFunc.pacman_install("firefox")
         # Cups
         CFunc.pacman_install("cups-pdf")
-        # Audio/video
-        CFunc.pacman_install("paprefs")
         # Remote access
         CFunc.pacman_install("remmina")
         # Tilix

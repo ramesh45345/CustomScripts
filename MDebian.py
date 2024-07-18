@@ -198,8 +198,6 @@ echo "firmware-ivtv firmware-ivtv/license/accepted boolean true" | debconf-set-s
         # Media Playback
         CFunc.aptinstall("ffmpeg")
         CFuncExt.ytdlp_install()
-        CFunc.aptinstall("alsa-utils pavucontrol pulseaudio-module-zeroconf pulseaudio-module-bluetooth swh-plugins")
-        CFunc.aptinstall("paprefs")
         CFunc.aptinstall("gstreamer1.0-vaapi")
         CFunc.aptinstall("fonts-powerline fonts-noto fonts-roboto")
         # Tilix
