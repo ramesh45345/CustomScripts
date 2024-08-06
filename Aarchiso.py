@@ -106,6 +106,8 @@ lxdm
 xorg-server
 xorg-drivers
 xorg-xset
+xorg-xhost
+xorg-xrandr
 mesa-libgl
 mesa-demos
 xorg-xinit
@@ -121,23 +123,10 @@ gvfs
 gvfs-smb
 tilix
 
-# Mate Desktop
-mate
-
-# Mate Extra tools
-atril
-caja-open-terminal
+# Xfce Desktop
+xfce4
+xfce4-goodies
 engrampa
-eom
-galculator
-mate-applets
-mate-power-manager
-mate-screensaver
-mate-system-monitor
-mate-terminal
-mate-utils
-pluma
-mate-icon-theme
 ttf-dejavu
 ttf-liberation
 ttf-roboto
@@ -159,7 +148,7 @@ systemctl disable multi-user.target
 
 systemctl -f enable lxdm
 sed -i 's/#\ autologin=dgod/autologin=liveuser/g' /etc/lxdm/lxdm.conf
-sed -i 's/#\ session=\/usr\/bin\/startlxde/session=\/usr\/bin\/mate-session/g' /etc/lxdm/lxdm.conf
+sed -i 's/#\ session=\/usr\/bin\/startlxde/session=\/usr\/bin\/xfce4-session/g' /etc/lxdm/lxdm.conf
 
 systemctl enable NetworkManager
 
@@ -174,9 +163,6 @@ usermod -aG wheel,network,floppy,audio,input,disk,video,storage,optical,systemd-
 /opt/CustomScripts/CShellConfig.py -z -d -f -u liveuser
 echo "liveuser ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/nopw
 chmod 0440 /etc/sudoers.d/nopw
-
-# Mate config
-/opt/CustomScripts/DExtMate.py
 
 # Enable avahi and ssh
 systemctl enable sshd
@@ -210,10 +196,10 @@ systemctl enable updatecs.service
 
 # --- END Update CustomScripts on startup ---
 
-# Run MATE Settings script on desktop startup.
-cat >"/etc/xdg/autostart/matesettings.desktop" <<"EOL"
+# Run Settings script on desktop startup.
+cat >"/etc/xdg/autostart/dsettings.desktop" <<"EOL"
 [Desktop Entry]
-Name=MATE Settings Script
+Name=Settings Script
 Exec=/opt/CustomScripts/Dset.py
 Terminal=false
 Type=Application

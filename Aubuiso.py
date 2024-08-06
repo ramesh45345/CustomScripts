@@ -4,6 +4,7 @@
 # Python includes.
 import argparse
 from datetime import datetime
+import functools
 import logging
 import os
 from pathlib import Path
@@ -15,6 +16,9 @@ import traceback
 # Custom includes
 import CFunc
 import zch
+
+# Disable buffered stdout (to ensure prints are in order)
+print = functools.partial(print, flush=True)
 
 print("Running {0}".format(__file__))
 
@@ -91,7 +95,7 @@ CFunc.subpout_logger("debootstrap --arch=amd64 --variant=minbase {0} {1}  http:/
 
 # Create chroot script.
 with open(os.path.join(rootfsfolder, "chrootscript.sh"), 'w') as f_handle:
-    f_handle.write("""#!/bin/bash -e
+    f_handle.write(r"""#!/bin/bash
 # Setup
 export HOME=/root
 export LC_ALL=C
@@ -190,8 +194,7 @@ gnome-disk-utility \
 gparted \
 gvfs \
 lightdm \
-mate-desktop-environment \
-ubuntu-mate-core \
+xubuntu-desktop-minimal \
 gnome-icon-theme \
 network-manager \
 network-manager-gnome \
@@ -202,37 +205,13 @@ x11-xserver-utils
 
 # Install VM software
 apt-get install -y \
-dkms \
 spice-vdagent \
 qemu-guest-agent \
 open-vm-tools \
 open-vm-tools-desktop \
 virtualbox-guest-utils \
-virtualbox-guest-dkms \
 virtualbox-guest-x11 \
 build-essential
-
-# Install pacman
-apt install --no-install-recommends -y meson libarchive-dev libssl-dev libgpgme-dev libcurl4-openssl-dev python3-setuptools
-cd /root
-git clone https://git.archlinux.org/pacman.git/
-cd pacman
-meson builddir
-cd builddir
-ninja
-ninja install
-ldconfig
-cd /root
-rm -rf /root/pacman
-apt install --no-install-recommends -y asciidoc m4 xsltproc
-git clone https://git.archlinux.org/arch-install-scripts.git
-cd arch-install-scripts
-make
-make install
-sudo apt remove -y --purge asciidoc m4 xsltproc meson libarchive-dev libssl-dev libgpgme-dev libcurl4-openssl-dev python3-setuptools
-cd /root
-rm -rf /root/arch-install-scripts
-mkdir -p /etc/pacman.d/
 
 cat <<EOF > /etc/NetworkManager/NetworkManager.conf
 [main]
@@ -261,9 +240,6 @@ useradd -m ubuntu
 # Sudoers configuration
 /opt/CustomScripts/CFuncExt.py -s
 
-# Mate Configuration
-/opt/CustomScripts/DExtMate.py
-
 # Update CustomScripts on startup
 cat >"/etc/systemd/system/updatecs.service" <<'EOL'
 [Unit]
@@ -283,14 +259,14 @@ WantedBy=graphical.target
 EOL
 systemctl enable updatecs.service
 
-# Dset
-cat >"/etc/xdg/autostart/dset.desktop" <<"EOL"
-[Desktop Entry]
-Name=Dset
-Exec=/opt/CustomScripts/Dset.py -p
-Terminal=false
-Type=Application
-EOL
+# # Dset
+# cat >"/etc/xdg/autostart/dset.desktop" <<"EOL"
+# [Desktop Entry]
+# Name=Dset
+# Exec=/opt/CustomScripts/Dset.py -p
+# Terminal=false
+# Type=Application
+# EOL
 
 # Autoset resolution
 cat >"/etc/xdg/autostart/ra.desktop" <<"EOL"

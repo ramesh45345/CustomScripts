@@ -85,11 +85,16 @@ selinux --disabled
 %packages
 
 # Desktop Environment
-@mate-desktop
-@mate-applications
+@xfce-desktop-environment
+xfce4-whiskermenu-plugin
+xfce4-systemload-plugin
+xfce4-diskperf-plugin
+xfce4-clipman-plugin
+tilix
 @networkmanager-submodules
 NetworkManager-wifi
 network-manager-applet
+xrandr
 
 # Firmware
 iwl4965-firmware
@@ -217,14 +222,44 @@ WantedBy=graphical.target
 EOL
 systemctl enable updatecs.service
 
-# Run MATE Settings script on desktop startup.
-cat >"/etc/xdg/autostart/mate-dset.desktop" <<"EOL"
+# Run Settings script on desktop startup.
+cat >"/etc/xdg/autostart/dset.desktop" <<"EOL"
 [Desktop Entry]
-Name=MATE Settings Script
+Name=Settings Script
 Exec=/opt/CustomScripts/Dset.py -p
 Terminal=false
 Type=Application
 EOL
+
+# Autoset resolution
+cat >"/etc/xdg/autostart/ra.desktop" <<"EOL"
+[Desktop Entry]
+Name=Autoresize Resolution
+Exec=/usr/local/bin/ra.sh
+Terminal=false
+Type=Application
+EOL
+cat >"/usr/local/bin/ra.sh" <<'EOL'
+#!/bin/bash
+while true; do
+    sleep 5
+    if [ -z $DISPLAY ]; then
+        echo "Display variable not set. Exiting."
+        exit 1;
+    fi
+    xhost +localhost
+    # Detect the display output from xrandr.
+    RADISPLAYS=$(xrandr --listmonitors | awk '{{print $4}}')
+    while true; do
+        sleep 1
+        # Loop through every detected display and autoset them.
+        for disp in ${{RADISPLAYS[@]}}; do
+            xrandr --output $disp --auto
+        done
+    done
+done
+EOL
+chmod a+rwx /usr/local/bin/ra.sh
 
 # Script run on boot
 cat > /var/lib/livesys/livesys-session-late-extra << EOF
@@ -241,15 +276,15 @@ chsh -s /bin/zsh liveuser
 # LightDM Autologin
 sed -i 's/^#autologin-user=.*/autologin-user=liveuser/' /etc/lightdm/lightdm.conf
 # sed -i 's/^#autologin-user-timeout=.*/autologin-user-timeout=0/' /etc/lightdm/lightdm.conf
-echo -e "[SeatDefaults]\nautologin-user=liveuser\nuser-session=mate" > /etc/lightdm/lightdm.conf.d/12-autologin.conf
+echo -e "[SeatDefaults]\nautologin-user=liveuser\nuser-session=xfce" > /etc/lightdm/lightdm.conf.d/12-autologin.conf
 groupadd autologin
 gpasswd -a liveuser autologin
 
 # rebuild schema cache with any overrides we installed
 glib-compile-schemas /usr/share/glib-2.0/schemas
 
-# set MATE as default session, otherwise login will fail
-sed -i 's/^#user-session=.*/user-session=mate/' /etc/lightdm/lightdm.conf
+# set xfce as default session, otherwise login will fail
+sed -i 's/^#user-session=.*/user-session=xfce/' /etc/lightdm/lightdm.conf
 
 # Turn off PackageKit-command-not-found while uninstalled
 if [ -f /etc/PackageKit/CommandNotFound.conf ]; then
