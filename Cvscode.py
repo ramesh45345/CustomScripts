@@ -47,10 +47,10 @@ def cmd_pips(cmd_type=int, enabled=bool):
         subprocess.run("flatpak run --command=pip3 com.vscodium.codium install {0} --user".format(pip_packages), shell=True, check=True)
     # Windows
     if enabled is True and (2 <= cmd_type <= 3) and shutil.which("pip"):
-        subprocess.run("pip install {0}".format(pip_packages), shell=True, check=True)
+        subprocess.run(f"pip install {pip_packages}", shell=True, check=True)
     # Other Linux types
     if (cmd_type == 1 or cmd_type == 4) and enabled is True and shutil.which("pip3") and not CFunc.is_nixos():
-        subprocess.run("pip3 install pylama pylama-pylint flake8", shell=True, check=True)
+        subprocess.run(f"pip3 install {pip_packages}", shell=True, check=False)
 def ce_ins(vscode_cmd=list, extension=str):
     """Install an extension"""
     subprocess.run(vscode_cmd + ["--install-extension", extension, "--force"], check=False, shell=False)
