@@ -186,8 +186,19 @@ if args.stage == 1:
 if args.stage == 2:
     print("Stage 2")
     systemd_resostreed()
+    subprocess.run("rpm-ostree update --uninstall rpmfusion-free-release --uninstall rpmfusion-nonfree-release --install rpmfusion-free-release --install rpmfusion-nonfree-release", shell=True, check=True)
     rostreeinstall("rpmfusion-free-release-tainted rpmfusion-nonfree-release-tainted")
     subprocess.run("systemctl enable smb", shell=True, check=True)
+
+    # Freeworld
+    # https://rpmfusion.org/Howto/OSTree
+    rostreeinstall("intel-media-driver libva-intel-driver")
+    subprocess.run("rpm-ostree override remove mesa-va-drivers --install mesa-va-drivers-freeworld", shell=True, check=False)
+    subprocess.run("rpm-ostree override remove mesa-vdpau-drivers --install mesa-vdpau-drivers-freeworld", shell=True, check=False)
+    subprocess.run("rpm-ostree install gstreamer1-plugin-libav gstreamer1-plugins-bad-free-extras gstreamer1-plugins-bad-freeworld gstreamer1-plugins-ugly gstreamer1-vaapi", shell=True, check=False)
+    subprocess.run("rpm-ostree override remove libavcodec-free libavfilter-free libavformat-free libavutil-free libpostproc-free libswresample-free libswscale-free --install ffmpeg", shell=True, check=False)
+    # https://github.com/fedora-silverblue/issue-tracker/issues/536#issuecomment-1974780009
+    subprocess.run("rpm-ostree override remove noopenh264 --install openh264 --install mozilla-openh264", shell=True, check=False)
 
     # Add normal user to all reasonable groups
     group_silverblueadd("disk")
@@ -214,11 +225,6 @@ if args.stage == 2:
 
     # Flatpak apps
     subprocess.run(os.path.join(SCRIPTDIR, "CFlatpakConfig.py"), shell=True, check=True)
-    # Flameshot
-    CFunc.flatpak_install("flathub", "org.flameshot.Flameshot")
-    os.makedirs(os.path.join(USERHOME, ".config", "autostart"), exist_ok=True)
-    # Start flameshot on user login.
-    shutil.copy("/var/lib/flatpak/app/org.flameshot.Flameshot/current/active/export/share/applications/org.flameshot.Flameshot.desktop", os.path.join(USERHOME, ".config", "autostart"))
 
     # Specific install section
     if fedora_version.endswith("silverblue"):
