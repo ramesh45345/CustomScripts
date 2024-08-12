@@ -194,9 +194,6 @@ if args.stage == 2:
     # https://rpmfusion.org/Howto/OSTree
     rostreeinstall("intel-media-driver libva-intel-driver")
     subprocess.run("rpm-ostree override remove mesa-va-drivers --install mesa-va-drivers-freeworld", shell=True, check=False)
-    subprocess.run("rpm-ostree override remove mesa-vdpau-drivers --install mesa-vdpau-drivers-freeworld", shell=True, check=False)
-    subprocess.run("rpm-ostree install gstreamer1-plugin-libav gstreamer1-plugins-bad-free-extras gstreamer1-plugins-bad-freeworld gstreamer1-plugins-ugly gstreamer1-vaapi", shell=True, check=False)
-    subprocess.run("rpm-ostree override remove libavcodec-free libavfilter-free libavformat-free libavutil-free libpostproc-free libswresample-free libswscale-free --install ffmpeg", shell=True, check=False)
     # https://github.com/fedora-silverblue/issue-tracker/issues/536#issuecomment-1974780009
     subprocess.run("rpm-ostree override remove noopenh264 --install openh264 --install mozilla-openh264", shell=True, check=False)
 
