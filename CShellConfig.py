@@ -614,6 +614,7 @@ if args.zsh is True and shutil.which('zsh'):
 ZSH_THEME="agnoster"
 plugins=( {1} )
 DISABLE_UPDATE_PROMPT=true
+DISABLE_MAGIC_FUNCTIONS=true
 source $ZSH/oh-my-zsh.sh
 
 # Expand $PATH to include the CustomScripts path.
