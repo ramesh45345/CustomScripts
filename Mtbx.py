@@ -59,25 +59,25 @@ print("Distro:", args.distro)
 ### Prune ###
 if args.prune:
     if args.distro == "all" or args.distro == "arch":
-        subprocess.run("podman rmi --force arch-shared", check=False, shell=True)
+        subprocess.run("podman rmi --force arch-img", check=False, shell=True)
     if args.distro == "all" or args.distro == "fedora":
-        subprocess.run("podman rmi --force fedora-shared", check=False, shell=True)
+        subprocess.run("podman rmi --force fedora-img", check=False, shell=True)
     if args.distro == "all" or args.distro == "ubuntu":
-        subprocess.run("podman rmi --force ubuntu-shared", check=False, shell=True)
+        subprocess.run("podman rmi --force ubuntu-img", check=False, shell=True)
 
 
 ### Create containerfile ###
 containerfile_arch = """
 FROM docker.io/library/archlinux:base-devel
-ENV NAME=arch-shared
+ENV NAME=arch-img
 """
 containerfile_fedora = """
 FROM registry.fedoraproject.org/fedora:latest
-ENV NAME=fedora-shared
+ENV NAME=fedora-img
 """
 containerfile_ubuntu = """
 FROM docker.io/library/ubuntu:latest
-ENV NAME=ubuntu-shared
+ENV NAME=ubuntu-img
 """
 
 addtext(r"""
@@ -215,27 +215,27 @@ if args.distro == "all" or args.distro == "ubuntu":
 currentpath = os.getcwd()
 if args.distro == "all" or args.distro == "arch":
     os.chdir(tempfolder_arch)
-    subprocess.run(["podman", "build", "--pull=true", "-t", "arch-shared", "-f", os.path.basename(tempfile_arch)], check=True)
+    subprocess.run(["podman", "build", "--pull=true", "-t", "arch-img", "-f", os.path.basename(tempfile_arch)], check=True)
 if args.distro == "all" or args.distro == "fedora":
     os.chdir(tempfolder_fedora)
-    subprocess.run(["podman", "build", "--pull=true", "-t", "fedora-shared", "-f", os.path.basename(tempfile_fedora)], check=True)
+    subprocess.run(["podman", "build", "--pull=true", "-t", "fedora-img", "-f", os.path.basename(tempfile_fedora)], check=True)
 if args.distro == "all" or args.distro == "ubuntu":
     os.chdir(tempfolder_ubuntu)
-    subprocess.run(["podman", "build", "--pull=true", "-t", "ubuntu-shared", "-f", os.path.basename(tempfile_ubuntu)], check=True)
+    subprocess.run(["podman", "build", "--pull=true", "-t", "ubuntu-img", "-f", os.path.basename(tempfile_ubuntu)], check=True)
 os.chdir(currentpath)
 
 print("""
 The following commands can be used to create and run containers:
 
 Distrobox:
-distrobox create -n test -i arch-shared ; distrobox enter arch-shared
-distrobox create -n test -i fedora-shared ; distrobox enter fedora-shared
-distrobox create -n test -i ubuntu-shared ; distrobox enter ubuntu-shared
+distrobox create -n arch-ct -i arch-img ; distrobox enter arch-ct
+distrobox create -n fedora-ct -i fedora-img ; distrobox enter fedora-ct
+distrobox create -n ubuntu-ct -i ubuntu-img ; distrobox enter ubuntu-ct
 
 Distrobox (non-shared home):
-distrobox create -n arch-shared -i arch-shared -H /mnt/Storage/VMs/arch-shared-home ; distrobox enter arch-shared
-distrobox create -n fedora-shared -i fedora-shared -H /mnt/Storage/VMs/fedora-shared-home ; distrobox enter fedora-shared
-distrobox create -n ubuntu-shared -i ubuntu-shared -H /mnt/Storage/VMs/ubuntu-shared-home ; distrobox enter ubuntu-shared
+distrobox create -n arch-ct -i arch-img -H /mnt/Storage/VMs/arch-ct-home ; distrobox enter arch-ct
+distrobox create -n fedora-ct -i fedora-img -H /mnt/Storage/VMs/fedora-ct-home ; distrobox enter fedora-ct
+distrobox create -n ubuntu-ct -i ubuntu-img -H /mnt/Storage/VMs/ubuntu-ct-home ; distrobox enter ubuntu-ct
 
 Add --root to both create and run container to use as root.
 """)
