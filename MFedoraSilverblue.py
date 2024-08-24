@@ -162,6 +162,8 @@ if args.stage == 1:
             os.remove(gnome_startup_file)
         subprocess.run("rpm-ostree override remove gnome-software gnome-software-rpm-ostree", shell=True, check=False)
     elif fedora_version.endswith("kinoite"):
+        # xorg support
+        rostreeinstall("plasma-workspace-x11")
         # Gnome Disk Utility
         rostreeinstall("gnome-disk-utility")
 

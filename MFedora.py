@@ -165,6 +165,8 @@ if __name__ == '__main__':
         # KDE
         CFunc.dnfinstall("--allowerasing @kde-desktop-environment")
         CFunc.dnfinstall("ark")
+        # xorg support
+        CFunc.dnfinstall("plasma-workspace-x11")
         CFunc.sysctl_enable("-f sddm", error_on_fail=True)
     elif args.desktop == "mate":
         # MATE
