@@ -44,6 +44,8 @@ for ff_path in firefox_profiles_paths:
                     userjs_text = """
 /** GFX ***/
 user_pref("gfx.webrender.all", true);
+// Enable software rendering due to long load times in firefox.
+user_pref("gfx.webrender.software", true);
 user_pref("gfx.webrender.precache-shaders", true);
 user_pref("gfx.webrender.compositor", true);
 user_pref("layers.gpu-process.enabled", true);
