@@ -41,7 +41,7 @@ if __name__ == '__main__':
 
     # Get arguments
     parser = argparse.ArgumentParser(description='Install Fedora Software.')
-    parser.add_argument("-d", "--desktop", help='Desktop Environment (i.e. gnome, kde, mate, etc)')
+    parser.add_argument("-d", "--desktop", help='Desktop Environment', choices=['gnome', 'kde', 'mate', 'xfce', 'lxqt', 'cinnamon', None], default=None)
     parser.add_argument("-x", "--nogui", help='Configure script to disable GUI.', action="store_true")
 
     # Save arguments.
