@@ -129,10 +129,10 @@ else:
 code_array[3]["path"] = os.path.join(userhome, "AppData", "Roaming", "Code", "User")
 
 # VSCodium
-if shutil.which("vscodium"):
+if shutil.which("vscodium") and not CFunc.is_windows():
     code_array[4]["cmd"] = ["vscodium"]
     code_array[4]["en"] = True
-elif shutil.which("codium"):
+elif shutil.which("codium") and not CFunc.is_windows():
     code_array[4]["cmd"] = ["codium"]
     code_array[4]["en"] = True
 else:
@@ -156,7 +156,7 @@ if args.type is not None:
 
 print(f"""Enabled choices:
 1 (Native): {code_array[1]["en"]}
-2 (VSCodium WindowsS): {code_array[2]["en"]}
+2 (VSCodium Windows): {code_array[2]["en"]}
 3 (VSCode Windows): {code_array[3]["en"]}
 4 (VSCodium): {code_array[4]["en"]}
 5 (VSCodium Flatpak): {code_array[5]["en"]}
@@ -173,7 +173,7 @@ for idx in range(1, 6):
         cmd_pips(idx, code_array[idx]["en"])
 
         # Add marketplace for vscodium
-        if idx == 4 or idx == 5:
+        if idx == 2 or idx == 4 or idx == 5:
             os.makedirs(os.path.dirname(code_array[idx]["path"]), exist_ok=True)
             product_json_path = os.path.join(os.path.dirname(code_array[idx]["path"]), "product.json")
             # Json data
