@@ -16,6 +16,7 @@ USERNAMEVAR, USERGROUP, USERHOME = CFunc.getnormaluser()
 
 firefox_profiles_paths = [os.path.join(USERHOME, ".mozilla", "firefox"),
                           os.path.join(USERHOME, ".var", "app", "org.mozilla.firefox", ".mozilla", "firefox"),
+                          os.path.join(USERHOME, "AppData", "Roaming", "Mozilla", "Firefox", "Profiles"),
                           os.path.join(USERHOME, ".librewolf"),
                           os.path.join(USERHOME, ".var", "app", "io.gitlab.librewolf-community", ".librewolf")]
 for ff_path in firefox_profiles_paths:
@@ -30,12 +31,18 @@ for ff_path in firefox_profiles_paths:
                     # print("Editing Firefox preferences in {0}.".format(prefsjs_file))
                     print(f"\nRunning arkenfox on {firefox_profilefolder}\n")
 
-                    arkenfox_updater = os.path.join(firefox_profilefolder, "updater.sh")
-                    arkenfox_cleaner = os.path.join(firefox_profilefolder, "prefsCleaner.sh")
-                    CFunc.downloadfile("https://raw.githubusercontent.com/arkenfox/user.js/master/prefsCleaner.sh", firefox_profilefolder)
-                    CFunc.downloadfile("https://raw.githubusercontent.com/arkenfox/user.js/master/updater.sh", firefox_profilefolder)
-                    os.chmod(arkenfox_updater, 0o777)
-                    os.chmod(arkenfox_cleaner, 0o777)
+                    if CFunc.is_windows():
+                        arkenfox_updater = os.path.join(firefox_profilefolder, "updater.bat")
+                        arkenfox_cleaner = os.path.join(firefox_profilefolder, "prefsCleaner.bat")
+                        CFunc.downloadfile("https://raw.githubusercontent.com/arkenfox/user.js/master/prefsCleaner.bat", firefox_profilefolder)
+                        CFunc.downloadfile("https://raw.githubusercontent.com/arkenfox/user.js/master/updater.bat", firefox_profilefolder)
+                    else:
+                        arkenfox_updater = os.path.join(firefox_profilefolder, "updater.sh")
+                        arkenfox_cleaner = os.path.join(firefox_profilefolder, "prefsCleaner.sh")
+                        CFunc.downloadfile("https://raw.githubusercontent.com/arkenfox/user.js/master/prefsCleaner.sh", firefox_profilefolder)
+                        CFunc.downloadfile("https://raw.githubusercontent.com/arkenfox/user.js/master/updater.sh", firefox_profilefolder)
+                        os.chmod(arkenfox_updater, 0o777)
+                        os.chmod(arkenfox_cleaner, 0o777)
 
                     # Add overrides
                     # https://github.com/arkenfox/user.js/wiki/2.1-User.js
@@ -105,7 +112,13 @@ user_pref("security.OCSP.require", false);
                     with open(userjs_file, 'w') as f:
                         f.write(userjs_text)
 
-                    # Run updater
-                    subprocess.run([arkenfox_updater, "-s", "-b"], shell=False, check=True)
-                    # Run cleaner
-                    subprocess.run([arkenfox_cleaner, "-s"], shell=False, check=True)
+                    if CFunc.is_windows():
+                        # Run updater
+                        subprocess.run([arkenfox_updater, "-unattended", "-singlebackup"], shell=False, check=True)
+                        # Run cleaner
+                        subprocess.run([arkenfox_cleaner, "-unattended"], shell=False, check=True)
+                    else:
+                        # Run updater
+                        subprocess.run([arkenfox_updater, "-s", "-b"], shell=False, check=True)
+                        # Run cleaner
+                        subprocess.run([arkenfox_cleaner, "-s"], shell=False, check=True)
