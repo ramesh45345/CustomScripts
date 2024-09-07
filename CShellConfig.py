@@ -132,31 +132,35 @@ function rms () {
 function start () {
     echo "Starting systemd service $@."
     $SUDOCMD systemctl start "$@"
-    $SUDOCMD systemctl status -l "$@"
+    $SUDOCMD systemctl status --all -l "$@"
 }
 function stop () {
     echo "Stopping systemd service $@."
     $SUDOCMD systemctl stop "$@"
-    $SUDOCMD systemctl status -l "$@"
+    $SUDOCMD systemctl status --all -l "$@"
 }
 function en () {
     echo "Enabling systemd service $@."
     $SUDOCMD systemctl enable "$@"
-    $SUDOCMD systemctl status -l "$@"
+    $SUDOCMD systemctl status --all -l "$@"
 }
 function dis () {
     echo "Disabling systemd service $@."
     $SUDOCMD systemctl disable "$@"
-    $SUDOCMD systemctl status -l "$@"
+    $SUDOCMD systemctl status --all -l "$@"
 }
 function res () {
     echo "Restarting systemd service $@."
     $SUDOCMD systemctl restart "$@"
-    $SUDOCMD systemctl status -l "$@"
+    $SUDOCMD systemctl status --all -l "$@"
 }
 function st () {
     echo "Getting status for systemd service $@."
-    $SUDOCMD systemctl status -l "$@"
+    $SUDOCMD systemctl status --all -l "$@"
+}
+function jt () {
+    echo "Getting journal entries."
+    $SUDOCMD journalctl --all "$@"
 }
 function dr () {
     echo "Executing systemd daemon-reload."
@@ -180,6 +184,10 @@ function resu () {
 function stu () {
     echo "Getting status for systemd service $@ for user."
     systemctl --user status -l "$@"
+}
+function jtu () {
+    echo "Getting user journal entries."
+    journalctl --user --all "$@"
 }
 function dru () {
     echo "Executing systemd daemon-reload for user."
@@ -805,31 +813,35 @@ end
 function start
     echo "Starting systemd service $argv."
     sudo systemctl start $argv
-    sudo systemctl status -l $argv
+    sudo systemctl status --all -l $argv
 end
 function stop
     echo "Stopping systemd service $argv."
     sudo systemctl stop $argv
-    sudo systemctl status -l $argv
+    sudo systemctl status --all -l $argv
 end
 function en
     echo "Enabling systemd service $argv."
     sudo systemctl enable $argv
-    sudo systemctl status -l $argv
+    sudo systemctl status --all -l $argv
 end
 function dis
     echo "Disabling systemd service $argv."
     sudo systemctl disable $argv
-    sudo systemctl status -l $argv
+    sudo systemctl status --all -l $argv
 end
 function res
     echo "Restarting systemd service $argv."
     sudo systemctl restart $argv
-    sudo systemctl status -l $argv
+    sudo systemctl status --all -l $argv
 end
 function st
     echo "Getting status for systemd service $argv."
-    sudo systemctl status -l $argv
+    sudo systemctl status --all -l $argv
+end
+function jt
+    echo "Getting journal entries."
+    sudo journalctl --all $argv
 end
 function dr
     echo "Executing systemd daemon-reload."
@@ -853,6 +865,10 @@ end
 function stu
     echo "Getting status for systemd service $argv for user."
     systemctl --user status -l $argv
+end
+function jtu
+    echo "Getting user journal entries."
+    journalctl --user --all $argv
 end
 function dru
     echo "Executing systemd daemon-reload for user."
