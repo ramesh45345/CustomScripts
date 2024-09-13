@@ -150,6 +150,8 @@ Acquire::ftp::Timeout "5";''')
 
     # Cli Software
     CFunc.aptinstall("ssh tmux zsh fish btrfs-progs f2fs-tools xfsprogs mdadm nano p7zip-full p7zip-rar unrar curl wget rsync less iotop sshfs sudo python-is-python3 nala")
+    # Topgrade
+    CFuncExt.topgrade_install()
     # Firmware
     CFunc.aptinstall("firmware-linux")
     subprocess.run("""echo "firmware-ipw2x00 firmware-ipw2x00/license/accepted boolean true" | debconf-set-selections

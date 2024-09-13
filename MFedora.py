@@ -76,6 +76,8 @@ if __name__ == '__main__':
     CFunc.dnfinstall("unrar")
     CFunc.sysctl_enable("sshd", error_on_fail=True)
     CFunc.dnfinstall("powerline-fonts google-roboto-fonts google-noto-sans-fonts")
+    # Topgrade
+    CFuncExt.topgrade_install()
     # Samba
     CFunc.dnfinstall("samba")
     CFunc.sysctl_enable("smb", error_on_fail=True)

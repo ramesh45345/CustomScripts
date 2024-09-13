@@ -58,9 +58,10 @@ CFunc.dnfupdate()
 ### Install CentOS Software ###
 # Cli tools
 CFunc.dnfinstall("zsh fish nano tmux iotop rsync p7zip p7zip-plugins zip unzip xdg-utils xdg-user-dirs util-linux-user openssh-server openssh-clients avahi python3-pip python3-virtualenv")
-# CFunc.dnfinstall("redhat-lsb-core")
 CFunc.sysctl_enable("sshd avahi-daemon")
 CFunc.dnfinstall("google-noto-sans-fonts google-noto-sans-mono-fonts google-roboto-fonts")
+# Topgrade
+CFuncExt.topgrade_install()
 # Samba
 CFunc.dnfinstall("samba")
 CFunc.sysctl_enable("smb")

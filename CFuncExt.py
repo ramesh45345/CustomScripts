@@ -6,10 +6,13 @@ Includes distribution specific and more complex common functions.
 
 # Python includes.
 import fileinput
+import json
 import os
 import re
 import shutil
 import subprocess
+import tempfile
+import urllib
 # Custom includes
 import CFunc
 import CNixRootSetup
@@ -167,6 +170,34 @@ def nix_standalone_install(username: str, packages: str):
         print("home.packages found in config file. Not editing.")
     # Nix upgrade
     CNixRootSetup.call_nix_update_user(USERNAMEVAR)
+def topgrade_install(dest_folder: str = os.path.join(os.sep, "usr", "local", "bin")):
+    """Install the latest topgrade version from github"""
+    releasejson_link = "https://api.github.com/repos/topgrade-rs/topgrade/tags"
+    # Get the json data from GitHub.
+    with urllib.request.urlopen(releasejson_link) as releasejson_handle:
+        releasejson_data = json.load(releasejson_handle)
+    for release in releasejson_data:
+        # Stop after the first (latest) release is found.
+        latestrelease = release["name"].strip().replace("v", "")
+        break
+    if os.path.exists(dest_folder):
+        print("Detected topgrade version: {0}".format(latestrelease))
+        tempfolder = tempfile.gettempdir()
+        # Download release
+        topgrade_gz_file = CFunc.downloadfile(f"https://github.com/topgrade-rs/topgrade/releases/download/v{latestrelease}/topgrade-v{latestrelease}-x86_64-unknown-linux-gnu.tar.gz", tempfolder)[0]
+        # Unzip release
+        subprocess.run(["tar", "-xf", topgrade_gz_file, "-C", dest_folder], check=True)
+        # Set permissions for extracted file.
+        unzipped_path = os.path.join(dest_folder, "topgrade")
+        if os.path.isfile(unzipped_path):
+            os.chmod(unzipped_path, 0o777)
+        else:
+            print(f"ERROR: {unzipped_path} does not exist.")
+        # Cleanup
+        if os.path.isfile(topgrade_gz_file):
+            os.remove(topgrade_gz_file)
+    else:
+        print(f"ERROR: {dest_folder} does not exist.")
 
 
 if __name__ == '__main__':

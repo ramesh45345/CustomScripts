@@ -221,6 +221,29 @@ function snap_search () {
         snap find $@
     fi
 }
+function up () {
+    if type -p nixos-rebuild &> /dev/null && [ $(id -u) != "0" ] && [ -d /etc/nixos ] ; then
+        cd /etc/nixos
+        git pull
+    fi
+    if type -p topgrade &> /dev/null ; then
+        topgrade -y flatpak --disable nix -c $@
+    elif type -p nala &> /dev/null; then
+        $SUDOCMD nala update
+        $SUDOCMD nala upgrade
+    elif type -p apt-get &> /dev/null; then
+        $SUDOCMD apt-get update
+        $SUDOCMD apt-get dist-upgrade
+    elif type -p dnf &> /dev/null; then
+        $SUDOCMD dnf update --refresh -y
+    elif type -p yay &> /dev/null; then
+        yay -Syu --needed --noconfirm
+    elif type -p rpm-ostree &> /dev/null; then
+        $SUDOCMD rpm-ostree upgrade
+    elif type nix &> /dev/null && ! [[ "$(which nix)" == *"$USER"* ]]; then
+        $SUDOCMD nixos-rebuild switch --upgrade
+    fi
+}
 
 if type -p nala &> /dev/null; then
     function ins () {
@@ -250,11 +273,6 @@ if type -p nala &> /dev/null; then
         $SUDOCMD apt-get autoremove --purge
         flatpak_clean
     }
-    function up () {
-        echo "Updating and Dist-upgrading system."
-        $SUDOCMD nala update
-        $SUDOCMD nala upgrade
-    }
 elif type -p apt-get &> /dev/null; then
     function ins () {
         echo "Installing $@."
@@ -282,11 +300,6 @@ elif type -p apt-get &> /dev/null; then
         echo "Auto-removing packages."
         $SUDOCMD apt-get autoremove --purge
         flatpak_clean
-    }
-    function up () {
-        echo "Updating and Dist-upgrading system."
-        $SUDOCMD apt-get update
-        $SUDOCMD apt-get dist-upgrade
     }
 elif type dnf &> /dev/null || type yum &> /dev/null; then
     if type dnf &> /dev/null; then
@@ -317,10 +330,6 @@ elif type dnf &> /dev/null || type yum &> /dev/null; then
         echo "Auto-removing packages."
         $SUDOCMD $PKGMGR autoremove
         flatpak_clean
-    }
-    function up () {
-        echo "Updating system."
-        $SUDOCMD $PKGMGR upgrade --refresh -y
     }
 elif type yay &> /dev/null || type pacman &> /dev/null; then
     if type yay &> /dev/null && [ $(id -u) != "0" ]; then
@@ -363,10 +372,6 @@ elif type yay &> /dev/null || type pacman &> /dev/null; then
         $PKGMGR -Qdtq | $PKGMGR -Rs -
         flatpak_clean
     }
-    function up () {
-        echo "Updating system."
-        $PKGMGR -Syu --needed --noconfirm
-    }
 elif type rpm-ostree &> /dev/null; then
     function ins () {
         echo "Installing $@."
@@ -396,10 +401,6 @@ elif type rpm-ostree &> /dev/null; then
         echo "Auto-removing packages."
         flatpak_clean
     }
-    function up () {
-        echo "Updating system."
-        $SUDOCMD rpm-ostree upgrade
-    }
 # NixOS package manager only.
 elif type nix &> /dev/null && ! [[ "$(which nix)" == *"$USER"* ]]; then
     function se () {
@@ -411,18 +412,6 @@ elif type nix &> /dev/null && ! [[ "$(which nix)" == *"$USER"* ]]; then
         echo "Auto-removing packages and performing garbage collection."
         $SUDOCMD nix-collect-garbage -d
         flatpak_clean
-    }
-    function up () {
-        echo "Updating system."
-        $SUDOCMD nixos-rebuild switch --upgrade
-    }
-    function upp () {
-        echo "Updating system and nixos config."
-        if [ $(id -u) != "0" ]; then
-            cd /etc/nixos
-            git pull
-        fi
-        $SUDOCMD nixos-rebuild switch --upgrade
     }
     function nsed () {
         echo "Editing nix config."
@@ -452,22 +441,6 @@ if type nix &> /dev/null; then
     function nse () {
         echo "Search nix packages"
         nix search nixpkgs "$@"
-    }
-fi
-
-# kubectl
-if type kubectl &> /dev/null; then
-    function kc () {
-        echo "\n Get Nodes"
-        kubectl get nodes -A -o wide
-        echo "\n Get Pods"
-        kubectl get pods -A -o wide
-        echo "\n Get Services"
-        kubectl get svc -A
-        echo "\n Get Persistent Volumes"
-        kubectl get pv -A
-        echo "\n Get Persistent Volume Claims"
-        kubectl get pvc -A
     }
 fi
 
@@ -901,6 +874,29 @@ function snap_search
         snap find $argv
     end
 end
+function up
+    if type -q nixos-rebuild ; and [ (id -u) != "0" ] ; and checkpath "/etc/nixos"; and test -d "/etc/nixos"
+        cd /etc/nixos
+        git pull
+    end
+    if type -q topgrade
+        topgrade -y flatpak --disable nix -c $argv
+    else if type -q nala
+        sudo nala update
+        sudo nala upgrade
+    else if type -q apt-get
+        sudo apt-get update
+        sudo apt-get dist-upgrade
+    else if type -q dnf
+        sudo dnf update --refresh -y
+    else if type -q yay
+        yay -Syu --needed --noconfirm
+    else if type -q rpm-ostree
+        sudo rpm-ostree upgrade
+    else if type -q nix; and not string match -qr $USER (which nix);
+        sudo nixos-rebuild switch --upgrade
+    end
+end
 
 # Set package manager functions
 if type -q nala
@@ -931,11 +927,6 @@ if type -q nala
         sudo nala autopurge --purge
         flatpak_clean
     end
-    function up
-        echo "Updating and Upgrading system."
-        sudo nala update
-        sudo nala upgrade
-    end
 else if type -q apt-get
     function ins
         echo "Installing $argv."
@@ -963,11 +954,6 @@ else if type -q apt-get
         echo "Auto-removing packages."
         sudo apt-get autoremove --purge
         flatpak_clean
-    end
-    function up
-        echo "Updating and Dist-upgrading system."
-        sudo apt-get update
-        sudo apt-get dist-upgrade
     end
 else if type -q dnf; or type -q yum
     if type -q dnf
@@ -998,10 +984,6 @@ else if type -q dnf; or type -q yum
         sudo $PKGMGR autoremove
         flatpak_clean
     end
-    function up
-        echo "Updating system."
-        sudo $PKGMGR update --refresh -y
-    end
 else if type -q yay
     function ins
         echo "Installing $argv.\n"
@@ -1029,10 +1011,6 @@ else if type -q yay
         echo "Auto-removing packages."
         yay -Qdtq | yay -Rs -
         flatpak_clean
-    end
-    function up
-        echo "Updating system."
-        yay -Syu --needed --noconfirm
     end
 else if type -q rpm-ostree
     function ins
@@ -1063,10 +1041,6 @@ else if type -q rpm-ostree
         echo "Auto-removing packages."
         flatpak_clean
     end
-    function up
-        echo "Updating system."
-        sudo rpm-ostree upgrade
-    end
 # NixOS package manager only.
 else if type -q nix; and not string match -qr $USER (which nix);
     function se
@@ -1078,18 +1052,6 @@ else if type -q nix; and not string match -qr $USER (which nix);
         echo "Auto-removing packages and performing garbage collection."
         sudo nix-collect-garbage -d
         flatpak_clean
-    end
-    function up
-        echo "Updating system."
-        sudo nixos-rebuild switch --upgrade
-    end
-    function upp
-        echo "Updating system and NixOS config."
-        if [ (id -u) != "0" ]
-            cd /etc/nixos
-            git pull
-        end
-        sudo nixos-rebuild switch --upgrade
     end
     function nsed
         echo "Editing nix config."
