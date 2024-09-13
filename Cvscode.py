@@ -38,19 +38,6 @@ def cmd_silent(cmd=list):
     """Run a command silently"""
     status = subprocess.run(cmd, check=False, shell=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode
     return status
-
-def cmd_pips(cmd_type=int, enabled=bool):
-    """Install python pip packages"""
-    pip_packages = "pylama pylama-pylint flake8"
-    # Flatpak
-    if enabled is True and cmd_type == 5:
-        subprocess.run("flatpak run --command=pip3 com.vscodium.codium install {0} --user".format(pip_packages), shell=True, check=True)
-    # Windows
-    if enabled is True and (2 <= cmd_type <= 3) and shutil.which("pip"):
-        subprocess.run(f"pip install {pip_packages}", shell=True, check=True)
-    # Other Linux types
-    if (cmd_type == 1 or cmd_type == 4) and enabled is True and shutil.which("pip3") and not CFunc.is_nixos():
-        subprocess.run(f"pip3 install {pip_packages}", shell=True, check=False)
 def ce_ins(vscode_cmd=list, extension=str):
     """Install an extension"""
     subprocess.run(vscode_cmd + ["--install-extension", extension, "--force"], check=False, shell=False)
@@ -169,8 +156,6 @@ for idx in range(1, 6):
     # Only process enabled options.
     if code_array[idx]["en"] is True:
         print("\nProcessing option {0}\n".format(idx))
-        # Pip Commands
-        cmd_pips(idx, code_array[idx]["en"])
 
         # Add marketplace for vscodium
         if idx == 2 or idx == 4 or idx == 5:
