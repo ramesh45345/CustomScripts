@@ -94,7 +94,7 @@ if __name__ == '__main__':
     CFunc.pacman_install("bash-completion fish zsh zsh-completions nano git tmux iotop rsync p7zip zip unzip unrar xdg-utils xdg-user-dirs sshfs openssh avahi nss-mdns ntfs-3g exfat-utils python-pip")
     CFunc.sysctl_enable("sshd avahi-daemon", error_on_fail=True)
     # Topgrade
-    yay_install("topgrade-bin")
+    yay_install(USERNAMEVAR, "topgrade-bin")
     # Add mdns_minimal to nsswitch to resolve .local domains.
     subprocess.run('sed -i "s/^hosts: files mymachines mdns4_minimal/hosts: files mdns_minimal mymachines mdns4_minimal/g" /etc/nsswitch.conf', shell=True, check=False)
     CFunc.pacman_install("powerline-fonts ttf-roboto ttf-roboto-mono noto-fonts ttf-dejavu ttf-liberation")
