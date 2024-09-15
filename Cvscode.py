@@ -95,7 +95,11 @@ if not CFunc.is_windows() and shutil.which("code"):
     code_array[1]["en"] = True
 else:
     code_array[1]["en"] = False
-code_array[1]["path"] = os.path.join(userhome, ".config", "Code", "User")
+if cmd_silent(code_array[1]["cmd"] + ["-h"]) == 0:
+    if os.path.isdir(os.path.join(userhome, ".config", "Code - OSS", "User")):
+        code_array[1]["path"] = os.path.join(userhome, ".config", "Code - OSS", "User")
+    else:
+        code_array[1]["path"] = os.path.join(userhome, ".config", "Code", "User")
 
 # VSCodium Windows
 code_array[2]["cmd"] = [os.path.join("C:", os.sep, "Program Files", "VSCodium", "bin", "codium.cmd")]
