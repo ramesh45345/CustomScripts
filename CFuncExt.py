@@ -59,10 +59,10 @@ def SudoersEnvSettings(sudoers_file=os.path.join(os.sep, "etc", "sudoers")):
         with open(sudoers_file, mode='w') as f:
             for line in lines:
                 # Debian/Ubuntu use tabs, Fedora uses spaces. Check for both.
-                line = re.sub(r'^(Defaults(\t|\s{4})mail_badpass)', r'# \1', line)
+                line = re.sub(r'^(Defaults(\t|\s{4}|\s{1})mail_badpass)', r'# \1', line)
                 # Set to not reset environment when sudoing.
-                line = re.sub(r'^(Defaults(\t|\s{4})env_reset)$', r'Defaults\t!env_reset', line)
-                line = re.sub(r'^(Defaults(\t|\s{4})secure_path)', r'# \1', line)
+                line = re.sub(r'^(Defaults(\t|\s{4}|\s{1})env_reset)$', r'Defaults\t!env_reset', line)
+                line = re.sub(r'^(Defaults(\t|\s{4}|\s{1})secure_path)', r'# \1', line)
                 f.write(line)
         CFunc.CheckRestoreSudoersFile(sudoers_file)
     else:
