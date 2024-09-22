@@ -227,7 +227,7 @@ function up () {
         git pull
     fi
     if type -p topgrade &> /dev/null ; then
-        topgrade -y flatpak --disable nix $@
+        topgrade -y flatpak $@
     elif type -p nala &> /dev/null; then
         $SUDOCMD nala update
         $SUDOCMD nala upgrade
@@ -880,7 +880,7 @@ function up
         git pull
     end
     if type -q topgrade
-        topgrade -y flatpak --disable nix $argv
+        topgrade -y flatpak $argv
     else if type -q nala
         sudo nala update
         sudo nala upgrade
