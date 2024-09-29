@@ -89,8 +89,6 @@ if __name__ == '__main__':
     # Yay
     if not shutil.which("yay"):
         install_aur_pkg("yay-bin", USERNAMEVAR, USERGROUP)
-        # TODO: Remove when yay-bin is rebuilt. https://aur.archlinux.org/packages/yay-bin#comment-990907
-        subprocess.run("ln -sfr /lib/libalpm.so.15 /lib/libalpm.so.14", shell=True, check=True)
 
     # Cli tools
     CFunc.pacman_install("bash-completion fish zsh zsh-completions nano git tmux iotop rsync p7zip zip unzip unrar xdg-utils xdg-user-dirs sshfs openssh avahi nss-mdns ntfs-3g exfat-utils python-pip")
