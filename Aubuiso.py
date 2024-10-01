@@ -155,6 +155,7 @@ f2fs-tools \
 fonts-powerline \
 fsarchiver \
 fstransform \
+gdisk \
 git \
 iotop \
 less \
@@ -163,9 +164,9 @@ mdadm \
 nano \
 nfs-common \
 rsync \
+s-tui \
 screen \
 ssh \
-s-tui \
 testdisk \
 tilix \
 tmux \

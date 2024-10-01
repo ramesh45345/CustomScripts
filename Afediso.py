@@ -111,28 +111,30 @@ libertas-usb8388-firmware
 iwlax2xx-firmware
 
 # CLI Utils
-git
-zsh
-powerline-fonts
-nano
-tmux
-iotop
-btop
-s-tui
-rsync
-p7zip
-p7zip-plugins
-zip
-unzip
-openssh-server
-openssh-clients
+arch-install-scripts
 avahi
+btop
 chntpw
 debootstrap
+gdisk
+git
 gnupg
+iotop
+nano
+openssh-clients
+openssh-server
+p7zip
+p7zip-plugins
 pacman
-arch-install-scripts
 podman
+powerline-fonts
+rsync
+s-tui
+screen
+tmux
+unzip
+zip
+zsh
 
 # Filesystem utils
 fstransform

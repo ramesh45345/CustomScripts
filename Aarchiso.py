@@ -71,31 +71,33 @@ with open(os.path.join(workingfolder, "packages.x86_64"), 'a') as f:
 # My custom packages
 
 # Utilities
-zip
-unzip
-p7zip
-unrar
-gparted
-clonezilla
-partimage
-fsarchiver
-btrfs-progs
-xfsprogs
-gnome-disk-utility
-grsync
-smbclient
-binutils
-git
-chntpw
-debootstrap
-openssh
 avahi
-nss-mdns
-tmux
-zsh
-fish
+binutils
 btop
+btrfs-progs
+chntpw
+clonezilla
+debootstrap
+fish
+fsarchiver
+git
+gnome-disk-utility
+gparted
+gptfdisk
+grsync
+nss-mdns
+openssh
+p7zip
+partimage
 s-tui
+screen
+smbclient
+tmux
+unrar
+unzip
+xfsprogs
+zip
+zsh
 
 # Virtual Machine guest
 spice-vdagent
