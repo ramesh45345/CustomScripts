@@ -53,16 +53,16 @@ def create_chroot_arch(path: str, packages: str = "base"):
     print("Creating arch at {0}".format(path))
     os.makedirs(path, exist_ok=False)
     ctr_create("docker.io/library/archlinux:latest", path, "sed -i 's/^#ParallelDownloads/ParallelDownloads/g' /etc/pacman.conf && pacman -Syu --noconfirm --needed arch-install-scripts && pacstrap -Pc /chrootfld {0}".format(packages))
-def create_chroot_fedora(path: str, packages: str = "systemd passwd dnf fedora-release vim-minimal"):
+def create_chroot_fedora(path: str, packages: str = "systemd passwd dnf fedora-release vim-minimal @minimal-environment"):
     """Create a fedora chroot."""
     print("Creating fedora at {0}".format(path))
     os.makedirs(path, exist_ok=False)
-    ctr_create("registry.fedoraproject.org/fedora", path, "dnf -y --releasever={0} --installroot=/chrootfld --disablerepo='*' --enablerepo=fedora --enablerepo=updates install {1}".format(fedora_version, packages))
+    ctr_create("registry.fedoraproject.org/fedora", path, f"dnf -y --releasever={fedora_version} --installroot=/chrootfld --disablerepo='*' --enablerepo=fedora --enablerepo=updates install {packages}")
 def create_chroot_ubuntu(path: str, packages: str = "systemd-container"):
     """Create an ubuntu chroot."""
     print("Creating ubuntu at {0}".format(path))
     os.makedirs(path, exist_ok=False)
-    ctr_create("docker.io/library/ubuntu:rolling", path, "apt-get update && apt-get install -y debootstrap && debootstrap --include={1} --components=main,universe,restricted,multiverse --arch amd64 {0} /chrootfld".format(ubuntu_version, packages))
+    ctr_create("docker.io/library/ubuntu:rolling", path, f"apt-get update && apt-get install -y debootstrap && debootstrap --include={packages} --components=main,universe,restricted,multiverse --arch amd64 {ubuntu_version} /chrootfld")
 
 
 ### Begin Code ###
@@ -81,8 +81,7 @@ if args.clean is True:
 # Fedora Chroot
 # Create chroot if it doesn't exist
 if not os.path.isdir(fedora_chroot_location) and shutil.which("dnf"):
-    os.makedirs(fedora_chroot_location)
-    subprocess.run('dnf -y --installroot={0} --releasever $(rpm -q --qf "%{{version}}" -f /etc/fedora-release) install @minimal-environment'.format(fedora_chroot_location), shell=True, check=True)
+    create_chroot_fedora(fedora_chroot_location)
     zch.ChrootCommand(fedora_chroot_location, "sh -c 'dnf install -y nano livecd-tools pykickstart anaconda util-linux libblockdev-nvdimm git'")
 if os.path.isdir(fedora_chroot_location):
     # Update packages
@@ -105,20 +104,8 @@ if os.path.isdir(arch_chroot_location):
 # Ubuntu Chroot
 # Create chroot if it doesn't exist
 if not os.path.isdir(ubuntu_chroot_location) and shutil.which("debootstrap"):
-    os.makedirs(ubuntu_chroot_location)
-    # Debootstrap link for ubuntu version.
-    debootstrap_scriptsfolder = os.path.join(os.sep, "usr", "share", "debootstrap", "scripts")
-    if os.path.isdir(debootstrap_scriptsfolder):
-        # Check that the release exists
-        if not os.path.islink(os.path.join(debootstrap_scriptsfolder, ubuntu_version)):
-            currentpath = os.getcwd()
-            os.chdir(debootstrap_scriptsfolder)
-            # Symlink if it doesn't exist
-            os.symlink("gutsy", ubuntu_version)
-            os.chdir(currentpath)
-            print("\nNOTE: symlink for {0} created at {1}.\n".format(ubuntu_version, debootstrap_scriptsfolder))
     # Run debootstrap
-    subprocess.run("debootstrap {0} {1} http://archive.ubuntu.com/ubuntu/".format(ubuntu_version, ubuntu_chroot_location), shell=True, check=True)
+    create_chroot_ubuntu(ubuntu_chroot_location)
     zch.ChrootCommand(ubuntu_chroot_location, "sh -c 'apt install -y debootstrap binutils squashfs-tools grub-pc-bin grub-efi-amd64-bin mtools dosfstools unzip'")
     zch.ChrootCommand(ubuntu_chroot_location, "sh -c 'apt-get install -y --no-install-recommends software-properties-common'")
     zch.ChrootCommand(ubuntu_chroot_location, "sh -c 'add-apt-repository -y main && add-apt-repository -y restricted && add-apt-repository -y universe && add-apt-repository -y multiverse'")
