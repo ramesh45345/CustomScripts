@@ -2,6 +2,7 @@
 """List IP addressess of all detected VMs"""
 
 # Python includes.
+import os
 import shutil
 import subprocess
 

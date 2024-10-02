@@ -283,7 +283,7 @@ if __name__ == '__main__':
         kvm_variant = "fedora-rawhide"
         isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/40/Server/x86_64/iso/Fedora-Server-dvd-x86_64-40-1.14.iso"
         if args.desktopenv is None:
-            args.desktopenv = "xfce"
+            args.desktopenv = "kde"
     if args.ostype == 1:
         vmname = "Packer-Fedora-{0}".format(hvname)
         vmprovision_defopts = "-d {0}".format(args.desktopenv)
@@ -320,7 +320,7 @@ if __name__ == '__main__':
         vmwareid = "ubuntu-64"
         vmprovisionscript = "MUbuntu.py"
         if args.desktopenv is None:
-            args.desktopenv = "xfce"
+            args.desktopenv = "kde"
     # Ubuntu latest
     if 10 <= args.ostype <= 14:
         kvm_variant = "ubuntu22.04"
@@ -375,7 +375,7 @@ if __name__ == '__main__':
         vmprovisionscript = "MDebian.py"
         kvm_variant = "debiantesting"
         if args.desktopenv is None:
-            args.desktopenv = "xfce"
+            args.desktopenv = "kde"
     # Debian Testing and Unstable
     if 30 <= args.ostype <= 39:
         isourl = "https://cdimage.debian.org/cdimage/daily-builds/daily/current/amd64/iso-cd/debian-testing-amd64-netinst.iso"
