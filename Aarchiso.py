@@ -33,7 +33,7 @@ USERHOME = os.path.expanduser("~root")
 # Get arguments
 parser = argparse.ArgumentParser(description='Build Arch LiveCD.')
 parser.add_argument("-n", "--noprompt", help='Do not prompt.', action="store_true")
-parser.add_argument("-w", "--workfolderroot", help='Location of Working Folder (default: %(default)s)', default=USERHOME)
+parser.add_argument("-w", "--workfolderroot", help='Location of Working Folder (default: %(default)s)', default=os.path.join(os.sep, "var", "tmp"))
 parser.add_argument("-o", "--output", help='Output Location of ISO (default: %(default)s)', default=USERHOME)
 
 # Save arguments.
