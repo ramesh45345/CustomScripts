@@ -129,11 +129,6 @@ systemctl enable sshd
 
 #Install xorg, display manger...
 pacman -S --needed --noconfirm xorg-server xorg-server-utils xorg-drivers xf86-input-libinput mesa-libgl xorg-xinit xterm mesa mesa-vdpau libva-mesa-driver libva-intel-driver libva-vdpau-driver libva
-# Causes crashing in chroots.
-#pacman -S --needed --noconfirm libvdpau-va-gl
-if [ $(uname -m) == "x86_64" ]; then
-    pacman -S --needed --noconfirm lib32-mesa-vdpau
-fi
 
 pacman -S --needed --noconfirm network-manager-applet gnome-keyring gnome-icon-theme ipw2200-fw dosfstools system-config-printer alsa-utils
 
