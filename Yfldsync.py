@@ -57,7 +57,7 @@ Executing: {cmd_full}
 """)
 
     if not args.skipdryrun:
-        subprocess.run(cmd_dryrun, shell=True, check=True)
+        subprocess.run(cmd_dryrun, shell=True, check=False)
 
     if args.noprompt is False:
         input("Press Enter to continue.")
@@ -66,9 +66,9 @@ Executing: {cmd_full}
     beforetime = datetime.datetime.now()
 
     # Run sync
-    subprocess.run(cmd_full, shell=True, check=True)
+    subprocess.run(cmd_full, shell=True, check=False)
     subprocess.run(["sync"], shell=False, check=True)
 
     # Save finish time.
     finishtime = datetime.datetime.now()
-    print("Sync completed in {0}".format(str(finishtime - beforetime)))
+    print(f"Sync to {args.destination} completed in {str(finishtime - beforetime)}")
