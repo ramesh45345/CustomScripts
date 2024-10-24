@@ -93,13 +93,13 @@ for idx in range(1, 6):
 code_array[1]["cmd"] = ["code"]
 if not CFunc.is_windows() and shutil.which("code"):
     code_array[1]["en"] = True
+    if cmd_silent(code_array[1]["cmd"] + ["-h"]) == 0:
+        if os.path.isdir(os.path.join(userhome, ".config", "Code - OSS", "User")):
+            code_array[1]["path"] = os.path.join(userhome, ".config", "Code - OSS", "User")
+        else:
+            code_array[1]["path"] = os.path.join(userhome, ".config", "Code", "User")
 else:
     code_array[1]["en"] = False
-if cmd_silent(code_array[1]["cmd"] + ["-h"]) == 0:
-    if os.path.isdir(os.path.join(userhome, ".config", "Code - OSS", "User")):
-        code_array[1]["path"] = os.path.join(userhome, ".config", "Code - OSS", "User")
-    else:
-        code_array[1]["path"] = os.path.join(userhome, ".config", "Code", "User")
 
 # VSCodium Windows
 code_array[2]["cmd"] = [os.path.join("C:", os.sep, "Program Files", "VSCodium", "bin", "codium.cmd")]
