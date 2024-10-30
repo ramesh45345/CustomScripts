@@ -126,6 +126,7 @@ openssh-server
 p7zip
 p7zip-plugins
 pacman
+perl-Time-HiRes
 podman
 powerline-fonts
 rsync
@@ -135,6 +136,7 @@ tmux
 unzip
 zip
 zsh
+zypper
 
 # Filesystem utils
 fstransform
