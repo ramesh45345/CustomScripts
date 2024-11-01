@@ -78,10 +78,10 @@ def vm_create(vmname: str, img_path: str, isopath: str, memory: int):
     efi_bin, efi_nvram = Pkvm.ovmf_bin_nvramcopy(os.path.dirname(img_path), vmname, secureboot=False)
     # virt-install manual: https://www.mankier.com/1/virt-install
     # List of os: osinfo-query os
-    CREATESCRIPT_KVM = f"""virt-install --connect qemu:///system --name={vmname} --install bootdev=cdrom --boot=hd,cdrom --disk device=cdrom,path="{isopath}",bus=sata,target=sda,readonly=on --disk path={img_path},bus={kvm_diskinterface} --graphics spice --vcpu={CPUCORES},sockets=1,cores={CPUCORES} --ram={args.memory} --network bridge=virbr0,model={kvm_netdevice} --filesystem source=/,target=root,mode=mapped --os-variant={kvm_variant} --import --noautoconsole --noreboot --video={kvm_video} --channel unix,target_type=virtio,name=org.qemu.guest_agent.0 --channel spicevmc,target_type=virtio,name=com.redhat.spice.0 --boot loader={efi_bin},loader_ro=yes,loader_type=pflash,nvram={efi_nvram}"""
+    CREATESCRIPT_KVM = f"""virt-install --connect qemu:///system --name={vmname} --install bootdev=cdrom --boot=hd,cdrom --disk device=cdrom,path="{isopath}",bus=sata,target=sda,readonly=on --disk path={img_path},bus={kvm_diskinterface} --graphics spice --cpu host --vcpu={CPUCORES},sockets=1,cores={CPUCORES} --ram={args.memory} --network bridge=virbr0,model={kvm_netdevice} --filesystem source=/,target=root,mode=mapped --os-variant={kvm_variant} --import --noautoconsole --noreboot --video={kvm_video} --channel unix,target_type=virtio,name=org.qemu.guest_agent.0 --channel spicevmc,target_type=virtio,name=com.redhat.spice.0 --boot loader={efi_bin},loader_ro=yes,loader_type=pflash,nvram={efi_nvram}"""
     subprocess.run(CREATESCRIPT_KVM, shell=True, check=True)
     # Log the launch command.
-    logging.info(f"""KVM launch command: virt-install --connect qemu:///system --name={vmname} --disk path={img_path},bus={kvm_diskinterface} --disk device=cdrom,bus=sata,target=sda,readonly=on --graphics spice --vcpu={CPUCORES},sockets=1,cores={CPUCORES} --ram={args.memory} --network bridge=virbr0,model={kvm_netdevice} --filesystem source=/,target=root,mode=mapped --os-variant={kvm_variant} --import --noautoconsole --noreboot --video={kvm_video} --channel unix,target_type=virtio,name=org.qemu.guest_agent.0 --channel spicevmc,target_type=virtio,name=com.redhat.spice.0 --boot loader={efi_bin},loader_ro=yes,loader_type=pflash,nvram={efi_nvram}""")
+    logging.info(f"""KVM launch command: virt-install --connect qemu:///system --name={vmname} --disk path={img_path},bus={kvm_diskinterface} --disk device=cdrom,bus=sata,target=sda,readonly=on --graphics spice --cpu host --vcpu={CPUCORES},sockets=1,cores={CPUCORES} --ram={args.memory} --network bridge=virbr0,model={kvm_netdevice} --filesystem source=/,target=root,mode=mapped --os-variant={kvm_variant} --import --noautoconsole --noreboot --video={kvm_video} --channel unix,target_type=virtio,name=org.qemu.guest_agent.0 --channel spicevmc,target_type=virtio,name=com.redhat.spice.0 --boot loader={efi_bin},loader_ro=yes,loader_type=pflash,nvram={efi_nvram}""")
 def vm_ejectiso(vmname: str):
     """Eject an iso from a VM."""
     subprocess.run("virsh --connect qemu:///system change-media {0} sda --eject --config".format(vmname), shell=True, check=False)
@@ -275,6 +275,15 @@ if __name__ == '__main__':
         vmbootstrap_cmd = 'cd ~ && export LANG=en_US.UTF-8 && /opt/CustomScripts/ZSlimDrive.py -n -g && /opt/CustomScripts/BDebian.py -n -z -t debian -r {debversion} -g 3 -i /dev/vda2 -c "{hostname}" -u {username} -q "{password}" -f "{fullname}" /mnt && echo "PermitRootLogin yes" >> /mnt/etc/ssh/sshd_config && poweroff'.format(hostname=vm_name, username=args.vmuser, password=args.vmpass, fullname=args.fullname, debversion=debversion)
         vmprovision_cmd = """mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{vmuser}/.ssh; echo '{sshkey}' > ~{vmuser}/.ssh/authorized_keys; chown {vmuser}:users -R ~{vmuser}; rm -f /etc/resolv.conf ; echo -e "nameserver 1.0.0.1\\nnameserver 1.1.1.1\\nnameserver 2606:4700:4700::1111\\nnameserver 2606:4700:4700::1001" > /etc/resolv.conf; /opt/CustomScripts/MDebian.py -d {desktop}""".format(vmuser=args.vmuser, sshkey=sshkey, desktop=args.desktopenv)
         kvm_variant = "debiantesting"
+    if args.ostype == 5:
+        if args.vmname is not None:
+            vm_name = args.vmname
+        else:
+            vm_name = "CC-OpenSuse-kvm"
+        # VM commands
+        vmbootstrap_cmd = f'cd ~ && export LANG=en_US.UTF-8 && /opt/CustomScripts/ZSlimDrive.py -n -g && /opt/CustomScripts/BOpensuse.py -n -g 3 -i /dev/vda2 -c "{vm_name}" -u {args.vmuser} -q "{args.vmpass}" -f "{args.fullname}" /mnt && echo "PermitRootLogin yes" >> /mnt/etc/ssh/sshd_config && poweroff'
+        vmprovision_cmd = """exit 0"""
+        kvm_variant = "opensusetumbleweed"
 
     # Override VM Name if provided
     print("VM Name is {0}".format(vm_name))

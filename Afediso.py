@@ -129,6 +129,7 @@ pacman
 perl-Time-HiRes
 podman
 powerline-fonts
+python3-passlib
 rsync
 s-tui
 screen
