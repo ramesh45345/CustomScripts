@@ -53,11 +53,11 @@ def create_chroot_arch(path: str, packages: str = "base"):
     print("Creating arch at {0}".format(path))
     os.makedirs(path, exist_ok=False)
     ctr_create("docker.io/library/archlinux:latest", path, "sed -i 's/^#ParallelDownloads/ParallelDownloads/g' /etc/pacman.conf && pacman -Syu --noconfirm --needed arch-install-scripts && pacstrap -Pc /chrootfld {0}".format(packages))
-def create_chroot_fedora(path: str, packages: str = "systemd passwd dnf fedora-release vim-minimal @minimal-environment"):
+def create_chroot_fedora(path: str, packages: str = "systemd passwd dnf fedora-release vim-minimal bash"):
     """Create a fedora chroot."""
     print("Creating fedora at {0}".format(path))
     os.makedirs(path, exist_ok=False)
-    ctr_create("registry.fedoraproject.org/fedora", path, f"dnf -y --releasever={fedora_version} --installroot=/chrootfld --disablerepo='*' --enablerepo=fedora --enablerepo=updates install {packages}")
+    ctr_create("registry.fedoraproject.org/fedora", path, f"dnf -y --releasever={fedora_version} --installroot=/chrootfld --use-host-config --disablerepo='*' --enablerepo=fedora --enablerepo=updates install {packages}")
 def create_chroot_ubuntu(path: str, packages: str = "systemd-container"):
     """Create an ubuntu chroot."""
     print("Creating ubuntu at {0}".format(path))
