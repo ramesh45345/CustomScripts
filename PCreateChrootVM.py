@@ -282,7 +282,7 @@ if __name__ == '__main__':
             vm_name = "CC-OpenSuse-kvm"
         # VM commands
         vmbootstrap_cmd = f'cd ~ && export LANG=en_US.UTF-8 && /opt/CustomScripts/ZSlimDrive.py -n -g && /opt/CustomScripts/BOpensuse.py -n -g 3 -i /dev/vda2 -c "{vm_name}" -u {args.vmuser} -q "{args.vmpass}" -f "{args.fullname}" /mnt && echo "PermitRootLogin yes" >> /mnt/etc/ssh/sshd_config && poweroff'
-        vmprovision_cmd = """exit 0"""
+        vmprovision_cmd = f"""mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{args.vmuser}/.ssh; echo '{sshkey}' > ~{args.vmuser}/.ssh/authorized_keys; chown {args.vmuser}:users -R ~{args.vmuser}; exit 0; /opt/CustomScripts/MOpensuse.py -d {args.desktopenv}"""
         kvm_variant = "opensusetumbleweed"
 
     # Override VM Name if provided

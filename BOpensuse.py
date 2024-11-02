@@ -68,6 +68,7 @@ if __name__ == '__main__':
     subprocess.run(f"zypper --root {absinstallpath} addrepo -f https://download.opensuse.org/tumbleweed/repo/oss/ tw-oss", shell=True, check=True)
     subprocess.run(f"zypper --root {absinstallpath} addrepo -f https://download.opensuse.org/tumbleweed/repo/non-oss/ tw-nonoss", shell=True, check=True)
     subprocess.run(f"zypper --root {absinstallpath} --gpg-auto-import-keys ref", shell=True, check=True)
+    subprocess.run(f"zypper --root {absinstallpath} install -y sysuser-shadow", shell=True, check=True)
     subprocess.run(f"zypper --root {absinstallpath} install -y patterns-base-enhanced_base patterns-base-bootloader", shell=True, check=True)
 
     # Import gpg key for repos
@@ -84,6 +85,10 @@ if __name__ == '__main__':
     zch.ChrootCommand(absinstallpath, f"useradd -u 1000 -m -g users -G wheel -s /bin/bash {args.username}")
     zch.ChrootCommand(absinstallpath, f'chfn -f "{args.fullname}" {args.username}')
     subprocess.run(f"""echo '{args.username}:{sha512_password}' | chpasswd -R {absinstallpath} -e""", shell=True, check=True)
+
+    # Enable ssh and network-manager
+    zypper_install_chroot(absinstallpath, "openssh-server openssh-server-config-rootlogin")
+    zch.ChrootCommand(absinstallpath, "systemctl enable sshd NetworkManager")
 
     # Grub install selection statement.
     if args.grubtype == 1:
