@@ -48,9 +48,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
     print("Desktop Environment:", args.desktop)
 
-    # Exit if not root.
-    CFunc.is_root(True)
-
     # Get non-root user information.
     USERNAMEVAR, USERGROUP, USERHOME = CFunc.getnormaluser()
     MACHINEARCH = CFunc.machinearch()

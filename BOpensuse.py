@@ -5,9 +5,9 @@
 import argparse
 import functools
 import os
-import sys
-import subprocess
 import stat
+import subprocess
+import sys
 # Custom Includes
 from passlib import hash
 import zch
@@ -87,8 +87,21 @@ if __name__ == '__main__':
     subprocess.run(f"""echo '{args.username}:{sha512_password}' | chpasswd -R {absinstallpath} -e""", shell=True, check=True)
 
     # Enable ssh and network-manager
-    zypper_install_chroot(absinstallpath, "openssh-server openssh-server-config-rootlogin")
+    zypper_install_chroot(absinstallpath, "openssh-server openssh-server-config-rootlogin git glibc-locale")
     zch.ChrootCommand(absinstallpath, "systemctl enable sshd NetworkManager")
+
+    # Timezone
+    if os.path.exists(os.path.join(absinstallpath, "etc", "localtime")):
+        os.remove(os.path.join(absinstallpath, "etc", "localtime"))
+    subprocess.run(f"ln -sfr {absinstallpath}/usr/share/zoneinfo/US/Eastern {absinstallpath}/etc/localtime", shell=True, check=True)
+    # Hostname
+    with open(os.path.join(absinstallpath, "etc", "hostname"), 'w') as f:
+        f.write(args.hostname)
+    # Locale
+    subprocess.run("""
+    export LANG=en_US.UTF-8
+    echo "LANG=en_US.UTF-8" > "/etc/locale.conf"
+    """, shell=True)
 
     # Grub install selection statement.
     if args.grubtype == 1:
