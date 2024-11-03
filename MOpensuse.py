@@ -20,15 +20,13 @@ CFunc.is_root(True)
 def repos():
     """Install repos"""
     # Packman
-    subprocess.run("zypper ar -f -n packman http://ftp.gwdg.de/pub/linux/misc/packman/suse/openSUSE_Tumbleweed/ packman", shell=True, check=True)
+    subprocess.run("zypper ar -f -n packman http://ftp.gwdg.de/pub/linux/misc/packman/suse/openSUSE_Tumbleweed/ packman", shell=True, check=False)
     # Emulators
-    subprocess.run('zypper ar -f http://download.opensuse.org/repositories/Emulators/openSUSE_Tumbleweed/ "Emulators"', shell=True, check=True)
-    # Numix Circle icon theme
-    subprocess.run('zypper ar -f https://download.opensuse.org/repositories/home:ahjolinna/openSUSE_Tumbleweed/home:ahjolinna.repo ahjolinna', shell=True, check=True)
-    subprocess.run('zypper --non-interactive --gpg-auto-import-keys refresh', shell=True, check=True)
+    subprocess.run('zypper ar -f http://download.opensuse.org/repositories/Emulators/openSUSE_Tumbleweed/ "Emulators"', shell=True, check=False)
+    subprocess.run('zypper --gpg-auto-import-keys refresh', shell=True, check=True)
 def zypp_install(packages: str):
     """Install packages using zypper."""
-    subprocess.run(f"zypper install --non-interactive -y {packages}", shell=True, check=True)
+    subprocess.run(f"zypper install -y {packages}", shell=True, check=True)
 
 
 if __name__ == '__main__':
@@ -73,11 +71,11 @@ if __name__ == '__main__':
 
     # Install software for VMs
     if vmstatus == "kvm":
-        CFunc.zpinstall("spice-vdagent qemu-guest-agent")
+        zypp_install("spice-vdagent qemu-guest-agent")
     if vmstatus == "vbox":
-        CFunc.zpinstall("virtualbox-guest-tools virtualbox-guest-x11")
+        zypp_install("virtualbox-guest-tools virtualbox-guest-x11")
     if vmstatus == "vmware":
-        CFunc.zpinstall("open-vm-tools open-vm-tools-desktop")
+        zypp_install("open-vm-tools open-vm-tools-desktop")
 
     # GUI Packages
     if not args.nogui:
@@ -85,7 +83,7 @@ if __name__ == '__main__':
         zypp_install("MozillaFirefox MozillaFirefox-branding-openSUSE")
 
         # Numix Circle icon theme
-        zypp_install("numix-icon-theme-circle")
+        CFuncExt.numix_icons()
 
         # Fonts
         zypp_install("noto-sans-fonts ubuntu-fonts liberation-fonts google-roboto-fonts")
@@ -98,7 +96,14 @@ if __name__ == '__main__':
     # Install Desktop Software
     if args.desktop == "gnome":
         # Gnome
-        zypp_install("patterns-gnome-gnome patterns-gnome-gnome_x11 patterns-gnome-gnome_yast")
+        zypp_install("patterns-gnome-gnome patterns-gnome-gnome_x11 patterns-gnome-gnome_yast gnome-shell-extension-gpaste tilix")
+        # Install gs installer script.
+        gs_installer = CFunc.downloadfile("https://raw.githubusercontent.com/brunelli/gnome-shell-extension-installer/master/gnome-shell-extension-installer", os.path.join(os.sep, "usr", "local", "bin"), overwrite=True)
+        os.chmod(gs_installer[0], 0o777)
+        # Dash to panel
+        CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 1160".format(gs_installer[0]))
+        # Kstatusnotifier
+        CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 615".format(gs_installer[0]))
     elif args.desktop == "kde":
         # KDE
         zypp_install("patterns-kde-kde_plasma patterns-kde-kde_yast patterns-kde-kde_utilities")
@@ -114,7 +119,23 @@ if __name__ == '__main__':
     CFunc.AddLineToSudoersFile(opensuse_sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("podman")))
 
     # Add normal user to all reasonable groups
-    CFunc.AddUserAllGroups()
+    CFunc.AddUserToGroup("disk")
+    CFunc.AddUserToGroup("lp")
+    CFunc.AddUserToGroup("wheel")
+    CFunc.AddUserToGroup("cdrom")
+    CFunc.AddUserToGroup("man")
+    CFunc.AddUserToGroup("dialout")
+    CFunc.AddUserToGroup("tape")
+    CFunc.AddUserToGroup("video")
+    CFunc.AddUserToGroup("audio")
+    CFunc.AddUserToGroup("input")
+    CFunc.AddUserToGroup("kvm")
+    CFunc.AddUserToGroup("systemd-journal")
+    CFunc.AddUserToGroup("systemd-timesync")
+    CFunc.AddUserToGroup("pipewire")
+    CFunc.AddUserToGroup("colord")
+    CFunc.AddUserToGroup("nm-openconnect")
+    CFunc.AddUserToGroup("vboxsf")
 
     # Plymouth and grub
     zypp_install("plymouth plymouth-branding-openSUSE plymouth-dracut")

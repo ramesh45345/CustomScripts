@@ -238,6 +238,9 @@ function up () {
         $SUDOCMD dnf update --refresh -y
     elif type -p yay &> /dev/null; then
         yay -Syu --needed --noconfirm
+    elif type -p zypper &> /dev/null; then
+        $SUDOCMD zypper up -y
+        $SUDOCMD zypper dup -y
     elif type -p rpm-ostree &> /dev/null; then
         $SUDOCMD rpm-ostree upgrade
     elif type nix &> /dev/null && ! [[ "$(which nix)" == *"$USER"* ]]; then
@@ -371,6 +374,20 @@ elif type yay &> /dev/null || type pacman &> /dev/null; then
         echo "Auto-removing packages."
         $PKGMGR -Qdtq | $PKGMGR -Rs -
         flatpak_clean
+    }
+elif type zypper &> /dev/null; then
+    function ins () {
+        echo "Installing $@."
+        $SUDOCMD zypper install $@
+    }
+    function rmv () {
+        echo "Removing $@."
+        $SUDOCMD zypper remove -u $@
+    }
+    function se () {
+        echo "Searching for $@."
+        $SUDOCMD zypper search "$@"
+        $SUDOCMD zypper info "$@"
     }
 elif type rpm-ostree &> /dev/null; then
     function ins () {
@@ -891,6 +908,9 @@ function up
         sudo dnf update --refresh -y
     else if type -q yay
         yay -Syu --needed --noconfirm
+    else if type -q zypper
+        sudo zypper up -y
+        sudo zypper dup -y
     else if type -q rpm-ostree
         sudo rpm-ostree upgrade
     else if type -q nix; and not string match -qr $USER (which nix);
@@ -1011,6 +1031,20 @@ else if type -q yay
         echo "Auto-removing packages."
         yay -Qdtq | yay -Rs -
         flatpak_clean
+    end
+else if type -q zypper
+    function ins
+        echo "Installing $argv."
+        sudo zypper install $argv
+    end
+    function rmv
+        echo "Removing $argv."
+        sudo zypper remove -u $argv
+    end
+    function se
+        echo "Searching for $argv."
+        sudo zypper search $argv
+        sudo zypper info $argv
     end
 else if type -q rpm-ostree
     function ins

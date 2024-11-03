@@ -69,7 +69,7 @@ if __name__ == '__main__':
     subprocess.run(f"zypper --root {absinstallpath} addrepo -f https://download.opensuse.org/tumbleweed/repo/non-oss/ tw-nonoss", shell=True, check=True)
     subprocess.run(f"zypper --root {absinstallpath} --gpg-auto-import-keys ref", shell=True, check=True)
     subprocess.run(f"zypper --root {absinstallpath} install -y sysuser-shadow", shell=True, check=True)
-    subprocess.run(f"zypper --root {absinstallpath} install -y patterns-base-enhanced_base patterns-base-bootloader", shell=True, check=True)
+    subprocess.run(f"zypper --root {absinstallpath} install -y patterns-base-enhanced_base patterns-base-bootloader gzip", shell=True, check=True)
 
     # Import gpg key for repos
     zch.ChrootCommand(absinstallpath, "rpm --import https://download.opensuse.org/tumbleweed/repo/oss/gpg-pubkey-29b700a4-62b07e22.asc")
