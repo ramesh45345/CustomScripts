@@ -226,8 +226,9 @@ function up () {
         cd /etc/nixos
         git pull
     fi
+    # System upgrade commands
     if type -p topgrade &> /dev/null ; then
-        topgrade -y flatpak $@
+        topgrade -y flatpak --disable firmware $@
     elif type -p nala &> /dev/null; then
         $SUDOCMD nala update
         $SUDOCMD nala upgrade
@@ -245,6 +246,16 @@ function up () {
         $SUDOCMD rpm-ostree upgrade
     elif type nix &> /dev/null && ! [[ "$(which nix)" == *"$USER"* ]]; then
         $SUDOCMD nixos-rebuild switch --upgrade
+    fi
+    # Non-root commands
+    if ! type -p topgrade &> /dev/null ; then
+        distrobox-upgrade --all
+    fi
+}
+function upr () {
+    # Root commands
+    if type -p distrobox-upgrade &> /dev/null ; then
+        distrobox-upgrade --root --all
     fi
 }
 
@@ -896,8 +907,9 @@ function up
         cd /etc/nixos
         git pull
     end
+    # System upgrade commands
     if type -q topgrade
-        topgrade -y flatpak $argv
+        topgrade -y flatpak --disable firmware $argv
     else if type -q nala
         sudo nala update
         sudo nala upgrade
@@ -915,6 +927,16 @@ function up
         sudo rpm-ostree upgrade
     else if type -q nix; and not string match -qr $USER (which nix);
         sudo nixos-rebuild switch --upgrade
+    end
+    # Non-root commands
+    if not type -q topgrade
+        distrobox-upgrade --all
+    end
+end
+function upr
+    # Root commands
+    if type -q distrobox-upgrade
+        distrobox-upgrade --root --all
     end
 end
 
