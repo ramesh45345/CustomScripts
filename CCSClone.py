@@ -106,13 +106,12 @@ WantedBy=timers.target
 # Fall-back to cron script if systemd is not available.
 elif os.path.isdir(cron_hourly_folder):
     with open(cron_hourly_file, 'w') as file:
-        file.write('''#!{2}
-echo "Executing \$0"
-su {0} -s /bin/sh <<'EOL'
-    cd {1}
+        file.write(f'''#!{shutil.which("bash")}
+su {USERNAMEVAR} -s /bin/sh <<'EOL'
+    cd {clonepath}
     git pull
 EOL
-'''.format(USERNAMEVAR, clonepath, shutil.which("bash")))
+''')
     # Make script executable
     os.chmod(cron_hourly_file, 0o777)
 
