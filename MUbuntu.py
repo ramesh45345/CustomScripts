@@ -120,15 +120,6 @@ if __name__ == '__main__':
 
     ### Software ###
 
-    # Syncthing
-    subprocess.run("wget -qO- https://syncthing.net/release-key.txt | apt-key add -", shell=True, check=True)
-    # Write syncthing sources list
-    with open(os.path.join(os.sep, "etc", "apt", "sources.list.d", "syncthing-release.list"), 'w') as f:
-        f.write("deb http://apt.syncthing.net/ syncthing release")
-    # Update and install syncthing:
-    CFunc.aptupdate()
-    CFunc.aptinstall("syncthing")
-
     # Cli Software
     CFunc.aptinstall("ssh tmux zsh fish btrfs-progs f2fs-tools xfsprogs dmraid mdadm nano p7zip-full p7zip-rar unrar curl rsync less iotop sshfs sudo python-is-python3 nala")
     # Topgrade
@@ -149,6 +140,8 @@ if __name__ == '__main__':
     CFunc.aptinstall("default-jre")
     # Drivers
     CFunc.aptinstall("intel-microcode")
+    # Syncthing
+    MDebian.syncthing()
 
     # Sudoers changes
     CFuncExt.SudoersEnvSettings()
@@ -190,8 +183,8 @@ renderer: NetworkManager""")
         CFunc.aptmark(held_pkgs, mark=False)
         CFunc.aptinstall("ubuntu-desktop ubuntu-session gnome-session")
         CFunc.aptinstall("gnome-clocks")
-        CFunc.snap_install("gnome-calculator gnome-characters gnome-logs gnome-system-monitor")
-        CFunc.aptinstall("gnome-shell-extensions")
+        CFunc.snap_install("gnome-calculator gnome-characters gnome-logs gnome-system-monitor gnome-tweaks")
+        CFunc.aptinstall("gnome-shell-extensions gnome-shell-extension-gpaste")
         CFunc.aptinstall("gnome-software-plugin-flatpak")
         # Install gs installer script.
         gs_installer = CFunc.downloadfile("https://raw.githubusercontent.com/brunelli/gnome-shell-extension-installer/master/gnome-shell-extension-installer", os.path.join(os.sep, "usr", "local", "bin"), overwrite=True)

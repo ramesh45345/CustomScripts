@@ -28,6 +28,15 @@ def vscode_deb():
     subprocess.run('echo "deb [ signed-by=/etc/apt/trusted.gpg.d/vscodium-archive-keyring.gpg ] https://paulcarroty.gitlab.io/vscodium-deb-rpm-repo/debs vscodium main" > /etc/apt/sources.list.d/vscodium.list', shell=True, check=True)
     CFunc.aptupdate()
     CFunc.aptinstall("codium")
+def syncthing():
+    """Install syncthing repo and deb."""
+    subprocess.run("mkdir -p /etc/apt/keyrings", shell=True, check=True)
+    subprocess.run("curl -L -o /etc/apt/keyrings/syncthing-archive-keyring.gpg https://syncthing.net/release-key.gpg", shell=True, check=True)
+    # Write syncthing sources list
+    subprocess.run('echo "deb [signed-by=/etc/apt/keyrings/syncthing-archive-keyring.gpg] https://apt.syncthing.net/ syncthing stable" | tee /etc/apt/sources.list.d/syncthing.list', shell=True, check=True)
+    # Update and install syncthing:
+    CFunc.aptupdate()
+    CFunc.aptinstall("syncthing")
 def kernel_liquorix():
     """Install liquorix kernel."""
     tempfolder = tempfile.gettempdir()
@@ -175,6 +184,8 @@ echo "firmware-ivtv firmware-ivtv/license/accepted boolean true" | debconf-set-s
     CFuncExt.FirewalldConfig()
     # Container stuff
     CFunc.aptinstall("podman")
+    # Syncthing
+    syncthing()
 
     # Install nix
     CFuncExt.nix_standalone_install(USERNAMEVAR, """
