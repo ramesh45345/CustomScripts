@@ -195,7 +195,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Create and run a Virtual Machine.')
     parser.add_argument("-a", "--ostype", type=int, help="OS type (1=Arch. 2=NixOS, 3=Ubuntu)", default="1")
     parser.add_argument("-c", "--nixconfig", help="Path of folder configuration for nix")
-    parser.add_argument("-e", "--desktopenv", help="Desktop Environment (default: %(default)s)", default="xfce")
+    parser.add_argument("-e", "--desktopenv", help="Desktop Environment (default: %(default)s)", default="gnome")
     parser.add_argument("-f", "--fullname", help="Full Name", default="User Name")
     parser.add_argument("-g", "--debversion", help="Ubuntu/Debian version to install.")
     parser.add_argument("-i", "--iso", help="Path to live cd", required=True)
