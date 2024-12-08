@@ -459,13 +459,6 @@ if shutil.which("kwriteconfig6") and shutil.which("plasma_session"):
     kwriteconfig("ksmserver.notifyrc", "Event/unlocked", "Action", "Execute")
     kwriteconfig("ksmserver.notifyrc", "Event/unlocked", "Execute", '{0} $(pgrep -f "whloffscreen.py")'.format(shutil.which("kill")))
 
-    # Fish config for konsole
-    if shutil.which("fish"):
-        subprocess.run('kwriteconfig6 --file konsolerc --group "Desktop Entry" --key DefaultProfile "Profile 1.profile"', shell=True, check=False)
-        subprocess.run('kwriteconfig6 --file "$HOME/.local/share/konsole/Profile 1.profile" --group "General" --key Name "Profile 1"', shell=True, check=False)
-        subprocess.run('kwriteconfig6 --file "$HOME/.local/share/konsole/Profile 1.profile" --group "General" --key Parent "FALLBACK/"', shell=True, check=False)
-        subprocess.run('kwriteconfig6 --file "$HOME/.local/share/konsole/Profile 1.profile" --group "General" --key Command "$(which fish)"', shell=True, check=False)
-
     if shutil.which("qdbus"):
         # Reload kwin.
         subprocess.run('qdbus org.kde.KWin /KWin reconfigure', shell=True, check=False)
@@ -716,6 +709,12 @@ if shutil.which("konsole"):
     kwriteconfig(os.path.join(USERHOME, ".local", "share", "konsole", "Profile 1.profile"), "Appearance", "Font", "Liberation Mono,11,-1,5,50,0,0,0,0,0,Regular")
     kwriteconfig(os.path.join(USERHOME, ".local", "share", "konsole", "Profile 1.profile"), "General", "TerminalColumns", "85")
     kwriteconfig(os.path.join(USERHOME, ".local", "share", "konsole", "Profile 1.profile"), "General", "TerminalRows", "30")
+    # Fish config for konsole
+    if shutil.which("fish"):
+        subprocess.run('kwriteconfig6 --file konsolerc --group "Desktop Entry" --key DefaultProfile "Profile 1.profile"', shell=True, check=False)
+        subprocess.run('kwriteconfig6 --file "$HOME/.local/share/konsole/Profile 1.profile" --group "General" --key Name "Profile 1"', shell=True, check=False)
+        subprocess.run('kwriteconfig6 --file "$HOME/.local/share/konsole/Profile 1.profile" --group "General" --key Parent "FALLBACK/"', shell=True, check=False)
+        subprocess.run('kwriteconfig6 --file "$HOME/.local/share/konsole/Profile 1.profile" --group "General" --key Command "$(which fish)"', shell=True, check=False)
 
 # Konsole session
 konsolesession_xml_path = os.path.join(USERHOME, ".local", "share", "kxmlgui5", "konsole", "sessionui.rc")
@@ -917,7 +916,7 @@ if shutil.which("lxqt-panel"):
     os.makedirs(lxqt_config_basefolder, exist_ok=True)
 
     # Panel shortcuts
-    lxqt_search_list = ["firefox.desktop", "brave-browser.desktop", "chrome.desktop", 'thunderbird.desktop', 'pcmanfm-qt.desktop', "tilix.desktop", 'virt-manager.desktop', "org.gnome.SystemMonitor.desktop"]
+    lxqt_search_list = ["firefox.desktop", "brave-browser.desktop", "chrome.desktop", 'thunderbird.desktop', 'pcmanfm-qt.desktop', "konsole.desktop", "tilix.desktop", 'virt-manager.desktop', "org.gnome.SystemMonitor.desktop"]
     lxqt_file_list = []
     lxqt_panel_string = ""
     lxqt_panel_id = 0
@@ -927,7 +926,7 @@ if shutil.which("lxqt-panel"):
             if lxqt_panel_id != 0:
                 lxqt_panel_string += "\n"
             lxqt_panel_id += 1
-            lxqt_panel_string += f"apps\\{lxqt_panel_id}\\desktop={ds[0]}"
+            lxqt_panel_string += f"apps\\{lxqt_panel_id}\\desktop={ds[-1]}"
     lxqt_panel_string += f"\napps\\size={lxqt_panel_id}"
 
     # Panel config
