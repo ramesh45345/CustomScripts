@@ -826,7 +826,7 @@ if __name__ == '__main__':
         graphics_type = "spice"
         # virt-install manual: https://www.mankier.com/1/virt-install
         # List of os: osinfo-query os
-        CREATESCRIPT_KVM = f"""virt-install --connect qemu:///system --name={vmname} --disk path={os.path.join(vmpath, vmname)}.qcow2,bus={kvm_diskinterface} --disk device=cdrom,bus=sata,target=sda,readonly=on --graphics {graphics_type} --cpu host --vcpu={CPUCORES},sockets=1,cores={CPUCORES} --ram={args.memory} --network bridge=virbr0,model={kvm_netdevice} --filesystem source=/,target=root,mode=mapped --os-variant={kvm_variant} --import --noautoconsole --noreboot --video={kvm_video} --channel unix,target_type=virtio,name=org.qemu.guest_agent.0 --channel spicevmc,target_type=virtio,name=com.redhat.spice.0"""
+        CREATESCRIPT_KVM = f"""virt-install --connect qemu:///system --name={vmname} --disk path={os.path.join(vmpath, vmname)}.qcow2,bus={kvm_diskinterface} --disk device=cdrom,bus=sata,target=sda,readonly=on --graphics {graphics_type} --cpu host-model --vcpu={CPUCORES},sockets=1,cores={CPUCORES} --ram={args.memory} --network bridge=virbr0,model={kvm_netdevice} --filesystem source=/,target=root,mode=mapped --os-variant={kvm_variant} --import --noautoconsole --noreboot --video={kvm_video} --channel unix,target_type=virtio,name=org.qemu.guest_agent.0 --channel spicevmc,target_type=virtio,name=com.redhat.spice.0"""
         if useefi is True:
             # Add efi loading
             CREATESCRIPT_KVM += f" --boot loader={efi_bin},loader_ro=yes,loader_type=pflash,nvram={efi_nvram}"
