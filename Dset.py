@@ -1018,7 +1018,7 @@ type=volume
 [worldclock]
 alignment=Right
 autoRotate=true
-customFormat="'<b>'HH:mm:ss'</b><br/><font size=\"-2\">'ddd, d MMM yyyy'<br/>'TT'</font>'"
+customFormat="'<b>'h:mm:ss A'</b><br/><font size=\"-2\">'ddd, yyyy-MM-dd t'</font>'"
 dateFormatType=custom
 dateLongNames=false
 datePadDay=false

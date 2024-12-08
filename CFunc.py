@@ -124,7 +124,7 @@ def log_subprocess_output(pipe):
     # b'\n'-separated lines
     for line in iter(pipe.readline, b''):
         # Remove the newlines and decode.
-        logging.info('%s', line.strip().decode())
+        logging.info('%s', line.strip().decode(errors="ignore"))
 def subpout_logger(cmd):
     """Run command which will output stdout to logger"""
     logging.info("Running command: %s", cmd)
