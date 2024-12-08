@@ -385,25 +385,6 @@ if shutil.which("kwriteconfig6") and shutil.which("plasma_session"):
     kwriteconfig("ksmserverrc", "General", "confirmLogout", "false")
     kwriteconfig("ksmserverrc", "General", "offerShutdown", "true")
     kwriteconfig("ksmserverrc", "General", "loginMode", "emptySession")
-    # Konsole settings
-    kwriteconfig("konsolerc", "Desktop Entry", "DefaultProfile", "Profile 1.profile")
-    kwriteconfig("konsolerc", "KonsoleWindow", "RememberWindowSize", "false")
-    kwriteconfig("konsolerc", "TabBar", "CloseTabOnMiddleMouseButton", "true")
-    kwriteconfig("konsolerc", "TabBar", "ExpandTabWidth", "true")
-    kwriteconfig("konsolerc", "TabBar", "NewTabButton", "true")
-    kwriteconfig("konsolerc", "TabBar", "TabBarPosition", "Top")
-    kwriteconfig("konsolerc", "TabBar", "TabBarVisibility", "AlwaysShowTabBar")
-    subprocess.run('kwriteconfig6 --file konsolerc --group "MainWindow" --group "Toolbar mainToolBar" --key ToolButtonStyle "IconOnly"', shell=True, check=False)
-    subprocess.run('kwriteconfig6 --file konsolerc --group "MainWindow" --group "Toolbar sessionToolbar" --key ToolButtonStyle "IconOnly"', shell=True, check=False)
-    # Konsole profile settings
-    os.makedirs("{0}/.local/share/konsole".format(USERHOME), exist_ok=True)
-    kwriteconfig(os.path.join(USERHOME, ".local", "share", "konsole", "Profile 1.profile"), "General", "Name", "Profile 1")
-    kwriteconfig(os.path.join(USERHOME, ".local", "share", "konsole", "Profile 1.profile"), "General", "Parent", "FALLBACK/")
-    kwriteconfig(os.path.join(USERHOME, ".local", "share", "konsole", "Profile 1.profile"), "Scrolling", "HistoryMode", "2")
-    kwriteconfig(os.path.join(USERHOME, ".local", "share", "konsole", "Profile 1.profile"), "Appearance", "ColorScheme", "Breeze")
-    kwriteconfig(os.path.join(USERHOME, ".local", "share", "konsole", "Profile 1.profile"), "Appearance", "Font", "Liberation Mono,11,-1,5,50,0,0,0,0,0,Regular")
-    kwriteconfig(os.path.join(USERHOME, ".local", "share", "konsole", "Profile 1.profile"), "General", "TerminalColumns", "85")
-    kwriteconfig(os.path.join(USERHOME, ".local", "share", "konsole", "Profile 1.profile"), "General", "TerminalRows", "30")
     # Clipboard settings
     kwriteconfig("klipperrc", "General", "MaxClipItems", "20")
     # Fonts
@@ -714,6 +695,28 @@ if os.path.isfile(places_xml_path):
     # Write the XML file
     xml_indent(root)
     tree.write(places_xml_path)
+
+if shutil.which("konsole"):
+    # Konsole settings
+    kwriteconfig("konsolerc", "Desktop Entry", "DefaultProfile", "Profile 1.profile")
+    kwriteconfig("konsolerc", "KonsoleWindow", "RememberWindowSize", "false")
+    kwriteconfig("konsolerc", "TabBar", "CloseTabOnMiddleMouseButton", "true")
+    kwriteconfig("konsolerc", "TabBar", "ExpandTabWidth", "true")
+    kwriteconfig("konsolerc", "TabBar", "NewTabButton", "true")
+    kwriteconfig("konsolerc", "TabBar", "TabBarPosition", "Top")
+    kwriteconfig("konsolerc", "TabBar", "TabBarVisibility", "AlwaysShowTabBar")
+    subprocess.run('kwriteconfig6 --file konsolerc --group "MainWindow" --group "Toolbar mainToolBar" --key ToolButtonStyle "IconOnly"', shell=True, check=False)
+    subprocess.run('kwriteconfig6 --file konsolerc --group "MainWindow" --group "Toolbar sessionToolbar" --key ToolButtonStyle "IconOnly"', shell=True, check=False)
+    # Konsole profile settings
+    os.makedirs("{0}/.local/share/konsole".format(USERHOME), exist_ok=True)
+    kwriteconfig(os.path.join(USERHOME, ".local", "share", "konsole", "Profile 1.profile"), "General", "Name", "Profile 1")
+    kwriteconfig(os.path.join(USERHOME, ".local", "share", "konsole", "Profile 1.profile"), "General", "Parent", "FALLBACK/")
+    kwriteconfig(os.path.join(USERHOME, ".local", "share", "konsole", "Profile 1.profile"), "Scrolling", "HistoryMode", "2")
+    kwriteconfig(os.path.join(USERHOME, ".local", "share", "konsole", "Profile 1.profile"), "Appearance", "ColorScheme", "Breeze")
+    kwriteconfig(os.path.join(USERHOME, ".local", "share", "konsole", "Profile 1.profile"), "Appearance", "Font", "Liberation Mono,11,-1,5,50,0,0,0,0,0,Regular")
+    kwriteconfig(os.path.join(USERHOME, ".local", "share", "konsole", "Profile 1.profile"), "General", "TerminalColumns", "85")
+    kwriteconfig(os.path.join(USERHOME, ".local", "share", "konsole", "Profile 1.profile"), "General", "TerminalRows", "30")
+
 # Konsole session
 konsolesession_xml_path = os.path.join(USERHOME, ".local", "share", "kxmlgui5", "konsole", "sessionui.rc")
 if os.path.isfile(konsolesession_xml_path):

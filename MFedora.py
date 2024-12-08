@@ -187,7 +187,7 @@ if __name__ == '__main__':
         CFunc.dnfinstall("tilix tilix-nautilus")
     elif args.desktop == "lxqt":
         CFunc.dnfinstall("--allowerasing @lxqt-desktop-environment")
-        CFunc.dnfinstall("tilix")
+        CFunc.dnfinstall("konsole")
     elif args.desktop == "cinnamon":
         CFunc.dnfinstall("--allowerasing @cinnamon-desktop-environment")
         CFunc.dnfinstall("tilix")
