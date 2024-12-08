@@ -906,3 +906,157 @@ CustomCommand={0}
 """.format(shutil.which("fish"))
     with open(xfterm_config_file, 'w') as f:
         f.write(xfterm_config_text)
+
+# lxqt
+if shutil.which("lxqt-panel"):
+    lxqt_config_basefolder = os.path.join(USERHOME, ".config", "lxqt")
+    lxqt_configfile_panel = os.path.join(lxqt_config_basefolder, "panel.conf")
+    os.makedirs(lxqt_config_basefolder, exist_ok=True)
+
+    # Panel shortcuts
+    lxqt_search_list = ["firefox.desktop", "brave-browser.desktop", "chrome.desktop", 'thunderbird.desktop', 'pcmanfm-qt.desktop', "tilix.desktop", 'virt-manager.desktop', "org.gnome.SystemMonitor.desktop"]
+    lxqt_file_list = []
+    lxqt_panel_string = ""
+    lxqt_panel_id = 0
+    for d in lxqt_search_list:
+        ds = CMimeSet.LocateDesktopFile(d)
+        if ds:
+            if lxqt_panel_id != 0:
+                lxqt_panel_string += "\n"
+            lxqt_panel_id += 1
+            lxqt_panel_string += f"apps\\{lxqt_panel_id}\\desktop={ds[0]}"
+    lxqt_panel_string += f"\napps\\size={lxqt_panel_id}"
+
+    # Panel config
+    lxqt_configfile_panel_text = r"""[General]
+__userfile__=true
+iconTheme=
+panels=panel1, panel2
+
+[fancymenu]
+alignment=Left
+favorites\size=0
+type=fancymenu
+
+[mount]
+alignment=Right
+type=mount
+
+[panel1]
+alignment=-1
+animation-duration=0
+background-color=@Variant(\0\0\0\x43\0\xff\xff\0\0\0\0\0\0\0\0)
+background-image=
+desktop=0
+font-color=@Variant(\0\0\0\x43\0\xff\xff\0\0\0\0\0\0\0\0)
+hidable=false
+hide-on-overlap=false
+iconSize=22
+lineCount=1
+lockPanel=false
+opacity=100
+panelSize=32
+plugins=fancymenu, quicklaunch, spacer, statusnotifier, tray, mount, volume, worldclock, showdesktop
+position=Top
+reserve-space=true
+show-delay=0
+visible-margin=true
+width=100
+width-percent=true
+
+[panel2]
+alignment=-1
+animation-duration=0
+background-color=@Variant(\0\0\0\x43\0\xff\xff\0\0\0\0\0\0\0\0)
+background-image=
+desktop=0
+font-color=@Variant(\0\0\0\x43\0\xff\xff\0\0\0\0\0\0\0\0)
+hidable=false
+hide-on-overlap=false
+iconSize=22
+lineCount=1
+lockPanel=false
+opacity=100
+panelSize=24
+plugins=taskbar2
+position=Bottom
+reserve-space=true
+show-delay=0
+visible-margin=true
+width=100
+width-percent=true
+
+[quicklaunch]
+alignment=Left
+{0}
+type=quicklaunch
+
+[showdesktop]
+alignment=Right
+type=showdesktop
+
+[statusnotifier]
+alignment=Right
+type=statusnotifier
+
+[taskbar]
+alignment=Left
+type=taskbar
+
+[taskbar2]
+alignment=Left
+type=taskbar
+
+[tray]
+alignment=Right
+type=tray
+
+[volume]
+alignment=Right
+type=volume
+
+[worldclock]
+alignment=Right
+autoRotate=true
+customFormat="'<b>'HH:mm:ss'</b><br/><font size=\"-2\">'ddd, d MMM yyyy'<br/>'TT'</font>'"
+dateFormatType=custom
+dateLongNames=false
+datePadDay=false
+datePosition=below
+dateShowDoW=false
+dateShowYear=false
+defaultTimeZone=
+formatType=custom-timeonly
+showDate=false
+showTimezone=false
+showTooltip=false
+showWeekNumber=true
+timeAMPM=false
+timePadHour=false
+timeShowSeconds=false
+timeZones\size=0
+timezoneFormatType=iana
+timezonePosition=below
+type=worldclock
+useAdvancedManualFormat=true
+""".format(lxqt_panel_string)
+    with open(lxqt_configfile_panel, 'w') as f:
+        f.write(lxqt_configfile_panel_text)
+
+    # lxqt config
+    lxqt_configfile_general_text = r"""
+[General]
+__userfile__=true
+icon_follow_color_scheme=true
+icon_theme=Numix-Circle
+theme=KDE-Plasma
+tool_bar_icon_size=24
+wallpaper_override=false
+
+[Qt]
+font="Noto Sans,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1"
+style=Fusion
+"""
+    lxqt_configfile_general = os.path.join(lxqt_config_basefolder, "lxqt.conf")
+    with open(lxqt_configfile_general, 'w') as f:
+        f.write(lxqt_configfile_general_text)
