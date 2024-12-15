@@ -1062,3 +1062,41 @@ style=Fusion
     lxqt_configfile_general = os.path.join(lxqt_config_basefolder, "lxqt.conf")
     with open(lxqt_configfile_general, 'w') as f:
         f.write(lxqt_configfile_general_text)
+
+# xscreensaver
+if shutil.which("xscreensaver"):
+    xscreensaver_file = os.path.join(USERHOME, ".xscreensaver")
+    # Panel config
+    xscreensaver_text = """
+timeout:        0:10:00
+cycle:          0:10:00
+lock:           False
+lockTimeout:    0:00:00
+passwdTimeout:  0:00:30
+verbose:        False
+splash:         True
+splashDuration: 0:00:05
+demoCommand:    xscreensaver-settings
+nice:           10
+fade:           True
+unfade:         False
+fadeSeconds:    0:00:10
+ignoreUninstalledPrograms:False
+dpmsQuickOff:   True
+dpmsStandby:    0:15:00
+dpmsSuspend:    0:15:00
+dpmsOff:        0:15:00
+selected:       -1
+"""
+    if vmstatus or args.disable_powersave:
+        xscreensaver_text += """
+mode:           off
+dpmsEnabled:    False
+"""
+    else:
+        xscreensaver_text += """
+mode:           blank
+dpmsEnabled:    True
+"""
+    with open(xscreensaver_file, 'w') as f:
+        f.write(xscreensaver_text)
