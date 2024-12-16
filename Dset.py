@@ -3,6 +3,7 @@
 
 # Python includes
 import argparse
+import configparser
 import os
 import pathlib
 import subprocess
@@ -1062,6 +1063,81 @@ style=Fusion
     lxqt_configfile_general = os.path.join(lxqt_config_basefolder, "lxqt.conf")
     with open(lxqt_configfile_general, 'w') as f:
         f.write(lxqt_configfile_general_text)
+
+# Pcmanfm-qt
+if shutil.which("pcmanfm-qt"):
+    pcmanfm_basefolder = os.path.join(USERHOME, ".config", "pcmanfm-qt", "lxqt")
+    pcmanfm_configfile = os.path.join(pcmanfm_basefolder, "settings.conf")
+    os.makedirs(pcmanfm_basefolder, exist_ok=True)
+
+    # Preserve case: https://stackoverflow.com/a/23836686 and https://docs.python.org/3/library/configparser.html#configparser.ConfigParser.optionxform
+    config = configparser.RawConfigParser()
+    config.optionxform = str
+
+    config.sections()
+    # Read the ini file
+    config.read(pcmanfm_configfile)
+
+    # Config modifications
+    # Behavior
+    config['Behavior']['BookmarkOpenMethod'] = "current_tab"
+    config['Behavior']['ConfirmDelete'] = "true"
+    config['Behavior']['ConfirmTrash'] = "true"
+    config['Behavior']['NoUsbTrash'] = "true"
+    config['Behavior']['SingleWindowMode'] = "true"
+    config['Behavior']['UseTrash'] = "false"
+    # Folderview
+    config['FolderView']['BackupAsHidden'] = 'false'
+    config['FolderView']['BigIconSize'] = '48'
+    config['FolderView']['Mode'] = 'detailed'
+    config['FolderView']['NoItemTooltip'] = 'false'
+    config['FolderView']['ScrollPerPixel'] = 'true'
+    config['FolderView']['ShadowHidden'] = 'true'
+    config['FolderView']['ShowFilter'] = 'false'
+    config['FolderView']['ShowFullNames'] = 'true'
+    config['FolderView']['ShowHidden'] = 'true'
+    config['FolderView']['SidePaneIconSize'] = '24'
+    config['FolderView']['SmallIconSize'] = '24'
+    config['FolderView']['SortCaseSensitive'] = 'false'
+    config['FolderView']['SortFolderFirst'] = 'true'
+    config['FolderView']['SortHiddenLast'] = 'false'
+    config['FolderView']['SortOrder'] = 'ascending'
+    config['FolderView']['ThumbnailIconSize'] = '128'
+    # Search
+    config['Search'] = {}
+    config['Search']['searchContentCaseInsensitive'] = 'true'
+    config['Search']['searchContentRegexp'] = 'true'
+    config['Search']['searchNameCaseInsensitive'] = 'true'
+    config['Search']['searchNameRegexp'] = 'true'
+    config['Search']['searchRecursive'] = 'true'
+    config['Search']['searchhHidden'] = 'true'
+    # System
+    if shutil.which("konsole"):
+        config['System']['Terminal'] = "konsole"
+    elif shutil.which("tilix"):
+        config['System']['Terminal'] = "tilix"
+    # Thumbnail
+    config['Thumbnail']['MaxThumbnailFileSize'] = "8192"
+    config['Thumbnail']['ShowThumbnails'] = "true"
+    config['Thumbnail']['ThumbnailLocalFilesOnly'] = "false"
+    # Window
+    config['Window']['AlwaysShowTabs'] = "true"
+    config['Window']['FixedHeight'] = "600"
+    config['Window']['FixedWidth'] = "800"
+    config['Window']['LastWindowMaximized'] = "false"
+    config['Window']['PathBarButtons'] = "true"
+    config['Window']['RememberWindowSize'] = "true"
+    config['Window']['ReopenLastTabs'] = "true"
+    config['Window']['ShowMenuBar'] = "true"
+    config['Window']['ShowTabClose'] = "true"
+    config['Window']['SidePaneMode'] = "places"
+    config['Window']['SidePaneVisible'] = "true"
+    config['Window']['SplitView'] = "false"
+    config['Window']['SwitchToNewTab'] = "true"
+
+    # Write the ini file
+    with open(pcmanfm_configfile, 'w') as configfile:
+        config.write(configfile)
 
 # xscreensaver
 if shutil.which("xscreensaver"):
