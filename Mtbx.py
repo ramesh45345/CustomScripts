@@ -142,7 +142,7 @@ addtext(r"""
 RUN sed -i '/tsflags=nodocs/d' /etc/dnf/dnf.conf
 RUN dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm https://dl.fedoraproject.org/pub/epel/epel-next-release-latest-9.noarch.rpm
 RUN dnf install -y https://download1.rpmfusion.org/free/el/rpmfusion-free-release-9.noarch.rpm https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-9.noarch.rpm
-RUN dnf -y install --allowerasing acl bash nano curl gawk grep gzip libcap openssl p11-kit pam python3 rpm sed systemd tar
+RUN dnf -y install --allowerasing acl bash nano curl gawk grep gzip libcap openssl p11-kit pam python3 rpm sed systemd tar xorg-x11-server-Xorg xorg-x11-xauth xorg-x11-server-utils
 RUN dnf -y install bash-completion bzip2 diffutils dnf-plugins-core findutils flatpak-spawn fuse fuse-libs git gnupg gnupg2-smime gvfs-client hostname iputils keyutils krb5-libs less lsof man-db man-pages mtr openssh-clients passwd pigz procps-ng rsync shadow-utils sudo tcpdump time tmux traceroute tree unzip vte-profile wget which words xorg-x11-xauth xz zip
 
 # Shell Tools
