@@ -1080,6 +1080,7 @@ if shutil.which("pcmanfm-qt"):
 
     # Config modifications
     # Behavior
+    config['Behavior'] = {}
     config['Behavior']['BookmarkOpenMethod'] = "current_tab"
     config['Behavior']['ConfirmDelete'] = "true"
     config['Behavior']['ConfirmTrash'] = "true"
@@ -1087,6 +1088,7 @@ if shutil.which("pcmanfm-qt"):
     config['Behavior']['SingleWindowMode'] = "true"
     config['Behavior']['UseTrash'] = "false"
     # Folderview
+    config['FolderView'] = {}
     config['FolderView']['BackupAsHidden'] = 'false'
     config['FolderView']['BigIconSize'] = '48'
     config['FolderView']['Mode'] = 'detailed'
@@ -1112,15 +1114,18 @@ if shutil.which("pcmanfm-qt"):
     config['Search']['searchRecursive'] = 'true'
     config['Search']['searchhHidden'] = 'true'
     # System
+    config['System'] = {}
     if shutil.which("konsole"):
         config['System']['Terminal'] = "konsole"
     elif shutil.which("tilix"):
         config['System']['Terminal'] = "tilix"
     # Thumbnail
+    config['Thumbnail'] = {}
     config['Thumbnail']['MaxThumbnailFileSize'] = "8192"
     config['Thumbnail']['ShowThumbnails'] = "true"
     config['Thumbnail']['ThumbnailLocalFilesOnly'] = "false"
     # Window
+    config['Window'] = {}
     config['Window']['AlwaysShowTabs'] = "true"
     config['Window']['FixedHeight'] = "600"
     config['Window']['FixedWidth'] = "800"
