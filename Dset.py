@@ -263,7 +263,7 @@ if shutil.which("gnome-session") or shutil.which("gnome-shell"):
     # Check current variable for gnome-system-monitor. If it doesn't exist, set the variable.
     gnome_desktop_read_list = subprocess.run("gsettings get org.gnome.shell favorite-apps", shell=True, check=False, stdout=subprocess.PIPE).stdout.decode().strip()
     if "gnome-system-monitor.desktop" not in gnome_desktop_read_list:
-        gnome_desktop_search_list = ["firefox.desktop", "brave-browser.desktop", "chrome.desktop", 'thunderbird.desktop', 'nautilus.desktop', "tilix.desktop", 'virt-manager.desktop', 'gnome-system-monitor.desktop']
+        gnome_desktop_search_list = ["firefox.desktop", "brave-browser.desktop", "chrome.desktop", 'thunderbird.desktop', 'nautilus.desktop', "tilix.desktop", 'virt-manager.desktop', 'gnome-system-monitor.desktop', 'org.gnome.SystemMonitor.desktop']
         gnome_desktop_file_list = []
         for d in gnome_desktop_search_list:
             ds = CMimeSet.LocateDesktopFileName(d)
@@ -304,6 +304,7 @@ if shutil.which("gnome-session") or shutil.which("gnome-shell"):
     # Fish config for gnome terminal
     if shutil.which("fish"):
         dconf_write("/org/gnome/terminal/legacy/profiles:/:b1dcc9dd-5262-4d8d-a863-c897e6d979b9/custom-command", "'{0}'".format(shutil.which("fish")))
+    
     # Set Fonts
     gsettings_set("org.gnome.desktop.interface", "document-font-name", "'Noto Sans 11'")
     gsettings_set("org.gnome.desktop.interface", "font-name", "'Roboto 11'")
@@ -328,6 +329,11 @@ if shutil.which("gnome-session") or shutil.which("gnome-shell"):
     # No Fish config for gnome-terminal, does not change folders when using "Open in Terminal"
     # Determine default archive program
     CMimeSet.HandlePredefines("archive", "org.gnome.FileRoller.desktop")
+
+# Gnome Console
+if shutil.which("kgx"):
+    dconf_write("/org/gnome/Console/ignore-scrollback-limit", "true")
+    dconf_write("/org/gnome/Console/custom-font", "'Liberation Mono 11'")
 
 
 # KDE/Plasma specific Settings
