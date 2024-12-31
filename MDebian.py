@@ -22,10 +22,9 @@ CFunc.is_root(True)
 ### Functions ###
 def vscode_deb():
     """Install vscode deb and repository."""
-    subprocess.run("""curl https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/raw/master/pub.gpg | gpg --dearmor > /tmp/vscodium-archive-keyring.gpg
-    mv /tmp/vscodium-archive-keyring.gpg /etc/apt/trusted.gpg.d/vscodium-archive-keyring.gpg""", shell=True, check=True)
+    subprocess.run("""wget https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/raw/master/pub.gpg -O /usr/share/keyrings/vscodium-archive-keyring.asc""", shell=True, check=True)
     # Install repo
-    subprocess.run('echo "deb [ signed-by=/etc/apt/trusted.gpg.d/vscodium-archive-keyring.gpg ] https://paulcarroty.gitlab.io/vscodium-deb-rpm-repo/debs vscodium main" > /etc/apt/sources.list.d/vscodium.list', shell=True, check=True)
+    subprocess.run("echo 'deb [ arch=amd64 signed-by=/usr/share/keyrings/vscodium-archive-keyring.asc ] https://paulcarroty.gitlab.io/vscodium-deb-rpm-repo/debs vscodium main' | tee /etc/apt/sources.list.d/vscodium.list", shell=True, check=True)
     CFunc.aptupdate()
     CFunc.aptinstall("codium")
 def syncthing():
@@ -58,6 +57,28 @@ def mpr_install(normaluser: str):
     # CFunc.gitclone("https://mpr.makedeb.org/mist.git", os.path.join(tempfolder, "mist"))
     # CFunc.chmod_recursive(os.path.join(tempfolder, "mist"), 0o777)
     # CFunc.run_as_user_su(normaluser, "cd {0}; makedeb -si -H 'MPR-Package: yes' --no-confirm".format(os.path.join(tempfolder, "mist")), error_on_fail=True)
+def repos_experimental(deburl: str = "http://http.us.debian.org/debian"):
+    """Install experimental repo, with low priority to ensure packages don't get installed by accident."""
+    # Install repo
+    with open('/etc/apt/sources.list.d/experimental.list', 'w') as f:
+        f.write(f'deb {deburl} experimental main contrib non-free')
+    # Reduce priority so its never chosen by default.
+    with open('/etc/apt/preferences.d/99experimental', 'w') as f:
+        f.write('''Package: *
+Pin: release o=experimental
+Pin-Priority: 1''')
+    CFunc.aptupdate()
+def pacstall_install():
+    """Setup pacstall."""
+    tempfolder = tempfile.gettempdir()
+    pacstall_script_file = CFunc.downloadfile("https://pacstall.dev/q/install", tempfolder)[0]
+    os.chmod(pacstall_script_file, 0o777)
+    # Remove the read line, so that the script installs unattended. Change this find/replace if the script changes.
+    CFunc.find_replace(tempfolder, "read -r reply <&0", "", os.path.basename(pacstall_script_file))
+    subprocess.run(pacstall_script_file, shell=True, check=True, executable=shutil.which("bash"))
+    # Cleanup
+    if os.path.isfile(pacstall_script_file):
+        os.remove(pacstall_script_file)
 
 
 if __name__ == '__main__':
@@ -128,6 +149,9 @@ add-apt-repository -y non-free
     if debrelease != "bullseye":
         subprocess.run("add-apt-repository -y non-free-firmware", shell=True, check=True)
 
+    # Install experimental repo
+    repos_experimental()
+
     # Comment out lines containing httpredir.
     subprocess.run("sed -i '/httpredir/ s/^#*/#/' /etc/apt/sources.list", shell=True, check=True)
 
@@ -191,6 +215,9 @@ echo "firmware-ivtv firmware-ivtv/license/accepted boolean true" | debconf-set-s
     CFuncExt.nix_standalone_install(USERNAMEVAR, """
     # Media tools
     mpv""")
+
+    # Install pacstall
+    pacstall_install()
 
     # Sudoers changes
     CFuncExt.SudoersEnvSettings()
