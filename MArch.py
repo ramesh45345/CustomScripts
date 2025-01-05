@@ -106,9 +106,8 @@ if __name__ == '__main__':
     # NTP Configuration
     CFunc.sysctl_enable("systemd-timesyncd", error_on_fail=True)
     subprocess.run("timedatectl set-local-rtc false; timedatectl set-ntp 1", shell=True, check=True)
-    # EarlyOOM
-    CFunc.pacman_install("earlyoom")
-    CFunc.sysctl_enable("earlyoom", error_on_fail=True)
+    # oomd
+    CFunc.sysctl_enable("systemd-oomd", error_on_fail=True)
     # firewalld
     CFunc.pacman_install("firewalld")
     CFunc.sysctl_enable("firewalld", now=True, error_on_fail=True)
@@ -133,13 +132,6 @@ if __name__ == '__main__':
         CFunc.pacman_install("code")
         # Syncthing
         CFunc.pacman_install("syncthing")
-        # Flameshot
-        CFunc.pacman_install("flameshot")
-        os.makedirs(os.path.join(USERHOME, ".config", "autostart"), exist_ok=True)
-        # Start flameshot on user login.
-        if os.path.isfile(os.path.join(os.sep, "usr", "share", "applications", "org.flameshot.Flameshot.desktop")):
-            shutil.copy(os.path.join(os.sep, "usr", "share", "applications", "org.flameshot.Flameshot.desktop"), os.path.join(USERHOME, ".config", "autostart"))
-        CFunc.chown_recursive(os.path.join(USERHOME, ".config", ), USERNAMEVAR, USERGROUP)
         CFunc.pacman_install("dconf-editor")
         CFunc.pacman_install("gnome-disk-utility")
 

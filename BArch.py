@@ -108,6 +108,8 @@ Include = /etc/pacman.d/mirrorlist
 EOL
     fi
 fi
+# Set permissions
+chmod a+r /etc/pacman.conf
 
 # Update system
 pacman -Syu --noconfirm
