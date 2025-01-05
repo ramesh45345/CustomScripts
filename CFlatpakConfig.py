@@ -36,15 +36,11 @@ if args.configure_remotes is False:
     # Flatpak apps
     CFunc.flatpak_install("flathub", "com.calibre_ebook.calibre")
     CFunc.flatpak_install("flathub", "com.github.tchx84.Flatseal")
-    CFunc.flatpak_install("flathub", "org.mozilla.Thunderbird")
-    CFunc.flatpak_install("flathub", "com.borgbase.Vorta")
     CFunc.flatpak_install("flathub", "org.libreoffice.LibreOffice")
     # Media apps
     CFunc.flatpak_install("flathub", "org.videolan.VLC")
     CFunc.flatpak_install("flathub", "info.smplayer.SMPlayer")
     CFunc.flatpak_install("flathub", "org.atheme.audacious")
-    CFunc.flatpak_install("flathub", "io.github.quodlibet.QuodLibet")
-    CFunc.flatpak_install("flathub", "org.gnome.EasyTAG")
     # Meld
     if not CFunc.is_nixos():
         CFunc.flatpak_install("flathub", "org.gnome.meld")
@@ -55,4 +51,3 @@ if args.configure_remotes is False:
 
     # Configure permissions for apps
     CFunc.flatpak_override("org.atheme.audacious", "--filesystem=host")
-    CFunc.flatpak_override("org.gnome.EasyTAG", "--filesystem=host")
