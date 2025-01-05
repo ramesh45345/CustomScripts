@@ -67,7 +67,7 @@ def vm_getimgpath(vmname: str, folder_path: str):
     return imgfile_fullpath
 def vm_createimage(img_path: str, size_gb: int):
     """Create a VM image file."""
-    subprocess.run("qemu-img create -f qcow2 -o compat=1.1,lazy_refcounts=on '{0}' {1}G".format(img_path, size_gb), shell=True, check=True)
+    subprocess.run("qemu-img create -f qcow2 -o compression_type=zstd,compat=1.1,lazy_refcounts=on '{0}' {1}G".format(img_path, size_gb), shell=True, check=True)
 def vm_create(vmname: str, img_path: str, isopath: str, memory: int):
     """Create the VM in libvirt."""
     CPUCORES = multiprocessing.cpu_count()
@@ -234,7 +234,7 @@ if __name__ == '__main__':
         else:
             vm_name = "CC-Arch-kvm"
         # VM commands
-        vmbootstrap_cmd = 'cd ~ && export LANG=en_US.UTF-8 && /opt/CustomScripts/ZSlimDrive.py -n -g && /opt/CustomScripts/BArch.py -n -g 3 -i /dev/vda2 -c "{hostname}" -u {username} -q "{password}" -f "{fullname}" /mnt && echo "PermitRootLogin yes" >> /mnt/etc/ssh/sshd_config && poweroff'.format(hostname=vm_name, username=args.vmuser, password=args.vmpass, fullname=args.fullname)
+        vmbootstrap_cmd = 'cd ~ && export LANG=en_US.UTF-8 && /opt/CustomScripts/ZSlimDrive.py -b -n -g && /opt/CustomScripts/BArch.py -n -g 3 -i /dev/vda2 -c "{hostname}" -u {username} -q "{password}" -f "{fullname}" /mnt && echo "PermitRootLogin yes" >> /mnt/etc/ssh/sshd_config && poweroff'.format(hostname=vm_name, username=args.vmuser, password=args.vmpass, fullname=args.fullname)
         vmprovision_cmd = "mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{vmuser}/.ssh; echo '{sshkey}' > ~{vmuser}/.ssh/authorized_keys; chown {vmuser}:users -R ~{vmuser}; pacman -Sy --noconfirm git; {gitcmd}; /opt/CustomScripts/MArch.py -d {desktop}".format(vmuser=args.vmuser, sshkey=sshkey, gitcmd=git_cmdline(), desktop=args.desktopenv)
         kvm_variant = "archlinux"
     if args.ostype == 2:
@@ -246,7 +246,7 @@ if __name__ == '__main__':
             print("ERROR: nixconfig {0} must be a folder.".format(args.nixconfig))
             sys.exit()
         # VM commands
-        vmbootstrap_cmd = 'cd ~ && /CustomScripts/ZSlimDrive.py -n -g && mkdir -p /mnt/etc && mv /nixos_config /mnt/etc/nixos && ln -sfr /mnt/etc/nixos/machines/qemu/configuration.nix /mnt/etc/nixos/ && nix-channel --update && nixos-install && poweroff'
+        vmbootstrap_cmd = 'cd ~ && /CustomScripts/ZSlimDrive.py -n -g && mkdir -p /mnt/etc && mv /nixos_config /mnt/etc/nixos && ln -sfr /mnt/etc/nixos/machines/qemu/configuration.nix /mnt/etc/nixos/ && nix-channel --update && nixos-install --flake /mnt/etc/nixos#qemu-nixos && poweroff'
         vmprovision_cmd = "mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; export UNVAR=$(id -un 1000); mkdir -m 700 -p ~$UNVAR/.ssh; echo '{sshkey}' > ~$UNVAR/.ssh/authorized_keys; chown $UNVAR:users -R ~$UNVAR; while ! test -f /var/opt/CustomScripts/MNixOS.py; do sleep 1; done; /var/opt/CustomScripts/MNixOS.py".format(sshkey=sshkey)
         kvm_variant = "nixos-unstable"
     if args.ostype == 3:
