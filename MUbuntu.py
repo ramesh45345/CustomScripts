@@ -171,7 +171,7 @@ renderer: NetworkManager""")
         CFunc.aptmark(held_pkgs, mark=False)
         CFunc.aptinstall("ubuntu-desktop ubuntu-session gnome-session")
         CFunc.aptinstall("gnome-clocks")
-        CFunc.snap_install("gnome-calculator gnome-characters gnome-logs gnome-system-monitor gnome-tweaks")
+        CFunc.snap_install("gnome-calculator gnome-characters gnome-logs gnome-system-monitor")
         CFunc.aptinstall("gnome-shell-extensions gnome-shell-extension-gpaste")
         CFunc.aptinstall("gnome-software-plugin-flatpak")
         # Install gs installer script.
