@@ -246,7 +246,7 @@ if __name__ == '__main__':
             print("ERROR: nixconfig {0} must be a folder.".format(args.nixconfig))
             sys.exit()
         # VM commands
-        vmbootstrap_cmd = 'cd ~ && /CustomScripts/ZSlimDrive.py -n -g && mkdir -p /mnt/etc && mv /nixos_config /mnt/etc/nixos && ln -sfr /mnt/etc/nixos/machines/qemu/configuration.nix /mnt/etc/nixos/ && nix-channel --update && nixos-install --flake /mnt/etc/nixos#qemu-nixos && poweroff'
+        vmbootstrap_cmd = '''cd ~ && disko --mode destroy,format,mount /nixos_config/modules/disko/ext4-single.nix --yes-wipe-all-disks --arg disks "[ \\"/dev/vda\\" ]" && mkdir -p /mnt/etc && mv /nixos_config /mnt/etc/nixos && nix-channel --update && nixos-install --flake /mnt/etc/nixos#qemu-nixos && poweroff'''
         vmprovision_cmd = "mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; export UNVAR=$(id -un 1000); mkdir -m 700 -p ~$UNVAR/.ssh; echo '{sshkey}' > ~$UNVAR/.ssh/authorized_keys; chown $UNVAR:users -R ~$UNVAR; while ! test -f /var/opt/CustomScripts/MNixOS.py; do sleep 1; done; /var/opt/CustomScripts/MNixOS.py".format(sshkey=sshkey)
         kvm_variant = "nixos-unstable"
     if args.ostype == 3:
