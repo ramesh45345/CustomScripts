@@ -50,7 +50,7 @@ CFunc.dnfinstall("https://download1.rpmfusion.org/free/el/rpmfusion-free-release
 MFedora.repo_vscode()
 # EL Repo
 # https://elrepo.org
-subprocess.run("rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org ; dnf install -y https://elrepo.org/linux/elrepo/el9/x86_64/RPMS/elrepo-release-9.0-1.el9.elrepo.noarch.rpm ; dnf config-manager --enable elrepo-kernel", shell=True)
+subprocess.run("rpm --import https://www.elrepo.org/RPM-GPG-KEY-v2-elrepo.org ; dnf install -y https://elrepo.org/linux/elrepo/el9/x86_64/RPMS/elrepo-release-9.0-1.el9.elrepo.noarch.rpm ; dnf config-manager --enable elrepo-kernel", shell=True)
 
 # Update system after enabling repos.
 CFunc.dnfupdate()
