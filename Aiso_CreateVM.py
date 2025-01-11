@@ -103,7 +103,7 @@ if os.path.isdir(arch_chroot_location):
 
 # Ubuntu Chroot
 # Create chroot if it doesn't exist
-if not os.path.isdir(ubuntu_chroot_location) and shutil.which("debootstrap"):
+if not os.path.isdir(ubuntu_chroot_location):
     # Run debootstrap
     create_chroot_ubuntu(ubuntu_chroot_location)
     zch.ChrootCommand(ubuntu_chroot_location, "sh -c 'apt install -y debootstrap binutils squashfs-tools grub-pc-bin grub-efi-amd64-bin mtools dosfstools unzip'")
