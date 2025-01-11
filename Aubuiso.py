@@ -90,8 +90,8 @@ CFunc.log_config(buildlog_path)
 # https://github.com/mvallim/live-custom-ubuntu-from-scratch
 
 CFunc.aptupdate()
-CFunc.aptinstall("debootstrap binutils squashfs-tools xorriso grub-pc-bin grub-efi-amd64-bin mtools dosfstools unzip")
-CFunc.subpout_logger("debootstrap --arch=amd64 --variant=minbase {0} {1}  http://us.archive.ubuntu.com/ubuntu/".format(args.release, rootfsfolder))
+CFunc.aptinstall("debootstrap mmdebstrap binutils squashfs-tools xorriso grub-pc-bin grub-efi-amd64-bin mtools dosfstools unzip")
+CFunc.subpout_logger("mmdebstrap --arch=amd64 {0} {1} http://us.archive.ubuntu.com/ubuntu/".format(args.release, rootfsfolder))
 
 # Create chroot script.
 with open(os.path.join(rootfsfolder, "chrootscript.sh"), 'w') as f_handle:
@@ -111,6 +111,7 @@ dpkg-divert --local --rename --add /sbin/initctl
 ln -s /bin/true /sbin/initctl
 
 apt-get install -y --no-install-recommends software-properties-common
+echo "deb http://us.archive.ubuntu.com/ubuntu/ %s main" > /etc/apt/sources.list
 add-apt-repository main && add-apt-repository restricted && add-apt-repository universe && add-apt-repository multiverse
 apt-get update
 # Install locales
@@ -384,7 +385,7 @@ rm /sbin/initctl
 dpkg-divert --rename --remove /sbin/initctl
 rm -rf /tmp/* ~/.bash_history
 export HISTSIZE=0
-""")
+""" % args.release)
 os.chmod(os.path.join(rootfsfolder, "chrootscript.sh"), 0o777)
 
 # Commands to run inside chroot

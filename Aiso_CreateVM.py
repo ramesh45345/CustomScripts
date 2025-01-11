@@ -106,7 +106,7 @@ if os.path.isdir(arch_chroot_location):
 if not os.path.isdir(ubuntu_chroot_location):
     # Run debootstrap
     create_chroot_ubuntu(ubuntu_chroot_location)
-    zch.ChrootCommand(ubuntu_chroot_location, "sh -c 'apt install -y debootstrap binutils squashfs-tools grub-pc-bin grub-efi-amd64-bin mtools dosfstools unzip'")
+    zch.ChrootCommand(ubuntu_chroot_location, "sh -c 'apt install -y debootstrap mmdebstrap binutils squashfs-tools grub-pc-bin grub-efi-amd64-bin mtools dosfstools unzip'")
     zch.ChrootCommand(ubuntu_chroot_location, "sh -c 'apt-get install -y --no-install-recommends software-properties-common'")
     zch.ChrootCommand(ubuntu_chroot_location, "sh -c 'add-apt-repository -y main && add-apt-repository -y restricted && add-apt-repository -y universe && add-apt-repository -y multiverse'")
 if os.path.isdir(ubuntu_chroot_location):
