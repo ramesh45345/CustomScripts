@@ -344,21 +344,7 @@ if __name__ == '__main__':
     if args.ostype == 16:
         vmname = "Packer-UbuntuLTSCLI-{0}".format(hvname)
         vmprovision_defopts = "-l -x"
-    if 20 <= args.ostype <= 24:
-        vboxosid = "Fedora_64"
-        vmwareid = "fedora-64"
-        kvm_variant = "rhel9.0"
-        isourl = "http://mirror.stream.centos.org/9-stream/BaseOS/x86_64/iso/CentOS-Stream-9-latest-x86_64-boot.iso"
-        vmprovisionscript = "MCentOS.py"
-        if args.desktopenv is None:
-            args.desktopenv = "gnome"
-    if args.ostype == 20:
-        vmname = "Packer-CentOS-{0}".format(hvname)
-        vmprovision_defopts = "-d {0}".format(args.desktopenv)
-    if args.ostype == 21:
-        vmname = "Packer-CentOSCLI-{0}".format(hvname)
-        vmprovision_defopts = "-x"
-    if 25 <= args.ostype <= 29:
+    if 20 <= args.ostype <= 29:
         vboxosid = "Fedora_64"
         vmwareid = "fedora-64"
         kvm_variant = "rhel9.0"
@@ -366,9 +352,21 @@ if __name__ == '__main__':
         vmprovisionscript = "MCentOS.py"
         if args.desktopenv is None:
             args.desktopenv = "gnome"
-    if args.ostype == 25:
+    if args.ostype == 20:
         vmname = "Packer-AlmaLinux-{0}".format(hvname)
         vmprovision_defopts = "-d {0}".format(args.desktopenv)
+    if args.ostype == 21:
+        vmname = "Packer-AlmaLinuxCLI-{0}".format(hvname)
+        vmprovision_defopts = "-x"
+    if args.ostype == 25:
+        vmname = "ISOVM"
+        # Override memory and disk setting if they are set to the default values.
+        if mem_mib == args.memory:
+            args.memory = int(((os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')) / (1024.**2)) / 2)
+        if size_disk_default_gb == args.imgsize:
+            args.imgsize = 120
+        # Use cli settings for ISOVM.
+        vmprovision_defopts = "-x"
     if 30 <= args.ostype <= 39:
         vboxosid = "Debian_64"
         vmwareid = "debian-64"
@@ -644,15 +642,6 @@ if __name__ == '__main__':
         data['source'][packer_type]['local']["boot_command"] = ["<up><wait>e<wait><down><wait><down><wait><end> inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/fedora.cfg<wait><f10>"]
         data['build']['provisioner'][0]["shell"] = {}
         data['build']['provisioner'][0]["shell"]["inline"] = ["dnf install -y git; {2}; /opt/CustomScripts/{0} {1}".format(vmprovisionscript, vmprovision_opts, git_cmdline())]
-    if args.ostype == 5:
-        data['build']['provisioner'][0]["shell"]["inline"] = ["dnf install -y git; {2}; /opt/CustomScripts/{0} {1}; systemctl reboot".format(vmprovisionscript, vmprovision_opts, git_cmdline())]
-        data['build']['provisioner'][0]["shell"]["expect_disconnect"] = True
-        data['build']['provisioner'].append('')
-        data['build']['provisioner'][1] = {}
-        data['build']['provisioner'][1]["shell"] = {}
-        data['build']['provisioner'][1]["shell"]["inline"] = ["/opt/CustomScripts/Aiso_CreateVM.py"]
-        data['build']['provisioner'][1]["shell"]["pause_before"] = "15s"
-        data['build']['provisioner'][1]["shell"]["timeout"] = "90m"
     if args.ostype == 8:
         CFunc.find_replace(tempunattendfolder, "silverblue", "kinoite", "silverblue.cfg")
     if 8 <= args.ostype <= 9:
@@ -679,14 +668,19 @@ if __name__ == '__main__':
         data['source'][packer_type]['local']["boot_wait"] = "1s"
     if 10 <= args.ostype <= 19:
         data['source'][packer_type]['local']["boot_command"] = ["<wait>c<wait>linux /casper/vmlinuz quiet autoinstall 'ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/'<enter><wait>initrd /casper/initrd<enter><wait5>boot<enter>"]
-    if 20 <= args.ostype <= 24:
-        data['source'][packer_type]['local']["boot_command"] = ["<up><tab> inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/centos.cfg<enter><wait>"]
-        data['build']['provisioner'][0]["shell"] = {}
-        data['build']['provisioner'][0]["shell"]["inline"] = ["{2}; /opt/CustomScripts/{0} {1}".format(vmprovisionscript, vmprovision_opts, git_cmdline())]
-    if 25 <= args.ostype <= 29:
+    if 20 <= args.ostype <= 29:
         data['source'][packer_type]['local']["boot_command"] = ["<up><tab> inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/almalinux.cfg<enter><wait>"]
         data['build']['provisioner'][0]["shell"] = {}
         data['build']['provisioner'][0]["shell"]["inline"] = ["{2}; /opt/CustomScripts/{0} {1}".format(vmprovisionscript, vmprovision_opts, git_cmdline())]
+    if args.ostype == 25:
+        data['build']['provisioner'][0]["shell"]["inline"] = ["dnf install -y git; {2}; /opt/CustomScripts/{0} {1}; systemctl reboot".format(vmprovisionscript, vmprovision_opts, git_cmdline())]
+        data['build']['provisioner'][0]["shell"]["expect_disconnect"] = True
+        data['build']['provisioner'].append('')
+        data['build']['provisioner'][1] = {}
+        data['build']['provisioner'][1]["shell"] = {}
+        data['build']['provisioner'][1]["shell"]["inline"] = ["/opt/CustomScripts/Aiso_CreateVM.py"]
+        data['build']['provisioner'][1]["shell"]["pause_before"] = "15s"
+        data['build']['provisioner'][1]["shell"]["timeout"] = "90m"
     if 30 <= args.ostype <= 39:
         data['build']['provisioner'][0]["shell"] = {}
         data['build']['provisioner'][0]["shell"]["inline"] = ["hostnamectl set-hostname '{vmname}'; mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{vmuser}/.ssh; echo '{sshkey}' > ~{vmuser}/.ssh/authorized_keys; chown {vmuser}:{vmuser} -R ~{vmuser}; apt install -y git dhcpcd5 avahi-daemon sudo; systemctl enable --now avahi-daemon; {gitcmd}; /opt/CustomScripts/{vmprovisionscript} {vmprovision_opts}".format(vmprovisionscript=vmprovisionscript, vmprovision_opts=vmprovision_opts, sshkey=sshkey, vmuser=args.vmuser, gitcmd=git_cmdline(), vmname=vmname)]

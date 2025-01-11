@@ -67,7 +67,7 @@ def create_chroot_ubuntu(path: str, packages: str = "systemd-container"):
 
 ### Begin Code ###
 # Host packges
-CFunc.dnfinstall("podman pacman arch-install-scripts systemd-container debootstrap zstd libblockdev-nvdimm")
+CFunc.dnfinstall("podman systemd-container")
 
 # Clean
 if args.clean is True:
