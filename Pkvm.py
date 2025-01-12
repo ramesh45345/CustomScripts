@@ -397,8 +397,8 @@ if __name__ == '__main__':
         vmwareid = "freebsd-64"
         vmprovisionscript = "MFreeBSD.py"
         vmprovision_defopts = "-d {0}".format(args.desktopenv)
-        kvm_variant = "freebsd12.0"
-        isourl = "https://download.freebsd.org/ftp/releases/amd64/amd64/ISO-IMAGES/13.0/FreeBSD-13.0-RELEASE-amd64-disc1.iso"
+        kvm_variant = "freebsd14.0"
+        isourl = "https://download.freebsd.org/releases/amd64/amd64/ISO-IMAGES/14.2/FreeBSD-14.2-RELEASE-amd64-disc1.iso"
     if 50 <= args.ostype <= 59:
         vboxosid = "Windows10_64"
         vmwareid = "windows9-64"
@@ -690,7 +690,7 @@ if __name__ == '__main__':
         data['build']['provisioner'][0]["shell"] = {}
         # Needed for freebsd: https://www.packer.io/docs/provisioners/shell.html#execute_command
         data['build']['provisioner'][0]["shell"]["execute_command"] = "chmod +x {{ .Path }}; env {{ .Vars }} {{ .Path }}"
-        data['build']['provisioner'][0]["shell"]["inline"] = ['''export ASSUME_ALWAYS_YES=yes; pw useradd -n {vmuser} -m; pw usermod {vmuser} -c "{fullname}"; chpass -p '{encpass}' {vmuser}; mkdir -m 700 -p /root/.ssh; echo "{sshkey}" > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{vmuser}/.ssh; echo "{sshkey}" > ~{vmuser}/.ssh/authorized_keys; chown -R {vmuser}:{vmuser} ~{vmuser}; pkg update -f; pkg install -y git python3; {gitcmd}; /opt/CustomScripts/{vmprovisionscript} {vmprovision_opts}'''.format(vmprovisionscript=vmprovisionscript, vmprovision_opts=vmprovision_opts, sshkey=sshkey, vmuser=args.vmuser, encpass=sha512_password, fullname=args.fullname, gitcmd=git_cmdline())]
+        data['build']['provisioner'][0]["shell"]["inline"] = ['''export ASSUME_ALWAYS_YES=yes; pw useradd -n {vmuser} -m; pw usermod {vmuser} -c "{fullname}"; chpass -p '{encpass}' {vmuser}; mkdir -m 700 -p /root/.ssh; echo "{sshkey}" > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{vmuser}/.ssh; echo "{sshkey}" > ~{vmuser}/.ssh/authorized_keys; chown -R {vmuser}:{vmuser} ~{vmuser}; pkg update -f; pkg install -y git python3; {gitcmd}; exit 0; /opt/CustomScripts/{vmprovisionscript} {vmprovision_opts}'''.format(vmprovisionscript=vmprovisionscript, vmprovision_opts=vmprovision_opts, sshkey=sshkey, vmuser=args.vmuser, encpass=sha512_password, fullname=args.fullname, gitcmd=git_cmdline())]
         data['source'][packer_type]['local']["shutdown_command"] = "shutdown -p now"
     if 50 <= args.ostype <= 59:
         # Reboot after initial script

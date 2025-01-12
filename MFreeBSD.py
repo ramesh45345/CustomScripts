@@ -63,8 +63,6 @@ os.makedirs("/usr/local/etc/pkg/repos", exist_ok=True)
 with open("/usr/local/etc/pkg/repos/FreeBSD.conf", 'w') as file:
     file.write('FreeBSD: { url: "pkg+http://pkg.FreeBSD.org/${ABI}/latest" }')
 
-# Update ports in background
-process_portupdate = subprocess.Popen("portsnap --interactive auto", shell=True, stdout=subprocess.DEVNULL, close_fds=True)
 # Update system
 subprocess.run(["freebsd-update", "--not-running-from-cron", "fetch", "install"], check=True)
 # Update packages
@@ -77,7 +75,7 @@ vmstatus = CFunc.getvmstate()
 
 ### Install FreeBSD Software ###
 # Cli tools
-pkg_install("git python3 sudo nano bash zsh tmux rsync wget p7zip p7zip-codec-rar zip unzip xdg-utils xdg-user-dirs fusefs-sshfs")
+pkg_install("git python3 sudo nano bash zsh tmux rsync wget 7-zip zip unzip xdg-utils xdg-user-dirs fusefs-sshfs")
 pkg_install("powerline-fonts ubuntu-font roboto-fonts-ttf noto-basic liberation-fonts-ttf")
 # Portmaster
 pkg_install("portmaster")
@@ -85,7 +83,7 @@ pkg_install("portmaster")
 pkg_install("avahi-app avahi-autoipd avahi-libdns nss_mdns")
 sysrc_cmd('dbus_enable=yes avahi_daemon_enable=yes avahi_dnsconfd_enable=yes')
 # Samba
-pkg_install("samba412")
+pkg_install("samba419")
 sysrc_cmd('samba_server_enable=yes winbindd_enable=yes')
 # NTP Configuration
 sysrc_cmd('ntpd_enable=yes')
@@ -94,7 +92,7 @@ if not args.nogui:
     # Browsers
     pkg_install("firefox")
     # Wine
-    pkg_install("i386-wine-devel winetricks")
+    pkg_install("wine winetricks")
     # Remote access
     pkg_install("remmina")
     # Editors
@@ -114,14 +112,14 @@ if not args.nogui:
     pkg_install("xorg xorg-drivers")
     sysrc_cmd("moused_enable=yes dbus_enable=yes hald_enable=yes")
 if args.desktop == "gnome":
-    pkg_install("gnome3")
+    pkg_install("gnome")
     sysrc_cmd('gdm_enable=yes')
     sysrc_cmd('slim_enable=')
     slim_session_name = "gnome-session"
-    pkg_install("gnome-shell-extension-dashtodock")
-    subprocess.run("glib-compile-schemas /usr/local/share/gnome-shell/extensions/dash-to-dock@micxgx.gmail.com/schemas", shell=True, check=True)
+    pkg_install("gnome-shell-extension-dashtopanel")
+    subprocess.run("glib-compile-schemas /usr/local/share/gnome-shell/extensions/dash-to-panel@jderose9.github.com/schemas", shell=True, check=True)
 elif args.desktop == "kde":
-    pkg_install("kde5 sddm")
+    pkg_install("plasma6-plasma sddm")
     sysrc_cmd('sddm_enable=yes')
     sysrc_cmd('slim_enable=')
 elif args.desktop == "mate":
@@ -137,19 +135,11 @@ if not args.nogui:
     CFuncExt.numix_icons(os.path.join(os.sep, "usr", "local", "share", "icons"))
 
 # Edit sudoers to add pkg.
-sudoersd_dir = os.path.join("/", "usr", "local", "etc", "sudoers.d")
-if os.path.isdir(sudoersd_dir):
-    CUSTOMSUDOERSPATH = os.path.join(sudoersd_dir, "10-wheel")
-    print("Writing {0}".format(CUSTOMSUDOERSPATH))
-    with open(CUSTOMSUDOERSPATH, 'w') as sudoers_writefile:
-        sudoers_writefile.write("""%wheel ALL=(ALL) ALL
-{0} ALL=(ALL) NOPASSWD: {1}
-""".format(USERNAMEVAR, shutil.which("pkg")))
-    os.chmod(CUSTOMSUDOERSPATH, 0o440)
-    status = subprocess.run('visudo -c', shell=True, check=False)
-    if status.returncode != 0:
-        print("Visudo status not 0, removing sudoers file.")
-        os.remove(CUSTOMSUDOERSPATH)
+CFuncExt.SudoersEnvSettings(sudoers_file="/usr/local/etc/sudoers")
+# Edit sudoers to add apt.
+sudoersfile = os.path.join(os.sep, "usr", "local", "etc", "sudoers.d", "pkmgt")
+CFunc.AddLineToSudoersFile(sudoersfile, "%wheel ALL=(ALL) ALL", overwrite=True)
+CFunc.AddLineToSudoersFile(sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("pkg")))
 subprocess.run("pw usermod {0} -G wheel,video,operator".format(USERNAMEVAR), shell=True, check=True)
 
 # Extra scripts
@@ -162,8 +152,5 @@ subprocess.run("bash {0}/CSysConfig.sh".format(SCRIPTDIR), shell=True, check=Tru
 
 # Wait for processes to finish before exiting.
 time_finishmain = datetime.now()
-process_portupdate.wait()
-time_finishport = datetime.now()
 
-print("\nPre-port update finished in {0}".format(str(time_finishmain - time_start)))
-print("Script End in {0}".format(str(time_finishport - time_start)))
+print("\nScript End in {0}".format(str(time_finishmain - time_start)))
