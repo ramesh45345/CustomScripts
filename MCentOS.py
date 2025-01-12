@@ -131,10 +131,6 @@ if vmstatus == "kvm":
     CFunc.dnfinstall("spice-vdagent qemu-guest-agent")
 if vmstatus == "vbox":
     CFunc.dnfinstall("virtualbox-guest-additions virtualbox-guest-additions-ogl")
-if vmstatus == "vmware":
-    CFunc.dnfinstall("open-vm-tools")
-    if not args.nogui:
-        CFunc.dnfinstall("open-vm-tools-desktop")
 
 # Add normal user to all reasonable groups
 CFunc.AddUserToGroup("disk")

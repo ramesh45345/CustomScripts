@@ -136,10 +136,6 @@ if __name__ == '__main__':
         CFunc.dnfinstall("spice-vdagent qemu-guest-agent")
     if vmstatus == "vbox":
         CFunc.dnfinstall("virtualbox-guest-additions")
-    if vmstatus == "vmware":
-        CFunc.dnfinstall("open-vm-tools")
-        if not args.nogui:
-            CFunc.dnfinstall("open-vm-tools-desktop")
 
     # Install Desktop Software
     if args.desktop == "gnome":

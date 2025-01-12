@@ -74,8 +74,6 @@ if __name__ == '__main__':
         zypp_install("spice-vdagent qemu-guest-agent")
     if vmstatus == "vbox":
         zypp_install("virtualbox-guest-tools virtualbox-guest-x11")
-    if vmstatus == "vmware":
-        zypp_install("open-vm-tools open-vm-tools-desktop")
 
     # GUI Packages
     if not args.nogui:

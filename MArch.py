@@ -145,8 +145,6 @@ if __name__ == '__main__':
         else:
             CFunc.pacman_install("virtualbox-guest-utils")
         CFunc.pacman_install("virtualbox-guest-dkms")
-    if vmstatus == "vmware":
-        CFunc.pacman_install("open-vm-tools")
 
     # Install Desktop Software
     if args.desktop == "gnome":

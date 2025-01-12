@@ -279,7 +279,6 @@ if __name__ == '__main__':
     if 1 <= args.ostype <= 5:
         vmprovisionscript = "MFedora.py"
         vboxosid = "Fedora_64"
-        vmwareid = "fedora-64"
         kvm_variant = "fedora-rawhide"
         isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/41/Server/x86_64/iso/Fedora-Server-dvd-x86_64-41-1.4.iso"
         if args.desktopenv is None:
@@ -302,7 +301,6 @@ if __name__ == '__main__':
     if args.ostype == 8:
         vmprovisionscript = "MFedoraSilverblue.py"
         vboxosid = "Fedora_64"
-        vmwareid = "fedora-64"
         kvm_variant = "silverblue-rawhide"
         isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/41/Kinoite/x86_64/iso/Fedora-Kinoite-ostree-x86_64-41-1.4.iso"
         vmname = "Packer-FedoraKinoite-{0}".format(hvname)
@@ -310,14 +308,12 @@ if __name__ == '__main__':
     if args.ostype == 9:
         vmprovisionscript = "MFedoraSilverblue.py"
         vboxosid = "Fedora_64"
-        vmwareid = "fedora-64"
         kvm_variant = "silverblue-rawhide"
         isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/41/Silverblue/x86_64/iso/Fedora-Silverblue-ostree-x86_64-41-1.4.iso"
         vmname = "Packer-FedoraSilverblue-{0}".format(hvname)
         vmprovision_defopts = ""
     if 10 <= args.ostype <= 19:
         vboxosid = "Ubuntu_64"
-        vmwareid = "ubuntu-64"
         vmprovisionscript = "MUbuntu.py"
         if args.desktopenv is None:
             args.desktopenv = "kde"
@@ -346,7 +342,6 @@ if __name__ == '__main__':
         vmprovision_defopts = "-l -x"
     if 20 <= args.ostype <= 29:
         vboxosid = "Fedora_64"
-        vmwareid = "fedora-64"
         kvm_variant = "rhel9.0"
         isourl = "https://na.edge.kernel.org/almalinux/9/isos/x86_64/AlmaLinux-9-latest-x86_64-boot.iso"
         vmprovisionscript = "MCentOS.py"
@@ -369,7 +364,6 @@ if __name__ == '__main__':
         vmprovision_defopts = "-x"
     if 30 <= args.ostype <= 39:
         vboxosid = "Debian_64"
-        vmwareid = "debian-64"
         vmprovisionscript = "MDebian.py"
         kvm_variant = "debiantesting"
         if args.desktopenv is None:
@@ -394,14 +388,12 @@ if __name__ == '__main__':
             args.desktopenv = "mate"
         vmname = "Packer-FreeBSD-{0}".format(hvname)
         vboxosid = "FreeBSD_64"
-        vmwareid = "freebsd-64"
         vmprovisionscript = "MFreeBSD.py"
         vmprovision_defopts = "-d {0}".format(args.desktopenv)
         kvm_variant = "freebsd14.0"
         isourl = "https://download.freebsd.org/releases/amd64/amd64/ISO-IMAGES/14.2/FreeBSD-14.2-RELEASE-amd64-disc1.iso"
     if 50 <= args.ostype <= 59:
         vboxosid = "Windows10_64"
-        vmwareid = "windows9-64"
         kvm_variant = "win10"
         vmprovision_defopts = " "
         isourl = None
@@ -414,7 +406,6 @@ if __name__ == '__main__':
         windows_key = "NRG8B-VKK3Q-CXVCJ-9G2XF-6Q84J"
     if 55 <= args.ostype <= 59:
         vboxosid = "Windows2019_64"
-        vmwareid = "windows9srv-64"
         kvm_variant = "win2k19"
         vmprovision_defopts = " "
     if args.ostype == 55:

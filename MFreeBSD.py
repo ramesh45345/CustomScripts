@@ -104,8 +104,6 @@ if not args.nogui:
 if vmstatus == "vbox":
     pkg_install("virtualbox-ose-additions")
     sysrc_cmd('vboxguest_enable=yes vboxservice_enable=yes')
-if vmstatus == "vmware":
-    pkg_install("open-vm-tools")
 
 # Install Desktop Software
 if not args.nogui:

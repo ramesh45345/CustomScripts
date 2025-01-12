@@ -120,8 +120,6 @@ if args.stage == 1:
     # Install software for VMs
     if vmstatus == "vbox":
         rostreeinstall("virtualbox-guest-additions virtualbox-guest-additions-ogl")
-    if vmstatus == "vmware":
-        rostreeinstall("open-vm-tools open-vm-tools-desktop")
 
     # Install libvirt software
     rostreeinstall("virt-install libvirt-daemon-config-network libvirt-daemon-kvm qemu-kvm virt-manager swtpm swtpm-tools")

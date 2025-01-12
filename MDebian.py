@@ -316,10 +316,6 @@ iface lo net loopback
             CFunc.aptinstall("virtualbox-guest-x11")
         subprocess.run("gpasswd -a {0} vboxsf".format(USERNAMEVAR), shell=True, check=True)
         CFunc.sysctl_enable("virtualbox-guest-utils", error_on_fail=True)
-    if vmstatus == "vmware":
-        CFunc.aptinstall("open-vm-tools open-vm-tools-dkms")
-        if not args.nogui:
-            CFunc.aptinstall("open-vm-tools-desktop")
 
     # Disable automatic unattended upgrades
     if os.path.isfile("/etc/apt/apt.conf.d/20auto-upgrades"):

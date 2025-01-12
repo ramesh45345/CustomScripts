@@ -251,10 +251,6 @@ renderer: NetworkManager""")
             CFunc.aptinstall("virtualbox-guest-x11")
         subprocess.run("gpasswd -a {0} vboxsf".format(USERNAMEVAR), shell=True, check=True)
         subprocess.run("systemctl enable virtualbox-guest-utils", shell=True, check=True)
-    if vmstatus == "vmware":
-        CFunc.aptinstall("open-vm-tools open-vm-tools-dkms")
-        if not args.nogui:
-            CFunc.aptinstall("open-vm-tools-desktop")
 
     subprocess.run("apt-get install -y --no-install-recommends smartmontools", shell=True, check=True)
 

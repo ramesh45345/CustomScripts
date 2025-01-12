@@ -23,10 +23,7 @@ $cs_username = "INSERTUSERHERE"
 $user_sshkey = "INSERTSSHKEYHERE"
 # Check if Virtual Machine
 $VMstring = Get-CimInstance -ClassName Win32_ComputerSystem
-if ( $VMstring.Model -imatch "vmware" ) {
-  $IsVM = $true
-  $VMtype = 3
-} elseif ( $VMstring.Model -imatch "virtualbox" ) {
+if ( $VMstring.Model -imatch "virtualbox" ) {
   $IsVM = $true
   $VMtype = 1
 } elseif ( $VMstring.Manufacturer -imatch "qemu" ) {
@@ -153,11 +150,6 @@ function Fcn-Software {
     $vmfolder = "$temppath\vmfolder"
     if (Test-Path $winiso) {
       Start-Process -Wait "C:\Program Files\7-Zip\7z.exe" -ArgumentList "x","$winiso","-o$vmfolder"
-
-      if (Test-Path "$vmfolder\setup64.exe") {
-        Write-Output "Installing VMWare tools"
-        Start-Process -Wait "$vmfolder\setup64.exe" -ArgumentList "/s","/v/qr","REBOOT=R"
-      }
 
       if (Test-Path "$vmfolder\VBoxWindowsAdditions.exe") {
         Write-Output "Installing Virtualbox tools"
