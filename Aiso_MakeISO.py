@@ -7,11 +7,30 @@ import functools
 import os
 import subprocess
 import sys
+import time
 # Custom includes
 import PCreateChrootVM
 
 # Disable buffered stdout (to ensure prints are in order)
 print = functools.partial(print, flush=True)
+
+### Functions ###
+def virsh_get_ip(vm_name: str = "ISOVM", retries: int = 100):
+    """Get the ip address of a started VM from virsh."""
+    status = 1
+    attempt = 0
+    while status != 0 and attempt < retries:
+        return_info = subprocess.run(f'''virsh --connect qemu:///system net-dhcp-leases default | grep {vm_name} | awk '{{print $5}}' | cut -d/ -f 1''', shell=True, check=False, stdout=subprocess.PIPE, universal_newlines=True)
+        status = return_info.returncode
+        ip = return_info.stdout.strip()
+        if status != 0:
+            print(f"IP retrieval status was {status}, attempt {attempt}, waiting.")
+            time.sleep(5)
+            attempt += 1
+    if status != 0:
+        print("ERROR: IP address not retrieved.")
+    return ip
+
 
 # Get arguments
 parser = argparse.ArgumentParser(description='Provision VM for ISO building.')
@@ -20,6 +39,7 @@ parser.add_argument("-s", "--stage", help='Setup Stage (1: Host System, 2: VM, d
 parser.add_argument("-w", "--chrootfolder", help='Location of chroot folder (default: %(default)s)', default=os.path.expanduser("~root"))
 parser.add_argument("-p", "--outfolder", help='Location to store ISOs (default: %(default)s)', default=os.getcwd())
 parser.add_argument("-t", "--distrotype", help='Specify ISO  (choices: %(choices)s) (default: %(default)s)', type=str, default="all", choices=["all", "fedora", "arch", "ubuntu"])
+parser.add_argument("-i", "--resolveip", help='Resolve the IP address of the VM using virsh.', action="store_true")
 args = parser.parse_args()
 
 # Global variables
@@ -37,6 +57,8 @@ if __name__ == '__main__':
         print("Running Stage 1, only for host.")
         # Start the VM if it is not started.
         PCreateChrootVM.vm_start(vm_name)
+        if args.resolveip:
+            ssh_ip = virsh_get_ip()
         PCreateChrootVM.ssh_wait(ip=ssh_ip, user=ssh_user)
         # Sync CustomScripts on host to VM.
         subprocess.run(f"rsync -axHAX --info=progress2 {sys.path[0]}/ {ssh_user}@{ssh_ip}:/opt/CustomScripts/", shell=True, check=True)
