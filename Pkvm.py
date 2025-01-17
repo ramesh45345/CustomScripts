@@ -172,6 +172,35 @@ def ovmf_bin_nvramcopy(destpath: str, vmname: str, secureboot: bool = False):
     shutil.copy(ovmf_nvram_fullpath, nvram_copy_path)
     os.chmod(nvram_copy_path, 0o777)
     return ovmf_bin_fullpath, nvram_copy_path
+def cmd_virtinstall(vmname: str,
+                    diskpath: str,
+                    variant: str,
+                    efi_bin: str = "",
+                    efi_nvram: str = "",
+                    memory: int = int(((os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')) / (1024.**2)) / 4),
+                    efi: bool = True,
+                    secureboot: bool = False,
+                    cpucores: str = multiprocessing.cpu_count(),
+                    diskinterface: str = "virtio",
+                    netdev: str = "virtio",
+                    video: str = "virtio",
+                    cdrom_path: str = "",
+                    cmd_print: bool = False
+                    ):
+    """Return a virt-install command to use."""
+    cmd = f"""virt-install --connect qemu:///system --name={vmname} --disk path={diskpath}.qcow2,bus={diskinterface} --disk device=cdrom,path="{cdrom_path}",bus=sata,target=sda,readonly=on --graphics spice --cpu host-model --vcpu={cpucores},sockets=1,cores={cpucores} --ram={memory} --network bridge=virbr0,model={netdev} --filesystem source=/,target=root,mode=mapped --os-variant={variant} --import --noautoconsole --noreboot --video={video} --channel unix,target_type=virtio,name=org.qemu.guest_agent.0 --channel spicevmc,target_type=virtio,name=com.redhat.spice.0"""
+    if efi is True:
+        cmd += f" --boot loader={efi_bin},loader_ro=yes,loader_type=pflash,nvram={efi_nvram}"
+        if secureboot is True:
+            # Add options to efi line. Note that this line (",loader_secure=yes") MUST follow the previous efi line.
+            cmd += ",loader_secure=yes --features smm.state=on"
+            # Add TPM loading
+            cmd += " --tpm backend.type=emulator,backend.version=2.0,model=tpm-tis"
+    if cdrom_path != "":
+        cmd += ' --install bootdev=cdrom --boot=hd,cdrom'
+    if cmd_print:
+        print(cmd)
+    return cmd
 def signal_handler(sig, frame):
     """Cleanup if given early termination."""
     if tpm_process:
@@ -590,6 +619,7 @@ if __name__ == '__main__':
         data['source'][packer_type]['local']["qemuargs"][0] = ["-m", "{0}M".format(args.memory)]
         data['source'][packer_type]['local']["qemuargs"].append(["-cpu", "host"])
         data['source'][packer_type]['local']["qemuargs"].append(["-smp", "cores={0},sockets=1,maxcpus={0}".format(CPUCORES)])
+        efi_bin, efi_nvram = "", ""
         if useefi is True:
             efi_bin, efi_nvram = ovmf_bin_nvramcopy(packer_temp_folder, vmname, secureboot=secureboot)
             # nvram
@@ -707,8 +737,8 @@ if __name__ == '__main__':
         data['source'][packer_type]['local']["winrm_use_ntlm"] = True
         data['source'][packer_type]['local']["ssh_username"] = "{0}".format(args.vmuser)
         data['source'][packer_type]['local']["floppy_files"] = [os.path.join(tempscriptbasename, "unattend", "autounattend.xml"),
-                                               os.path.join(tempscriptbasename, "unattend", "win_initial.bat"),
-                                               os.path.join(tempscriptbasename, "unattend", "win_enablerm.ps1")]
+                                                                os.path.join(tempscriptbasename, "unattend", "win_initial.bat"),
+                                                                os.path.join(tempscriptbasename, "unattend", "win_enablerm.ps1")]
         # Register the namespace to avoid nsX in namespace.
         ET.register_namespace('', "urn:schemas-microsoft-com:unattend")
         ET.register_namespace('wcm', "http://schemas.microsoft.com/WMIConfig/2002/State")
@@ -802,25 +832,15 @@ if __name__ == '__main__':
 
     # Attach VM to libvirt
     if args.vmtype == 2:
-        kvm_diskinterface = "virtio"
-        kvm_netdevice = "virtio"
         if 50 <= args.ostype <= 59:
             kvm_video = "qxl"
         else:
             kvm_video = "virtio"
-        graphics_type = "spice"
         # virt-install manual: https://www.mankier.com/1/virt-install
         # List of os: osinfo-query os
-        CREATESCRIPT_KVM = f"""virt-install --connect qemu:///system --name={vmname} --disk path={os.path.join(vmpath, vmname)}.qcow2,bus={kvm_diskinterface} --disk device=cdrom,bus=sata,target=sda,readonly=on --graphics {graphics_type} --cpu host-model --vcpu={CPUCORES},sockets=1,cores={CPUCORES} --ram={args.memory} --network bridge=virbr0,model={kvm_netdevice} --filesystem source=/,target=root,mode=mapped --os-variant={kvm_variant} --import --noautoconsole --noreboot --video={kvm_video} --channel unix,target_type=virtio,name=org.qemu.guest_agent.0 --channel spicevmc,target_type=virtio,name=com.redhat.spice.0"""
-        if useefi is True:
-            # Add efi loading
-            CREATESCRIPT_KVM += f" --boot loader={efi_bin},loader_ro=yes,loader_type=pflash,nvram={efi_nvram}"
-            if secureboot is True:
-                # Add options to efi line. Note that this line (",loader_secure=yes") MUST follow the previous efi line.
-                CREATESCRIPT_KVM += ",loader_secure=yes --features smm.state=on"
-                # Add TPM loading
-                CREATESCRIPT_KVM += " --tpm backend.type=emulator,backend.version=2.0,model=tpm-tis"
-                tpm_process.terminate()
+        CREATESCRIPT_KVM = cmd_virtinstall(vmname=vmname, diskpath=os.path.join(vmpath, vmname), variant=kvm_variant, efi=useefi, efi_bin=efi_bin, efi_nvram=efi_nvram, secureboot=secureboot, memory=args.memory, video=kvm_video)
+        if secureboot is True:
+            tpm_process.terminate()
         logging.info("KVM launch command: {0}".format(CREATESCRIPT_KVM))
         if args.noprompt is False:
             subprocess.run(CREATESCRIPT_KVM, shell=True, check=False)
