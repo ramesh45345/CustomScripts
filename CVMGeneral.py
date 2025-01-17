@@ -74,7 +74,10 @@ WantedBy=default.target""".format(ra_script_path)
     CFunc.systemd_createuserunit("ra.service", ra_service_text)
 
     # Set up virtio filesystem mounts.
-    fstab_text = "root /media/sf_root 9p rw,defaults,trans=virtio,version=9p2000.L,noauto,x-systemd.automount 0 0"
+    fstab_mnt_text = "mnt /mnt/sf_mnt virtiofs defaults,rw,relatime,nofail,x-systemd.automount 0 0"
+    fstab_home_text = "home /mnt/sf_home virtiofs defaults,rw,relatime,nofail,x-systemd.automount 0 0"
     if not CFunc.Fstab_CheckStringInFile(fstab_path, "virtio"):
-        os.makedirs(os.path.join(os.sep, "media", "sf_root"), 0o777, exist_ok=True)
-        CFunc.Fstab_AddLine(fstab_path, fstab_text)
+        os.makedirs(os.path.join(os.sep, "mnt", "sf_mnt"), 0o777, exist_ok=True)
+        os.makedirs(os.path.join(os.sep, "mnt", "sf_home"), 0o777, exist_ok=True)
+        CFunc.Fstab_AddLine(fstab_path, fstab_mnt_text)
+        CFunc.Fstab_AddLine(fstab_path, fstab_home_text)

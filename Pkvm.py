@@ -188,7 +188,7 @@ def cmd_virtinstall(vmname: str,
                     cmd_print: bool = False
                     ):
     """Return a virt-install command to use."""
-    cmd = f"""virt-install --connect qemu:///system --name={vmname} --disk path={diskpath}.qcow2,bus={diskinterface} --disk device=cdrom,path="{cdrom_path}",bus=sata,target=sda,readonly=on --graphics spice --cpu host-model --vcpu={cpucores},sockets=1,cores={cpucores} --ram={memory} --network bridge=virbr0,model={netdev} --filesystem source=/,target=root,mode=mapped --os-variant={variant} --import --noautoconsole --noreboot --video={video} --channel unix,target_type=virtio,name=org.qemu.guest_agent.0 --channel spicevmc,target_type=virtio,name=com.redhat.spice.0"""
+    cmd = f"""virt-install --connect qemu:///system --name={vmname} --disk path={diskpath}.qcow2,bus={diskinterface} --disk device=cdrom,path="{cdrom_path}",bus=sata,target=sda,readonly=on --graphics spice --cpu host-model --vcpu={cpucores},sockets=1,cores={cpucores} --memory {memory} --memorybacking source.type=memfd,access.mode=shared --network bridge=virbr0,model={netdev} --filesystem driver.type=virtiofs,source=/mnt,target=mnt --filesystem driver.type=virtiofs,source=/home,target=home --os-variant={variant} --import --noautoconsole --noreboot --video={video} --channel unix,target_type=virtio,name=org.qemu.guest_agent.0 --channel spicevmc,target_type=virtio,name=com.redhat.spice.0"""
     if efi is True:
         cmd += f" --boot loader={efi_bin},loader_ro=yes,loader_type=pflash,nvram={efi_nvram}"
         if secureboot is True:
