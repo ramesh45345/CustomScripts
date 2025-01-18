@@ -168,6 +168,8 @@ function Fcn-Software {
       $desktop_folder = "$env:PUBLIC\Desktop"
       # Add script to add network share
       Set-Content -Path "$desktop_folder\share.bat" -Value "@echo off`nnet use * `"\\192.168.122.1\rootfs`" /PERSISTENT:YES /SAVECRED"
+      # vfs script
+      Set-Content -Path "$desktop_folder\vfs.bat" -Value "@echo off`n`"C:\Program Files (x86)\WinFsp\bin\fsreg.bat`" virtiofs `"C:\Program Files\Virtio-Win\VioFS\virtiofs.exe`" `"-t %%1 -m %%2`""
 
       # Run virtiofs on startup
       New-ItemProperty -Path "Registry::HKCU\Software\Microsoft\Windows\CurrentVersion\Run" -Name virtfsM -Value '"C:\Program Files (x86)\WinFsp\bin\launchctl-x64.exe" start virtiofs viofsM mnt M:' -Force -ErrorAction SilentlyContinue | Out-Null
@@ -177,7 +179,7 @@ function Fcn-Software {
       if ((Test-Path "E:\virtio-win-guest-tools.exe") -and -not (Test-Path "$desktop_folder\virtdrivers\")) {
         Copy-Item 'E:\' -Destination "$desktop_folder\virtdrivers\" -Recurse -Force
         # Create script to install drivers post-install.
-        Set-Content -Path "$desktop_folder\virtdrivers.ps1" -Value "Start-Process -Wait -FilePath `"$desktop_folder\virtdrivers\virtio-win-guest-tools.exe`" -ArgumentList `"/install /norestart /passive`"`n(Get-ChildItem `"$desktop_folder\virtdrivers`" -Include w11,2k22 -Recurse -Directory).FullName | Select-Object -Unique | Get-ChildItem -Recurse -Filter `"*.inf`" | ForEach-Object { PNPUtil.exe /add-driver `$_.FullName /install }`nRemove-Item -Recurse -Force $desktop_folder\virtdrivers`nRemove-Item -Force `$MyInvocation.MyCommand.Path`nStart-Process -Wait -FilePath cmd -Verb RunAs -ArgumentList '/c', 'C:\Program Files (x86)\WinFsp\bin\fsreg.bat', 'virtiofs', 'C:\Program Files\Virtio-Win\VioFS\virtiofs.exe', '-t %1 -m %2'"
+        Set-Content -Path "$desktop_folder\virtdrivers.ps1" -Value "Start-Process -Wait -FilePath `"$desktop_folder\virtdrivers\virtio-win-guest-tools.exe`" -ArgumentList `"/install /norestart /passive`"`n(Get-ChildItem `"$desktop_folder\virtdrivers`" -Include w11,2k22 -Recurse -Directory).FullName | Select-Object -Unique | Get-ChildItem -Recurse -Filter `"*.inf`" | ForEach-Object { PNPUtil.exe /add-driver `$_.FullName /install }`nRemove-Item -Recurse -Force $desktop_folder\virtdrivers`nRemove-Item -Force `$MyInvocation.MyCommand.Path"
       }
     }
 
