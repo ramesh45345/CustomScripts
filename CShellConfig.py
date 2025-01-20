@@ -441,10 +441,6 @@ elif type nix &> /dev/null && ! [[ "$(which nix)" == *"$USER"* ]]; then
         $SUDOCMD nix-collect-garbage -d
         flatpak_clean
     }
-    function nsed () {
-        echo "Editing nix config."
-        $SUDOCMD nano /etc/nixos/configuration.nix
-    }
 fi
 
 # Nix user-mode functions
@@ -1108,10 +1104,6 @@ else if type -q nix; and not string match -qr $USER (which nix);
         echo "Auto-removing packages and performing garbage collection."
         sudo nix-collect-garbage -d
         flatpak_clean
-    end
-    function nsed
-        echo "Editing nix config."
-        sudo nano /etc/nixos/configuration.nix
     end
 end
 
