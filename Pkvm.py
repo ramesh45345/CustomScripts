@@ -435,11 +435,11 @@ if __name__ == '__main__':
         windows_key = "NRG8B-VKK3Q-CXVCJ-9G2XF-6Q84J"
     if 55 <= args.ostype <= 59:
         vboxosid = "Windows2019_64"
-        kvm_variant = "win2k19"
+        kvm_variant = "win2k22"
         vmprovision_defopts = " "
     if args.ostype == 55:
-        windows_key = "VDYBN-27WPP-V4HQT-9VMD4-VMK7H"
-        vmname = "Packer-Windows2022-{0}".format(hvname)
+        windows_key = "TVRH6-WHNXV-R9WG3-9XRFY-MY832"
+        vmname = "Packer-Windows2025-{0}".format(hvname)
 
     # Override provision opts if provided.
     if args.vmprovision is None:

@@ -204,8 +204,8 @@ function Fcn-Software {
   choco upgrade -y setdefaultbrowser
   SetDefaultBrowser.exe HKLM Firefox-308046B0AF4A39CB
 
-  # sshfs
-  winget install --accept-package-agreements --accept-source-agreements --disable-interactivity WinFsp.WinFsp; winget install --accept-package-agreements --accept-source-agreements --disable-interactivity SSHFS-Win.SSHFS-Win
+  # winfsp
+  choco upgrade -y winfsp
 
   # Windows Terminal
   winget install --accept-package-agreements --accept-source-agreements --disable-interactivity --id Microsoft.WindowsTerminal -e
@@ -478,17 +478,18 @@ function Fcn-oosu {
 }
 
 function Fcn-ssh {
-  # Check for ssh feature: Get-WindowsCapability -Online | Where-Object Name -like 'OpenSSH*'
-  if (Test-Path "C:\tools\gsudo\Current\gsudo.exe") {
-    Start-Process -Wait "C:\tools\gsudo\Current\gsudo.exe" -ArgumentList "Add-WindowsCapability","-Online","-Name","OpenSSH.Server~~~~0.0.1.0"
-  } else {
-    Add-WindowsCapability -Online -Name "OpenSSH.Server~~~~0.0.1.0"
-  }
   Start-Service sshd
   Set-Service -Name sshd -StartupType 'Automatic'
   New-ItemProperty -Path "HKLM:\SOFTWARE\OpenSSH" -Name DefaultShell -Value "C:\Program Files\PowerShell\7\pwsh.exe" -PropertyType String -Force
   if ( -Not ( $user_sshkey.Contains("INSERTSSHKEYHERE") ) ) {
     Set-Content -Path "$env:ProgramData\ssh\administrators_authorized_keys" -Value "$user_sshkey"
+  }
+  # Firewall rule
+  if (!(Get-NetFirewallRule -Name "OpenSSH-Server-In-TCP" -ErrorAction SilentlyContinue | Select-Object Name, Enabled)) {
+    Write-Output "Firewall Rule 'OpenSSH-Server-In-TCP' does not exist, creating it..."
+    New-NetFirewallRule -Name 'OpenSSH-Server-In-TCP' -DisplayName 'OpenSSH Server (sshd)' -Enabled True -Direction Inbound -Protocol TCP -Action Allow -LocalPort 22
+  } else {
+      Write-Output "Firewall rule 'OpenSSH-Server-In-TCP' has been created and exists."
   }
 }
 
