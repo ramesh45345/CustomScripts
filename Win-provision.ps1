@@ -478,6 +478,13 @@ function Fcn-oosu {
 }
 
 function Fcn-ssh {
+  # Check for ssh feature: Get-WindowsCapability -Online | Where-Object Name -like 'OpenSSH*'
+  if (Test-Path "C:\tools\gsudo\Current\gsudo.exe") {
+    Start-Process -Wait "C:\tools\gsudo\Current\gsudo.exe" -ArgumentList "Add-WindowsCapability","-Online","-Name","OpenSSH.Server~~~~0.0.1.0"
+  } else {
+    Add-WindowsCapability -Online -Name "OpenSSH.Server~~~~0.0.1.0"
+  }
+  # Start and enable service
   Start-Service sshd
   Set-Service -Name sshd -StartupType 'Automatic'
   New-ItemProperty -Path "HKLM:\SOFTWARE\OpenSSH" -Name DefaultShell -Value "C:\Program Files\PowerShell\7\pwsh.exe" -PropertyType String -Force
