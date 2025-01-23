@@ -480,7 +480,7 @@ function Fcn-oosu {
 function Fcn-ssh {
   # Check for ssh feature: Get-WindowsCapability -Online | Where-Object Name -like 'OpenSSH*'
   if (Test-Path "C:\tools\gsudo\Current\gsudo.exe") {
-    Start-Process -Wait "C:\tools\gsudo\Current\gsudo.exe" -ArgumentList "Add-WindowsCapability","-Online","-Name","OpenSSH.Server~~~~0.0.1.0"
+    Start-Process -Wait -NoNewWindow "C:\tools\gsudo\Current\gsudo.exe" -ArgumentList "Add-WindowsCapability","-Online","-Name","OpenSSH.Server~~~~0.0.1.0"
   } else {
     Add-WindowsCapability -Online -Name "OpenSSH.Server~~~~0.0.1.0"
   }
