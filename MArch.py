@@ -48,6 +48,54 @@ def install_aur_pkg(package: str, username, usergroup):
     CFunc.chown_recursive(package_gitcheckout_folder, username, usergroup)
     CFunc.run_as_user(username, "cd {0} ; makepkg --noconfirm -si".format(package_gitcheckout_folder), error_on_fail=True)
     shutil.rmtree(package_gitcheckout_folder)
+def snapper_arch():
+    """Install snapper on Arch."""
+    status = subprocess.run('mount -v | grep " on / type btrfs"', check=False, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode
+    if status == 0:
+        print("Installing snapper for Arch.")
+        CFunc.pacman_install("snapper snap-pac grub-btrfs inotify-tools")
+        yayuser = CFunc.getnormaluser()
+        yay_install(yayuser[0], "btrfs-assistant")
+        # Create snapper configs
+        subprocess.run("snapper -c root create-config /", check=True, shell=True)
+        subprocess.run("snapper -c home create-config /home", check=True, shell=True)
+        subprocess.run("snapper -c var create-config /var", check=True, shell=True)
+        # Create snapshots
+        subprocess.run("snapper -c root create", check=True, shell=True)
+        subprocess.run("snapper -c home create", check=True, shell=True)
+        # snapper config
+        with open("/etc/snapper/configs/root", 'w') as f:
+            f.write('''
+SUBVOLUME="/"
+FSTYPE="btrfs"
+QGROUP=""
+SPACE_LIMIT="0.5"
+FREE_LIMIT="0.2"
+ALLOW_USERS=""
+ALLOW_GROUPS=""
+SYNC_ACL="no"
+BACKGROUND_COMPARISON="yes"
+NUMBER_CLEANUP="yes"
+NUMBER_MIN_AGE="1800"
+NUMBER_LIMIT="25"
+NUMBER_LIMIT_IMPORTANT="10"
+TIMELINE_CREATE="yes"
+TIMELINE_CLEANUP="yes"
+TIMELINE_MIN_AGE="1800"
+TIMELINE_LIMIT_HOURLY="4"
+TIMELINE_LIMIT_DAILY="7"
+TIMELINE_LIMIT_WEEKLY="5"
+TIMELINE_LIMIT_MONTHLY="3"
+TIMELINE_LIMIT_YEARLY="0"
+EMPTY_PRE_POST_CLEANUP="yes"
+EMPTY_PRE_POST_MIN_AGE="1800"
+''')
+        # Enable snapper timers
+        CFunc.sysctl_enable("snapper-cleanup.timer snapper-timeline.timer grub-btrfsd", now=True)
+        # First execution
+        subprocess.run("/etc/grub.d/41_snapshots-btrfs", check=False, shell=True)
+        # grub update
+        CFuncExt.GrubUpdate()
 
 
 if __name__ == '__main__':
@@ -222,6 +270,9 @@ if __name__ == '__main__':
     # Disable mitigations
     CFuncExt.GrubEnvAdd(os.path.join(os.sep, "etc", "default", "grub"), "GRUB_CMDLINE_LINUX", "mitigations=off")
     CFuncExt.GrubUpdate()
+
+    # Enable snapper
+    snapper_arch()
 
     # Extra scripts
     subprocess.run("{0}/CCSClone.py".format(SCRIPTDIR), shell=True, check=True)
