@@ -118,6 +118,8 @@ RUN locale-gen
 RUN echo "root:asdf" | chpasswd && \
     echo -e "nobody ALL=(ALL) NOPASSWD: /usr/sbin/pacman" > /etc/sudoers.d/nopw && \
     chmod 0440 /etc/sudoers.d/nopw
+# Setup nobody account for use to install AUR helper
+RUN chage -E -1 -M -1 -I -1 -m 0 nobody
 # Install AUR helper
 RUN git clone https://aur.archlinux.org/yay-bin.git /tmp/yay-bin && \
     chmod a+rw -R /tmp/yay-bin && cd /tmp/yay-bin && \
