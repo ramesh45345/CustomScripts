@@ -229,6 +229,8 @@ function up () {
     # System upgrade commands
     if type -p topgrade &> /dev/null ; then
         topgrade -y flatpak --disable firmware $@
+    elif type -p rpm-ostree &> /dev/null; then
+        $SUDOCMD rpm-ostree upgrade
     elif type -p nala &> /dev/null; then
         $SUDOCMD nala update
         $SUDOCMD nala upgrade
@@ -242,8 +244,6 @@ function up () {
     elif type -p zypper &> /dev/null; then
         $SUDOCMD zypper up -y
         $SUDOCMD zypper dup -y
-    elif type -p rpm-ostree &> /dev/null; then
-        $SUDOCMD rpm-ostree upgrade
     elif type nix &> /dev/null && ! [[ "$(which nix)" == *"$USER"* ]]; then
         $SUDOCMD nixos-rebuild switch --upgrade
     fi
@@ -259,7 +259,36 @@ function upr () {
     fi
 }
 
-if type -p nala &> /dev/null; then
+if type rpm-ostree &> /dev/null; then
+    function ins () {
+        echo "Installing $@."
+        $SUDOCMD rpm-ostree install $@
+    }
+    function rmv () {
+        echo "Removing $@."
+        $SUDOCMD rpm-ostree remove $@
+    }
+    function rst () {
+        $SUDOCMD rpm-ostree status
+    }
+    function se () {
+        echo -e "\nSearching for $@."
+        if [ $(id -u) != "0" ]; then
+            if ! toolbox list --containers | grep -q fedora-toolbox; then
+                toolbox create
+            fi
+            toolbox run sudo dnf search "$@"
+            echo -e "\nInfo for $@."
+            toolbox run sudo dnf info "$@"
+        fi
+        snap_search "$@"
+        flatpak_search "$@"
+    }
+    function cln () {
+        echo "Auto-removing packages."
+        flatpak_clean
+    }
+elif type -p nala &> /dev/null; then
     function ins () {
         echo "Installing $@."
         $SUDOCMD nala install $@
@@ -399,35 +428,6 @@ elif type zypper &> /dev/null; then
         echo "Searching for $@."
         $SUDOCMD zypper search "$@"
         $SUDOCMD zypper info "$@"
-    }
-elif type rpm-ostree &> /dev/null; then
-    function ins () {
-        echo "Installing $@."
-        $SUDOCMD rpm-ostree install $@
-    }
-    function rmv () {
-        echo "Removing $@."
-        $SUDOCMD rpm-ostree remove $@
-    }
-    function rst () {
-        $SUDOCMD rpm-ostree status
-    }
-    function se () {
-        echo -e "\nSearching for $@."
-        if [ $(id -u) != "0" ]; then
-            if ! toolbox list --containers | grep -q fedora-toolbox; then
-                toolbox create
-            fi
-            toolbox run sudo dnf search "$@"
-            echo -e "\nInfo for $@."
-            toolbox run sudo dnf info "$@"
-        fi
-        snap_search "$@"
-        flatpak_search "$@"
-    }
-    function cln () {
-        echo "Auto-removing packages."
-        flatpak_clean
     }
 # NixOS package manager only.
 elif type nix &> /dev/null && ! [[ "$(which nix)" == *"$USER"* ]]; then
@@ -906,6 +906,8 @@ function up
     # System upgrade commands
     if type -q topgrade
         topgrade -y flatpak --disable firmware $argv
+    else if type -q rpm-ostree
+        sudo rpm-ostree upgrade
     else if type -q nala
         sudo nala update
         sudo nala upgrade
@@ -919,8 +921,6 @@ function up
     else if type -q zypper
         sudo zypper up -y
         sudo zypper dup -y
-    else if type -q rpm-ostree
-        sudo rpm-ostree upgrade
     else if type -q nix; and not string match -qr $USER (which nix);
         sudo nixos-rebuild switch --upgrade
     end
@@ -937,7 +937,36 @@ function upr
 end
 
 # Set package manager functions
-if type -q nala
+if type -q rpm-ostree
+    function ins
+        echo "Installing $argv."
+        sudo rpm-ostree install $argv
+    end
+    function rmv
+        echo "Removing $argv."
+        sudo rpm-ostree remove $argv
+    end
+    function rst
+        sudo rpm-ostree status
+    end
+    function se
+        echo -e "\\nSearching for $argv."
+        if [ (id -u) != "0" ]
+            if not toolbox list --containers | grep -q fedora-toolbox
+                toolbox create
+            end
+            toolbox run sudo dnf search $argv
+            echo -e "\nInfo for $argv."
+            toolbox run sudo dnf info $argv
+        end
+        snap_search $argv
+        flatpak_search $argv
+    end
+    function cln
+        echo "Auto-removing packages."
+        flatpak_clean
+    end
+else if type -q nala
     function ins
         echo "Installing $argv."
         sudo nala install $argv
@@ -1063,35 +1092,6 @@ else if type -q zypper
         echo "Searching for $argv."
         sudo zypper search $argv
         sudo zypper info $argv
-    end
-else if type -q rpm-ostree
-    function ins
-        echo "Installing $argv."
-        sudo rpm-ostree install $argv
-    end
-    function rmv
-        echo "Removing $argv."
-        sudo rpm-ostree remove $argv
-    end
-    function rst
-        sudo rpm-ostree status
-    end
-    function se
-        echo -e "\\nSearching for $argv."
-        if [ (id -u) != "0" ]
-            if not toolbox list --containers | grep -q fedora-toolbox
-                toolbox create
-            end
-            toolbox run sudo dnf search $argv
-            echo -e "\nInfo for $argv."
-            toolbox run sudo dnf info $argv
-        end
-        snap_search $argv
-        flatpak_search $argv
-    end
-    function cln
-        echo "Auto-removing packages."
-        flatpak_clean
     end
 # NixOS package manager only.
 else if type -q nix; and not string match -qr $USER (which nix);
