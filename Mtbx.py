@@ -101,7 +101,7 @@ RUN pacman -Syu --needed --noconfirm reflector
 RUN reflector --country 'United States' --latest 10 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
 RUN pacman -Syy
 # Software setup
-RUN pacman -Syu --needed --noconfirm nano sudo git zsh python3 shadow tmux
+RUN pacman -Syu --needed --noconfirm nano sudo git zsh fish python3 shadow tmux
 RUN pacman -Syu --needed --noconfirm ttf-dejavu ttf-liberation powerline-fonts
 # Enable multilib
 RUN echo -e '\n[multilib]\nInclude = /etc/pacman.d/mirrorlist' >> /etc/pacman.conf ; pacman -Syu --needed --noconfirm
@@ -133,7 +133,7 @@ RUN dnf -y install acl bash curl gawk grep gzip libcap openssl p11-kit pam pytho
 RUN dnf -y install bash-completion bzip2 diffutils dnf-plugins-core findutils flatpak-spawn fpaste fuse fuse-libs git gnupg gnupg2-smime gvfs-client hostname iputils jwhois keyutils krb5-libs less lsof man-db man-pages mtr nano-default-editor nss-mdns openssh-clients passwd pigz procps-ng rsync shadow-utils sudo tcpdump time tmux traceroute tree unzip vte-profile wget which words xorg-x11-xauth xz zip
 
 # Shell Tools
-RUN dnf -y install zsh
+RUN dnf -y install zsh fish powerline-fonts
 # Build tools
 RUN dnf -y install make gcc automake autoconf ninja-build
 # Wine
@@ -148,7 +148,7 @@ RUN dnf -y install --allowerasing acl bash nano curl gawk grep gzip libcap opens
 RUN dnf -y install bash-completion bzip2 diffutils dnf-plugins-core findutils flatpak-spawn fuse fuse-libs git gnupg gnupg2-smime gvfs-client hostname iputils keyutils krb5-libs less lsof man-db man-pages mtr openssh-clients passwd pigz procps-ng rsync shadow-utils sudo tcpdump time tmux traceroute tree unzip vte-profile wget which words xorg-x11-xauth xz zip
 
 # Shell Tools
-RUN dnf -y install zsh
+RUN dnf -y install zsh powerline-fonts
 # Build tools
 RUN dnf -y install make gcc automake autoconf
 """, "alma")
@@ -184,6 +184,7 @@ RUN echo '%wheel ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/user-group && \
 addtext("RUN git clone https://github.com/ramesh45345/CustomScripts /opt/CustomScripts && chown 1000:1000 -R /opt/CustomScripts")
 # Run shell config when zsh loads for the first time.
 addtext("RUN echo '/opt/CustomScripts/CShellConfig.py -z' > /etc/skel/.zshrc")
+addtext("RUN /opt/CustomScripts/CFuncExt.py -s")
 # Timezone
 addtext("RUN ln -sf /usr/share/zoneinfo/US/Eastern /etc/localtime")
 
