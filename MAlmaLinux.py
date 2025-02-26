@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Install CentOS 9 Software"""
+"""Install AlmaLinux 9 Software"""
 
 # Python includes.
 import argparse
@@ -18,7 +18,7 @@ print("Running {0}".format(__file__))
 SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))
 
 # Get arguments
-parser = argparse.ArgumentParser(description='Install CentOS 9 Software.')
+parser = argparse.ArgumentParser(description='Install AlmaLinux 9 Software.')
 parser.add_argument("-d", "--desktop", help='Desktop Environment (choices: %(choices)s) (default: %(default)s)', default="gnome", choices=["gnome", "kde"])
 parser.add_argument("-k", "--kerneltype", type=int, help="Kernel type (0=stock kernel, 1=Mainline kernel, 2=LTS kernel (default: %(default)s)", default=1, choices=[0, 1, 2])
 parser.add_argument("-x", "--nogui", help='Configure script to disable GUI.', action="store_true")
@@ -55,7 +55,7 @@ subprocess.run("rpm --import https://www.elrepo.org/RPM-GPG-KEY-v2-elrepo.org ; 
 # Update system after enabling repos.
 CFunc.dnfupdate()
 
-### Install CentOS Software ###
+### Install Software ###
 # Cli tools
 CFunc.dnfinstall("zsh fish nano tmux iotop rsync p7zip p7zip-plugins zip unzip xdg-utils xdg-user-dirs util-linux-user openssh-server openssh-clients avahi python3-pip python3-passlib")
 CFunc.sysctl_enable("sshd avahi-daemon")

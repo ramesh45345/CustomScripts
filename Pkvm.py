@@ -373,7 +373,7 @@ if __name__ == '__main__':
         vboxosid = "Fedora_64"
         kvm_variant = "rhel9.0"
         isourl = "https://na.edge.kernel.org/almalinux/9/isos/x86_64/AlmaLinux-9-latest-x86_64-boot.iso"
-        vmprovisionscript = "MCentOS.py"
+        vmprovisionscript = "MAlmaLinux.py"
         if args.desktopenv is None:
             args.desktopenv = "gnome"
     if args.ostype == 20:
