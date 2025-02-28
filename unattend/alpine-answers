@@ -1,0 +1,38 @@
+# Example answer file for setup-alpine script
+# If you don't want to use a certain option, then comment it out
+# Use US layout with US variant
+KEYMAPOPTS="us us"
+
+# Set hostname
+HOSTNAMEOPTS="-n INSERTHOSTNAMENAMEHERE"
+
+# Contents of /etc/network/interfaces
+INTERFACESOPTS="auto lo
+iface lo inet loopback
+auto eth0
+iface eth0 inet dhcp
+    hostname INSERTHOSTNAMENAMEHERE
+"
+
+# Set timezone
+TIMEZONEOPTS="-z US/Eastern"
+
+# set http/ftp proxy
+PROXYOPTS="none"
+
+# Add a mirror
+APKREPOSOPTS="-c"
+
+# Create admin user
+USEROPTS="-a -u -g audio,input,video,netdev,wheel INSERTUSERHERE"
+USERSSHKEY="INSERTSSHKEYHERE"
+
+# Install Openssh
+SSHDOPTS="-c openssh"
+ROOTSSHKEY="INSERTSSHKEYHERE"
+
+# Use openntpd
+NTPOPTS="-c openntpd"
+
+# Set disk options
+DISKOPTS="-m sys /dev/vda"

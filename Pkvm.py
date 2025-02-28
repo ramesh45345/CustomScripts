@@ -412,6 +412,19 @@ if __name__ == '__main__':
         vmprovision_defopts = "-d {0}".format(args.desktopenv)
         kvm_variant = "freebsd14.0"
         isourl = "https://download.freebsd.org/releases/amd64/amd64/ISO-IMAGES/14.2/FreeBSD-14.2-RELEASE-amd64-disc1.iso"
+    if 45 <= args.ostype <= 49:
+        vboxosid = "Fedora_64"
+        kvm_variant = "fedora-rawhide"
+        vmprovisionscript = "MAlpine.py"
+        isourl = "http://dl-cdn.alpinelinux.org/alpine/latest-stable/releases/x86_64/alpine-standard-3.21.3-x86_64.iso"
+    if args.ostype == 45:
+        vmname = "Packer-Alpine-{0}".format(hvname)
+        if args.desktopenv is None:
+            args.desktopenv = "kde"
+        vmprovision_defopts = "-d {0}".format(args.desktopenv)
+    if args.ostype == 46:
+        vmname = "Packer-AlpineCLI-{0}".format(hvname)
+        vmprovision_defopts = "-x"
     if 50 <= args.ostype <= 59:
         vboxosid = "Windows10_64"
         kvm_variant = "win10"
@@ -704,6 +717,11 @@ if __name__ == '__main__':
         data['build']['provisioner'][0]["shell"]["execute_command"] = "chmod +x {{ .Path }}; env {{ .Vars }} {{ .Path }}"
         data['build']['provisioner'][0]["shell"]["inline"] = ['''export ASSUME_ALWAYS_YES=yes; pw useradd -n {vmuser} -m; pw usermod {vmuser} -c "{fullname}"; chpass -p '{encpass}' {vmuser}; mkdir -m 700 -p /root/.ssh; echo "{sshkey}" > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{vmuser}/.ssh; echo "{sshkey}" > ~{vmuser}/.ssh/authorized_keys; chown -R {vmuser}:{vmuser} ~{vmuser}; pkg update -f; pkg install -y git python3; {gitcmd}; exit 0; /opt/CustomScripts/{vmprovisionscript} {vmprovision_opts}'''.format(vmprovisionscript=vmprovisionscript, vmprovision_opts=vmprovision_opts, sshkey=sshkey, vmuser=args.vmuser, encpass=sha512_password, fullname=args.fullname, gitcmd=git_cmdline())]
         data['source'][packer_type]['local']["shutdown_command"] = "shutdown -p now"
+    if 45 <= args.ostype <= 49:
+        data['source'][packer_type]['local']["shutdown_command"] = "poweroff"
+        data['source'][packer_type]['local']["boot_command"] = ["<wait10>root<enter><wait>", "ifconfig eth0 up && udhcpc -i eth0<enter><wait5>", "wget http://{{ .HTTPIP }}:{{ .HTTPPort }}/alpine-answers<enter><wait>", f"setup-alpine -e -f $PWD/alpine-answers; mount /dev/vda3 /mnt; echo 'PermitRootLogin yes' >> /mnt/etc/ssh/sshd_config; echo 'root:{sha512_password}' | chpasswd -e -R /mnt; reboot<enter><wait5>", "<wait30s>y<enter>"]
+        data['build']['provisioner'][0]["shell"] = {}
+        data['build']['provisioner'][0]["shell"]["inline"] = [f"echo '{args.vmuser}:{sha512_password}' | chpasswd -e; addgroup {args.vmuser} wheel; chown -R {args.vmuser}:{args.vmuser} ~{args.vmuser}; apk add git python3; git clone https://github.com/ramesh45345/CustomScripts /opt/CustomScripts; /opt/CustomScripts/{vmprovisionscript} {vmprovision_opts}"]
     if 50 <= args.ostype <= 59:
         # Reboot after initial script
         data['build']['provisioner'][0]["windows-restart"] = {}
