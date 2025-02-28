@@ -318,15 +318,6 @@ if __name__ == '__main__':
     if args.ostype == 2:
         vmname = "Packer-FedoraCLI-{0}".format(hvname)
         vmprovision_defopts = "-x"
-    if args.ostype == 5:
-        vmname = "ISOVM"
-        # Override memory and disk setting if they are set to the default values.
-        if mem_mib == args.memory:
-            args.memory = int(((os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')) / (1024.**2)) / 2)
-        if size_disk_default_gb == args.imgsize:
-            args.imgsize = 120
-        # Use cli settings for ISOVM.
-        vmprovision_defopts = "-x"
     if args.ostype == 8:
         vmprovisionscript = "MFedoraSilverblue.py"
         vboxosid = "Fedora_64"
