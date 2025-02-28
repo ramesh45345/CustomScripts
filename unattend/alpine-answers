@@ -21,7 +21,7 @@ TIMEZONEOPTS="-z US/Eastern"
 PROXYOPTS="none"
 
 # Add a mirror
-APKREPOSOPTS="-c"
+APKREPOSOPTS="-c -f"
 
 # Create admin user
 USEROPTS="-a -u -g audio,input,video,netdev,wheel INSERTUSERHERE"

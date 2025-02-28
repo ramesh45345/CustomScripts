@@ -26,7 +26,7 @@ def apkinstall(apks):
 
 # Get arguments
 parser = argparse.ArgumentParser(description='Install Alpine Software.')
-parser.add_argument("-d", "--desktop", help='Desktop Environment (i.e. gnome, kde, mate, etc)', default="kde")
+parser.add_argument("-d", "--desktop", help='Desktop Environment (i.e. gnome, kde, mate, etc)')
 parser.add_argument("-x", "--nogui", help='Configure script to disable GUI.', action="store_true")
 
 # Save arguments.
@@ -74,8 +74,9 @@ if not args.nogui:
     apkinstall("dbus dbus-x11 udev")
     subprocess.run("rc-update add dbus", shell=True)
     subprocess.run("rc-update add udev", shell=True)
-    # Xorg
+    # Xorg and wayland
     subprocess.run("setup-xorg-base", shell=True)
+    subprocess.run("setup-wayland-base", shell=True)
     apkinstall("xhost xrandr font-ubuntu font-dejavu font-liberation font-noto")
     # Addons for GUI
     apkinstall("libinput")
@@ -84,15 +85,15 @@ if not args.nogui:
     # Browsers
     apkinstall("firefox")
 
-# Install Desktop Software
-if args.desktop == "gnome":
-    subprocess.run("setup-desktop gnome", shell=True)
-elif args.desktop == "kde":
-    subprocess.run("setup-desktop plasma", shell=True)
-elif args.desktop == "mate":
-    subprocess.run("setup-desktop mate", shell=True)
-elif args.desktop == "xfce":
-    subprocess.run("setup-desktop xfce", shell=True)
+    # Install Desktop Software
+    if args.desktop == "gnome":
+        subprocess.run("setup-desktop gnome", shell=True)
+    elif args.desktop == "kde":
+        subprocess.run("setup-desktop plasma", shell=True)
+    elif args.desktop == "mate":
+        subprocess.run("setup-desktop mate", shell=True)
+    elif args.desktop == "xfce":
+        subprocess.run("setup-desktop xfce", shell=True)
 
 # Install software for VMs
 if vmstatus == "kvm":
@@ -103,6 +104,8 @@ if vmstatus == "vbox":
     if not args.nogui:
         apkinstall("virtualbox-guest-additions-x11")
     subprocess.run("rc-update add virtualbox-guest-additions", shell=True)
+
+subprocess.run("apk fix", shell=True)
 
 # Extra scripts
 subprocess.run(os.path.join(SCRIPTDIR, "CCSClone.py"), shell=True, check=True)
