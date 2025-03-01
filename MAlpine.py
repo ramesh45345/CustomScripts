@@ -21,7 +21,10 @@ SCRIPTDIR = sys.path[0]
 ### Functions ###
 def apkinstall(apks):
     """Install packages with apk."""
-    subprocess.run("apk add {0}".format(apks), shell=True)
+    subprocess.run(f"apk add {apks}", shell=True)
+def rcupdate_add(service: str):
+    """Add a service to startup."""
+    subprocess.run(f"rc-update add {service}", shell=True)
 
 
 # Get arguments
@@ -56,7 +59,7 @@ with open(os.path.join(os.sep, "etc", "apk", "repositories"), 'w') as tfile:
 subprocess.run("apk upgrade --update-cache --available", shell=True)
 
 ### Software ###
-apkinstall("git nano sudo bash zsh fish shadow")
+apkinstall("git nano sudo bash zsh fish shadow tmux perl-datetime-hires util-linux util-linux-login")
 # Sudoers changes
 CFuncExt.SudoersEnvSettings()
 # Edit sudoers to add dnf.
@@ -65,15 +68,11 @@ CFunc.AddLineToSudoersFile(sudoersfile, "%wheel ALL=(ALL) ALL", overwrite=True)
 CFunc.AddLineToSudoersFile(sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("apk")))
 # Avahi
 apkinstall("avahi")
-subprocess.run("rc-update add avahi-daemon", shell=True)
+rcupdate_add("avahi-daemon")
 
 
 # GUI Packages
 if not args.nogui:
-    # Dbus/udev
-    apkinstall("dbus dbus-x11 udev")
-    subprocess.run("rc-update add dbus", shell=True)
-    subprocess.run("rc-update add udev", shell=True)
     # Xorg and wayland
     subprocess.run("setup-xorg-base", shell=True)
     subprocess.run("setup-wayland-base", shell=True)
@@ -82,6 +81,12 @@ if not args.nogui:
     apkinstall("libinput")
     # Gvfs
     apkinstall("gvfs-cdda gvfs-goa gvfs-mtp gvfs-smb gvfs gvfs-afc gvfs-nfs gvfs-archive gvfs-fuse gvfs-gphoto2 gvfs-avahi")
+    # udev
+    subprocess.run("setup-devd udev", shell=True)
+    # elogind
+    apkinstall("elogind polkit polkit-elogind")
+    rcupdate_add("elogind")
+    rcupdate_add("polkit")
     # Browsers
     apkinstall("firefox")
 
@@ -97,14 +102,16 @@ if not args.nogui:
 
 # Install software for VMs
 if vmstatus == "kvm":
-    apkinstall("qemu-guest-agent")
-    subprocess.run("rc-update add qemu-guest-agent", shell=True)
+    apkinstall("qemu-guest-agent spice-vdagent")
+    rcupdate_add("qemu-guest-agent")
+    rcupdate_add("spice-vdagentd")
 if vmstatus == "vbox":
     apkinstall("virtualbox-guest-additions")
     if not args.nogui:
         apkinstall("virtualbox-guest-additions-x11")
-    subprocess.run("rc-update add virtualbox-guest-additions", shell=True)
+    rcupdate_add("virtualbox-guest-additions")
 
+# Fix any I/O errors
 subprocess.run("apk fix", shell=True)
 
 # Extra scripts

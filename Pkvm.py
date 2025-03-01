@@ -418,12 +418,12 @@ if __name__ == '__main__':
         vmprovisionscript = "MAlpine.py"
         isourl = "http://dl-cdn.alpinelinux.org/alpine/latest-stable/releases/x86_64/alpine-standard-3.21.3-x86_64.iso"
     if args.ostype == 45:
-        vmname = "Packer-Alpine-{0}".format(hvname)
+        vmname = "AlpineVM"
         if args.desktopenv is None:
             args.desktopenv = "kde"
         vmprovision_defopts = "-d {0}".format(args.desktopenv)
     if args.ostype == 46:
-        vmname = "Packer-AlpineCLI-{0}".format(hvname)
+        vmname = "AlpineCLIVM"
         vmprovision_defopts = "-x"
     if 50 <= args.ostype <= 59:
         vboxosid = "Windows10_64"
@@ -549,7 +549,12 @@ if __name__ == '__main__':
         CFunc.find_replace(tempunattendfolder, "INSERTPASSWORDHERE", args.vmpass, "*")
         CFunc.find_replace(tempscriptfolderpath, "INSERTPASSWORDHERE", args.vmpass, "Win-provision.ps1")
         CFunc.find_replace(tempunattendfolder, "INSERTFULLNAMEHERE", args.fullname, "*")
-        CFunc.find_replace(tempunattendfolder, "INSERTHOSTNAMENAMEHERE", vmname, "*")
+        # Alpine hostname fix
+        if 45 <= args.ostype <= 49:
+            vmname_lower = ''.join(char for char in vmname if char.isalnum()).lower()
+            CFunc.find_replace(tempunattendfolder, "INSERTHOSTNAMENAMEHERE", vmname_lower, "*")
+        else:
+            CFunc.find_replace(tempunattendfolder, "INSERTHOSTNAMENAMEHERE", vmname, "*")
         CFunc.find_replace(tempunattendfolder, "INSERTHASHEDPASSWORDHERE", sha512_password, "*")
         CFunc.find_replace(tempunattendfolder, "INSERTSSHKEYHERE", sshkey, "*")
         CFunc.find_replace(tempscriptfolderpath, "INSERTSSHKEYHERE", sshkey, "Win-provision.ps1")
