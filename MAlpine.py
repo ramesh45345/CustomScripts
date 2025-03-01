@@ -59,7 +59,7 @@ with open(os.path.join(os.sep, "etc", "apk", "repositories"), 'w') as tfile:
 subprocess.run("apk upgrade --update-cache --available", shell=True)
 
 ### Software ###
-apkinstall("git nano sudo bash zsh fish shadow tmux perl-datetime-hires rsync util-linux util-linux-login")
+apkinstall("btop git nano sudo bash zsh fish shadow tmux perl-datetime-hires rsync curl util-linux util-linux-login")
 # Sudoers changes
 CFuncExt.SudoersEnvSettings()
 # Edit sudoers to add dnf.
