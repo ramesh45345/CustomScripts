@@ -69,7 +69,23 @@ CFunc.AddLineToSudoersFile(sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USE
 # Avahi
 apkinstall("avahi")
 rcupdate_add("avahi-daemon")
+# Network Manager
+apkinstall("networkmanager networkmanager-tui networkmanager-cli networkmanager-wifi wpa_supplicant")
+rcupdate_add("networkmanager default")
+subprocess.run("rc-update del networking boot", shell=True)
+subprocess.run("rc-update del wpa_supplicant boot", shell=True)
+with open(os.path.join(os.sep, "etc", "NetworkManager", "NetworkManager.conf"), 'w') as f:
+    f.write("""[main]
+dhcp=internal
+plugins=ifupdown,keyfile
 
+[ifupdown]
+managed=true
+
+[device]
+wifi.scan-rand-mac-address=yes
+wifi.backend=wpa_supplicant
+""")
 
 # GUI Packages
 if not args.nogui:
@@ -95,10 +111,13 @@ if not args.nogui:
         subprocess.run("setup-desktop gnome", shell=True)
     elif args.desktop == "kde":
         subprocess.run("setup-desktop plasma", shell=True)
+        apkinstall("plasma-nm")
     elif args.desktop == "mate":
         subprocess.run("setup-desktop mate", shell=True)
+        apkinstall("network-manager-applet")
     elif args.desktop == "xfce":
         subprocess.run("setup-desktop xfce", shell=True)
+        apkinstall("network-manager-applet")
 
 # Install software for VMs
 if vmstatus == "kvm":
@@ -110,6 +129,13 @@ if vmstatus == "vbox":
     if not args.nogui:
         apkinstall("virtualbox-guest-additions-x11")
     rcupdate_add("virtualbox-guest-additions")
+
+# Add user to groups
+CFunc.AddUserToGroup("dialout")
+CFunc.AddUserToGroup("disk")
+CFunc.AddUserToGroup("plugdev")
+CFunc.AddUserToGroup("video")
+CFunc.AddUserToGroup("wheel")
 
 # Fix any I/O errors
 subprocess.run("apk fix", shell=True)
