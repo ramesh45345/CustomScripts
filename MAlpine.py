@@ -25,6 +25,9 @@ def apkinstall(apks):
 def rcupdate_add(service: str):
     """Add a service to startup."""
     subprocess.run(f"rc-update add {service}", shell=True)
+def apkfix():
+    """Run apk fix"""
+    subprocess.run("apk fix", shell=True)
 
 
 # Get arguments
@@ -71,6 +74,7 @@ apkinstall("avahi")
 rcupdate_add("avahi-daemon")
 # Network Manager
 apkinstall("networkmanager networkmanager-tui networkmanager-cli networkmanager-wifi wpa_supplicant")
+apkfix()
 rcupdate_add("networkmanager default")
 subprocess.run("rc-update del networking boot", shell=True)
 subprocess.run("rc-update del wpa_supplicant boot", shell=True)
@@ -138,7 +142,7 @@ CFunc.AddUserToGroup("video")
 CFunc.AddUserToGroup("wheel")
 
 # Fix any I/O errors
-subprocess.run("apk fix", shell=True)
+apkfix()
 
 # Extra scripts
 subprocess.run(os.path.join(SCRIPTDIR, "CCSClone.py"), shell=True, check=True)
