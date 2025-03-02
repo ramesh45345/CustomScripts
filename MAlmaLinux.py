@@ -19,7 +19,7 @@ SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))
 
 # Get arguments
 parser = argparse.ArgumentParser(description='Install AlmaLinux 9 Software.')
-parser.add_argument("-d", "--desktop", help='Desktop Environment (choices: %(choices)s) (default: %(default)s)', default="gnome", choices=["gnome", "kde"])
+parser.add_argument("-d", "--desktop", help='Desktop Environment (choices: %(choices)s) (default: %(default)s)', default="gnome", choices=["gnome", "kde", "xfce"])
 parser.add_argument("-k", "--kerneltype", type=int, help="Kernel type (0=stock kernel, 1=Mainline kernel, 2=LTS kernel (default: %(default)s)", default=1, choices=[0, 1, 2])
 parser.add_argument("-x", "--nogui", help='Configure script to disable GUI.', action="store_true")
 args = parser.parse_args()
@@ -101,30 +101,30 @@ if not args.nogui:
     # Numix Icon Theme
     CFuncExt.numix_icons(os.path.join(os.sep, "usr", "local", "share", "icons"))
 
-# Desktop Environments
-if args.desktop == "gnome":
-    # Workstation
-    CFunc.dnfinstall('@workstation --disablerepo="rpmfusion*"')
-    # Misc tools
-    CFunc.dnfinstall("dconf-editor chrome-gnome-shell")
-    # Gnome Stuff
-    CFunc.dnfinstall("gnome-tweaks gnome-extensions-app")
-    CFunc.dnfinstall("tilix tilix-nautilus")
-    # Gnome Shell extensions
-    # Install gs installer script.
-    gs_installer = CFunc.downloadfile("https://raw.githubusercontent.com/brunelli/gnome-shell-extension-installer/master/gnome-shell-extension-installer", os.path.join(os.sep, "usr", "local", "bin"), overwrite=True)
-    os.chmod(gs_installer[0], 0o777)
-    # Install volume extension
-    CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 858".format(gs_installer[0]))
-    # Install Dash to Panel extension
-    CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 1160".format(gs_installer[0]))
-elif args.desktop == "kde":
-    # Plasma
-    CFunc.dnfinstall('--skip-broken install @"KDE Plasma Workspaces" --exclude kf5-akonadi-server-mysql')
-    CFunc.sysctl_enable("sddm")
-elif args.desktop == "xfce":
-    # Xfce
-    CFunc.dnfinstall('@xfce xfce4-whiskermenu-plugin xfce4-systemload-plugin xfce4-datetime-plugin xfce4-cpugraph-plugin xfce4-netload-plugin xfce4-genmon-plugin xfce4-mount-plugin')
+    # Desktop Environments
+    if args.desktop == "gnome":
+        # Workstation
+        CFunc.dnfinstall('@workstation --disablerepo="rpmfusion*"')
+        # Misc tools
+        CFunc.dnfinstall("dconf-editor chrome-gnome-shell")
+        # Gnome Stuff
+        CFunc.dnfinstall("gnome-tweaks gnome-extensions-app")
+        CFunc.dnfinstall("tilix tilix-nautilus")
+        # Gnome Shell extensions
+        # Install gs installer script.
+        gs_installer = CFunc.downloadfile("https://raw.githubusercontent.com/brunelli/gnome-shell-extension-installer/master/gnome-shell-extension-installer", os.path.join(os.sep, "usr", "local", "bin"), overwrite=True)
+        os.chmod(gs_installer[0], 0o777)
+        # Install volume extension
+        CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 858".format(gs_installer[0]))
+        # Install Dash to Panel extension
+        CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 1160".format(gs_installer[0]))
+    elif args.desktop == "kde":
+        # Plasma
+        CFunc.dnfinstall('--skip-broken install @"KDE Plasma Workspaces" --exclude kf5-akonadi-server-mysql')
+        CFunc.sysctl_enable("sddm")
+    elif args.desktop == "xfce":
+        # Xfce
+        CFunc.dnfinstall('@xfce xfce4-whiskermenu-plugin xfce4-systemload-plugin xfce4-datetime-plugin xfce4-cpugraph-plugin xfce4-netload-plugin xfce4-genmon-plugin xfce4-mount-plugin')
 
 # Install software for VMs
 if vmstatus == "kvm":

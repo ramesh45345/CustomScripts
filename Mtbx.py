@@ -6,7 +6,6 @@ import argparse
 import os
 import shutil
 import subprocess
-import sys
 import tempfile
 # Custom includes
 import CFunc
@@ -21,11 +20,6 @@ distro_options = ["all", "arch", "ubuntu", "fedora", "alma"]
 
 
 ### Functions ###
-def check_cmds(cmdcheck: list):
-    """Ensure that certain commands exist."""
-    for cmd in cmdcheck:
-        if not shutil.which(cmd):
-            sys.exit("\nError, ensure command {0} is installed.".format(cmd))
 def addtext(ct_text: str, distro: str = "all"):
     """Add text to containerfiles."""
     global containerfile_alma

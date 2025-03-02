@@ -10,6 +10,8 @@ import shutil
 import subprocess
 import sys
 import time
+# Custom includes
+import CFunc
 
 print("Running {0}".format(__file__))
 
@@ -35,10 +37,7 @@ if os.geteuid() != 0:
     sys.exit("ERROR: Please run as root.")
 
 # Ensure that certain commands exist.
-cmdcheck = ["systemctl", "ss"]
-for cmd in cmdcheck:
-    if not shutil.which(cmd):
-        sys.exit("\nError, ensure command {0} is installed.".format(cmd))
+CFunc.commands_check(["systemctl", "ss"])
 
 
 ### Functions ###

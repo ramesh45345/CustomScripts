@@ -6,7 +6,6 @@ import argparse
 import os
 import shutil
 import subprocess
-import sys
 # Custom includes
 import CFunc
 import CFuncExt
@@ -18,17 +17,6 @@ SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))
 
 # Global variables
 distro_options = ["arch", "ubuntu", "fedora"]
-
-
-### Functions ###
-def check_cmds(cmdcheck: list):
-    """Ensure that certain commands exist."""
-    for cmd in cmdcheck:
-        if not shutil.which(cmd):
-            sys.exit("\nError, ensure command {0} is installed.".format(cmd))
-
-
-# Default variables
 distro_default = "arch"
 
 # Get arguments
@@ -61,14 +49,14 @@ print("Group Name is:", args.group)
 # Import support libs
 if args.distro == "arch":
     import MArch
-    check_cmds(["pacman"])
+    CFunc.commands_check(["pacman"])
 if args.distro == "ubuntu":
     import MDebian
     import MUbuntu
-    check_cmds(["apt-get"])
+    CFunc.commands_check(["apt-get"])
 if args.distro == "fedora":
     import MFedora
-    check_cmds(["dnf"])
+    CFunc.commands_check(["dnf"])
 
 # Create group and user
 subprocess.run(["groupadd", args.group, "-g", str(args.gid), "-f"], check=False)

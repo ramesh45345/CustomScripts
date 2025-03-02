@@ -10,7 +10,6 @@
 import argparse
 import functools
 import os
-import sys
 import subprocess
 import shutil
 import stat
@@ -72,13 +71,9 @@ CFunc.is_root(True)
 
 # Ensure that certain commands exist.
 cmdcheck = ["debootstrap"]
-for cmd in cmdcheck:
-    if not shutil.which(cmd):
-        sys.exit("\nError, ensure command {0} is installed.".format(cmd))
 if args.zch is False:
-    cmd = "systemd-nspawn"
-    if not shutil.which(cmd):
-        sys.exit("\nError, ensure command {0} is installed.".format(cmd))
+    cmdcheck += ["systemd-nspawn"]
+CFunc.commands_check(cmdcheck)
 
 if args.noprompt is False:
     input("Press Enter to continue.")
@@ -103,10 +98,7 @@ if "arm" in args.architecture:
     if args.architecture == "arm64":
         qemu_cmd = "qemu-aarch64-static"
     # Ensure that certain commands exist.
-    cmdcheck = ["update-binfmts", qemu_cmd]
-    for cmd in cmdcheck:
-        if not shutil.which(cmd):
-            sys.exit("\nError, ensure command {0} is installed.".format(cmd))
+    CFunc.commands_check(["update-binfmts", qemu_cmd])
     # ARM specific init here.
     BOOTSTRAPSCRIPT += """
 debootstrap --foreign --no-check-gpg --include=ca-certificates --arch {DEBARCH} {DISTROCHOICE} {INSTALLPATH} {URL}

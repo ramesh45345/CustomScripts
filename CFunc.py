@@ -511,6 +511,16 @@ def is_nixos():
         return True
     else:
         return False
+def commands_check(cmd_list: list, exit_if_fail: bool = True):
+    """Check if the passed commands are on the system."""
+    command_exists = True
+    for cmd in cmd_list:
+        if not shutil.which(cmd):
+            print(f"\nError, ensure command {cmd} is installed.")
+            if exit_if_fail:
+                sys.exit(status=1)
+            command_exists = False
+    return command_exists
 # Apt
 def aptupdate():
     """Update apt sources"""

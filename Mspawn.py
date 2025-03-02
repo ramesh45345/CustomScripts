@@ -23,12 +23,6 @@ fedora_version = "35"
 
 
 ### Functions ###
-def check_cmds():
-    """Ensure that certain commands exist."""
-    cmdcheck = ["systemd-nspawn"]
-    for cmd in cmdcheck:
-        if not shutil.which(cmd):
-            sys.exit("\nError, ensure command {0} is installed.".format(cmd))
 def ctr_detect():
     """Detect if podman or docker is on machine."""
     cmd = None
@@ -71,7 +65,7 @@ def sshauthkey_get():
 
 
 # Check for commands.
-check_cmds()
+CFunc.commands_check(["systemd-nspawn"])
 
 # Default variables
 distro_default = "arch"

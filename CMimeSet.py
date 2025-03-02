@@ -8,9 +8,10 @@ import glob
 import mimetypes
 import os
 import re
-import shutil
 import sys
 import subprocess
+# Custom includes
+import CFunc
 
 # Folder of this script
 SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))
@@ -31,13 +32,7 @@ def Retrieve_XdgDataDir():
     return xdg_datadir_var
 def Mime_CheckCmds():
     """Check for required utilities."""
-    status = True
-    cmdcheck = ["xdg-mime"]
-    for cmd in cmdcheck:
-        if not shutil.which(cmd):
-            print("\nError, ensure command {0} is installed.".format(cmd))
-            status = False
-    return status
+    return CFunc.commands_check(["xdg-mime"], exit_if_fail=False)
 def Mime_Set(mimetype: str, app: str):
     """Set mime-type."""
     if Mime_CheckCmds():

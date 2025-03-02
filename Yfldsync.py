@@ -9,6 +9,8 @@ import os
 import shutil
 import subprocess
 import sys
+# Custom includes
+import CFunc
 
 # Disable buffered stdout (to ensure prints are in order)
 print = functools.partial(print, flush=True)
@@ -20,10 +22,7 @@ if __name__ == '__main__':
     print("Running {0}".format(__file__))
 
     # Ensure that certain commands exist.
-    cmdcheck = ["rsync"]
-    for cmd in cmdcheck:
-        if not shutil.which(cmd):
-            sys.exit("\nError, ensure command {0} is installed.".format(cmd))
+    CFunc.commands_check(["rsync"])
 
     # Get arguments
     parser = argparse.ArgumentParser(description='Create and run a Virtual Machine.')
