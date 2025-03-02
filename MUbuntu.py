@@ -59,7 +59,7 @@ if __name__ == '__main__':
 
     # Get arguments
     parser = argparse.ArgumentParser(description='Install Ubuntu Software.')
-    parser.add_argument("-d", "--desktop", help='Desktop Environment (i.e. gnome, kde, mate, etc)')
+    parser.add_argument("-d", "--desktop", help='Desktop Environment (choices: %(choices)s) (default: %(default)s)', default="gnome", choices=["gnome", "kde", "xfce", "neon", "mate", "budgie", "cinnamon"])
     parser.add_argument("-l", "--lts", help='Configure script to run for an LTS release.', action="store_true")
     parser.add_argument("-x", "--nogui", help='Configure script to disable GUI.', action="store_true")
     parser.add_argument("-r", "--rolling", help='Set sources to devel sources (rolling).', action="store_true")
@@ -109,7 +109,7 @@ if __name__ == '__main__':
     ### Software ###
 
     # Cli Software
-    CFunc.aptinstall("ssh tmux zsh fish btrfs-progs f2fs-tools xfsprogs dmraid mdadm nano p7zip-full p7zip-rar unrar curl rsync less iotop sshfs sudo python-is-python3 nala")
+    CFunc.aptinstall("ssh tmux zsh fish btrfs-progs f2fs-tools xfsprogs mdadm nano p7zip-full p7zip-rar unrar curl rsync less iotop sshfs sudo python-is-python3 nala")
     # Topgrade
     CFuncExt.topgrade_install()
     # Timezone stuff
@@ -165,55 +165,54 @@ renderer: NetworkManager""")
     # Hold firefox (install flatpak later)
     if args.nogui is False:
         CFunc.aptmark("firefox")
-    # Install Desktop Software
-    if args.desktop == "gnome":
-        print("\n Installing gnome desktop")
-        CFunc.aptmark(held_pkgs, mark=False)
-        CFunc.aptinstall("ubuntu-desktop ubuntu-session gnome-session")
-        CFunc.aptinstall("gnome-clocks")
-        CFunc.snap_install("gnome-calculator gnome-characters gnome-logs gnome-system-monitor")
-        CFunc.aptinstall("gnome-shell-extensions gnome-shell-extension-gpaste")
-        CFunc.aptinstall("gnome-software-plugin-flatpak")
-        # Install gs installer script.
-        gs_installer = CFunc.downloadfile("https://raw.githubusercontent.com/brunelli/gnome-shell-extension-installer/master/gnome-shell-extension-installer", os.path.join(os.sep, "usr", "local", "bin"), overwrite=True)
-        os.chmod(gs_installer[0], 0o777)
-        # Dash to panel
-        CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 1160".format(gs_installer[0]))
-        # Kstatusnotifier
-        CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 615".format(gs_installer[0]))
-    elif args.desktop == "kde":
-        print("\n Installing kde desktop")
-        CFunc.aptmark(held_pkgs)
-        CFunc.aptinstall("kubuntu-desktop")
-    elif args.desktop == "neon":
-        print("\n Installing kde neon desktop.")
-        CFunc.aptmark(held_pkgs)
-        subprocess.run("wget -qO - 'http://archive.neon.kde.org/public.key' | apt-key add -", shell=True, check=True)
-        subprocess.run("apt-add-repository http://archive.neon.kde.org/user", shell=True, check=True)
-        CFunc.aptupdate()
-        CFunc.aptdistupg("--allow-downgrades")
-        CFunc.aptinstall("neon-desktop")
-        CFunc.aptdistupg("--allow-downgrades")
-    elif args.desktop == "mate":
-        print("\n Installing mate desktop")
-        CFunc.aptmark(held_pkgs)
-        CFunc.aptinstall("ubuntu-mate-core ubuntu-mate-default-settings ubuntu-mate-desktop")
-        CFunc.aptinstall("ubuntu-mate-lightdm-theme")
-    elif args.desktop == "xfce":
-        print("\n Installing xfce desktop")
-        CFunc.aptmark(held_pkgs)
-        CFunc.aptinstall("xubuntu-desktop")
-    elif args.desktop == "budgie":
-        print("\n Installing budgie desktop")
-        CFunc.aptmark(held_pkgs)
-        CFunc.aptinstall("ubuntu-budgie-desktop")
-        CFunc.aptinstall("gnome-software-plugin-flatpak")
-    elif args.desktop == "cinnamon":
-        print("\n Installing cinnamon desktop")
-        CFunc.aptinstall("cinnamon-desktop-environment lightdm")
+        # Install Desktop Software
+        if args.desktop == "gnome":
+            print("\n Installing gnome desktop")
+            CFunc.aptmark(held_pkgs, mark=False)
+            CFunc.aptinstall("ubuntu-desktop ubuntu-session gnome-session")
+            CFunc.aptinstall("gnome-clocks")
+            CFunc.snap_install("gnome-calculator gnome-characters gnome-logs gnome-system-monitor")
+            CFunc.aptinstall("gnome-shell-extensions gnome-shell-extension-gpaste")
+            CFunc.aptinstall("gnome-software-plugin-flatpak")
+            # Install gs installer script.
+            gs_installer = CFunc.downloadfile("https://raw.githubusercontent.com/brunelli/gnome-shell-extension-installer/master/gnome-shell-extension-installer", os.path.join(os.sep, "usr", "local", "bin"), overwrite=True)
+            os.chmod(gs_installer[0], 0o777)
+            # Dash to panel
+            CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 1160".format(gs_installer[0]))
+            # Kstatusnotifier
+            CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 615".format(gs_installer[0]))
+        elif args.desktop == "kde":
+            print("\n Installing kde desktop")
+            CFunc.aptmark(held_pkgs)
+            CFunc.aptinstall("kubuntu-desktop")
+        elif args.desktop == "neon":
+            print("\n Installing kde neon desktop.")
+            CFunc.aptmark(held_pkgs)
+            subprocess.run("wget -qO - 'http://archive.neon.kde.org/public.key' | apt-key add -", shell=True, check=True)
+            subprocess.run("apt-add-repository http://archive.neon.kde.org/user", shell=True, check=True)
+            CFunc.aptupdate()
+            CFunc.aptdistupg("--allow-downgrades")
+            CFunc.aptinstall("neon-desktop")
+            CFunc.aptdistupg("--allow-downgrades")
+        elif args.desktop == "mate":
+            print("\n Installing mate desktop")
+            CFunc.aptmark(held_pkgs)
+            CFunc.aptinstall("ubuntu-mate-core ubuntu-mate-default-settings ubuntu-mate-desktop")
+            CFunc.aptinstall("ubuntu-mate-lightdm-theme")
+        elif args.desktop == "xfce":
+            print("\n Installing xfce desktop")
+            CFunc.aptmark(held_pkgs)
+            CFunc.aptinstall("xubuntu-desktop")
+        elif args.desktop == "budgie":
+            print("\n Installing budgie desktop")
+            CFunc.aptmark(held_pkgs)
+            CFunc.aptinstall("ubuntu-budgie-desktop")
+            CFunc.aptinstall("gnome-software-plugin-flatpak")
+        elif args.desktop == "cinnamon":
+            print("\n Installing cinnamon desktop")
+            CFunc.aptinstall("cinnamon-desktop-environment lightdm")
 
-    # GUI Software and Post DE install stuff.
-    if args.nogui is False:
+        # GUI Software and Post DE install stuff.
         # Numix Icon Theme
         CFuncExt.numix_icons(os.path.join(os.sep, "usr", "local", "share", "icons"))
 
@@ -238,9 +237,21 @@ renderer: NetworkManager""")
         # Visual Studio Code
         MDebian.vscode_deb()
 
-    # Post-install mate configuration
-    if args.desktop == "mate":
-        subprocess.run("{0}/DExtMate.py".format(SCRIPTDIR), shell=True, check=True)
+        # Post-install mate configuration
+        if args.desktop == "mate":
+            subprocess.run("{0}/DExtMate.py".format(SCRIPTDIR), shell=True, check=True)
+
+        # Install nix
+        CFuncExt.nix_standalone_install(USERNAMEVAR, """
+# Media tools
+mpv
+ffmpeg
+yt-dlp""")
+
+        # Install pacstall
+        MDebian.pacstall_install()
+        # Install makedeb and mist
+        MDebian.mpr_install(USERNAMEVAR)
 
     # Install guest software for VMs
     if vmstatus == "kvm":
@@ -253,18 +264,6 @@ renderer: NetworkManager""")
         subprocess.run("systemctl enable virtualbox-guest-utils", shell=True, check=True)
 
     subprocess.run("apt-get install -y --no-install-recommends smartmontools", shell=True, check=True)
-
-    # Install nix
-    CFuncExt.nix_standalone_install(USERNAMEVAR, """
-    # Media tools
-    mpv
-    ffmpeg
-    yt-dlp""")
-
-    # Install pacstall
-    MDebian.pacstall_install()
-    # Install makedeb and mist
-    MDebian.mpr_install(USERNAMEVAR)
 
     # Disable mitigations
     CFuncExt.GrubEnvAdd(os.path.join(os.sep, "etc", "default", "grub"), "GRUB_CMDLINE_LINUX_DEFAULT", "mitigations=off")

@@ -252,7 +252,7 @@ apt update
 apt dist-upgrade -y
 
 # Install software
-DEBIAN_FRONTEND=noninteractive apt install -y tasksel xorg
+DEBIAN_FRONTEND=noninteractive apt install -y tasksel
 apt install -f
 # Install fs tools.
 DEBIAN_FRONTEND=noninteractive apt install -y btrfs-tools f2fs-tools nbd-client
@@ -294,9 +294,6 @@ DEBIAN_FRONTEND=noninteractive apt install -y gfxboot gfxboot-theme-ubuntu linux
         GRUBSCRIPT += """
 if [[ "{DEBARCH}" = "amd64" ]]; then
     DEBIAN_FRONTEND=noninteractive apt install -y linux-image-amd64
-fi
-if [[ "{DEBARCH}" = "i386" || "{DEBARCH}" = "i686" ]]; then
-    DEBIAN_FRONTEND=noninteractive apt install -y linux-image-686-pae
 fi
 
 apt install -y firmware-linux gfxboot

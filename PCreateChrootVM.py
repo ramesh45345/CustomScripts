@@ -11,6 +11,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 # Custom includes
 import CFunc
@@ -146,10 +147,20 @@ def vm_cleanup(vmname: str, img_path: str):
 def vm_runscript(ip: str, port: int, user: str, password: str, script: str):
     """Run a script (passed as a variable) on a VM."""
     # Write the script to a file.
+    tempfolder = tempfile.gettempdir()
+    tempscript_path = os.path.join(tempfolder, "tempscript")
+    with open(tempscript_path, 'w') as f:
+        f.write(script)
     # Make the file executable.
+    os.chmod(tempscript_path, 0o777)
     # SCP the file to the host.
+    scp_vm(ip=ip, filepath=tempscript_path, destination=f"{tempfolder}/", port=port, user=user, password=password, folder=False)
     # Run the file in the VM.
+    ssh_vm(ip=ip, command=f"bash {tempscript_path}", port=port, user=user, password=password)
     # Remove the file from host and guest.
+    if os.path.isfile(tempscript_path):
+        os.remove(tempscript_path)
+    ssh_vm(ip=ip, command=f"rm {tempscript_path}", port=port, user=user, password=password)
 def git_branch_retrieve():
     """Retrieve the current branch of this script's git repo."""
     git_branch = None
@@ -181,10 +192,7 @@ if __name__ == '__main__':
     mem_mib = int(((os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')) / (1024.**2)) / 4)
 
     # Ensure that certain commands exist.
-    cmdcheck = ["ssh", "sshpass", "qemu-img", "virsh", "ip"]
-    for cmd in cmdcheck:
-        if not shutil.which(cmd):
-            sys.exit("\nError, ensure command {0} is installed.".format(cmd))
+    CFunc.commands_check(["ssh", "sshpass", "qemu-img", "virsh", "ip"])
 
     # Get arguments
     parser = argparse.ArgumentParser(description='Create and run a Virtual Machine.')
@@ -198,6 +206,7 @@ if __name__ == '__main__':
     parser.add_argument("-p", "--vmpath", help="Path of Virtual Machine folders", required=True)
     parser.add_argument("-s", "--imgsize", type=int, help="Size of image in GB (default: %(default)s)", default=imgsize_default)
     parser.add_argument("-v", "--rootsshkey", help="Root SSH Key")
+    parser.add_argument("--vmprovision", help="""Override provision options. Enclose options in double backslashes and quotes. Example: \\\\"-n -e 3\\\\" """, default=None)
     parser.add_argument("-w", "--livesshuser", help="Live SSH Username", default="root")
     parser.add_argument("-x", "--livesshpass", help="Live SSH Password", default="asdf")
     parser.add_argument("-y", "--vmuser", help="VM Username", default="user")
@@ -209,6 +218,12 @@ if __name__ == '__main__':
     # Set paths
     vmpath = os.path.abspath(args.vmpath)
     iso_path = os.path.abspath(args.iso)
+
+    # Override provision opts if provided.
+    if args.vmprovision is None:
+        vmprovision_opts = f"-d {args.desktopenv}"
+    else:
+        vmprovision_opts = args.vmprovision
 
     # Detect root ssh key.
     if args.rootsshkey is not None:
@@ -229,8 +244,18 @@ if __name__ == '__main__':
         else:
             vm_name = "CC-Arch-kvm"
         # VM commands
-        vmbootstrap_cmd = 'cd ~ && export LANG=en_US.UTF-8 && /opt/CustomScripts/ZSlimDrive.py -b -n -g && /opt/CustomScripts/BArch.py -n -g 3 -i /dev/vda2 -c "{hostname}" -u {username} -q "{password}" -f "{fullname}" /mnt && echo "PermitRootLogin yes" >> /mnt/etc/ssh/sshd_config && poweroff'.format(hostname=vm_name, username=args.vmuser, password=args.vmpass, fullname=args.fullname)
-        vmprovision_cmd = "mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{vmuser}/.ssh; echo '{sshkey}' > ~{vmuser}/.ssh/authorized_keys; chown {vmuser}:users -R ~{vmuser}; pacman -Sy --noconfirm git; {gitcmd}; /opt/CustomScripts/MArch.py -d {desktop}".format(vmuser=args.vmuser, sshkey=sshkey, gitcmd=git_cmdline(), desktop=args.desktopenv)
+        vmbootstrap_cmd = f"""#!/bin/bash
+cd ~
+export LANG=en_US.UTF-8
+/opt/CustomScripts/ZSlimDrive.py -b -n -g
+/opt/CustomScripts/BArch.py -n -g 3 -i /dev/vda2 -c "{vm_name}" -u {args.vmuser} -q "{args.vmpass}" -f "{args.fullname}" /mnt
+echo "PermitRootLogin yes" >> /mnt/etc/ssh/sshd_config && poweroff"""
+        vmprovision_cmd = f"""#!/bin/bash
+mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys
+mkdir -m 700 -p ~{args.vmuser}/.ssh; echo '{sshkey}' > ~{args.vmuser}/.ssh/authorized_keys
+chown {args.vmuser}:users -R ~{args.vmuser}
+pacman -Sy --noconfirm git; {git_cmdline()}
+/opt/CustomScripts/MArch.py {vmprovision_opts}"""
         kvm_variant = "archlinux"
     if args.ostype == 2:
         if args.vmname is not None:
@@ -241,8 +266,21 @@ if __name__ == '__main__':
             print("ERROR: nixconfig {0} must be a folder.".format(args.nixconfig))
             sys.exit()
         # VM commands
-        vmbootstrap_cmd = '''cd ~ && disko --mode destroy,format,mount /nixos_config/modules/disko/ext4-single.nix --yes-wipe-all-disks --arg disks "[ \\"/dev/vda\\" ]" && mkdir -p /mnt/etc && mv /nixos_config /mnt/etc/nixos && nix-channel --update && nixos-install --flake /mnt/etc/nixos#qemu-nixos && poweroff'''
-        vmprovision_cmd = "mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; export UNVAR=$(id -un 1000); mkdir -m 700 -p ~$UNVAR/.ssh; echo '{sshkey}' > ~$UNVAR/.ssh/authorized_keys; chown $UNVAR:users -R ~$UNVAR; while ! test -f /var/opt/CustomScripts/MNixOS.py; do sleep 1; done; /var/opt/CustomScripts/MNixOS.py".format(sshkey=sshkey)
+        vmbootstrap_cmd = '''#!/bin/bash
+cd ~
+disko --mode destroy,format,mount /nixos_config/modules/disko/ext4-single.nix --yes-wipe-all-disks --arg disks "[ \\"/dev/vda\\" ]" && mkdir -p /mnt/etc
+mv /nixos_config /mnt/etc/nixos
+nix-channel --update
+nixos-install --flake /mnt/etc/nixos#qemu-nixos && poweroff'''
+        vmprovision_cmd = """#!/bin/bash
+mkdir -m 700 -p /root/.ssh
+echo '{sshkey}' > /root/.ssh/authorized_keys
+export UNVAR=$(id -un 1000)
+mkdir -m 700 -p ~$UNVAR/.ssh
+echo '{sshkey}' > ~$UNVAR/.ssh/authorized_keys
+chown $UNVAR:users -R ~$UNVAR
+while ! test -f /var/opt/CustomScripts/MNixOS.py; do sleep 1; done;
+/var/opt/CustomScripts/MNixOS.py""".format(sshkey=sshkey)
         kvm_variant = "nixos-unstable"
     if args.ostype == 3:
         if args.vmname is not None:
@@ -254,8 +292,20 @@ if __name__ == '__main__':
         else:
             debversion = "noble"
         # VM commands
-        vmbootstrap_cmd = 'cd ~ && export LANG=en_US.UTF-8 && /opt/CustomScripts/ZSlimDrive.py -n -g && /opt/CustomScripts/BDebian.py -n -z -t ubuntu -r {debversion} -g 3 -i /dev/vda2 -c "{hostname}" -u {username} -q "{password}" -f "{fullname}" --forcelink /mnt && echo "PermitRootLogin yes" >> /mnt/etc/ssh/sshd_config && poweroff'.format(hostname=vm_name, username=args.vmuser, password=args.vmpass, fullname=args.fullname, debversion=debversion)
-        vmprovision_cmd = """mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{vmuser}/.ssh; echo '{sshkey}' > ~{vmuser}/.ssh/authorized_keys; chown {vmuser}:users -R ~{vmuser}; rm -f /etc/resolv.conf ; echo -e "nameserver 1.0.0.1\\nnameserver 1.1.1.1\\nnameserver 2606:4700:4700::1111\\nnameserver 2606:4700:4700::1001" > /etc/resolv.conf; /opt/CustomScripts/MUbuntu.py -d {desktop}""".format(vmuser=args.vmuser, sshkey=sshkey, desktop=args.desktopenv)
+        vmbootstrap_cmd = f"""#!/bin/bash
+cd ~
+export LANG=en_US.UTF-8
+/opt/CustomScripts/ZSlimDrive.py -n -g
+/opt/CustomScripts/BDebian.py -n -z -t ubuntu -r {debversion} -g 3 -i /dev/vda2 -c "{vm_name}" -u {args.vmuser} -q "{args.vmpass}" -f "{args.fullname}" --forcelink /mnt
+echo "PermitRootLogin yes" >> /mnt/etc/ssh/sshd_config
+poweroff"""
+        vmprovision_cmd = f"""#!/bin/bash
+mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys
+mkdir -m 700 -p ~{args.vmuser}/.ssh; echo '{sshkey}' > ~{args.vmuser}/.ssh/authorized_keys
+chown {args.vmuser}:users -R ~{args.vmuser}
+rm -f /etc/resolv.conf
+echo -e "nameserver 1.0.0.1\\nnameserver 1.1.1.1\\nnameserver 2606:4700:4700::1111\\nnameserver 2606:4700:4700::1001" > /etc/resolv.conf
+/opt/CustomScripts/MUbuntu.py {vmprovision_opts}"""
         kvm_variant = "ubuntu22.04"
     if args.ostype == 4:
         if args.vmname is not None:
@@ -267,8 +317,22 @@ if __name__ == '__main__':
         else:
             debversion = "unstable"
         # VM commands
-        vmbootstrap_cmd = 'cd ~ && export LANG=en_US.UTF-8 && /opt/CustomScripts/ZSlimDrive.py -n -g && /opt/CustomScripts/BDebian.py -n -z -t debian -r {debversion} -g 3 -i /dev/vda2 -c "{hostname}" -u {username} -q "{password}" -f "{fullname}" /mnt && echo "PermitRootLogin yes" >> /mnt/etc/ssh/sshd_config && poweroff'.format(hostname=vm_name, username=args.vmuser, password=args.vmpass, fullname=args.fullname, debversion=debversion)
-        vmprovision_cmd = """mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{vmuser}/.ssh; echo '{sshkey}' > ~{vmuser}/.ssh/authorized_keys; chown {vmuser}:users -R ~{vmuser}; rm -f /etc/resolv.conf ; echo -e "nameserver 1.0.0.1\\nnameserver 1.1.1.1\\nnameserver 2606:4700:4700::1111\\nnameserver 2606:4700:4700::1001" > /etc/resolv.conf; /opt/CustomScripts/MDebian.py -d {desktop}""".format(vmuser=args.vmuser, sshkey=sshkey, desktop=args.desktopenv)
+        vmbootstrap_cmd = f'''#!/bin/bash
+cd ~
+export LANG=en_US.UTF-8
+/opt/CustomScripts/ZSlimDrive.py -n -g
+/opt/CustomScripts/BDebian.py -n -z -t debian -r {debversion} -g 3 -i /dev/vda2 -c "{vm_name}" -u {args.vmuser} -q "{args.vmpass}" -f "{args.fullname}" /mnt
+echo "PermitRootLogin yes" >> /mnt/etc/ssh/sshd_config
+poweroff'''
+        vmprovision_cmd = f"""#!/bin/bash
+mkdir -m 700 -p /root/.ssh
+echo '{sshkey}' > /root/.ssh/authorized_keys
+mkdir -m 700 -p ~{args.vmuser}/.ssh
+echo '{sshkey}' > ~{args.vmuser}/.ssh/authorized_keys
+chown {args.vmuser}:users -R ~{args.vmuser}
+rm -f /etc/resolv.conf
+echo -e "nameserver 1.0.0.1\\nnameserver 1.1.1.1\\nnameserver 2606:4700:4700::1111\\nnameserver 2606:4700:4700::1001" > /etc/resolv.conf
+/opt/CustomScripts/MDebian.py {vmprovision_opts}"""
         kvm_variant = "debiantesting"
     if args.ostype == 5:
         if args.vmname is not None:
@@ -276,8 +340,21 @@ if __name__ == '__main__':
         else:
             vm_name = "CC-OpenSuse-kvm"
         # VM commands
-        vmbootstrap_cmd = f'cd ~ && export LANG=en_US.UTF-8 && /opt/CustomScripts/ZSlimDrive.py -n -g && /opt/CustomScripts/BOpensuse.py -n -g 3 -i /dev/vda2 -c "{vm_name}" -u {args.vmuser} -q "{args.vmpass}" -f "{args.fullname}" /mnt && echo "PermitRootLogin yes" >> /mnt/etc/ssh/sshd_config && poweroff'
-        vmprovision_cmd = f"""mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{args.vmuser}/.ssh; echo '{sshkey}' > ~{args.vmuser}/.ssh/authorized_keys; chown {args.vmuser}:users -R ~{args.vmuser}; {git_cmdline()}; /opt/CustomScripts/MOpensuse.py -d {args.desktopenv}"""
+        vmbootstrap_cmd = f'''#!/bin/bash
+cd ~
+export LANG=en_US.UTF-8
+/opt/CustomScripts/ZSlimDrive.py -n -g
+/opt/CustomScripts/BOpensuse.py -n -g 3 -i /dev/vda2 -c "{vm_name}" -u {args.vmuser} -q "{args.vmpass}" -f "{args.fullname}" /mnt
+echo "PermitRootLogin yes" >> /mnt/etc/ssh/sshd_config
+poweroff'''
+        vmprovision_cmd = f"""#!/bin/bash
+mkdir -m 700 -p /root/.ssh
+echo '{sshkey}' > /root/.ssh/authorized_keys
+mkdir -m 700 -p ~{args.vmuser}/.ssh
+echo '{sshkey}' > ~{args.vmuser}/.ssh/authorized_keys
+chown {args.vmuser}:users -R ~{args.vmuser}
+{git_cmdline()}
+/opt/CustomScripts/MOpensuse.py {vmprovision_opts}"""
         kvm_variant = "opensusetumbleweed"
 
     # Override VM Name if provided
@@ -289,6 +366,7 @@ if __name__ == '__main__':
     print("Live SSH user is {0}".format(args.livesshuser))
     print("VM User is {0}".format(args.vmuser))
     print("SSH Key is \"{0}\"".format(sshkey))
+    print("VM Provision Options:", vmprovision_opts)
 
     # Variables less likely to change.
     sship = None
@@ -327,7 +405,8 @@ if __name__ == '__main__':
     # All else besides nixos, sync the CustomScripts folder into the live environment.
     else:
         scp_vm(ip=sship, port=localsshport, user=args.livesshuser, password=args.livesshpass, filepath=SCRIPTDIR, destination="/opt/", folder=True)
-    ssh_vm(ip=sship, port=localsshport, user=args.livesshuser, password=args.livesshpass, command=vmbootstrap_cmd)
+    # Bootstrap
+    vm_runscript(ip=sship, port=localsshport, user=args.livesshuser, password=args.livesshpass, script=vmbootstrap_cmd)
     vm_shutdown(vm_name)
     # Eject cdrom
     vm_ejectiso(vm_name)
@@ -336,7 +415,7 @@ if __name__ == '__main__':
     vm_start(vm_name)
     sship = vm_getip(vm_name)
     ssh_wait(ip=sship, port=localsshport, user="root", password=args.vmpass)
-    ssh_vm(ip=sship, port=localsshport, user="root", password=args.vmpass, command=vmprovision_cmd)
+    vm_runscript(ip=sship, port=localsshport, user="root", password=args.vmpass, script=vmprovision_cmd)
     vm_shutdown(vm_name)
     # Save finish time.
     fullfinishtime = datetime.datetime.now()
