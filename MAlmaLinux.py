@@ -19,7 +19,7 @@ SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))
 
 # Get arguments
 parser = argparse.ArgumentParser(description='Install AlmaLinux 9 Software.')
-parser.add_argument("-d", "--desktop", help='Desktop Environment (choices: %(choices)s) (default: %(default)s)', default="gnome", choices=["gnome", "kde", "xfce"])
+parser.add_argument("-d", "--desktop", help='Desktop Environment (choices: %(choices)s) (default: %(default)s)', default=None, choices=["gnome", "kde", "xfce"])
 parser.add_argument("-k", "--kerneltype", type=int, help="Kernel type (0=stock kernel, 1=Mainline kernel, 2=LTS kernel (default: %(default)s)", default=1, choices=[0, 1, 2])
 parser.add_argument("-x", "--nogui", help='Configure script to disable GUI.', action="store_true")
 args = parser.parse_args()

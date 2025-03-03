@@ -59,7 +59,7 @@ if __name__ == '__main__':
 
     # Get arguments
     parser = argparse.ArgumentParser(description='Install Ubuntu Software.')
-    parser.add_argument("-d", "--desktop", help='Desktop Environment (choices: %(choices)s) (default: %(default)s)', default="gnome", choices=["gnome", "kde", "xfce", "neon", "mate", "budgie", "cinnamon"])
+    parser.add_argument("-d", "--desktop", help='Desktop Environment (choices: %(choices)s) (default: %(default)s)', default=None, choices=["gnome", "kde", "xfce", "neon", "mate", "budgie", "cinnamon"])
     parser.add_argument("-l", "--lts", help='Configure script to run for an LTS release.', action="store_true")
     parser.add_argument("-x", "--nogui", help='Configure script to disable GUI.', action="store_true")
     parser.add_argument("-r", "--rolling", help='Set sources to devel sources (rolling).', action="store_true")

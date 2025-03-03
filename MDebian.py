@@ -36,12 +36,6 @@ def syncthing():
     # Update and install syncthing:
     CFunc.aptupdate()
     CFunc.aptinstall("syncthing")
-def kernel_liquorix():
-    """Install liquorix kernel."""
-    tempfolder = tempfile.gettempdir()
-    liquorix_script_file = CFunc.downloadfile("https://liquorix.net/install-liquorix.sh", tempfolder)[0]
-    os.chmod(liquorix_script_file, 0o777)
-    subprocess.run(liquorix_script_file, shell=True, check=True, executable=shutil.which("bash"))
 def mpr_install(normaluser: str):
     """Install mpr and mist tool."""
     # Install makedeb
@@ -86,15 +80,15 @@ if __name__ == '__main__':
 
     # Get arguments
     parser = argparse.ArgumentParser(description='Install Debian Software.')
-    parser.add_argument("-d", "--desktop", help='Desktop Environment (i.e. gnome, kde, mate, etc)')
+    parser.add_argument("-d", "--desktop", help='Desktop Environment (choices: %(choices)s) (default: %(default)s)', default=None, choices=["gnome", "kde", "xfce", "mate", "lxqt"])
     parser.add_argument("-u", "--unstable", help='Upgrade to unstable.', action="store_true")
     parser.add_argument("-x", "--nogui", help='Configure script to disable GUI.', action="store_true")
 
     # Save arguments.
     args = parser.parse_args()
-    print("Desktop Environment:", args.desktop)
     print("Unstable Mode:", args.unstable)
     print("No GUI:", args.nogui)
+    print("Desktop Environment:", args.desktop)
 
     # Get non-root user information.
     USERNAMEVAR, USERGROUP, USERHOME = CFunc.getnormaluser()
@@ -208,16 +202,6 @@ echo "firmware-ivtv firmware-ivtv/license/accepted boolean true" | debconf-set-s
     CFuncExt.FirewalldConfig()
     # Container stuff
     CFunc.aptinstall("podman")
-    # Syncthing
-    syncthing()
-
-    # Install nix
-    CFuncExt.nix_standalone_install(USERNAMEVAR, """
-    # Media tools
-    mpv""")
-
-    # Install pacstall
-    pacstall_install()
 
     # Sudoers changes
     CFuncExt.SudoersEnvSettings()
@@ -254,6 +238,46 @@ echo "firmware-ivtv firmware-ivtv/license/accepted boolean true" | debconf-set-s
         # Firefox
         CFunc.flatpak_install("flathub", "org.mozilla.firefox")
         CFunc.flatpak_override("org.mozilla.firefox", "--filesystem=host")
+        # Syncthing
+        syncthing()
+        # Install nix
+        CFuncExt.nix_standalone_install(USERNAMEVAR, """
+        # Media tools
+        mpv""")
+        # Install pacstall
+        pacstall_install()
+
+        # Install Desktop Software
+        if args.desktop == "gnome":
+            print("\n Installing gnome desktop")
+            CFunc.aptinstall("task-gnome-desktop")
+            CFunc.aptinstall("gnome-clocks")
+            CFunc.aptinstall("gnome-shell-extensions gnome-shell-extension-gpaste")
+            # Install gs installer script.
+            gs_installer = CFunc.downloadfile("https://raw.githubusercontent.com/brunelli/gnome-shell-extension-installer/master/gnome-shell-extension-installer", os.path.join(os.sep, "usr", "local", "bin"), overwrite=True)
+            os.chmod(gs_installer[0], 0o777)
+            # Dash to panel
+            CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 1160".format(gs_installer[0]))
+            # Kstatusnotifier
+            CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 615".format(gs_installer[0]))
+        elif args.desktop == "mate":
+            print("\n Installing mate desktop")
+            CFunc.aptinstall("task-mate-desktop mate-tweak dconf-cli")
+            CFunc.aptinstall("mate-applet-brisk-menu")
+            # Run MATE Configuration
+            subprocess.run("{0}/DExtMate.py".format(SCRIPTDIR), shell=True, check=True)
+        elif args.desktop == "kde":
+            print("\n Installing kde desktop")
+            CFunc.aptinstall("task-kde-desktop")
+        elif args.desktop == "xfce":
+            print("\n Installing xfce desktop")
+            CFunc.aptinstall("task-xfce-desktop")
+        elif args.desktop == "lxqt":
+            print("\n INstalling lxqt desktop")
+            CFunc.aptinstall("task-lxqt-desktop")
+        # Post DE install stuff.
+        # Numix Icon Theme
+        CFuncExt.numix_icons(os.path.join(os.sep, "usr", "local", "share", "icons"))
 
     # Network Manager
     CFunc.aptinstall("network-manager network-manager-ssh")
@@ -274,40 +298,6 @@ iface lo net loopback
     # Add dns server after installing network manager.
     with open(os.path.join(os.sep, "etc", "resolv.conf"), 'a') as writefile:
         writefile.write("\nnameserver 1.0.0.1\nnameserver 1.1.1.1\nnameserver 2606:4700:4700::1111\nnameserver 2606:4700:4700::1001")
-
-    # Install Desktop Software
-    if args.desktop == "gnome":
-        print("\n Installing gnome desktop")
-        CFunc.aptinstall("task-gnome-desktop")
-        CFunc.aptinstall("gnome-clocks")
-        CFunc.aptinstall("gnome-shell-extensions gnome-shell-extension-gpaste")
-        # Install gs installer script.
-        gs_installer = CFunc.downloadfile("https://raw.githubusercontent.com/brunelli/gnome-shell-extension-installer/master/gnome-shell-extension-installer", os.path.join(os.sep, "usr", "local", "bin"), overwrite=True)
-        os.chmod(gs_installer[0], 0o777)
-        # Dash to panel
-        CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 1160".format(gs_installer[0]))
-        # Kstatusnotifier
-        CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 615".format(gs_installer[0]))
-    elif args.desktop == "mate":
-        print("\n Installing mate desktop")
-        CFunc.aptinstall("task-mate-desktop mate-tweak dconf-cli")
-        CFunc.aptinstall("mate-applet-brisk-menu")
-        # Run MATE Configuration
-        subprocess.run("{0}/DExtMate.py".format(SCRIPTDIR), shell=True, check=True)
-    elif args.desktop == "kde":
-        print("\n Installing kde desktop")
-        CFunc.aptinstall("task-kde-desktop")
-    elif args.desktop == "xfce":
-        print("\n Installing xfce desktop")
-        CFunc.aptinstall("task-xfce-desktop")
-    elif args.desktop == "lxqt":
-        print("\n INstalling lxqt desktop")
-        CFunc.aptinstall("task-lxqt-desktop")
-
-    # Post DE install stuff.
-    if args.nogui is False:
-        # Numix Icon Theme
-        CFuncExt.numix_icons(os.path.join(os.sep, "usr", "local", "share", "icons"))
 
     # Install guest software for VMs
     if vmstatus == "kvm":
@@ -330,8 +320,6 @@ iface lo net loopback
     # Disable mitigations
     CFuncExt.GrubEnvAdd(os.path.join(os.sep, "etc", "default", "grub"), "GRUB_CMDLINE_LINUX_DEFAULT", "mitigations=off")
     CFuncExt.GrubUpdate()
-    # Install liquorix
-    kernel_liquorix()
 
     # Add normal user to all reasonable groups
     CFunc.AddUserToGroup("disk")
