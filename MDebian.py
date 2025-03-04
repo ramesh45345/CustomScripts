@@ -285,19 +285,15 @@ echo "firmware-ivtv firmware-ivtv/license/accepted boolean true" | debconf-set-s
     subprocess.run("sed -i 's/managed=.*/managed=true/g' /etc/NetworkManager/NetworkManager.conf", shell=True, check=True)
     # https://askubuntu.com/questions/882806/ethernet-device-not-managed
     with open('/etc/NetworkManager/conf.d/10-globally-managed-devices.conf', 'w') as writefile:
-        writefile.write("""[keyfile]
-    unmanaged-devices=none""")
+        writefile.write("[keyfile]\nunmanaged-devices=none")
     # Remove interfaces from /etc/network/interfaces
-    with open(os.path.join(os.sep, "etc", "network", "interfaces"), 'w') as writefile:
-        writefile.write("""source /etc/network/interfaces.d/*
-
-# The loopback network interface
-auto lo
-iface lo net loopback
-""")
+    if os.path.isfile(os.path.join(os.sep, "etc", "network", "interfaces")):
+        os.remove(os.path.join(os.sep, "etc", "network", "interfaces"))
     # Add dns server after installing network manager.
     with open(os.path.join(os.sep, "etc", "resolv.conf"), 'a') as writefile:
         writefile.write("\nnameserver 1.0.0.1\nnameserver 1.1.1.1\nnameserver 2606:4700:4700::1111\nnameserver 2606:4700:4700::1001")
+    # Disable networking
+    CFunc.sysctl_disable("networking")
 
     # Install guest software for VMs
     if vmstatus == "kvm":

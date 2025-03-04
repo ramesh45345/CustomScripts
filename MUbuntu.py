@@ -149,8 +149,7 @@ if __name__ == '__main__':
     subprocess.run("sed -i 's/managed=.*/managed=true/g' /etc/NetworkManager/NetworkManager.conf", shell=True, check=True)
     # https://askubuntu.com/questions/882806/ethernet-device-not-managed
     with open('/etc/NetworkManager/conf.d/10-globally-managed-devices.conf', 'w') as writefile:
-        writefile.write("""[keyfile]
-    unmanaged-devices=none""")
+        writefile.write("[keyfile]\nunmanaged-devices=none")
     # Ensure DNS resolution is working
     with open(os.path.join(os.sep, "etc", "resolv.conf"), 'a') as writefile:
         writefile.write("\nnameserver 1.0.0.1\nnameserver 1.1.1.1\nnameserver 2606:4700:4700::1111\nnameserver 2606:4700:4700::1001")
