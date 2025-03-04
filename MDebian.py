@@ -36,6 +36,20 @@ def syncthing():
     # Update and install syncthing:
     CFunc.aptupdate()
     CFunc.aptinstall("syncthing")
+def deb_mm(debrelease: str):
+    """Deb Multimedia"""
+    # Write sources list
+    with open('/etc/apt/sources.list.d/dmo.sources', 'w') as stapt_writefile:
+        stapt_writefile.write("""Types: deb
+URIs: https://www.deb-multimedia.org
+Suites: {0}
+Components: main non-free
+Signed-By: /usr/share/keyrings/deb-multimedia-keyring.pgp""".format(debrelease))
+    subprocess.run("apt-get update -oAcquire::AllowInsecureRepositories=true", shell=True, check=True)
+    subprocess.run("apt-get install -y --allow-unauthenticated deb-multimedia-keyring -oAcquire::AllowInsecureRepositories=true", shell=True, check=True)
+    # Update and upgrade with new repositories
+    CFunc.aptupdate()
+    CFunc.aptdistupg()
 def mpr_install(normaluser: str):
     """Install mpr and mist tool."""
     # Install makedeb
@@ -139,9 +153,8 @@ add-apt-repository -y main
 add-apt-repository -y contrib
 add-apt-repository -y non-free
     """, shell=True, check=True)
-    # Make non-free-firmware unconditional when stable becomes bookworm.
-    if debrelease != "bullseye":
-        subprocess.run("add-apt-repository -y non-free-firmware", shell=True, check=True)
+    # Install non-free-firmware
+    subprocess.run("add-apt-repository -y non-free-firmware", shell=True, check=True)
 
     # Install experimental repo
     repos_experimental()
@@ -160,20 +173,7 @@ Acquire::ftp::Timeout "5";''')
     CFunc.aptdistupg()
 
     ### Software ###
-    # Debian Multimedia
-    # Write sources list
-    if args.unstable:
-        multimedia_release = "sid"
-    else:
-        multimedia_release = debrelease
-    with open('/etc/apt/sources.list.d/debian-multimedia.list', 'w') as stapt_writefile:
-        stapt_writefile.write("deb https://www.deb-multimedia.org {0} main non-free".format(multimedia_release))
-    subprocess.run("apt-get update -oAcquire::AllowInsecureRepositories=true", shell=True, check=True)
-    subprocess.run("apt-get install -y --allow-unauthenticated deb-multimedia-keyring -oAcquire::AllowInsecureRepositories=true", shell=True, check=True)
-
-    # Update and upgrade with new repositories
-    CFunc.aptupdate()
-    CFunc.aptdistupg()
+    deb_mm(debrelease)
 
     # Cli Software
     CFunc.aptinstall("ssh tmux zsh fish btrfs-progs f2fs-tools xfsprogs mdadm nano p7zip-full p7zip-rar unrar curl wget rsync less iotop sshfs sudo python-is-python3 nala")
