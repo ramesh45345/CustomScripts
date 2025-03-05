@@ -22,6 +22,8 @@ SCRIPTDIR = sys.path[0]
 def apkinstall(apks):
     """Install packages with apk."""
     subprocess.run(f"apk add {apks}", shell=True)
+    # Run apk fix after every install due to I/O errors.
+    apkfix()
 def rcupdate_add(service: str):
     """Add a service to startup."""
     subprocess.run(f"rc-update add {service}", shell=True)
@@ -76,7 +78,6 @@ apkinstall("avahi")
 rcupdate_add("avahi-daemon")
 # Network Manager
 apkinstall("networkmanager networkmanager-tui networkmanager-cli networkmanager-wifi wpa_supplicant")
-apkfix()
 rcupdate_add("networkmanager default")
 subprocess.run("rc-update del networking boot", shell=True)
 subprocess.run("rc-update del wpa_supplicant boot", shell=True)
@@ -92,6 +93,9 @@ managed=true
 wifi.scan-rand-mac-address=yes
 wifi.backend=wpa_supplicant
 """)
+# https://askubuntu.com/questions/882806/ethernet-device-not-managed
+with open('/etc/NetworkManager/conf.d/10-globally-managed-devices.conf', 'w') as writefile:
+    writefile.write("[keyfile]\nunmanaged-devices=none")
 
 # GUI Packages
 if not args.nogui:
@@ -142,9 +146,6 @@ CFunc.AddUserToGroup("disk")
 CFunc.AddUserToGroup("plugdev")
 CFunc.AddUserToGroup("video")
 CFunc.AddUserToGroup("wheel")
-
-# Fix any I/O errors
-apkfix()
 
 # Extra scripts
 subprocess.run(os.path.join(SCRIPTDIR, "CCSClone.py"), shell=True, check=True)
