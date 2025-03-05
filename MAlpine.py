@@ -79,7 +79,8 @@ rcupdate_add("avahi-daemon")
 # Network Manager
 apkinstall("networkmanager networkmanager-tui networkmanager-cli networkmanager-wifi wpa_supplicant")
 rcupdate_add("networkmanager default")
-subprocess.run("rc-update del networking boot", shell=True)
+# Network manager doesn't yet take control of eth0. Uncomment once its possible.
+# subprocess.run("rc-update del networking boot", shell=True)
 subprocess.run("rc-update del wpa_supplicant boot", shell=True)
 with open(os.path.join(os.sep, "etc", "NetworkManager", "NetworkManager.conf"), 'w') as f:
     f.write("""[main]
