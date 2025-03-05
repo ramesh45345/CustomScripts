@@ -17,6 +17,7 @@ def libvirt_virtnetworks():
 def libvirt_ipv4(hostname: str):
     """
     Return an ipv4 address for a given VM name.
+    Inspired by https://github.com/earlruby/create-vm/blob/main/get-vm-ip
     The shell version of this function:
         HOSTNAME=U1 ; MAC=$(virsh -q domiflist $HOSTNAME | awk '{ print $5 }') ; virsh --connect qemu:///system net-dhcp-leases default "$MAC" | grep -i ipv4 | awk '{ print $5 }' | sed 's@/.*$@@g'
     """
