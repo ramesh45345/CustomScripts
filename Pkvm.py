@@ -36,11 +36,6 @@ SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))
 
 
 ### Functions ###
-def cmd_check(cmd: str):
-    """Check if a command exists. Exit if it doesn't exist"""
-    if not shutil.which(cmd):
-        print("ERROR: {0} does not exist. Exiting.".format(cmd))
-        sys.exit()
 def md5sum(md5_filename, blocksize=65536):
     """
     Calculate the MD5Sum of a file
@@ -281,7 +276,7 @@ if __name__ == '__main__':
         subprocess.run("packer -v", shell=True, check=True)
 
     # Ensure that certain commands exist.
-    cmd_check("packer")
+    CFunc.commands_check(["packer"])
 
     # Determine VM hypervisor
     if args.vmtype == 1:
@@ -470,7 +465,7 @@ if __name__ == '__main__':
             powershell_cmd = "powershell"
     # Detect swtpms for linux if using qemu
     if args.vmtype == 2 and secureboot is True:
-        cmd_check("swtpm")
+        CFunc.commands_check(["swtpm"])
 
     if args.noprompt is False:
         input("Press Enter to continue.")

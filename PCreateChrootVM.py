@@ -144,7 +144,7 @@ def vm_cleanup(vmname: str, img_path: str):
     # Delete the image file.
     if os.path.isfile(img_path):
         os.remove(img_path)
-def vm_runscript(ip: str, port: int, user: str, password: str, script: str):
+def vm_runscript(ip: str, script: str, port: int = 22, user: str = "root", password: str = "asdf"):
     """Run a script (passed as a variable) on a VM."""
     # Write the script to a file.
     tempfolder = tempfile.gettempdir()

@@ -38,7 +38,7 @@ if __name__ == '__main__':
     keyfile_priv = os.path.join(args.keypath, "id_ed25519")
     keyfile_pub = os.path.join(args.keypath, "id_ed25519.pub")
     # Generate keys
-    if args.keynew:
+    if args.keynew or not os.path.exists(keyfile_priv):
         subprocess.run(["ssh-keygen", "-t", "ed25519", "-N", '', "-f", keyfile_priv], check=True)
 
     # Check if keys exist regardless of generation.

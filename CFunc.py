@@ -9,6 +9,7 @@ import os
 import pathlib
 import platform
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -125,10 +126,16 @@ def log_subprocess_output(pipe):
     for line in iter(pipe.readline, b''):
         # Remove the newlines and decode.
         logging.info('%s', line.strip().decode(errors="ignore"))
-def subpout_logger(cmd):
+def subpout_logger(cmd: str = None, cmd_list: list = None):
     """Run command which will output stdout to logger"""
-    logging.info("Running command: %s", cmd)
-    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+    if cmd is not None:
+        logging.info("Running command: %s", cmd)
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+    elif cmd_list is not None:
+        logging.info(f"Running command: {shlex.join(cmd_list)}")
+        process = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    else:
+        logging.info("ERROR: cmd and cmd_list is None, cannot run command.")
     with process.stdout:
         log_subprocess_output(process.stdout)
     exitcode = process.wait()
