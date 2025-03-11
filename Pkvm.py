@@ -293,7 +293,7 @@ if __name__ == '__main__':
     tpm_tempdir = None
     tpm_process = None
     # EFI flag
-    useefi = False
+    useefi = True
     secureboot = False
     # Predetermined iso checksum.
     md5_isourl = None
@@ -334,12 +334,12 @@ if __name__ == '__main__':
             args.desktopenv = "kde"
     # Ubuntu latest
     if 10 <= args.ostype <= 14:
-        kvm_variant = "ubuntu22.04"
-        isourl = "https://releases.ubuntu.com/24.04/ubuntu-24.04-live-server-amd64.iso"
+        kvm_variant = "ubuntu24.04"
+        isourl = "https://releases.ubuntu.com/24.04/ubuntu-24.04.2-live-server-amd64.iso"
     # Ubuntu LTS
     if 15 <= args.ostype <= 19:
-        kvm_variant = "ubuntu22.04"
-        isourl = "https://releases.ubuntu.com/22.04/ubuntu-22.04-live-server-amd64.iso"
+        kvm_variant = "ubuntu24.04"
+        isourl = "https://releases.ubuntu.com/22.04/ubuntu-22.04.5-live-server-amd64.iso"
     if args.ostype == 10:
         vmname = "Packer-Ubuntu-{0}".format(hvname)
         vmprovision_defopts = "-d {0}".format(args.desktopenv)
@@ -407,11 +407,13 @@ if __name__ == '__main__':
         vmprovision_defopts = "-d {0}".format(args.desktopenv)
         kvm_variant = "freebsd14.0"
         isourl = "https://download.freebsd.org/releases/amd64/amd64/ISO-IMAGES/14.2/FreeBSD-14.2-RELEASE-amd64-disc1.iso"
+        useefi = False
     if 45 <= args.ostype <= 49:
         vboxosid = "Fedora_64"
         kvm_variant = "fedora-rawhide"
         vmprovisionscript = "MAlpine.py"
         isourl = "http://dl-cdn.alpinelinux.org/alpine/latest-stable/releases/x86_64/alpine-standard-3.21.3-x86_64.iso"
+        useefi = False
     if args.ostype == 45:
         vmname = "AlpineVM"
         if args.desktopenv is None:
@@ -427,7 +429,6 @@ if __name__ == '__main__':
         isourl = None
         # Windows KMS key list: https://docs.microsoft.com/en-us/windows-server/get-started/kmsclientkeys
         windows_key = None
-        useefi = True
         secureboot = True
     if args.ostype == 50:
         vmname = "Packer-Windows11-{0}".format(hvname)
