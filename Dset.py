@@ -350,6 +350,10 @@ if shutil.which("kgx"):
     dconf_write("/org/gnome/Console/ignore-scrollback-limit", "true")
     dconf_write("/org/gnome/Console/custom-font", "'Liberation Mono 11'")
 
+# Dconf editor
+if shutil.which("dconf-editor"):
+    dconf_write("/ca/desrt/dconf-editor/show-warning", "false")
+
 
 # KDE/Plasma specific Settings
 # https://askubuntu.com/questions/839647/gsettings-like-tools-for-kde#839773
