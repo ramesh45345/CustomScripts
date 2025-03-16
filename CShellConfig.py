@@ -193,6 +193,9 @@ function dru () {
     echo "Executing systemd daemon-reload for user."
     systemctl --user daemon-reload
 }
+function f () {
+    sudo flatpak $@
+}
 function fup () {
     flatpak_update
 }
@@ -870,6 +873,9 @@ end
 function dru
     echo "Executing systemd daemon-reload for user."
     systemctl --user daemon-reload
+end
+function f
+    sudo flatpak $argv
 end
 function fup
     flatpak_update
