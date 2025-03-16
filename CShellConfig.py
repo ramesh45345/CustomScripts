@@ -193,6 +193,9 @@ function dru () {
     echo "Executing systemd daemon-reload for user."
     systemctl --user daemon-reload
 }
+function d () }
+    df -hT | grep -v tmpfs
+}
 function f () {
     sudo flatpak $@
 }
@@ -873,6 +876,9 @@ end
 function dru
     echo "Executing systemd daemon-reload for user."
     systemctl --user daemon-reload
+end
+function d
+    df -hT | grep -v tmpfs
 end
 function f
     sudo flatpak $argv

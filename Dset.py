@@ -137,6 +137,8 @@ if shutil.which("gnome-system-monitor"):
     dconf_write("/org/gnome/gnome-system-monitor/cpu-stacked-area-chart", "true")
     dconf_write("/org/gnome/gnome-system-monitor/resources-memory-in-iec", "true")
     dconf_write("/org/gnome/gnome-system-monitor/process-memory-in-iec", "true")
+    dconf_write("/org/gnome/gnome-system-monitor/proctree/sort-order", "0")
+    dconf_write("/org/gnome/gnome-system-monitor/show-whose-processes", "'all'")
 
 # MATE specific settings
 if shutil.which("mate-session"):
@@ -259,7 +261,7 @@ if shutil.which("gnome-session") or shutil.which("gnome-shell"):
         gsettings_set("org.gnome.desktop.session", "idle-delay", "300")
     dconf_write("/org/gnome/desktop/interface/font-antialiasing", "'rgba'")
     dconf_write("/org/gnome/desktop/interface/font-hinting", "'full'")
-    gsettings_set("org.gnome.shell", "enabled-extensions", "['window-list@gnome-shell-extensions.gcampax.github.com', 'dash-to-dock@micxgx.gmail.com', 'dash-to-panel@jderose9.github.com', 'GPaste@gnome-shell-extensions.gnome.org', 'user-theme@gnome-shell-extensions.gcampax.github.com', 'appindicatorsupport@rgcjonas.gmail.com']")
+    gsettings_set("org.gnome.shell", "enabled-extensions", "['window-list@gnome-shell-extensions.gcampax.github.com', 'dash-to-dock@micxgx.gmail.com', 'dash-to-panel@jderose9.github.com', 'GPaste@gnome-shell-extensions.gnome.org', 'user-theme@gnome-shell-extensions.gcampax.github.com', 'appindicatorsupport@rgcjonas.gmail.com', 'system-monitor@gnome-shell-extensions.gcampax.github.com']")
     # Check current variable for gnome-system-monitor. If it doesn't exist, set the variable.
     gnome_desktop_read_list = subprocess.run("gsettings get org.gnome.shell favorite-apps", shell=True, check=False, stdout=subprocess.PIPE).stdout.decode().strip()
     if "gnome-system-monitor.desktop" not in gnome_desktop_read_list:
@@ -288,7 +290,6 @@ if shutil.which("gnome-session") or shutil.which("gnome-shell"):
     gsettings_set("org.gnome.FileRoller.UI", "view-sidebar", "true")
     gsettings_set("org.gnome.FileRoller.FileSelector", "show-hidden", "true")
     gsettings_set("org.gnome.FileRoller.General", "compression-level", "maximum")
-    gsettings_set("org.gnome.gnome-system-monitor", "show-whose-processes", "all")
     # Disabled dash-to-dock until updated for Gnome 40.0
     # dconf_write("/org/gnome/shell/extensions/dash-to-dock/intellihide", "true")
     # dconf_write("/org/gnome/shell/extensions/dash-to-dock/multi-monitor", "true")
@@ -304,15 +305,27 @@ if shutil.which("gnome-session") or shutil.which("gnome-shell"):
     # Fish config for gnome terminal
     if shutil.which("fish"):
         dconf_write("/org/gnome/terminal/legacy/profiles:/:b1dcc9dd-5262-4d8d-a863-c897e6d979b9/custom-command", "'{0}'".format(shutil.which("fish")))
-    
+
     # Set Fonts
     gsettings_set("org.gnome.desktop.interface", "document-font-name", "'Noto Sans 11'")
     gsettings_set("org.gnome.desktop.interface", "font-name", "'Roboto 11'")
     gsettings_set("org.gnome.desktop.interface", "monospace-font-name", "'Liberation Mono 11'")
     gsettings_set("org.gnome.desktop.wm.preferences", "titlebar-font", "'Roboto Bold 11'")
     # Dash to panel settings
-    dconf_write("/org/gnome/shell/extensions/dash-to-panel/panel-positions", r"""'{"0":"TOP"}'""")
-    dconf_write("/org/gnome/shell/extensions/dash-to-panel/panel-sizes", r"""'{"0":32}'""")
+    dconf_write("/org/gnome/shell/extensions/dash-to-panel/panel-element-positions-monitors-sync", "true")
+
+    dashtopanel_panel_positions = dashtopanel_panel_size = "'{"
+    for x in range(args.screens):
+        dashtopanel_panel_positions += f'"{x}":"TOP"'
+        dashtopanel_panel_size += f'"{x}":24'
+        if (x + 1) != args.screens:
+            dashtopanel_panel_positions += ","
+            dashtopanel_panel_size += ","
+    dashtopanel_panel_positions += "}'"
+    dashtopanel_panel_size += "}'"
+    dconf_write("/org/gnome/shell/extensions/dash-to-panel/panel-positions", dashtopanel_panel_positions)
+    dconf_write("/org/gnome/shell/extensions/dash-to-panel/panel-sizes", dashtopanel_panel_size)
+
     dconf_write("/org/gnome/shell/extensions/dash-to-panel/appicon-margin", "4")
     dconf_write("/org/gnome/shell/extensions/dash-to-panel/appicon-padding", "2")
     dconf_write("/org/gnome/shell/extensions/dash-to-panel/dot-position", "'BOTTOM'")
@@ -320,6 +333,8 @@ if shutil.which("gnome-session") or shutil.which("gnome-shell"):
     dconf_write("/org/gnome/shell/extensions/dash-to-panel/dot-style-unfocused", "'DOTS'")
     dconf_write("/org/gnome/shell/extensions/dash-to-panel/primary-monitor", "1")
     dconf_write("/org/gnome/shell/extensions/dash-to-panel/multi-monitors", "true")
+    # System Monitor
+    dconf_write("/org/gnome/shell/extensions/system-monitor/show-swap", "false")
 
     # This section enables custom keybindings.
     gsettings_set("org.gnome.settings-daemon.plugins.media-keys", "custom-keybindings", "['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']")
