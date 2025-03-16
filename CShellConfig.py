@@ -193,7 +193,7 @@ function dru () {
     echo "Executing systemd daemon-reload for user."
     systemctl --user daemon-reload
 }
-function d () }
+function d () {
     df -hT | grep -v tmpfs
 }
 function f () {
