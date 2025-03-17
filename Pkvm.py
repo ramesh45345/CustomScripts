@@ -703,7 +703,7 @@ if __name__ == '__main__':
     if 10 <= args.ostype <= 19:
         data['source'][packer_type]['local']["boot_command"] = ["<wait>c<wait>linux /casper/vmlinuz quiet autoinstall 'ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/'<enter><wait>initrd /casper/initrd<enter><wait5>boot<enter>"]
     if 20 <= args.ostype <= 29:
-        data['source'][packer_type]['local']["boot_command"] = ["<up><tab> inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/almalinux.cfg<enter><wait>"]
+        data['source'][packer_type]['local']["boot_command"] = ["<up><wait>e<wait><down><wait><down><wait><end> inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/almalinux.cfg<wait><f10>"]
         data['build']['provisioner'][0]["shell"] = {}
         data['build']['provisioner'][0]["shell"]["inline"] = ["{2}; /opt/CustomScripts/{0} {1}".format(vmprovisionscript, vmprovision_opts, git_cmdline())]
     if args.ostype == 25:
