@@ -188,8 +188,6 @@ if __name__ == '__main__':
     # Get non-root user information.
     USERNAMEVAR, USERGROUP, USERHOME = CFunc.getnormaluser()
     imgsize_default = "100"
-    # Set memory to system memory size / 4.
-    mem_mib = int(((os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')) / (1024.**2)) / 4)
 
     # Ensure that certain commands exist.
     CFunc.commands_check(["ssh", "sshpass", "qemu-img", "virsh", "ip"])
@@ -211,7 +209,7 @@ if __name__ == '__main__':
     parser.add_argument("-x", "--livesshpass", help="Live SSH Password", default="asdf")
     parser.add_argument("-y", "--vmuser", help="VM Username", default="user")
     parser.add_argument("-z", "--vmpass", help="VM Password", default="asdf")
-    parser.add_argument("-m", "--memory", help="Memory for VM (default: %(default)s)", default=mem_mib)
+    parser.add_argument("-m", "--memory", help="Memory for VM (default: %(default)s)", default=Pkvm.vm_memory_range())
     parser.add_argument("--noprompt", help='Do not prompt to continue.', action="store_true")
     args = parser.parse_args()
 

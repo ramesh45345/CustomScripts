@@ -46,6 +46,14 @@ def md5sum(md5_filename, blocksize=65536):
         for block in iter(lambda: f.read(blocksize), b""):
             hashmd5.update(block)
     return hashmd5.hexdigest()
+def vm_memory_range(sizemb_upper: int = 16384, sizemb_lower: int = 4096):
+    """Return memory in MB for a VM, bounded by the specified range."""
+    mem_mb = int(((os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')) / (1024.**2)) / 4)
+    if mem_mb > sizemb_upper:
+        mem_mb = sizemb_upper
+    if mem_mb < sizemb_lower:
+        mem_mb = sizemb_lower
+    return mem_mb
 def packerversion_get():
     """Get the packer version from github"""
     releasejson_link = "https://api.github.com/repos/hashicorp/packer/tags"
@@ -172,7 +180,7 @@ def cmd_virtinstall(vmname: str,
                     variant: str,
                     efi_bin: str = "",
                     efi_nvram: str = "",
-                    memory: int = int(((os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')) / (1024.**2)) / 4),
+                    memory: int = vm_memory_range(),
                     efi: bool = True,
                     secureboot: bool = False,
                     cpucores: str = multiprocessing.cpu_count(),
@@ -215,7 +223,7 @@ if __name__ == '__main__':
     USERHOME = os.path.expanduser("~")
     CPUCORES = multiprocessing.cpu_count()
     # Set memory to system memory size / 4.
-    mem_mib = int(((os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')) / (1024.**2)) / 4)
+    mem_mib = vm_memory_range()
     size_disk_default_gb = 100
 
     # Get arguments
@@ -253,7 +261,6 @@ if __name__ == '__main__':
     qemu_virtio_diskpath = None
     print("Path to Packer output is {0}".format(vmpath))
     print("OS Type is {0}".format(args.ostype))
-    print("VM Memory is {0}".format(args.memory))
     print("VM Hard Disk size is {0} GB".format(args.imgsize))
     print("VM User is {0}".format(args.vmuser))
     print("Headless:", args.headless)
@@ -372,7 +379,7 @@ if __name__ == '__main__':
         vmname = "ISOVM"
         # Override memory and disk setting if they are set to the default values.
         if mem_mib == args.memory:
-            args.memory = int(((os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')) / (1024.**2)) / 2)
+            args.memory = vm_memory_range(sizemb_lower=8192, sizemb_upper=32768)
         if size_disk_default_gb == args.imgsize:
             args.imgsize = 120
         # Use cli settings for ISOVM.
@@ -453,6 +460,7 @@ if __name__ == '__main__':
         vmname = args.vmname
     print("VM Name is {0}".format(vmname))
     print("Desktop Environment:", args.desktopenv)
+    print("VM Memory is {0}".format(args.memory))
 
     # Determine disk size in mb
     size_disk_mb = args.imgsize * 1024
