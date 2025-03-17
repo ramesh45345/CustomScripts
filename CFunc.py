@@ -525,7 +525,7 @@ def commands_check(cmd_list: list, exit_if_fail: bool = True):
         if not shutil.which(cmd):
             print(f"\nError, ensure command {cmd} is installed.")
             if exit_if_fail:
-                sys.exit(status=1)
+                sys.exit(1)
             command_exists = False
     return command_exists
 # Apt
