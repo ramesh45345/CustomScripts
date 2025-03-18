@@ -218,6 +218,24 @@ def getvmstate():
         if vmstatus_temp == "VMware":
             vmstatus = "vmware"
     return vmstatus
+def storage_path_detect(folders_in_path: list = ["VMs"], folder_primary: str = ""):
+    """Find out where the storage folder is on the computer."""
+    storage_path_options = []
+    if folder_primary != "":
+        storage_path_options += [folder_primary]
+    storage_path_options += ["/mnt/IntStorage", "/mnt/SSDStorage", "/mnt/Storage", "/mnt/RaidStorage", "/mnt/MirrorStorage", "/var/ServerStorage"]
+    for path in storage_path_options:
+        exist_status = False
+        if os.path.exists(path):
+            exist_status = True
+        if exist_status is True:
+            for addon_path in folders_in_path:
+                if not os.path.exists(os.path.join(path, addon_path)):
+                    exist_status = False
+        if exist_status is True:
+            storage_path = path
+            break
+    return storage_path
 def is_root(checkstate=True, state_exit=True):
     """
     Check if current user is root or not.

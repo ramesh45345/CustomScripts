@@ -260,7 +260,8 @@ if args.distro == "all" or args.distro == "ubuntu":
     subprocess.run(["podman", "build", "--pull=true", "-t", "ubuntu-img", "-f", os.path.basename(tempfile_ubuntu)], check=True)
 os.chdir(currentpath)
 
-print("""
+storage_path = CFunc.storage_path_detect()
+print(f"""
 The following commands can be used to create and run containers:
 
 Distrobox:
@@ -270,10 +271,10 @@ distrobox create -n fedora-ct -i fedora-img ; distrobox enter fedora-ct
 distrobox create -n ubuntu-ct -i ubuntu-img ; distrobox enter ubuntu-ct
 
 Distrobox (non-shared home):
-distrobox create -n alma-ct -i alma-img -H /mnt/Storage/VMs/alma-ct-home ; distrobox enter alma-ct
-distrobox create -n arch-ct -i arch-img -H /mnt/Storage/VMs/arch-ct-home ; distrobox enter arch-ct
-distrobox create -n fedora-ct -i fedora-img -H /mnt/Storage/VMs/fedora-ct-home ; distrobox enter fedora-ct
-distrobox create -n ubuntu-ct -i ubuntu-img -H /mnt/Storage/VMs/ubuntu-ct-home ; distrobox enter ubuntu-ct
+distrobox create -n alma-ct -i alma-img -H {storage_path}/VMs/alma-ct-home ; distrobox enter alma-ct
+distrobox create -n arch-ct -i arch-img -H {storage_path}/VMs/arch-ct-home ; distrobox enter arch-ct
+distrobox create -n fedora-ct -i fedora-img -H {storage_path}/VMs/fedora-ct-home ; distrobox enter fedora-ct
+distrobox create -n ubuntu-ct -i ubuntu-img -H {storage_path}/VMs/ubuntu-ct-home ; distrobox enter ubuntu-ct
 
 Add --root to both create and run container to use as root.
 """)
