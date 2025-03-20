@@ -518,7 +518,6 @@ if (-Not $isDotSourced) {
   Fcn-Customize
   Fcn-debloat
   if ( $IsVM -eq $true ) {
-    Fcn-exppatch
     Fcn-DisableDefender
     Fcn-ssh
   }
