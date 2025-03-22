@@ -259,9 +259,10 @@ for idx in range(1, 6):
         data["markdown.extension.preview.autoShowPreviewToSide"] = False
         data["pasteImage.path"] = "${currentFileDir}/assets/images"
         data["gitlens.plusFeatures.enabled"] = False
-        data["gitlens.showWelcomeOnInstall"] = False
         data["gitlens.showWhatsNewAfterUpgrades"] = False
         data["gitlens.telemetry.enabled"] = False
+        data["window.commandCenter"] = False
+        data["chat.commandCenter.enabled"] = False
         # Markdown lint config
         data["markdownlint.config"] = {
             "default": True,
