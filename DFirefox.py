@@ -51,10 +51,8 @@ for ff_path in firefox_profiles_paths:
                     userjs_text = """
 /** GFX ***/
 user_pref("gfx.webrender.all", true);
-// Enable software rendering due to long load times in firefox.
-user_pref("gfx.webrender.software", true);
-user_pref("gfx.webrender.precache-shaders", true);
-user_pref("gfx.webrender.compositor", true);
+// https://wiki.archlinux.org/title/Firefox#Hardware_video_acceleration
+// https://fedoraproject.org/wiki/Firefox_Hardware_acceleration
 user_pref("layers.gpu-process.enabled", true);
 user_pref("media.hardware-video-decoding.enabled", true);
 user_pref("gfx.canvas.accelerated", true);
