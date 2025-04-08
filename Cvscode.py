@@ -271,6 +271,15 @@ for idx in range(1, 6):
         # Python Config
         data["flake8.args"] = ["--ignore=E501,E302,E266"]
         data["python.analysis.typeCheckingMode"] = "off"
+        # File Associations
+        data["files.associations"] = {
+            "compose-*.yaml": "dockercompose",
+            "compose-*.yml": "dockercompose",
+            "docker-compose*.yaml": "dockercompose",
+            "docker-compose*.yml": "dockercompose",
+            "Containerfile-*": "dockerfile",
+            "Dockerfile-*": "dockerfile"
+        }
 
         # Print the json data for debugging purposes.
         # print(json.dumps(data, indent=2))
