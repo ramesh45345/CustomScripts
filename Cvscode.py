@@ -273,12 +273,13 @@ for idx in range(1, 6):
         data["python.analysis.typeCheckingMode"] = "off"
         # File Associations
         data["files.associations"] = {
+            ".env*": "properties",
             "compose-*.yaml": "dockercompose",
             "compose-*.yml": "dockercompose",
+            "Containerfile-*": "dockerfile",
             "docker-compose*.yaml": "dockercompose",
             "docker-compose*.yml": "dockercompose",
-            "Containerfile-*": "dockerfile",
-            "Dockerfile-*": "dockerfile"
+            "Dockerfile-*": "dockerfile",
         }
 
         # Print the json data for debugging purposes.
