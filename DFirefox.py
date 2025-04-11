@@ -87,6 +87,10 @@ user_pref("signon.rememberSignons", false);
 // Search
 user_pref("browser.urlbar.suggest.quicksuggest.nonsponsored", false);
 user_pref("browser.urlbar.suggest.quicksuggest.sponsored", false);
+// Toolbar
+user_pref("identity.fxaccounts.toolbar.pxiToolbarEnabled.monitorEnabled", false);
+user_pref("identity.fxaccounts.toolbar.pxiToolbarEnabled.relayEnabled", false);
+user_pref("identity.fxaccounts.toolbar.pxiToolbarEnabled.vpnEnabled", false);
 
 /*** From Librewolf ***/
 user_pref("privacy.clearOnShutdown.cache", false);
