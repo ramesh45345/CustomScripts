@@ -50,7 +50,7 @@ if __name__ == '__main__':
     print("Running {0}".format(__file__))
 
     # Get arguments
-    parser = argparse.ArgumentParser(description='CFunc Extras.')
+    parser = argparse.ArgumentParser(description='Click input capture dialogue when detected.')
     parser.add_argument("-x", "--xcoord", type=int, help='X coordinate for click', default=170)
     parser.add_argument("-y", "--ycoord", type=int, help='Y coordinate for click', default=250)
     parser.add_argument("-o", "--oneshot", help='Do not loop.', action="store_true")
