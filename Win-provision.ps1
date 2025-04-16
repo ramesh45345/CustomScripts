@@ -343,6 +343,13 @@ function Fcn-Customize {
   Fcn-appxremove("MicrosoftWindows.Client.WebExperience")
   Fcn-appxremove("Microsoft.Copilot")
 
+  # Remove other appx
+  Fcn-appxremove("Microsoft.XboxSpeechToTextOverlay")
+  Fcn-appxremove("Microsoft.Xbox.TCUI")
+  Fcn-appxremove("Microsoft.XboxGamingOverlay")
+  Fcn-appxremove("Microsoft.XboxIdentityProvider")
+  Fcn-appxremove("Microsoft.ZuneMusic")
+
   # Set pagefile
   wmic computersystem set AutomaticManagedPagefile=False
   wmic pagefileset delete
@@ -503,6 +510,7 @@ function Fcn-exppatch {
 function Fcn-appxremove {
   param(
     # To get the package name: Get-AppxPackage -all *NAME_OF_THE_APPX*
+    # Get names of multiple: Get-AppxPackage -all *xbox* | Select-Object -ExpandProperty Name
     [Parameter(Mandatory=$true)]
     [string] $packagename
   )
@@ -512,6 +520,8 @@ function Fcn-appxremove {
   # Get the full package name
   $packageFullName = Get-AppxPackage -Name "$packagename" | Select-Object -ExpandProperty PackageFullName
   Write-Output "$packageFullName"
+  # Get the package install location
+  $packageInstallLocation = Get-AppxPackage -Name "$packagename" | Select-Object -ExpandProperty InstallLocation
   # Remove the app
   if ( $packageFullName ) {
     # Remove the app
@@ -519,8 +529,6 @@ function Fcn-appxremove {
     Remove-AppxPackage -AllUsers -Package "$packageFullName"
   }
 
-  # Get the package install location
-  $packageInstallLocation = Get-AppxPackage -Name "$packagename" | Select-Object -ExpandProperty InstallLocation
   if (Test-Path "$packageInstallLocation"){
     Write-Output "Remove: $packageInstallLocation"
     # Remove the install location
