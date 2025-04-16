@@ -46,11 +46,11 @@ function Fcn-InstallChocolatey {
 # https://gist.github.com/mkropat/c1226e0cc2ca941b23a9
 function Add-EnvPath {
     param(
-        [Parameter(Mandatory=$true)]
-        [string] $Path,
+      [Parameter(Mandatory=$true)]
+      [string] $Path,
 
-        [ValidateSet('Machine', 'User', 'Session')]
-        [string] $Container = 'Session'
+      [ValidateSet('Machine', 'User', 'Session')]
+      [string] $Container = 'Session'
     )
 
     if ($Container -ne 'Session') {
@@ -338,6 +338,10 @@ function Fcn-Customize {
     Where-Object{$_.Name -match $appnames}).Verbs() | 
     Where-Object{$_.Name.replace('&','') -match 'Unpin from taskbar'} | 
     ForEach-Object{$_.DoIt(); $exec = $true}
+  
+  # Remove copilot - https://learn.microsoft.com/en-us/windows/client-management/manage-windows-copilot#remove-or-prevent-installation-of-the-copilot-app
+  Fcn-appxremove("MicrosoftWindows.Client.WebExperience")
+  Fcn-appxremove("Microsoft.Copilot")
 
   # Set pagefile
   wmic computersystem set AutomaticManagedPagefile=False
@@ -447,6 +451,8 @@ function Fcn-OnedriveDisable {
 
   Write-Output "Onedrive: Removing startmenu junk entry"
   rm -Force -ErrorAction SilentlyContinue "$env:userprofile\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\OneDrive.lnk"
+  # Uninstall the app
+  Fcn-appxremove("Microsoft.OneDriveSync")
 }
 
 function Fcn-oosu {
@@ -492,6 +498,34 @@ function Fcn-exppatch {
   Invoke-WebRequest "https://github.com/valinet/ExplorerPatcher/releases/latest/download/ep_setup.exe" -OutFile "$env:USERPROFILE/Downloads/ep_setup.exe"
   # Run explorer patcher
   Start-Process "$env:USERPROFILE/Downloads/ep_setup.exe"
+}
+
+function Fcn-appxremove {
+  param(
+    # To get the package name: Get-AppxPackage -all *NAME_OF_THE_APPX*
+    [Parameter(Mandatory=$true)]
+    [string] $packagename
+  )
+
+  Write-Output "Removing $packagename"
+
+  # Get the full package name
+  $packageFullName = Get-AppxPackage -Name "$packagename" | Select-Object -ExpandProperty PackageFullName
+  Write-Output "$packageFullName"
+  # Remove the app
+  if ( $packageFullName ) {
+    # Remove the app
+    Write-Output "Remove: $packageFullName"
+    Remove-AppxPackage -AllUsers -Package "$packageFullName"
+  }
+
+  # Get the package install location
+  $packageInstallLocation = Get-AppxPackage -Name "$packagename" | Select-Object -ExpandProperty InstallLocation
+  if (Test-Path "$packageInstallLocation"){
+    Write-Output "Remove: $packageInstallLocation"
+    # Remove the install location
+    Remove-Item -Recurse -Force "$packageInstallLocation"
+  }
 }
 
 ### Begin Code ###
