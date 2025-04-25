@@ -265,7 +265,7 @@ if shutil.which("gnome-session") or shutil.which("gnome-shell"):
     # Check current variable for gnome-system-monitor. If it doesn't exist, set the variable.
     gnome_desktop_read_list = subprocess.run("gsettings get org.gnome.shell favorite-apps", shell=True, check=False, stdout=subprocess.PIPE).stdout.decode().strip()
     if "gnome-system-monitor.desktop" not in gnome_desktop_read_list:
-        gnome_desktop_search_list = ["firefox.desktop", "brave-browser.desktop", "chrome.desktop", 'thunderbird.desktop', 'nautilus.desktop', "tilix.desktop", 'virt-manager.desktop', 'gnome-system-monitor.desktop', 'org.gnome.SystemMonitor.desktop']
+        gnome_desktop_search_list = ["firefox.desktop", "brave-browser.desktop", "chrome.desktop", 'thunderbird.desktop', 'nautilus.desktop', "tilix.desktop", "org.kde.konsole.desktop", 'virt-manager.desktop', 'gnome-system-monitor.desktop', 'org.gnome.SystemMonitor.desktop']
         gnome_desktop_file_list = []
         for d in gnome_desktop_search_list:
             ds = CMimeSet.LocateDesktopFileName(d)
