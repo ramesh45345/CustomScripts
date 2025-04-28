@@ -368,6 +368,7 @@ if shutil.which("kwriteconfig6") and shutil.which("plasma_session"):
         kwriteconfig("dolphinrc", "IconsMode", "PreviewSize", "32")
         kwriteconfig("dolphinrc", "DetailsMode", "PreviewSize", "22")
         kwriteconfig("dolphinrc", "CompactMode", "PreviewSize", "16")
+        subprocess.run('kwriteconfig6 --file dolphinrc --group "MainWindow" --group "Toolbar mainToolBar" --key ToolButtonStyle "IconOnly"', shell=True, check=False)
     # KDE Globals
     subprocess.run('kwriteconfig6 --file kdeglobals --group KDE --key SingleClick --type bool false', shell=True, check=False)
     os.makedirs("{0}/.kde/share/config".format(USERHOME), exist_ok=True)
