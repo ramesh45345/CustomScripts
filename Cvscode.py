@@ -47,9 +47,9 @@ def ce_unins(vscode_cmd=list, extension=str):
 def codeconfig_installext(vscode_cmd=list):
     """Install vscode extensions"""
     print("\nInstalling VS Code extensions.")
-    ce_ins(vscode_cmd, "ms-pyright.pyright")
+    # ce_ins(vscode_cmd, "ms-pyright.pyright")
+    ce_ins(vscode_cmd, "detachhead.basedpyright")
     ce_ins(vscode_cmd, "ms-python.python")
-    ce_unins(vscode_cmd, "ms-python.vscode-pylance")
     ce_ins(vscode_cmd, "ms-python.flake8")
     ce_ins(vscode_cmd, "ms-azuretools.vscode-docker")
     ce_ins(vscode_cmd, "mikestead.dotenv")
@@ -65,6 +65,8 @@ def codeconfig_installext(vscode_cmd=list):
     ce_ins(vscode_cmd, "danielroedl.meld-diff")
     ce_ins(vscode_cmd, "aaron-bond.better-comments")
     ce_ins(vscode_cmd, "ms-toolsai.jupyter")
+    # Remove extensions
+    ce_unins(vscode_cmd, "ms-python.vscode-pylance")
 def codeconfig_writeconfiguration(json_data=dict, json_path=str, json_file: str = "settings.json"):
     """Write the config.json"""
     if os.path.isdir(json_path):
@@ -271,6 +273,23 @@ for idx in range(1, 6):
         # Python Config
         data["flake8.args"] = ["--ignore=E501,E302,E266"]
         data["python.analysis.typeCheckingMode"] = "off"
+        # basedpyright
+        data["basedpyright.analysis.diagnosticSeverityOverrides"] = {
+            # Disabled
+            "reportExplicitAny": "none",
+            "reportMissingTypeArgument": "none",
+            "reportUnusedCallResult": "none",
+            # Information
+            "reportAny": "information",
+            "reportArgumentType": "information",
+            "reportCallIssue": "information",
+            "reportMissingParameterType": "information",
+            "reportOperatorIssue": "information",
+            "reportUnknownArgumentType": "information",
+            "reportUnknownMemberType": "information",
+            "reportUnknownParameterType": "information",
+            "reportUnknownVariableType": "information",
+        }
         # File Associations
         data["files.associations"] = {
             ".env*": "properties",

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Set Desktop Settings"""
+"""Set Firefox Settings"""
 
 # Python includes
 import functools
