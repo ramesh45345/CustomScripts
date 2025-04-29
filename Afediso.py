@@ -97,18 +97,11 @@ network-manager-applet
 xrandr
 
 # Firmware
-iwl4965-firmware
-iwl5000-firmware
-iwl5150-firmware
-iwl6000-firmware
-iwl6000g2a-firmware
-iwl6000g2b-firmware
-iwl6050-firmware
-iwl7260-firmware
-libertas-sd8686-firmware
-libertas-sd8787-firmware
-libertas-usb8388-firmware
-iwlax2xx-firmware
+linux-firmware
+iwlwifi-dvm-firmware
+iwlwifi-mvm-firmware
+libertas-firmware
+atheros-firmware
 
 # CLI Utils
 arch-install-scripts
