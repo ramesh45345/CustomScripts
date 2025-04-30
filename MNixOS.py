@@ -20,7 +20,6 @@ def cli_scripts():
     subprocess.run(['{0}/CCSClone.py'.format(SCRIPTDIR)], check=True)
 def gui_scripts(user: str):
     """"""
-    subprocess.run(['{0}/CFlatpakConfig.py'.format(SCRIPTDIR)], check=True)
     subprocess.run(['{0}/Cxdgdirs.py'.format(SCRIPTDIR)], check=True)
     CFunc.run_as_user(user, "{0}/Cvscode.py".format(SCRIPTDIR), error_on_fail=True)
     CFunc.run_as_user(user, "{0}/CMediaPlayerConfig.py".format(SCRIPTDIR), error_on_fail=True)
