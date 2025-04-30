@@ -6,6 +6,7 @@ import json
 import os
 import shutil
 import subprocess
+from pathlib import Path
 # Custom includes
 import CFunc
 
@@ -30,19 +31,19 @@ cr_profiles_paths = [
 ### Functions ###
 
 # TODO: Move this to CFunc
-def codeconfig_writeconfiguration(json_data: list = dict, json_path=str, json_file: str = "GroupPolicy.json"):
+def codeconfig_writeconfiguration(json_data: list, json_path: str):
     """Write the config.json"""
-    if os.path.isdir(json_path):
-        config_path = os.path.join(json_path, json_file)
-        print("Writing {0}.".format(config_path))
-        with open(config_path, 'w') as f:
+    dirname = os.path.abspath(os.path.dirname(json_path))
+    if os.path.isdir(dirname):
+        print(f"Writing {json_path}")
+        with open(json_path, 'w') as f:
             json.dump(json_data, f, indent=2)
     else:
         print("ERROR: {0} config path missing. Not writing config.".format(json_path))
-def browser_isinstalled(browser_line: dict):
-    """Test if the browser in the dictionary is present."""
-    status = False
-    return status
+
+
+# Exit if not root.
+CFunc.is_root(True)
 
 
 ### Begin Code ###
@@ -59,9 +60,16 @@ for br in cr_profiles_paths:
     # Json data
     data = {}
     if br['browser_type'] == "brave":
-        data["TorDisabled"] = 1
+        data["TorDisabled"] = True
+        data["BraveRewardsDisabled"] = True
+        data["BraveWalletDisabled"] = True
+        data["BraveAIChatEnabled"] = False
+        data["BraveVPNDisabled"] = True
 
     # Print the json data for debugging purposes.
     # print(json.dumps(data, indent=2))
 
     # Write json configuration
+    profile_dirname = Path(os.path.abspath(os.path.dirname(br['profile_path'])))
+    profile_dirname.mkdir(parents=True, exist_ok=True)
+    codeconfig_writeconfiguration(json_data=data, json_path=br['profile_path'])
