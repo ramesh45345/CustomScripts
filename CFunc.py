@@ -113,6 +113,9 @@ def gitclone(url, destination):
         subprocess.run("git clone {0} {1}".format(url, destination), shell=True, check=True)
 def log_config(logfile_path):
     """Configure logger, which outputs to file and stdout."""
+    # https://stackoverflow.com/a/46098711
+    # If someone else has initialized the logging system, reset it.
+    logging.root.handlers = []
     logging.basicConfig(
         format="%(message)s",
         level=logging.INFO,
