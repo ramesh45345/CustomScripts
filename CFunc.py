@@ -228,6 +228,7 @@ def storage_path_detect(folders_in_path: list = ["VMs"], folder_primary: str = "
     if folder_primary != "":
         storage_path_options += [folder_primary]
     storage_path_options += ["/mnt/IntStorage", "/mnt/SSDStorage", "/mnt/Storage", "/mnt/RaidStorage", "/mnt/MirrorStorage", "/var/ServerStorage"]
+    storage_path = ""
     for path in storage_path_options:
         exist_status = False
         if os.path.exists(path):

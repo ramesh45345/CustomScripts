@@ -2,7 +2,6 @@
 """Set Chromium/Brave and equivalent browser settings"""
 
 import functools
-import json
 import os
 import shutil
 import subprocess
@@ -44,7 +43,9 @@ for br in cr_profiles_paths:
             br['browser_installed'] = True
 
     # Json data
+    # Chrome policies: https://chromeenterprise.google/policies/
     data = {}
+    # Brave specific policies: https://support.brave.com/hc/en-us/articles/360039248271-Group-Policy
     if br['browser_type'] == "brave":
         data["TorDisabled"] = True
         data["BraveRewardsDisabled"] = True
@@ -64,6 +65,17 @@ for br in cr_profiles_paths:
     data["SafeBrowsingExtendedReportingEnabled"] = False
     data["PasswordLeakDetectionEnabled"] = False
     data["PasswordSharingEnabled"] = False
+    data["AutoplayAllowed"] = False
+    data["BookmarkBarEnabled"] = True
+    data["RestoreOnStartup"] = 1
+    data["PromptForDownloadLocation"] = True
+    data["HomepageIsNewTabPage"] = True
+    data["HardwareAccelerationModeEnabled"] = True
+    data["HighEfficiencyModeEnabled"] = True
+    data["MemorySaverModeSavings"] = 0
+    dlfolder = CFunc.storage_path_detect(["DLs"])
+    if dlfolder:
+        data["DownloadDirectory"] = dlfolder
     data["ExtensionInstallForcelist"] = [
         "bnomihfieiccainjcjblhegjgglakjdd",  # Improve YouTube
         "cjpalhdlnbpafiamejdnhcphjbkeiagm",  # uBlock Origin
@@ -73,8 +85,12 @@ for br in cr_profiles_paths:
         "mnjggcdmjocbbbhaepdhchncahnbgone",  # Sponsorblock
         "nkgllhigpcljnhoakjkgaieabnkmgdkb",  # Don't F*** With Paste
         "nngceckbapebfimnlniiiahkandclblb",  # Bitwarden
-        ""
     ]
+    data["TabDiscardingExceptions"] = [
+        "google.com",
+        "youtube.com",
+    ]
+
     # Write json configuration
     profile_dirname = Path(os.path.abspath(os.path.dirname(br['profile_path'])))
     profile_dirname.mkdir(parents=True, exist_ok=True)
