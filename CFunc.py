@@ -4,6 +4,7 @@
 # Python includes.
 import fnmatch
 import functools
+import json
 import logging
 import os
 import pathlib
@@ -549,6 +550,17 @@ def commands_check(cmd_list: list, exit_if_fail: bool = True):
                 sys.exit(1)
             command_exists = False
     return command_exists
+def json_configwrite(json_data: list, json_path: str, print_json: bool = False):
+    """Write a json config file."""
+    if print_json is True:
+        print(json.dumps(json_data, indent=2))
+    dirname = os.path.abspath(os.path.dirname(json_path))
+    if os.path.isdir(dirname):
+        print(f"Writing {json_path}")
+        with open(json_path, 'w') as f:
+            json.dump(json_data, f, indent=2)
+    else:
+        print("ERROR: {0} config path missing. Not writing config.".format(dirname))
 # Apt
 def aptupdate():
     """Update apt sources"""

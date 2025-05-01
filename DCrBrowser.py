@@ -18,28 +18,15 @@ USERNAMEVAR, USERGROUP, USERHOME = CFunc.getnormaluser()
 
 
 ### Global Variables ###
-
 cr_profiles_paths = [
     # Command to run, Command to check with Which, Path to profile
     # Brave native linux
     {"browser_type": "brave", "cmd_which": "brave", "cmd_test": None, "browser_installed": False, "profile_path": os.path.join(os.sep, "etc", "brave", "policies", "managed", "GroupPolicy.json")},
     # Brave flatpak
     # {"cmd_which": "brave", "cmd_test": None, "profile_path": os.path.join(os.sep, "etc", "brave", "policies", "managed", "GroupPolicy.json")},
-    # Brave Windows
 ]
 
 ### Functions ###
-
-# TODO: Move this to CFunc
-def codeconfig_writeconfiguration(json_data: list, json_path: str):
-    """Write the config.json"""
-    dirname = os.path.abspath(os.path.dirname(json_path))
-    if os.path.isdir(dirname):
-        print(f"Writing {json_path}")
-        with open(json_path, 'w') as f:
-            json.dump(json_data, f, indent=2)
-    else:
-        print("ERROR: {0} config path missing. Not writing config.".format(json_path))
 
 
 # Exit if not root.
@@ -47,7 +34,6 @@ CFunc.is_root(True)
 
 
 ### Begin Code ###
-
 for br in cr_profiles_paths:
     # Detect if browser is installed
     if br['cmd_which'] and shutil.which(br['cmd_which']):
@@ -65,11 +51,31 @@ for br in cr_profiles_paths:
         data["BraveWalletDisabled"] = True
         data["BraveAIChatEnabled"] = False
         data["BraveVPNDisabled"] = True
-
-    # Print the json data for debugging purposes.
-    # print(json.dumps(data, indent=2))
-
+    data["ShoppingListEnabled"] = False
+    data["SideSearchEnabled"] = False
+    data["AccessCodeCastEnabled"] = False
+    data["LensDesktopNTPSearchEnabled"] = False
+    data["GoogleSearchSidePanelEnabled"] = False
+    data["PasswordManagerEnabled"] = False
+    data["AutofillCreditCardEnabled"] = False
+    data["BackgroundModeEnabled"] = False
+    data["SafeBrowsingDeepScanningEnabled"] = False
+    data["SafeBrowsingSurveysEnabled"] = False
+    data["SafeBrowsingExtendedReportingEnabled"] = False
+    data["PasswordLeakDetectionEnabled"] = False
+    data["PasswordSharingEnabled"] = False
+    data["ExtensionInstallForcelist"] = [
+        "bnomihfieiccainjcjblhegjgglakjdd",  # Improve YouTube
+        "cjpalhdlnbpafiamejdnhcphjbkeiagm",  # uBlock Origin
+        "fnaicdffflnofjppbagibeoednhnbjhg",  # floccus
+        "gebbhagfogifgggkldgodflihgfeippi",  # Return YouTube Dislike
+        "iaiomicjabeggjcfkbimgmglanimpnae",  # Tab Session Manager
+        "mnjggcdmjocbbbhaepdhchncahnbgone",  # Sponsorblock
+        "nkgllhigpcljnhoakjkgaieabnkmgdkb",  # Don't F*** With Paste
+        "nngceckbapebfimnlniiiahkandclblb",  # Bitwarden
+        ""
+    ]
     # Write json configuration
     profile_dirname = Path(os.path.abspath(os.path.dirname(br['profile_path'])))
     profile_dirname.mkdir(parents=True, exist_ok=True)
-    codeconfig_writeconfiguration(json_data=data, json_path=br['profile_path'])
+    CFunc.json_configwrite(json_data=data, json_path=br['profile_path'], print_json=False)

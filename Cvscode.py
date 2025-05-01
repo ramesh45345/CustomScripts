@@ -67,15 +67,6 @@ def codeconfig_installext(vscode_cmd=list):
     ce_ins(vscode_cmd, "ms-toolsai.jupyter")
     # Remove extensions
     ce_unins(vscode_cmd, "ms-python.vscode-pylance")
-def codeconfig_writeconfiguration(json_data=dict, json_path=str, json_file: str = "settings.json"):
-    """Write the config.json"""
-    if os.path.isdir(json_path):
-        vscode_userconfig = os.path.join(json_path, json_file)
-        print("Writing {0}.".format(vscode_userconfig))
-        with open(vscode_userconfig, 'w') as f:
-            json.dump(json_data, f, indent=2)
-    else:
-        print("ERROR: {0} config path missing. Not writing config.".format(json_path))
 
 
 ########################## Variables ##########################
@@ -226,8 +217,7 @@ for idx in range(1, 6):
             {"key": "ctrl+y", "command": "-redo"},
             {"key": "ctrl+y", "command": "redo", "when": "!notebookEditorFocused || inputFocus"},
         ]
-        # print(json.dumps(kb_data, indent=4))
-        codeconfig_writeconfiguration(kb_data, code_array[idx]["path"], "keybindings.json")
+        CFunc.json_configwrite(kb_data, os.path.join(code_array[idx]["path"], "keybindings.json"))
 
         # Json data
         data = {}
@@ -301,8 +291,5 @@ for idx in range(1, 6):
             "Dockerfile-*": "dockerfile",
         }
 
-        # Print the json data for debugging purposes.
-        # print(json.dumps(data, indent=2))
-
         # Write json configuration
-        codeconfig_writeconfiguration(data, code_array[idx]["path"])
+        CFunc.json_configwrite(data, os.path.join(code_array[idx]["path"], "settings.json"))
