@@ -69,7 +69,7 @@ if __name__ == '__main__':
 
     ### Install Fedora Software ###
     # Cli tools
-    CFunc.dnfinstall("fish zsh nano tmux perl-Time-HiRes iotop rsync p7zip p7zip-plugins zip unzip xdg-utils xdg-user-dirs util-linux-user fuse-sshfs redhat-lsb-core openssh-server openssh-clients avahi nss-mdns dnf-plugin-system-upgrade xfsprogs python3-pip python3-passlib")
+    CFunc.dnfinstall("fish zsh nano tmux perl-Time-HiRes iotop rsync p7zip p7zip-plugins zip unzip xdg-utils xdg-user-dirs util-linux-user fuse-sshfs lsb_release openssh-server openssh-clients avahi nss-mdns dnf-plugin-system-upgrade xfsprogs python3-pip python3-passlib")
     CFunc.dnfinstall("unrar")
     CFunc.sysctl_enable("sshd", error_on_fail=True)
     CFunc.dnfinstall("powerline-fonts google-roboto-fonts google-noto-sans-fonts")
