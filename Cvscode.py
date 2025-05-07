@@ -238,6 +238,7 @@ for idx in range(1, 6):
                 },
             }
             data["terminal.integrated.defaultProfile.linux"] = "fphost"
+        data["files.enableTrash"] = False
         data["security.workspace.trust.enabled"] = False
         data["telemetry.telemetryLevel"] = "error"
         data["workbench.iconTheme"] = "vscode-icons"
@@ -247,6 +248,7 @@ for idx in range(1, 6):
         data["update.showReleaseNotes"] = False
         data["git.confirmSync"] = False
         data["git.autofetch"] = True
+        data["git.discardUntrackedChangesToTrash"] = False
         data["[nix]"] = {"editor.tabSize": 2}
         data["markdown.extension.preview.autoShowPreviewToSide"] = False
         data["pasteImage.path"] = "${currentFileDir}/assets/images"
