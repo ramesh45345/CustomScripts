@@ -43,7 +43,7 @@ def detect_click(x: int, y: int):
     if title_detected is True:
         if args.debug:
             print("Title detected.")
-        ydo_click(args.xcoord, args.ycoord)
+        ydo_click(x, y)
 
 
 if __name__ == '__main__':

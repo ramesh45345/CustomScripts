@@ -57,6 +57,7 @@ def vm_memory_range(sizemb_upper: int = 16384, sizemb_lower: int = 4096):
 def packerversion_get():
     """Get the packer version from github"""
     releasejson_link = "https://api.github.com/repos/hashicorp/packer/tags"
+    latestrelease = ""
     # Get the json data from GitHub.
     with urllib.request.urlopen(releasejson_link) as releasejson_handle:
         releasejson_data = json.load(releasejson_handle)
@@ -286,6 +287,7 @@ if __name__ == '__main__':
     CFunc.commands_check(["packer"])
 
     # Determine VM hypervisor
+    hvname = ""
     if args.vmtype == 1:
         hvname = "vbox"
         packer_type = "virtualbox-iso"
@@ -299,6 +301,7 @@ if __name__ == '__main__':
     # Variables
     tpm_tempdir = None
     tpm_process = None
+    vmprovision_defopts = ""
     # EFI flag
     useefi = True
     secureboot = False
@@ -449,10 +452,9 @@ if __name__ == '__main__':
         vmname = "Packer-Windows2025-{0}".format(hvname)
 
     # Override provision opts if provided.
+    vmprovision_opts = args.vmprovision
     if args.vmprovision is None:
         vmprovision_opts = vmprovision_defopts
-    else:
-        vmprovision_opts = args.vmprovision
     print("VM Provision Options:", vmprovision_opts)
 
     # Override VM Name if provided
