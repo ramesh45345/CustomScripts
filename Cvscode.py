@@ -47,10 +47,7 @@ def ce_unins(vscode_cmd=list, extension=str):
 def codeconfig_installext(vscode_cmd=list):
     """Install vscode extensions"""
     print("\nInstalling VS Code extensions.")
-    # ce_ins(vscode_cmd, "ms-pyright.pyright")
     ce_ins(vscode_cmd, "detachhead.basedpyright")
-    ce_ins(vscode_cmd, "ms-python.python")
-    ce_ins(vscode_cmd, "ms-python.flake8")
     ce_ins(vscode_cmd, "ms-azuretools.vscode-docker")
     ce_ins(vscode_cmd, "mikestead.dotenv")
     ce_ins(vscode_cmd, "timonwong.shellcheck")
@@ -67,6 +64,9 @@ def codeconfig_installext(vscode_cmd=list):
     ce_ins(vscode_cmd, "ms-toolsai.jupyter")
     # Remove extensions
     ce_unins(vscode_cmd, "ms-python.vscode-pylance")
+    ce_unins(vscode_cmd, "ms-pyright.pyright")
+    ce_unins(vscode_cmd, "ms-python.flake8")
+    ce_unins(vscode_cmd, "ms-python.python")
 
 
 ########################## Variables ##########################
@@ -266,21 +266,25 @@ for idx in range(1, 6):
         data["flake8.args"] = ["--ignore=E501,E302,E266"]
         data["python.analysis.typeCheckingMode"] = "off"
         # basedpyright
+        data["basedpyright.importStrategy"] = "useBundled"
         data["basedpyright.analysis.diagnosticSeverityOverrides"] = {
             # Disabled
+            "reportAny": "none",
+            "reportArgumentType": "none",
+            "reportCallIssue": "none",
             "reportExplicitAny": "none",
+            "reportMissingParameterType": "none",
             "reportMissingTypeArgument": "none",
+            "reportOperatorIssue": "none",
+            "reportUnknownArgumentType": "none",
+            "reportUnknownMemberType": "none",
+            "reportUnknownParameterType": "none",
+            "reportUnknownVariableType": "none",
             "reportUnusedCallResult": "none",
+            "reportCallInDefaultInitializer": "none",
+            # Warning
+            "reportPossiblyUnboundVariable": "warning",
             # Information
-            "reportAny": "information",
-            "reportArgumentType": "information",
-            "reportCallIssue": "information",
-            "reportMissingParameterType": "information",
-            "reportOperatorIssue": "information",
-            "reportUnknownArgumentType": "information",
-            "reportUnknownMemberType": "information",
-            "reportUnknownParameterType": "information",
-            "reportUnknownVariableType": "information",
         }
         # File Associations
         data["files.associations"] = {
