@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Install AlmaLinux 9 Software"""
+"""Install AlmaLinux Software"""
 
 # Python includes.
 import argparse
@@ -18,7 +18,7 @@ print("Running {0}".format(__file__))
 SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))
 
 # Get arguments
-parser = argparse.ArgumentParser(description='Install AlmaLinux 9 Software.')
+parser = argparse.ArgumentParser(description='Install AlmaLinux Software.')
 parser.add_argument("-d", "--desktop", help='Desktop Environment (choices: %(choices)s) (default: %(default)s)', default=None, choices=["gnome", "kde", "xfce"])
 parser.add_argument("-k", "--kerneltype", type=int, help="Kernel type (0=stock kernel, 1=Mainline kernel, 2=LTS kernel (default: %(default)s)", default=1, choices=[0, 1, 2])
 parser.add_argument("-x", "--nogui", help='Configure script to disable GUI.', action="store_true")
@@ -43,14 +43,14 @@ vmstatus = CFunc.getvmstate()
 # CRB
 subprocess.run("dnf config-manager --set-enabled crb", shell=True, check=True)
 # EPEL
-CFunc.dnfinstall("https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm https://dl.fedoraproject.org/pub/epel/epel-next-release-latest-9.noarch.rpm")
+CFunc.dnfinstall("https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm")
 # RPMFusion
-CFunc.dnfinstall("https://download1.rpmfusion.org/free/el/rpmfusion-free-release-9.noarch.rpm https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-9.noarch.rpm")
+CFunc.dnfinstall("https://download1.rpmfusion.org/free/el/rpmfusion-free-release-10.noarch.rpm https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-10.noarch.rpm")
 # Visual Studio Code
 MFedora.repo_vscode()
 # EL Repo
 # https://elrepo.org
-subprocess.run("rpm --import https://www.elrepo.org/RPM-GPG-KEY-v2-elrepo.org ; dnf install -y https://elrepo.org/linux/elrepo/el9/x86_64/RPMS/elrepo-release-9.0-1.el9.elrepo.noarch.rpm ; dnf config-manager --enable elrepo-kernel", shell=True)
+subprocess.run("rpm --import https://www.elrepo.org/RPM-GPG-KEY-v2-elrepo.org ; dnf install -y https://elrepo.org/linux/elrepo/el10/x86_64/RPMS/elrepo-release-10.0-1.el10.elrepo.noarch.rpm ; dnf config-manager --enable elrepo-kernel", shell=True)
 
 # Update system after enabling repos.
 CFunc.dnfupdate()
