@@ -8,6 +8,8 @@
   Run dot sourced: . $MyInvocation.ScriptName
 #>
 
+Set-ExecutionPolicy Bypass -Scope Process -Force
+
 # Check if dot sourced.
 $isDotSourced = $MyInvocation.InvocationName -eq '.' -or $MyInvocation.Line -eq ''
 
@@ -31,6 +33,16 @@ if ( $VMstring.Model -imatch "virtualbox" ) {
   $VMtype = 2
 } else {
   $IsVM = $false
+}
+# Check Windows Version
+$sysinfo = systeminfo /fo csv | ConvertFrom-Csv
+$sysinfo.'OS Name'
+# Default = 1 (i.e. Home, Pro, etc), 2 = LTSC, 3 = Server
+$WinType = 1
+if ( $sysinfo.'OS Name' -imatch "Microsoft Windows 11 IoT Enterprise LTSC" ) {
+  $WinType = 2
+} elseif ( $sysinfo.'OS Name' -imatch "Windows Server" ) {
+  $WinType = 3
 }
 
 
@@ -197,12 +209,30 @@ function Fcn-Software {
   Write-Output "Installing Desktop Apps"
   # Workaround for windows-terminal https://github.com/mkevenaar/chocolatey-packages/issues/136
   Add-AppxPackage https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx
+  if ( $WinType -eq 2 ) {
+    # https://github.com/microsoft/winget-cli/issues/5181#issuecomment-2634796406
+    Install-PackageProvider -Name NuGet -Force
+    Install-Module Microsoft.WinGet.Client -Force
+    Remove-Item -Force -ErrorAction SilentlyContinue -Recurse "$env:LOCALAPPDATA\Temp\Winget"
+    # Repair-WinGetPackageManager -Latest -AllUsers -Force -Verbose
+  }
   # GUI Apps
   choco upgrade -y firefox notepadplusplus tortoisegit bleachbit gsudo putty chocolateygui conemu cascadiafonts vscodium sumatrapdf winget WizTree
   choco upgrade -y ShutUp10
-  # Set default browser.
-  choco upgrade -y setdefaultbrowser
-  SetDefaultBrowser.exe HKLM Firefox-308046B0AF4A39CB
+  # Set firefox default browser
+  $associations_xml = @"
+<?xml version="1.0" encoding="UTF-8"?>
+<DefaultAssociations>
+  <Association Identifier=".htm" ProgId="FirefoxHTML" ApplicationName="Mozilla Firefox" />
+  <Association Identifier=".html" ProgId="FirefoxHTML" ApplicationName="Mozilla Firefox" />
+  <Association Identifier=".pdf" ProgId="AcroExch.Document.DC" ApplicationName="Mozilla Firefox" />
+  <Association Identifier="http" ProgId="FirefoxURL" ApplicationName="Mozilla Firefox" />
+  <Association Identifier="https" ProgId="FirefoxURL" ApplicationName="Mozilla Firefox" />
+</DefaultAssociations>
+"@
+  $provisioning = ni "$($env:ProgramData)\provisioning" -ItemType Directory -Force
+  $associations_xml | Out-File "$($provisioning.FullName)\associations.xml" -Encoding utf8
+  dism /online /Import-DefaultAppAssociations:"$($provisioning.FullName)\associations.xml"
 
   # winfsp
   choco upgrade -y winfsp
@@ -351,13 +381,11 @@ function Fcn-Customize {
   Fcn-appxremove("Microsoft.ZuneMusic")
 
   # Set pagefile
-  wmic computersystem set AutomaticManagedPagefile=False
-  wmic pagefileset delete
-  wmic pagefileset create name="$ENV:SystemDrive\pagefile.sys"
-  $PageFile = Get-WmiObject -Class Win32_PageFileSetting
-  $PageFile.InitialSize = 64
-  $PageFile.MaximumSize = 2048
-  $PageFile.Put()
+  # https://stackoverflow.com/questions/37813441/powershell-script-to-set-the-size-of-pagefile-sys
+  $PageFile = Get-CimInstance -ClassName Win32_PageFileSetting -Filter "Name like '%pagefile.sys'"
+  $PageFile | Remove-CimInstance
+  $PageFile = New-CimInstance -ClassName Win32_PageFileSetting -Property @{ Name= "C:\pagefile.sys" }
+  $PageFile | Set-CimInstance -Property @{ InitialSize = 64; MaximumSize = 2048 }
 
   # Set EST as timezone
   tzutil /s "Eastern Standard Time"

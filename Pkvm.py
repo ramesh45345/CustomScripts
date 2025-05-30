@@ -442,12 +442,18 @@ if __name__ == '__main__':
         secureboot = True
     if args.ostype == 50:
         vmname = "Packer-Windows11-{0}".format(hvname)
+        # Windows 11 Pro for Workstations
         windows_key = "NRG8B-VKK3Q-CXVCJ-9G2XF-6Q84J"
+    if args.ostype == 54:
+        vmname = "Packer-WindowsLTSC-{0}".format(hvname)
+        # Windows IoT Enterprise LTSC 2024
+        windows_key = "KBN8V-HFGQ4-MGXVD-347P6-PDQGT"
     if 55 <= args.ostype <= 59:
         vboxosid = "Windows2019_64"
         kvm_variant = "win2k22"
         vmprovision_defopts = " "
     if args.ostype == 55:
+        # Windows Server 2025 Standard
         windows_key = "TVRH6-WHNXV-R9WG3-9XRFY-MY832"
         vmname = "Packer-Windows2025-{0}".format(hvname)
 
@@ -744,7 +750,7 @@ if __name__ == '__main__':
         # Provision with generic windows script
         data['build']['provisioner'][1]["powershell"]["scripts"] = [os.path.join(tempscriptfolderpath, "Win-provision.ps1")]
         # Press enter at the cdrom prompt.
-        data['source'][packer_type]['local']["boot_command"] = ["<enter><wait2><enter><wait2><enter><wait2><enter><wait2><enter><wait2><enter><wait2><enter>"]
+        data['source'][packer_type]['local']["boot_command"] = ["<enter><wait><enter><wait><enter><wait><enter><wait><enter>"]
         data['source'][packer_type]['local']["boot_wait"] = "1s"
         data['source'][packer_type]['local']["shutdown_command"] = "shutdown /s /t 60"
         data['source'][packer_type]['local']["shutdown_timeout"] = "15m"
@@ -763,10 +769,13 @@ if __name__ == '__main__':
         ET.register_namespace('', "urn:schemas-microsoft-com:unattend")
         ET.register_namespace('wcm', "http://schemas.microsoft.com/WMIConfig/2002/State")
         ET.register_namespace('xsi', "http://www.w3.org/2001/XMLSchema-instance")
-    if 50 <= args.ostype <= 52:
+    if 50 <= args.ostype <= 54:
         shutil.move(os.path.join(tempunattendfolder, "windows.xml"), os.path.join(tempunattendfolder, "autounattend.xml"))
         # Insert product key
         xml_insertwindowskey(windows_key, os.path.join(tempunattendfolder, "autounattend.xml"))
+    if args.ostype == 54:
+        # Select IoT Enterprise
+        CFunc.find_replace(tempunattendfolder, "INSERTWINOSIMAGE", "1", "autounattend.xml")
     if 55 <= args.ostype <= 59:
         shutil.move(os.path.join(tempunattendfolder, "windows.xml"), os.path.join(tempunattendfolder, "autounattend.xml"))
         # Insert Windows Server product key
