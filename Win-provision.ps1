@@ -588,7 +588,7 @@ if (-Not $isDotSourced) {
     Fcn-exppatch
     Fcn-DisableDefender
     Fcn-Tablacus
-    # Fcn-ssh
+    Fcn-ssh
   }
   Fcn-DisableWinRM
 }
