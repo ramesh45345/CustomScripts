@@ -209,13 +209,6 @@ function Fcn-Software {
   Write-Output "Installing Desktop Apps"
   # Workaround for windows-terminal https://github.com/mkevenaar/chocolatey-packages/issues/136
   Add-AppxPackage https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx
-  if ( $WinType -eq 2 ) {
-    # https://github.com/microsoft/winget-cli/issues/5181#issuecomment-2634796406
-    Install-PackageProvider -Name NuGet -Force
-    Install-Module Microsoft.WinGet.Client -Force
-    Remove-Item -Force -ErrorAction SilentlyContinue -Recurse "$env:LOCALAPPDATA\Temp\Winget"
-    # Repair-WinGetPackageManager -Latest -AllUsers -Force -Verbose
-  }
   # GUI Apps
   choco upgrade -y firefox notepadplusplus tortoisegit bleachbit gsudo putty chocolateygui conemu cascadiafonts vscodium sumatrapdf winget WizTree
   choco upgrade -y ShutUp10
