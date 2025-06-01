@@ -500,24 +500,20 @@ function Fcn-oosu {
 
 function Fcn-ssh {
   # Check for ssh feature: Get-WindowsCapability -Online | Where-Object Name -like 'OpenSSH*'
-  if (Test-Path "C:\tools\gsudo\Current\gsudo.exe") {
-    Start-Process -Wait -NoNewWindow "C:\tools\gsudo\Current\gsudo.exe" -ArgumentList "Add-WindowsCapability","-Online","-Name","OpenSSH.Server~~~~0.0.1.0"
-  } else {
-    Add-WindowsCapability -Online -Name "OpenSSH.Server~~~~0.0.1.0"
-  }
-  # Start and enable service
+  # Install the OpenSSH Client
+  Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0
+  # Install the OpenSSH Server
+  Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
+  # Set default shell
+  New-ItemProperty -Path "HKLM:\SOFTWARE\OpenSSH" -Name DefaultShell -Value "C:\Program Files\PowerShell\7\pwsh.exe" -PropertyType String -Force
+  # Start the sshd service
   Start-Service sshd
   Set-Service -Name sshd -StartupType 'Automatic'
-  New-ItemProperty -Path "HKLM:\SOFTWARE\OpenSSH" -Name DefaultShell -Value "C:\Program Files\PowerShell\7\pwsh.exe" -PropertyType String -Force
-  if ( -Not ( $user_sshkey.Contains("INSERTSSHKEYHERE") ) ) {
+  # Firewall
+  New-NetFirewallRule -Name sshd -DisplayName 'OpenSSH Server (sshd)' -Enabled True -Direction Inbound -Protocol TCP -Action Allow -LocalPort 22 -ErrorAction SilentlyContinue
+
+  if ( -Not ( $user_sshkey.Contains("SSHKEYHERE") ) ) {
     Set-Content -Path "$env:ProgramData\ssh\administrators_authorized_keys" -Value "$user_sshkey"
-  }
-  # Firewall rule
-  if (!(Get-NetFirewallRule -Name "OpenSSH-Server-In-TCP" -ErrorAction SilentlyContinue | Select-Object Name, Enabled)) {
-    Write-Output "Firewall Rule 'OpenSSH-Server-In-TCP' does not exist, creating it..."
-    New-NetFirewallRule -Name 'OpenSSH-Server-In-TCP' -DisplayName 'OpenSSH Server (sshd)' -Enabled True -Direction Inbound -Protocol TCP -Action Allow -LocalPort 22
-  } else {
-      Write-Output "Firewall rule 'OpenSSH-Server-In-TCP' has been created and exists."
   }
 }
 
@@ -592,7 +588,7 @@ if (-Not $isDotSourced) {
     Fcn-exppatch
     Fcn-DisableDefender
     Fcn-Tablacus
-    Fcn-ssh
+    # Fcn-ssh
   }
   Fcn-DisableWinRM
 }
