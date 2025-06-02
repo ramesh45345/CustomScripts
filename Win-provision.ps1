@@ -240,6 +240,20 @@ function Fcn-Software {
   $Shortcut.TargetPath = $TargetPath
   $Shortcut.Save()
 
+  # Tabby
+  choco install -y tabby
+  # Tabby config
+  $tabby_config_yaml = @"
+version: 7
+terminal:
+  ligatures: true
+  profile: local:default
+enableWelcomeTab: true
+recoverTabs: false
+"@
+  $tabby_config_folder = ni "$($env:APPDATA)\tabby" -ItemType Directory -Force
+  $tabby_config_yaml | Out-File "$($tabby_config_folder.FullName)\config.yaml" -Encoding utf8
+
   # Chocolatey Configuration
   choco feature enable -n allowGlobalConfirmation
 
