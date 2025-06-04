@@ -36,14 +36,27 @@ fullrepo = "ramesh45345/CustomScripts"
 repouser = fullrepo.split("/")[0]
 reponame = fullrepo.split("/")[1]
 
-# Name of this repo
-clonepath = SCRIPTDIR
+# Folder of the repo to be configured
+if os.path.isdir(os.path.join(SCRIPTDIR, ".git")):
+    clonepath = SCRIPTDIR
+else:
+    if CFunc.is_windows():
+        clonepath = os.path.join(USERHOME, "Documents", "CustomScripts")
+    elif CFunc.is_root():
+        if CFunc.is_nixos():
+            clonepath = os.path.join(os.sep, "var", "opt", "CustomScripts")
+        else:
+            clonepath = os.path.join(os.sep, "opt", "CustomScripts")
+    else:
+        clonepath = os.path.join(USERHOME, "CustomScripts")
 
 # Cron variables
 cron_hourly_folder = os.path.join(os.sep, "etc", "cron.hourly")
 cron_hourly_file = os.path.join(cron_hourly_folder, reponame)
 
 ### Begin Code ###
+# Clone or update
+CFunc.gitclone(f"https://github.com/{fullrepo}.git", clonepath)
 # Git config
 subprocess.run("git config --global pull.rebase false", shell=True, check=True)
 CFunc.run_as_user(USERNAMEVAR, "git config --global pull.rebase false", error_on_fail=True)

@@ -21,7 +21,6 @@ import signal
 import subprocess
 import sys
 import tempfile
-import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 # Custom includes
@@ -131,11 +130,6 @@ def git_branch_retrieve():
     else:
         git_branch = "master"
     return git_branch
-def git_cmdline(destination=os.path.join(os.sep, "opt", "CustomScripts")):
-    """Compose the git command line to check out the repo."""
-    git_branch = git_branch_retrieve()
-    git_cmd = "git clone https://github.com/ramesh45345/CustomScripts {0} -b {1}".format(destination, git_branch)
-    return git_cmd
 def file_ifexists(paths: list):
     """Return the first file string if it exists in a list."""
     for f in paths:
@@ -680,26 +674,33 @@ if __name__ == '__main__':
     # Packer Provisioning Configuration
     data['build']['provisioner'] = ['']
     data['build']['provisioner'][0] = {}
+    data['build']['provisioner'].append('')
+    data['build']['provisioner'][1] = {}
+    # Always copy the current CustomScripts to the VM
+    if 1 <= args.ostype <= 49:
+        data['build']['provisioner'][0]["file"] = {}
+        data['build']['provisioner'][0]["file"]["source"] = os.path.join(tempscriptfolderpath)
+        data['build']['provisioner'][0]["file"]["destination"] = "/tmp"
     if 1 <= args.ostype <= 5:
         data['source'][packer_type]['local']["boot_command"] = ["<up><wait>e<wait><down><wait><down><wait><end> inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/fedora.cfg<wait><f10>"]
-        data['build']['provisioner'][0]["shell"] = {}
-        data['build']['provisioner'][0]["shell"]["inline"] = ["dnf install -y git; {2}; /opt/CustomScripts/{0} {1}".format(vmprovisionscript, vmprovision_opts, git_cmdline())]
+        data['build']['provisioner'][1]["shell"] = {}
+        data['build']['provisioner'][1]["shell"]["inline"] = [f"/tmp/CustomScripts/{vmprovisionscript} {vmprovision_opts}"]
     if args.ostype == 8:
         CFunc.find_replace(tempunattendfolder, "silverblue", "kinoite", "silverblue.cfg")
     if 8 <= args.ostype <= 9:
         data['source'][packer_type]['local']["boot_command"] = ["<up><wait>e<wait><down><wait><down><wait><end> inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/silverblue.cfg<wait><f10>"]
-        data['build']['provisioner'][0]["shell"] = {}
-        data['build']['provisioner'][0]["shell"]["inline"] = ["{1}; /opt/CustomScripts/{0} -s 1; systemctl reboot".format(vmprovisionscript, git_cmdline())]
-        data['build']['provisioner'][0]["shell"]["expect_disconnect"] = True
-        data['build']['provisioner'].append('')
-        data['build']['provisioner'][1] = {}
         data['build']['provisioner'][1]["shell"] = {}
-        data['build']['provisioner'][1]["shell"]["inline"] = ["/opt/CustomScripts/{0} -s 2".format(vmprovisionscript)]
-        data['build']['provisioner'][1]["shell"]["pause_before"] = "15s"
-        data['build']['provisioner'][1]["shell"]["timeout"] = "90m"
+        data['build']['provisioner'][1]["shell"]["inline"] = [f"/tmp/CustomScripts/{vmprovisionscript} -s 1; systemctl reboot"]
+        data['build']['provisioner'][1]["shell"]["expect_disconnect"] = True
+        data['build']['provisioner'].append('')
+        data['build']['provisioner'][2] = {}
+        data['build']['provisioner'][2]["shell"] = {}
+        data['build']['provisioner'][2]["shell"]["inline"] = [f"/tmp/CustomScripts/{vmprovisionscript} -s 2"]
+        data['build']['provisioner'][2]["shell"]["pause_before"] = "15s"
+        data['build']['provisioner'][2]["shell"]["timeout"] = "90m"
     if 10 <= args.ostype <= 19:
-        data['build']['provisioner'][0]["shell"] = {}
-        data['build']['provisioner'][0]["shell"]["inline"] = ["mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{vmuser}/.ssh; echo '{sshkey}' > ~{vmuser}/.ssh/authorized_keys; chown {vmuser}:{vmuser} -R ~{vmuser}; apt install -y git; {gitcmd}; /opt/CustomScripts/{vmprovisionscript} {vmprovision_opts}".format(vmprovisionscript=vmprovisionscript, vmprovision_opts=vmprovision_opts, sshkey=sshkey, vmuser=args.vmuser, gitcmd=git_cmdline())]
+        data['build']['provisioner'][1]["shell"] = {}
+        data['build']['provisioner'][1]["shell"]["inline"] = [f"mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{args.vmuser}/.ssh; echo '{sshkey}' > ~{args.vmuser}/.ssh/authorized_keys; chown {args.vmuser}:{args.vmuser} -R ~{args.vmuser}; /tmp/CustomScripts/{vmprovisionscript} {vmprovision_opts}"]
         # Workaround for ssh being enabled on livecd. Remove this when a method to disable ssh on livecd is found.
         data['source'][packer_type]['local']["ssh_handshake_attempts"] = "9999"
         # Create user-data and meta-data.
@@ -712,39 +713,37 @@ if __name__ == '__main__':
         data['source'][packer_type]['local']["boot_command"] = ["<wait>c<wait>linux /casper/vmlinuz quiet autoinstall 'ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/'<enter><wait>initrd /casper/initrd<enter><wait5>boot<enter>"]
     if 20 <= args.ostype <= 29:
         data['source'][packer_type]['local']["boot_command"] = ["<up><wait>e<wait><down><wait><down><wait><end> inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/almalinux.cfg<wait><f10>"]
-        data['build']['provisioner'][0]["shell"] = {}
-        data['build']['provisioner'][0]["shell"]["inline"] = ["{2}; /opt/CustomScripts/{0} {1}".format(vmprovisionscript, vmprovision_opts, git_cmdline())]
-    if args.ostype == 25:
-        data['build']['provisioner'][0]["shell"]["inline"] = ["dnf install -y git; {2}; /opt/CustomScripts/{0} {1}; systemctl reboot".format(vmprovisionscript, vmprovision_opts, git_cmdline())]
-        data['build']['provisioner'][0]["shell"]["expect_disconnect"] = True
-        data['build']['provisioner'].append('')
-        data['build']['provisioner'][1] = {}
         data['build']['provisioner'][1]["shell"] = {}
-        data['build']['provisioner'][1]["shell"]["inline"] = ["/opt/CustomScripts/Aiso_CreateVM.py"]
-        data['build']['provisioner'][1]["shell"]["pause_before"] = "15s"
-        data['build']['provisioner'][1]["shell"]["timeout"] = "90m"
+        data['build']['provisioner'][1]["shell"]["inline"] = [f"/tmp/CustomScripts/{vmprovisionscript} {vmprovision_opts}"]
+    if args.ostype == 25:
+        data['build']['provisioner'][1]["shell"]["inline"] = [f"/tmp/CustomScripts/{vmprovisionscript} {vmprovision_opts}; systemctl reboot"]
+        data['build']['provisioner'][1]["shell"]["expect_disconnect"] = True
+        data['build']['provisioner'].append('')
+        data['build']['provisioner'][2] = {}
+        data['build']['provisioner'][2]["shell"] = {}
+        data['build']['provisioner'][2]["shell"]["inline"] = ["/tmp/CustomScripts/Aiso_CreateVM.py"]
+        data['build']['provisioner'][2]["shell"]["pause_before"] = "15s"
+        data['build']['provisioner'][2]["shell"]["timeout"] = "90m"
     if 30 <= args.ostype <= 39:
-        data['build']['provisioner'][0]["shell"] = {}
-        data['build']['provisioner'][0]["shell"]["inline"] = ["hostnamectl set-hostname '{vmname}'; mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{vmuser}/.ssh; echo '{sshkey}' > ~{vmuser}/.ssh/authorized_keys; chown {vmuser}:{vmuser} -R ~{vmuser}; apt install -y git dhcpcd5 avahi-daemon sudo; systemctl enable --now avahi-daemon; {gitcmd}; /opt/CustomScripts/{vmprovisionscript} {vmprovision_opts}".format(vmprovisionscript=vmprovisionscript, vmprovision_opts=vmprovision_opts, sshkey=sshkey, vmuser=args.vmuser, gitcmd=git_cmdline(), vmname=vmname)]
+        data['build']['provisioner'][1]["shell"] = {}
+        data['build']['provisioner'][1]["shell"]["inline"] = [f"hostnamectl set-hostname '{vmname}'; mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{args.vmuser}/.ssh; echo '{sshkey}' > ~{args.vmuser}/.ssh/authorized_keys; chown {args.vmuser}:{args.vmuser} -R ~{args.vmuser}; apt install -y git dhcpcd5 avahi-daemon sudo; systemctl enable --now avahi-daemon; /tmp/CustomScripts/{vmprovisionscript} {vmprovision_opts}"]
         data['source'][packer_type]['local']["boot_command"] = ["<esc>auto url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/debian.cfg hostname=debian locale=en_US keyboard-configuration/modelcode=SKIP netcfg/choose_interface=auto <enter>"]
     if 40 <= args.ostype <= 41:
         data['source'][packer_type]['local']["boot_command"] = ["<wait2><enter><wait30><right><wait><enter><wait>dhclient -b vtnet0<enter><wait>dhclient -b em0<enter><wait10>fetch -o /tmp/installerconfig http://{{ .HTTPIP }}:{{ .HTTPPort }}/freebsd<wait><enter><wait>bsdinstall script /tmp/installerconfig<wait><enter>"]
-        data['build']['provisioner'][0]["shell"] = {}
+        data['build']['provisioner'][1]["shell"] = {}
         # Needed for freebsd: https://www.packer.io/docs/provisioners/shell.html#execute_command
-        data['build']['provisioner'][0]["shell"]["execute_command"] = "chmod +x {{ .Path }}; env {{ .Vars }} {{ .Path }}"
-        data['build']['provisioner'][0]["shell"]["inline"] = ['''export ASSUME_ALWAYS_YES=yes; pw useradd -n {vmuser} -m; pw usermod {vmuser} -c "{fullname}"; chpass -p '{encpass}' {vmuser}; mkdir -m 700 -p /root/.ssh; echo "{sshkey}" > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{vmuser}/.ssh; echo "{sshkey}" > ~{vmuser}/.ssh/authorized_keys; chown -R {vmuser}:{vmuser} ~{vmuser}; pkg update -f; pkg install -y git python3; {gitcmd}; exit 0; /opt/CustomScripts/{vmprovisionscript} {vmprovision_opts}'''.format(vmprovisionscript=vmprovisionscript, vmprovision_opts=vmprovision_opts, sshkey=sshkey, vmuser=args.vmuser, encpass=sha512_password, fullname=args.fullname, gitcmd=git_cmdline())]
+        data['build']['provisioner'][1]["shell"]["execute_command"] = "chmod +x {{ .Path }}; env {{ .Vars }} {{ .Path }}"
+        data['build']['provisioner'][1]["shell"]["inline"] = [f'''export ASSUME_ALWAYS_YES=yes; pw useradd -n {args.vmuser} -m; pw usermod {args.vmuser} -c "{args.fullname}"; chpass -p '{sha512_password}' {args.vmuser}; mkdir -m 700 -p /root/.ssh; echo "{sshkey}" > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{args.vmuser}/.ssh; echo "{sshkey}" > ~{args.vmuser}/.ssh/authorized_keys; chown -R {args.vmuser}:{args.vmuser} ~{args.vmuser}; pkg update -f; pkg install -y git python3; /tmp/CustomScripts/{vmprovisionscript} {vmprovision_opts}''']
         data['source'][packer_type]['local']["shutdown_command"] = "shutdown -p now"
     if 45 <= args.ostype <= 49:
         data['source'][packer_type]['local']["shutdown_command"] = "poweroff"
         data['source'][packer_type]['local']["boot_command"] = ["<wait10>root<enter><wait>", "ifconfig eth0 up && udhcpc -i eth0<enter><wait5>", "wget http://{{ .HTTPIP }}:{{ .HTTPPort }}/alpine-answers<enter><wait>", f"setup-alpine -e -f $PWD/alpine-answers; mount /dev/vda3 /mnt; echo 'PermitRootLogin yes' >> /mnt/etc/ssh/sshd_config; echo 'root:{sha512_password}' | chpasswd -e -R /mnt; reboot<enter><wait5>", "<wait30s>y<enter>"]
-        data['build']['provisioner'][0]["shell"] = {}
-        data['build']['provisioner'][0]["shell"]["inline"] = [f"echo '{args.vmuser}:{sha512_password}' | chpasswd -e; addgroup {args.vmuser} wheel; chown -R {args.vmuser}:{args.vmuser} ~{args.vmuser}; apk add git python3; git clone https://github.com/ramesh45345/CustomScripts /opt/CustomScripts; /opt/CustomScripts/{vmprovisionscript} {vmprovision_opts}"]
+        data['build']['provisioner'][1]["shell"] = {}
+        data['build']['provisioner'][1]["shell"]["inline"] = [f"echo '{args.vmuser}:{sha512_password}' | chpasswd -e; addgroup {args.vmuser} wheel; chown -R {args.vmuser}:{args.vmuser} ~{args.vmuser}; apk add git python3; /tmp/CustomScripts/{vmprovisionscript} {vmprovision_opts}"]
     if 50 <= args.ostype <= 59:
         # Reboot after initial script
         data['build']['provisioner'][0]["windows-restart"] = {}
         data['build']['provisioner'][0]["windows-restart"]["restart_timeout"] = "10m"
-        data['build']['provisioner'].append('')
-        data['build']['provisioner'][1] = {}
         data['build']['provisioner'][1]["file"] = {}
         data['build']['provisioner'][1]["file"]["source"] = os.path.join(tempscriptfolderpath)
         data['build']['provisioner'][1]["file"]["destination"] = "C:"
