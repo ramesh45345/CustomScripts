@@ -4,6 +4,7 @@
 # Python includes
 import argparse
 import configparser
+import functools
 import os
 import pathlib
 import subprocess
@@ -13,6 +14,9 @@ import xml.etree.ElementTree as ET
 # Custom includes
 import CFunc
 import CMimeSet
+
+# Disable buffered stdout (to ensure prints are in order)
+print = functools.partial(print, flush=True)
 
 print("Running {0}".format(__file__))
 
@@ -190,9 +194,9 @@ if shutil.which("mate-session"):
     gsettings_set("org.mate.Marco.general", "audible-bell", "false")
     # Set Fonts
     gsettings_set("org.mate.interface", "document-font-name", "'Noto Sans 11'")
-    gsettings_set("org.mate.interface", "font-name", "'Roboto 11'")
+    gsettings_set("org.mate.interface", "font-name", "'Noto Sans 11'")
     gsettings_set("org.mate.interface", "monospace-font-name", "'Liberation Mono 11'")
-    gsettings_set("org.mate.Marco.general", "titlebar-font", "'Roboto Bold 11'")
+    gsettings_set("org.mate.Marco.general", "titlebar-font", "'Noto Sans Bold 11'")
     dconf_write("/org/mate/terminal/profiles/default/use-theme-colors", "false")
     dconf_write("/org/mate/terminal/profiles/default/background-color", "'#00002B2A3635'")
     dconf_write("/org/mate/terminal/profiles/default/foreground-color", "'#838294939695'")
@@ -308,9 +312,9 @@ if shutil.which("gnome-session") or shutil.which("gnome-shell"):
 
     # Set Fonts
     gsettings_set("org.gnome.desktop.interface", "document-font-name", "'Noto Sans 11'")
-    gsettings_set("org.gnome.desktop.interface", "font-name", "'Roboto 11'")
+    gsettings_set("org.gnome.desktop.interface", "font-name", "'Noto Sans 11'")
     gsettings_set("org.gnome.desktop.interface", "monospace-font-name", "'Liberation Mono 11'")
-    gsettings_set("org.gnome.desktop.wm.preferences", "titlebar-font", "'Roboto Bold 11'")
+    gsettings_set("org.gnome.desktop.wm.preferences", "titlebar-font", "'Noto Sans Bold 11'")
     # Dash to panel settings
     dconf_write("/org/gnome/shell/extensions/dash-to-panel/panel-element-positions-monitors-sync", "true")
 
@@ -781,8 +785,8 @@ if shutil.which("xfconf-query") and shutil.which("xfce4-panel"):
         xfconf("xsettings", "/Net/IconThemeName", "string", "Numix-Circle")
     xfconf("xfwm4", "/general/workspace_count", "int", "1")
     # Fonts
-    xfconf("xfwm4", "/general/title_font", "string", "Roboto Bold 11")
-    xfconf("xsettings", "/Gtk/FontName", "string", "Roboto 10")
+    xfconf("xfwm4", "/general/title_font", "string", "Noto Sans Bold 11")
+    xfconf("xsettings", "/Gtk/FontName", "string", "Noto Sans 10")
     xfconf("xsettings", "/Gtk/MonospaceFontName", "string", "Liberation Mono 10")
     xfconf("xsettings", "/Xft/Antialias", "int", "1")
     xfconf("xsettings", "/Xft/Hinting", "int", "1")

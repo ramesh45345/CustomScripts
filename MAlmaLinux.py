@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Install AlmaLinux 9 Software"""
+"""Install AlmaLinux Software"""
 
 # Python includes.
 import argparse
+import functools
 import os
 import shutil
 import subprocess
@@ -12,13 +13,16 @@ import CFunc
 import CFuncExt
 import MFedora
 
+# Disable buffered stdout (to ensure prints are in order)
+print = functools.partial(print, flush=True)
+
 print("Running {0}".format(__file__))
 
 # Folder of this script
 SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))
 
 # Get arguments
-parser = argparse.ArgumentParser(description='Install AlmaLinux 9 Software.')
+parser = argparse.ArgumentParser(description='Install AlmaLinux Software.')
 parser.add_argument("-d", "--desktop", help='Desktop Environment (choices: %(choices)s) (default: %(default)s)', default=None, choices=["gnome", "kde", "xfce"])
 parser.add_argument("-k", "--kerneltype", type=int, help="Kernel type (0=stock kernel, 1=Mainline kernel, 2=LTS kernel (default: %(default)s)", default=1, choices=[0, 1, 2])
 parser.add_argument("-x", "--nogui", help='Configure script to disable GUI.', action="store_true")
@@ -43,23 +47,23 @@ vmstatus = CFunc.getvmstate()
 # CRB
 subprocess.run("dnf config-manager --set-enabled crb", shell=True, check=True)
 # EPEL
-CFunc.dnfinstall("https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm https://dl.fedoraproject.org/pub/epel/epel-next-release-latest-9.noarch.rpm")
+CFunc.dnfinstall("https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm")
 # RPMFusion
-CFunc.dnfinstall("https://download1.rpmfusion.org/free/el/rpmfusion-free-release-9.noarch.rpm https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-9.noarch.rpm")
+CFunc.dnfinstall("https://download1.rpmfusion.org/free/el/rpmfusion-free-release-10.noarch.rpm https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-10.noarch.rpm")
 # Visual Studio Code
 MFedora.repo_vscode()
 # EL Repo
 # https://elrepo.org
-subprocess.run("rpm --import https://www.elrepo.org/RPM-GPG-KEY-v2-elrepo.org ; dnf install -y https://elrepo.org/linux/elrepo/el9/x86_64/RPMS/elrepo-release-9.0-1.el9.elrepo.noarch.rpm ; dnf config-manager --enable elrepo-kernel", shell=True)
+subprocess.run("rpm --import https://www.elrepo.org/RPM-GPG-KEY-v2-elrepo.org ; dnf install -y https://elrepo.org/linux/elrepo/el10/x86_64/RPMS/elrepo-release-10.0-1.el10.elrepo.noarch.rpm ; dnf config-manager --enable elrepo-kernel", shell=True)
 
 # Update system after enabling repos.
 CFunc.dnfupdate()
 
 ### Install Software ###
 # Cli tools
-CFunc.dnfinstall("zsh fish nano tmux iotop rsync p7zip p7zip-plugins zip unzip xdg-utils xdg-user-dirs util-linux-user openssh-server openssh-clients avahi python3-pip python3-passlib")
+CFunc.dnfinstall("git zsh fish nano tmux iotop rsync 7zip zip unzip xdg-utils xdg-user-dirs util-linux-user openssh-server openssh-clients avahi python3-pip")
 CFunc.sysctl_enable("sshd avahi-daemon")
-CFunc.dnfinstall("google-noto-sans-fonts google-noto-sans-mono-fonts google-roboto-fonts")
+CFunc.dnfinstall("google-noto-sans-fonts google-noto-sans-mono-fonts")
 # Topgrade
 CFuncExt.topgrade_install()
 # Samba
@@ -70,8 +74,7 @@ CFunc.dnfinstall("cifs-utils")
 # Enable setuid for mount.cifs to enable mounting as a normal user
 subprocess.run("sudo chmod u+s /sbin/mount.cifs", shell=True)
 # NTP Configuration
-CFunc.dnfinstall("systemd-timesyncd")
-subprocess.run("systemctl enable systemd-timesyncd; timedatectl set-local-rtc false; timedatectl set-ntp 1", shell=True)
+subprocess.run("timedatectl set-local-rtc false; timedatectl set-ntp 1", shell=True)
 # Install kernel
 if args.kerneltype == 1:
     CFunc.dnfinstall("kernel-ml kernel-ml-devel kernel-ml-modules-extra")
@@ -90,9 +93,6 @@ CFuncExt.FirewalldConfig()
 
 # GUI Packages
 if not args.nogui:
-    CFunc.dnfinstall("@base-x")
-    # Enable graphical target
-    subprocess.run("systemctl set-default graphical.target", shell=True)
     # Browsers
     CFunc.dnfinstall("firefox")
     # Editors
@@ -106,25 +106,24 @@ if not args.nogui:
         # Workstation
         CFunc.dnfinstall('@workstation --disablerepo="rpmfusion*"')
         # Misc tools
-        CFunc.dnfinstall("dconf-editor chrome-gnome-shell")
+        CFunc.dnfinstall("dconf-editor")
         # Gnome Stuff
         CFunc.dnfinstall("gnome-tweaks gnome-extensions-app")
-        CFunc.dnfinstall("tilix tilix-nautilus")
         # Gnome Shell extensions
         # Install gs installer script.
         gs_installer = CFunc.downloadfile("https://raw.githubusercontent.com/brunelli/gnome-shell-extension-installer/master/gnome-shell-extension-installer", os.path.join(os.sep, "usr", "local", "bin"), overwrite=True)
         os.chmod(gs_installer[0], 0o777)
-        # Install volume extension
-        CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 858".format(gs_installer[0]))
-        # Install Dash to Panel extension
-        CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 1160".format(gs_installer[0]))
+        # Install extensions
+        CFunc.dnfinstall("gnome-shell-extension-window-list gnome-shell-extension-user-theme gnome-shell-extension-system-monitor gnome-shell-extension-status-icons gnome-shell-extension-light-style gnome-shell-extension-appindicator gnome-shell-extension-dash-to-panel")
     elif args.desktop == "kde":
         # Plasma
-        CFunc.dnfinstall('--skip-broken install @"KDE Plasma Workspaces" --exclude kf5-akonadi-server-mysql')
+        CFunc.dnfinstall('install @"KDE Plasma Workspaces"')
         CFunc.sysctl_enable("sddm")
     elif args.desktop == "xfce":
         # Xfce
         CFunc.dnfinstall('@xfce xfce4-whiskermenu-plugin xfce4-systemload-plugin xfce4-datetime-plugin xfce4-cpugraph-plugin xfce4-netload-plugin xfce4-genmon-plugin xfce4-mount-plugin')
+    # Enable graphical target
+    subprocess.run("systemctl set-default graphical.target", shell=True)
 
 # Install software for VMs
 if vmstatus == "kvm":
@@ -182,10 +181,11 @@ if not args.nogui:
 
     # Install nix
     CFuncExt.nix_standalone_install(USERNAMEVAR, """
-# Media tools
-mpv
-ffmpeg
-yt-dlp""")
+  tilix
+  # Media tools
+  mpv
+  ffmpeg
+  yt-dlp""")
 
 # Disable Selinux
 # To get selinux status: sestatus, getenforce
