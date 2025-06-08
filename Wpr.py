@@ -20,6 +20,8 @@ SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))
 
 
 ### Global Variables ###
+# Get non-root user information.
+USERNAMEVAR, USERGROUP, USERHOME = CFunc.getnormaluser()
 # Get powershell command
 powershell_cmd = "pwsh.exe"
 powershell_cmd_fullpath = shutil.which(powershell_cmd)
@@ -28,6 +30,7 @@ url_vclib = "https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx"
 url_uixaml = "https://www.nuget.org/api/v2/package/Microsoft.UI.Xaml"
 url_winget_msix = "https://github.com/microsoft/winget-cli/releases/download/v1.10.390/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle"
 url_winget_lic = "https://github.com/microsoft/winget-cli/releases/download/v1.10.390/e53e159d00e04f729cc2180cffd1c02e_License1.xml"
+url_msstore_giturl = "https://github.com/QuangVNMC/Add-Microsoft-Store"
 
 
 ### Utility Functions ###
@@ -106,6 +109,17 @@ def Util_WingetInstall():
     os.remove(file_winget_msix[0])
     os.remove(file_winget_lic[0])
     return
+def Util_MSStore():
+    """Install Microsoft Store"""
+    mst_folder = os.path.join(USERHOME, "Documents", "Add-Microsoft-Store")
+    mst_script = os.path.join(mst_folder, "Add-Store.cmd")
+    # Clone the repo
+    CFunc.gitclone(url_msstore_giturl, mst_folder)
+    # Remove the pause after running
+    CFunc.find_replace(mst_folder, 'pause >nul', '', "Add-Store.cmd")
+    # Run script
+    subprocess.run(mst_script)
+    return
 def Util_WinTerminalInstall():
     """Install Windows Terminal"""
     pwsh_run("winget install --accept-package-agreements --accept-source-agreements --disable-interactivity --id Microsoft.WindowsTerminal -e", error_on_fail=False)
@@ -128,7 +142,7 @@ ostype = win_ostype()
 def SoftwareInstall():
     """Install software"""
     if ostype == 2:
-        Util_WingetInstall()
+        Util_MSStore()
     # Windows Terminal
     Util_WinTerminalInstall()
     return
