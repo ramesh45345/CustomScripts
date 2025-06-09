@@ -210,7 +210,7 @@ function Fcn-Software {
   # Workaround for windows-terminal https://github.com/mkevenaar/chocolatey-packages/issues/136
   Add-AppxPackage https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx
   # GUI Apps
-  choco upgrade -y firefox notepadplusplus tortoisegit bleachbit gsudo putty chocolateygui conemu cascadiafonts vscodium sumatrapdf winget WizTree
+  choco upgrade -y firefox notepadplusplus tortoisegit bleachbit gsudo putty wingetui conemu cascadiafonts vscodium sumatrapdf winget WizTree
   choco upgrade -y ShutUp10
   # Set firefox default browser
   $associations_xml = @"
