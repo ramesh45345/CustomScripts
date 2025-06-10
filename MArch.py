@@ -179,7 +179,7 @@ if __name__ == '__main__':
         CFunc.pacman_install("ffmpeg mpv yt-dlp")
         yay_install(USERNAMEVAR, "yt-dlp-drop-in")
         # Editors
-        CFunc.pacman_install("code")
+        yay_install(USERNAMEVAR, "vscodium-bin")
         # Syncthing
         CFunc.pacman_install("syncthing")
         CFunc.pacman_install("dconf-editor")
