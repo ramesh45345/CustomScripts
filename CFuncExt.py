@@ -2,6 +2,10 @@
 """
 General Python Extended Functions
 Includes distribution specific and more complex common functions.
+To run a function in this script that doesn't have an argument switch:
+```
+sudo python -c "import CFuncExt; CFuncExt.topgrade_install()" ; sudo rm -rf ./__pycache__/
+```
 """
 
 # Python includes.
