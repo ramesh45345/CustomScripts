@@ -41,6 +41,11 @@ def pwsh_subpout(cmd: str):
     """Run a command with poershell and get its output."""
     output = subprocess.run([powershell_cmd_fullpath, "-c", cmd], stdout=subprocess.PIPE, check=False, universal_newlines=True).stdout.strip()
     return output
+def win_add_path(cmd: str, path: str):
+    """"""
+    if not shutil.which(cmd) and os.path.isdir(path):
+        os.environ['PATH'] += f';{path}'
+    return
 def win_vmtype() -> int:
     """
     Return the VM type.
@@ -114,7 +119,11 @@ def Util_MSStore():
     mst_folder = os.path.join(USERHOME, "Documents", "Add-Microsoft-Store")
     mst_script = os.path.join(mst_folder, "Add-Store.cmd")
     # Clone the repo
-    CFunc.gitclone(url_msstore_giturl, mst_folder)
+    try:
+        CFunc.gitclone(url_msstore_giturl, mst_folder)
+    except:
+        if not os.path.isfile(mst_script):
+            raise Exception(f"ERROR: {mst_folder} was not cloned successfully.")
     # Remove the pause after running
     CFunc.find_replace(mst_folder, 'pause >nul', '', "Add-Store.cmd")
     # Run script
@@ -157,4 +166,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     ### Begin Code ###
+    win_add_path("git", r"C:\Program Files\Git\cmd")
     SoftwareInstall()

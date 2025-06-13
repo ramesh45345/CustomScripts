@@ -751,10 +751,9 @@ if __name__ == '__main__':
         data['build']['provisioner'][2] = {}
         data['build']['provisioner'][2]["powershell"] = {}
         data['build']['provisioner'][2]["powershell"]["inline"] = [
-            r'''powershell -executionpolicy bypass "& Set-Variable ProgressPreference SilentlyContinue; &'{0}'; $LastExitCode = 0;"'''.format(os.path.join("C:/", tempscriptbasename, "Win-provision.ps1")),
-            # r'$py_pathname = (Get-ChildItem C:\Python*\python.exe -Recurse).fullname; Start-Process -Wait -FilePath $py_pathname -ArgumentList "{0}" -Verb RunAs'.format(os.path.join("C:/", tempscriptbasename, "Wpr.py")),
-            f'Remove-Item -Recurse {os.path.join("C:/", tempscriptbasename)}; $LastExitCode = 0',
+            r'''powershell -executionpolicy bypass "& Set-Variable ProgressPreference SilentlyContinue; &'{0}'; &'C:/Python*/python.exe' {1}; Remove-Item -Recurse {2} ; exit 0;"'''.format(os.path.join("C:/", tempscriptbasename, "Win-provision.ps1"), os.path.join("C:/", tempscriptbasename, "Wpr.py"), os.path.join("C:/", tempscriptbasename)),
         ]
+        # data['build']['provisioner'][2]["powershell"]["debug_mode"] = 1
         # Press enter at the cdrom prompt.
         data['source'][packer_type]['local']["boot_command"] = ["<enter><wait><enter><wait><enter><wait><enter><wait><enter>"]
         data['source'][packer_type]['local']["boot_wait"] = "1s"
