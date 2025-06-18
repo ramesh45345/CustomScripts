@@ -752,7 +752,7 @@ if __name__ == '__main__':
         data['build']['provisioner'][2] = {}
         data['build']['provisioner'][2]["powershell"] = {}
         data['build']['provisioner'][2]["powershell"]["inline"] = [
-            r'''powershell -executionpolicy bypass "& Set-Variable ProgressPreference SilentlyContinue; &'{0}'; &'C:/Python*/python.exe' {1}; Remove-Item -Recurse {2} ; exit 0;"'''.format(os.path.join("C:/", tempscriptbasename, "Win-provision.ps1"), os.path.join("C:/", tempscriptbasename, "Wpr.py"), os.path.join("C:/", tempscriptbasename)),
+            r'''powershell -executionpolicy bypass "& Set-Variable ProgressPreference SilentlyContinue; &'{0}'; &'C:/Python*/python.exe' {1}; Remove-Item -Recurse {2} ; exit 0;"'''.format(os.path.join("C:/", tempscriptbasename, "Win-provision.ps1"), os.path.join("C:/", tempscriptbasename, "Wwinget.py"), os.path.join("C:/", tempscriptbasename)),
         ]
         # data['build']['provisioner'][2]["powershell"]["debug_mode"] = 1
         # Press enter at the cdrom prompt.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Provision a new Windows install."""
+"""Provision winget related Windows software."""
 
 # Python includes.
 import argparse
@@ -11,6 +11,7 @@ import subprocess
 import tempfile
 # Custom includes
 import CFunc
+import Wprovision
 
 # Disable buffered stdout (to ensure prints are in order)
 print = functools.partial(print, flush=True)
@@ -34,48 +35,6 @@ url_msstore_giturl = "https://github.com/QuangVNMC/Add-Microsoft-Store"
 
 
 ### Utility Functions ###
-def pwsh_run(cmd: list = [], error_on_fail: bool = True):
-    """Run a command with powershell."""
-    subprocess.run([powershell_cmd_fullpath, "-c", cmd], check=error_on_fail)
-def pwsh_subpout(cmd: str):
-    """Run a command with poershell and get its output."""
-    output = subprocess.run([powershell_cmd_fullpath, "-c", cmd], stdout=subprocess.PIPE, check=False, universal_newlines=True).stdout.strip()
-    return output
-def win_add_path(cmd: str, path: str):
-    """"""
-    if not shutil.which(cmd) and os.path.isdir(path):
-        os.environ['PATH'] += f';{path}'
-    return
-def win_vmtype() -> int:
-    """
-    Return the VM type.
-    0: Not a VM
-    1: virtualbox
-    2: qemu
-    """
-    out_model = pwsh_subpout("(Get-CimInstance -ClassName Win32_ComputerSystem).Model")
-    out_manufacturer = pwsh_subpout("(Get-CimInstance -ClassName Win32_ComputerSystem).Manufacturer")
-    if "virtualbox" in out_model.lower():
-        vmtype = 1
-    elif "qemu" in out_manufacturer.lower():
-        vmtype = 2
-    else:
-        vmtype = 0
-    return vmtype
-def win_ostype() -> int:
-    """
-    Return the OS type.
-    1: Windows 11
-    2: LTSC
-    3: Server
-    """
-    ostype = 1
-    out = pwsh_subpout("(systeminfo /fo csv | ConvertFrom-Csv).'OS Name'")
-    if "Enterprise LTSC" in out:
-        ostype = 2
-    elif "Windows Server" in out:
-        ostype = 3
-    return ostype
 def Util_WingetInstall():
     """
     Install winget
@@ -85,7 +44,7 @@ def Util_WingetInstall():
     # Download VCLib
     file_vclib = CFunc.downloadfile(url_vclib, tempfolder)
     # Install VCLib
-    pwsh_run(cmd=f"Add-AppxPackage {file_vclib[0]}", error_on_fail=False)
+    Wprovision.pwsh_run(cmd=f"Add-AppxPackage {file_vclib[0]}", error_on_fail=False)
     # Download UI Xaml
     file_zip_uixaml = CFunc.downloadfile(url_uixaml, tempfolder)
     uixaml_folder = os.path.join(tempfolder, "uixaml")
@@ -98,15 +57,15 @@ def Util_WingetInstall():
         for file in files:
             if regex.match(file):
                 file_uixaml_appx = os.path.join(uixaml_folder, "tools", "AppX", "x64", "Release", file)
-    pwsh_run(cmd=f"Add-AppxPackage {file_uixaml_appx}", error_on_fail=False)
+    Wprovision.pwsh_run(cmd=f"Add-AppxPackage {file_uixaml_appx}", error_on_fail=False)
     # Download winget
     file_winget_msix = CFunc.downloadfile(url_winget_msix, tempfolder)
     file_winget_lic = CFunc.downloadfile(url_winget_lic, tempfolder)
     # Install winget
-    pwsh_run(cmd=f"Add-AppxPackage {file_winget_msix[0]}", error_on_fail=False)
+    Wprovision.pwsh_run(cmd=f"Add-AppxPackage {file_winget_msix[0]}", error_on_fail=False)
     # Configure the WinGet client with the correct license
-    pwsh_run(cmd=f"Add-AppxProvisionedPackage -Online -PackagePath {file_winget_msix[0]} -LicensePath {file_winget_lic[0]}", error_on_fail=False)
-    pwsh_run(cmd="Repair-WinGetPackageManager -AllUsers -Force -Latest")
+    Wprovision.pwsh_run(cmd=f"Add-AppxProvisionedPackage -Online -PackagePath {file_winget_msix[0]} -LicensePath {file_winget_lic[0]}", error_on_fail=False)
+    Wprovision.pwsh_run(cmd="Repair-WinGetPackageManager -AllUsers -Force -Latest")
     # Cleanup
     os.remove(file_vclib[0])
     shutil.rmtree(uixaml_folder, ignore_errors=True)
@@ -131,10 +90,11 @@ def Util_MSStore():
     return
 def Util_WinTerminalInstall():
     """Install Windows Terminal"""
-    pwsh_run("winget install --accept-package-agreements --accept-source-agreements --disable-interactivity --id Microsoft.WindowsTerminal -e", error_on_fail=False)
+    print("Install Windows Terminal")
+    Wprovision.pwsh_run("winget install --accept-package-agreements --accept-source-agreements --disable-interactivity --id Microsoft.WindowsTerminal -e", error_on_fail=False)
     TargetPath = r"shell:AppsFolder\Microsoft.WindowsTerminal_8wekyb3d8bbwe!App"
     shortcutfile = os.path.join(os.getenv("PUBLIC"), "Desktop", "Windows Terminal.lnk")
-    pwsh_run(f"""
+    Wprovision.pwsh_run(f"""
 $WScriptShell = New-Object -ComObject WScript.Shell
 $Shortcut = $WScriptShell.CreateShortcut("{shortcutfile}")
 $Shortcut.TargetPath = "{TargetPath}"
@@ -143,17 +103,20 @@ $Shortcut.Save()
     return
 
 # Utility Variables
-vmtype = win_vmtype()
-ostype = win_ostype()
+vmtype = Wprovision.win_vmtype()
+ostype = Wprovision.win_ostype()
 
 
 ### Code Functions ###
-def SoftwareInstall():
-    """Install software"""
+def WingetSoftwareInstall():
+    """Install software depending on MSStore/winget."""
     if ostype == 2:
         Util_MSStore()
-    # Windows Terminal
-    Util_WinTerminalInstall()
+    if CFunc.commands_check(["winget"], exit_if_fail=False):
+        # Windows Terminal
+        Util_WinTerminalInstall()
+    else:
+        print("ERROR: Winget not found. Skipping provision.")
     return
 
 
@@ -161,10 +124,10 @@ if __name__ == '__main__':
     print("Running {0}".format(__file__))
 
     # Get arguments
-    parser = argparse.ArgumentParser(description='Provision a new Windows install.')
+    parser = argparse.ArgumentParser(description='Provision a new Windows install using commands that rely on winget.')
     parser.add_argument("-n", "--noprompt", help="No prompt")
     args = parser.parse_args()
 
     ### Begin Code ###
-    win_add_path("git", r"C:\Program Files\Git\cmd")
-    SoftwareInstall()
+    Wprovision.win_add_path("git", r"C:\Program Files\Git\cmd")
+    WingetSoftwareInstall()
