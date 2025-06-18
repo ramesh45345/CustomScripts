@@ -179,6 +179,7 @@ def cmd_virtinstall(vmname: str,
                     efi: bool = True,
                     secureboot: bool = False,
                     cpucores: str = multiprocessing.cpu_count(),
+                    cpuflags: str = "host-model",
                     diskinterface: str = "virtio",
                     netdev: str = "virtio",
                     video: str = "virtio",
@@ -186,7 +187,7 @@ def cmd_virtinstall(vmname: str,
                     cmd_print: bool = False
                     ):
     """Return a virt-install command to use."""
-    cmd = f"""virt-install --connect qemu:///system --name={vmname} --disk path={diskpath}.qcow2,bus={diskinterface} --disk device=cdrom,path="{cdrom_path}",bus=sata,target=sda,readonly=on --graphics spice --cpu host-model --vcpu={cpucores},sockets=1,cores={cpucores} --memory {memory} --memorybacking source.type=memfd,access.mode=shared --network bridge=virbr0,model={netdev} --filesystem driver.type=virtiofs,source=/mnt,target=mnt --filesystem driver.type=virtiofs,source=/home,target=home --os-variant={variant} --import --noautoconsole --noreboot --video={video} --channel unix,target_type=virtio,name=org.qemu.guest_agent.0 --channel spicevmc,target_type=virtio,name=com.redhat.spice.0"""
+    cmd = f"""virt-install --connect qemu:///system --name={vmname} --disk path={diskpath}.qcow2,bus={diskinterface} --disk device=cdrom,path="{cdrom_path}",bus=sata,target=sda,readonly=on --graphics spice --cpu {cpuflags} --vcpu={cpucores},sockets=1,cores={cpucores} --memory {memory} --memorybacking source.type=memfd,access.mode=shared --network bridge=virbr0,model={netdev} --filesystem driver.type=virtiofs,source=/mnt,target=mnt --filesystem driver.type=virtiofs,source=/home,target=home --os-variant={variant} --import --noautoconsole --noreboot --video={video} --channel unix,target_type=virtio,name=org.qemu.guest_agent.0 --channel spicevmc,target_type=virtio,name=com.redhat.spice.0"""
     if efi is True:
         cmd += f" --boot loader={efi_bin},loader_ro=yes,loader_type=pflash,nvram={efi_nvram}"
         if secureboot is True:
@@ -428,7 +429,7 @@ if __name__ == '__main__':
         vmprovision_defopts = "-x"
     if 50 <= args.ostype <= 59:
         vboxosid = "Windows10_64"
-        kvm_variant = "win10"
+        kvm_variant = "win11"
         vmprovision_defopts = " "
         isourl = None
         # Windows KMS key list: https://docs.microsoft.com/en-us/windows-server/get-started/kmsclientkeys
@@ -866,13 +867,22 @@ if __name__ == '__main__':
 
     # Attach VM to libvirt
     if args.vmtype == 2:
+        kvm_video = "virtio"
+        cpuflags = "host-model"
         if 50 <= args.ostype <= 59:
             kvm_video = "qxl"
-        else:
-            kvm_video = "virtio"
+            lscpu_out = CFunc.subpout("lscpu")
+            lscpu_flag = ",disable=hypervisor,require="
+            if "vmx" in lscpu_out:
+                lscpu_flag += "vmx"
+            elif "svm" in lscpu_out:
+                lscpu_flag += "svm"
+            else:
+                lscpu_flag = ""
+            cpuflags = f"host-model,match=exact{lscpu_flag}"
         # virt-install manual: https://www.mankier.com/1/virt-install
         # List of os: osinfo-query os
-        CREATESCRIPT_KVM = cmd_virtinstall(vmname=vmname, diskpath=os.path.join(vmpath, vmname), variant=kvm_variant, efi=useefi, efi_bin=efi_bin, efi_nvram=efi_nvram, secureboot=secureboot, memory=args.memory, video=kvm_video)
+        CREATESCRIPT_KVM = cmd_virtinstall(vmname=vmname, diskpath=os.path.join(vmpath, vmname), variant=kvm_variant, efi=useefi, efi_bin=efi_bin, efi_nvram=efi_nvram, secureboot=secureboot, memory=args.memory, video=kvm_video, cpuflags=cpuflags)
         if secureboot is True:
             tpm_process.terminate()
         logging.info("KVM launch command: {0}".format(CREATESCRIPT_KVM))
