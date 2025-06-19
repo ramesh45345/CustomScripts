@@ -2,6 +2,7 @@
 """General Python Functions"""
 
 # Python includes.
+import ctypes
 import fnmatch
 import functools
 import json
@@ -241,25 +242,25 @@ def storage_path_detect(folders_in_path: list = ["VMs"], folder_primary: str = "
             storage_path = path
             break
     return storage_path
-def is_root(checkstate=True, state_exit=True):
+def is_root(checkstate: bool=True, state_exit: bool=True) -> bool:
     """
     Check if current user is root or not.
     Pass True if checking to make sure you are root, or False if you don't want to be root.
     """
-    if is_windows() is False:
-        actualstate = bool(os.geteuid() == 0)
-        if actualstate != checkstate:
-            # No match if actual state didn't match the expected state (checkstate).
-            match = False
-            if state_exit is True:
-                sys.exit("\nError: Actual root state is {0}, expected {1}.\n".format(actualstate, checkstate))
-        else:
-            match = True
-        # Return result of root match check.
-        return match
+    if is_windows() is True:
+        # Windows Admin check
+        actualstate = bool(ctypes.windll.shell32.IsUserAnAdmin() == 1)
     else:
-        # Windows should always return false for root.
-        return False
+        actualstate = bool(os.geteuid() == 0)
+    if actualstate != checkstate:
+        # No match if actual state didn't match the expected state (checkstate).
+        match = False
+        if state_exit is True:
+            sys.exit("\nError: Actual root state is {0}, expected {1}.\n".format(actualstate, checkstate))
+    else:
+        match = True
+    # Return result of root match check.
+    return match
 def sudocmd(h=False):
     """Generate sudo command if not root."""
     sudo_cmd = ""
