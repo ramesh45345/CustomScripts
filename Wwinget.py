@@ -111,7 +111,7 @@ ostype = Wprovision.win_ostype()
 def WingetSoftwareInstall():
     """Install software depending on MSStore/winget."""
     if ostype == 2:
-        Util_MSStore()
+        Util_WingetInstall()
     if CFunc.commands_check(["winget"], exit_if_fail=False):
         # Windows Terminal
         Util_WinTerminalInstall()

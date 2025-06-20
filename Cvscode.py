@@ -30,9 +30,6 @@ args = parser.parse_args()
 # Get user details.
 usernamevar, usergroup, userhome = CFunc.getnormaluser()
 
-# Exit if root.
-CFunc.is_root(False)
-
 ########################## Functions ##########################
 def cmd_silent(cmd=list):
     """Run a command silently"""
