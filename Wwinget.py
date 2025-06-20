@@ -31,7 +31,7 @@ url_vclib = "https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx"
 url_uixaml = "https://www.nuget.org/api/v2/package/Microsoft.UI.Xaml"
 url_winget_msix = "https://github.com/microsoft/winget-cli/releases/download/v1.10.390/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle"
 url_winget_lic = "https://github.com/microsoft/winget-cli/releases/download/v1.10.390/e53e159d00e04f729cc2180cffd1c02e_License1.xml"
-url_msstore_giturl = "https://github.com/QuangVNMC/Add-Microsoft-Store"
+url_msstore_giturl = "https://github.com/R-YaTian/LTSC-Add-MicrosoftStore-2021_2024"
 
 
 ### Utility Functions ###
@@ -75,7 +75,7 @@ def Util_WingetInstall():
     return
 def Util_MSStore():
     """Install Microsoft Store"""
-    mst_folder = os.path.join(USERHOME, "Documents", "Add-Microsoft-Store")
+    mst_folder = os.path.join(USERHOME, "Documents", "LTSC-Add-MicrosoftStore-2021_2024")
     mst_script = os.path.join(mst_folder, "Add-Store.cmd")
     # Clone the repo
     try:
@@ -84,6 +84,8 @@ def Util_MSStore():
         if not os.path.isfile(mst_script):
             raise Exception(f"ERROR: {mst_folder} was not cloned successfully.")
     # Remove the pause after running
+    CFunc.find_replace(mst_folder, '''set /p choice="Do you want to install latest DesktopAppInstaller with winget included? This may take a while.(Y/N): "''', '', "Add-Store.cmd")
+    CFunc.find_replace(mst_folder, '''set choice=%choice:~0,1%''', 'set choice=Y', "Add-Store.cmd")
     CFunc.find_replace(mst_folder, 'pause >nul', '', "Add-Store.cmd")
     # Run script
     subprocess.run(mst_script)
@@ -111,7 +113,7 @@ ostype = Wprovision.win_ostype()
 def WingetSoftwareInstall():
     """Install software depending on MSStore/winget."""
     if ostype == 2:
-        Util_WingetInstall()
+        Util_MSStore()
     if CFunc.commands_check(["winget"], exit_if_fail=False):
         # Windows Terminal
         Util_WinTerminalInstall()
