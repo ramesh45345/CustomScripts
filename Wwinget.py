@@ -35,6 +35,16 @@ url_msstore_giturl = "https://github.com/R-YaTian/LTSC-Add-MicrosoftStore-2021_2
 
 
 ### Utility Functions ###
+def Util_WingetTest():
+    """Test if the winget command functions."""
+    winget_exists = False
+    if shutil.which("winget"):
+        try:
+            status = subprocess.Popen([shutil.which("winget"), "-v"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode
+            winget_exists = bool(status != 0)
+        except:
+            winget_exists = False
+    return winget_exists
 def Util_WingetInstall():
     """
     Install winget
@@ -65,7 +75,7 @@ def Util_WingetInstall():
     Wprovision.pwsh_run(cmd=f"Add-AppxPackage {file_winget_msix[0]}", error_on_fail=False)
     # Configure the WinGet client with the correct license
     Wprovision.pwsh_run(cmd=f"Add-AppxProvisionedPackage -Online -PackagePath {file_winget_msix[0]} -LicensePath {file_winget_lic[0]}", error_on_fail=False)
-    Wprovision.pwsh_run(cmd="Repair-WinGetPackageManager -AllUsers -Force -Latest")
+    # Wprovision.pwsh_run(cmd="Repair-WinGetPackageManager -AllUsers -Force -Latest")
     # Cleanup
     os.remove(file_vclib[0])
     shutil.rmtree(uixaml_folder, ignore_errors=True)
@@ -112,9 +122,10 @@ ostype = Wprovision.win_ostype()
 ### Code Functions ###
 def WingetSoftwareInstall():
     """Install software depending on MSStore/winget."""
-    if ostype == 2:
+    if not Util_WingetTest():
         Util_MSStore()
-    if CFunc.commands_check(["winget"], exit_if_fail=False):
+    # Recheck once winget is installed.
+    if Util_WingetTest():
         # Windows Terminal
         Util_WinTerminalInstall()
     else:
