@@ -23,9 +23,6 @@ SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))
 ### Global Variables ###
 # Get non-root user information.
 USERNAMEVAR, USERGROUP, USERHOME = CFunc.getnormaluser()
-# Get powershell command
-powershell_cmd = "pwsh.exe"
-powershell_cmd_fullpath = shutil.which(powershell_cmd)
 # Urls
 url_vclib = "https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx"
 url_uixaml = "https://www.nuget.org/api/v2/package/Microsoft.UI.Xaml"
@@ -45,7 +42,7 @@ def Util_WingetTest():
         except:
             winget_exists = False
     return winget_exists
-def Util_WingetInstall():
+def Util_WingetInstall_Old():
     """
     Install winget
     https://learn.microsoft.com/en-us/windows/iot/iot-enterprise/deployment/install-winget-windows-iot
@@ -83,6 +80,9 @@ def Util_WingetInstall():
     os.remove(file_winget_msix[0])
     os.remove(file_winget_lic[0])
     return
+def Util_WingetInstall():
+    Wprovision.pwsh_run(cmd=f"choco install -y winget.powershell", error_on_fail=False)
+    Wprovision.pwsh_run(cmd=f"Repair-WinGetPackageManager -AllUsers -Force -Latest", error_on_fail=False)
 def Util_MSStore():
     """Install Microsoft Store"""
     mst_folder = os.path.join(USERHOME, "Documents", "LTSC-Add-MicrosoftStore-2021_2024")
@@ -123,7 +123,7 @@ ostype = Wprovision.win_ostype()
 def WingetSoftwareInstall():
     """Install software depending on MSStore/winget."""
     if not Util_WingetTest():
-        Util_MSStore()
+        Util_WingetInstall()
     # Recheck once winget is installed.
     if Util_WingetTest():
         # Windows Terminal
