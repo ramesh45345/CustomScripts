@@ -208,9 +208,9 @@ function Fcn-Software {
   # Install desktop apps.
   Write-Output "Installing Desktop Apps"
   # Workaround for windows-terminal https://github.com/mkevenaar/chocolatey-packages/issues/136
-  Add-AppxPackage https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx
+  # Add-AppxPackage https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx
   # GUI Apps
-  choco upgrade -y firefox notepadplusplus tortoisegit bleachbit gsudo putty wingetui conemu cascadiafonts vscodium sumatrapdf winget WizTree
+  choco upgrade -y firefox notepadplusplus tortoisegit bleachbit gsudo putty wingetui conemu cascadiafonts vscodium sumatrapdf WizTree
   choco upgrade -y ShutUp10
   # Set firefox default browser
   $associations_xml = @"
@@ -229,16 +229,6 @@ function Fcn-Software {
 
   # winfsp
   choco upgrade -y winfsp
-
-  # Windows Terminal
-  winget install --accept-package-agreements --accept-source-agreements --disable-interactivity --id Microsoft.WindowsTerminal -e
-  # Create shortcut for Windows Terminal
-  $TargetPath =  "shell:AppsFolder\Microsoft.WindowsTerminal_8wekyb3d8bbwe!App"
-  $ShortcutFile = "$env:PUBLIC\Desktop\Windows Terminal.lnk"
-  $WScriptShell = New-Object -ComObject WScript.Shell
-  $Shortcut = $WScriptShell.CreateShortcut($ShortcutFile)
-  $Shortcut.TargetPath = $TargetPath
-  $Shortcut.Save()
 
   # Tabby
   choco install -y tabby

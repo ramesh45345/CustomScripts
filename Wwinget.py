@@ -114,10 +114,6 @@ $Shortcut.Save()
 """)
     return
 
-# Utility Variables
-vmtype = Wprovision.win_vmtype()
-ostype = Wprovision.win_ostype()
-
 
 ### Code Functions ###
 def WingetSoftwareInstall():

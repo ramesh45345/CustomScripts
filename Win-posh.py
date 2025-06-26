@@ -110,6 +110,8 @@ Set-Alias ls Get-ChildItemColorFormatWide -Option AllScope
 function which($name) {
     Get-Command $name | Select-Object -ExpandProperty Definition
 }
+# topgrade
+Set-Alias up topgrade
 
 """
 os.makedirs(powershell_profile_folder, exist_ok=True)

@@ -71,17 +71,27 @@ def win_ostype() -> int:
     elif "Windows Server" in out:
         ostype = 3
     return ostype
-
-
-# Utility Variables
-vmtype = win_vmtype()
-ostype = win_ostype()
+def choco_install(pkgs: list, force: bool = False, error_on_fail: bool = False):
+    """Install apps using chocolatey"""
+    cmd = ["choco", "upgrade", "-y"]
+    if force:
+        cmd += ["--force"]
+    cmd += pkgs
+    subprocess.run(cmd, check=error_on_fail)
 
 
 ### Code Functions ###
 def SoftwareInstall():
     """Install software."""
-
+    # Chocolatey config
+    win_add_path("choco", r"C:\ProgramData\chocolatey\bin")
+    subprocess.run(["choco", "feature", "enable", "-n", "allowGlobalConfirmation"], check=False)
+    # gsudo
+    choco_install(["gsudo"])
+    win_add_path("gsudo", r"C:\tools\gsudo\Current")
+    subprocess.run(["gsudo", "config", "PathPrecedence", "True"], check=False)
+    # topgrade
+    choco_install(["topgrade"])
     return
 
 
@@ -94,5 +104,11 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     ### Begin Code ###
+
+    # Utility Variables
+    vmtype = win_vmtype()
+    ostype = win_ostype()
+
+    # Add commands to path
     win_add_path("git", r"C:\Program Files\Git\cmd")
     SoftwareInstall()
