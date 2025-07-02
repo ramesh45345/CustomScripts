@@ -66,8 +66,17 @@ def create_chroot_ubuntu(path: str, packages: str = "systemd-container"):
 
 
 ### Begin Code ###
+# Disable ipv6 (due to no global ipv6 in libvirt VMs)
+subprocess.run("""
+echo "net.ipv6.conf.all.disable_ipv6 = 1" > /etc/sysctl.conf
+echo "net.ipv6.conf.default.disable_ipv6 = 1" >> /etc/sysctl.conf
+sysctl -p
+""", shell=True, check=True)
+
 # Host packges
 CFunc.dnfinstall("podman systemd-container")
+# TODO: Remove once passlib is an installable package
+subprocess.run("pip install -U --break-system-packages passlib", shell=True, check=True)
 
 # Clean
 if args.clean is True:

@@ -114,7 +114,6 @@ mesa-libgl
 mesa-demos
 xorg-xinit
 xf86-input-vmmouse
-xf86-video-vmware
 open-vm-tools
 onboard
 networkmanager

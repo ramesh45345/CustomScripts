@@ -3,13 +3,16 @@
 
 # Python includes.
 import argparse
+from datetime import datetime
 import functools
 import os
 import subprocess
 import sys
 import time
 # Custom includes
+import CFunc
 import PCreateChrootVM
+import Snetvm
 
 # Disable buffered stdout (to ensure prints are in order)
 print = functools.partial(print, flush=True)
@@ -20,9 +23,11 @@ def virsh_get_ip(vm_name: str = "ISOVM", retries: int = 100):
     status = 1
     attempt = 0
     while status != 0 and attempt < retries:
-        return_info = subprocess.run(f'''virsh --connect qemu:///system net-dhcp-leases default | grep {vm_name} | awk '{{print $5}}' | cut -d/ -f 1''', shell=True, check=False, stdout=subprocess.PIPE, universal_newlines=True)
-        status = return_info.returncode
-        ip = return_info.stdout.strip()
+        try:
+            status = 0
+            ip = Snetvm.libvirt_ipv4(vm_name)
+        except:
+            status = 1
         if status != 0:
             print(f"IP retrieval status was {status}, attempt {attempt}, waiting.")
             time.sleep(5)
@@ -39,7 +44,6 @@ parser.add_argument("-s", "--stage", help='Setup Stage (1: Host System, 2: VM, d
 parser.add_argument("-w", "--chrootfolder", help='Location of chroot folder (default: %(default)s)', default=os.path.expanduser("~root"))
 parser.add_argument("-p", "--outfolder", help='Location to store ISOs (default: %(default)s)', default=os.getcwd())
 parser.add_argument("-t", "--distrotype", help='Specify ISO  (choices: %(choices)s) (default: %(default)s)', type=str, default="all", choices=["all", "fedora", "arch", "ubuntu"])
-parser.add_argument("-i", "--resolveip", help='Resolve the IP address of the VM using virsh.', action="store_true")
 args = parser.parse_args()
 
 # Global variables
@@ -48,7 +52,6 @@ fedora_chroot_location = os.path.join(workfolder, "chroot_fedora")
 arch_chroot_location = os.path.join(workfolder, "chroot_arch")
 ubuntu_chroot_location = os.path.join(workfolder, "chroot_ubuntu")
 vm_name = "ISOVM"
-ssh_ip = f"{vm_name}.local"
 ssh_user = "root"
 
 if __name__ == '__main__':
@@ -57,16 +60,18 @@ if __name__ == '__main__':
         print("Running Stage 1, only for host.")
         # Start the VM if it is not started.
         PCreateChrootVM.vm_start(vm_name)
-        if args.resolveip:
-            ssh_ip = virsh_get_ip()
+        ssh_ip = virsh_get_ip()
         PCreateChrootVM.ssh_wait(ip=ssh_ip, user=ssh_user)
         # Sync CustomScripts on host to VM.
         subprocess.run(f"rsync -axHAX --info=progress2 {sys.path[0]}/ {ssh_user}@{ssh_ip}:/opt/CustomScripts/", shell=True, check=True)
+        # Initiate logger
+        buildlog_path = os.path.join(args.outfolder, f"isovm_{datetime.now()}.log")
+        CFunc.log_config(buildlog_path)
         # Execute Stage 2
         stagetwocmd = f"ssh {ssh_ip} -l {ssh_user} /opt/CustomScripts/Aiso_MakeISO.py -s 2 -t {args.distrotype}"
         if args.clean:
             stagetwocmd += " -c"
-        subprocess.run(stagetwocmd, shell=True, check=True)
+        CFunc.subpout_logger(cmd=stagetwocmd)
 
         # Retrieve ISO paths
         fedora_iso_path = subprocess.run(f"ssh {ssh_ip} -l {ssh_user} find {fedora_chroot_location}/root/fedlive/ -maxdepth 1 -type f -name '*.iso'", shell=True, check=False, stdout=subprocess.PIPE, universal_newlines=True).stdout.strip()
@@ -85,6 +90,7 @@ if __name__ == '__main__':
             subprocess.run(f"ssh {ssh_ip} -l {ssh_user} rm -rf {arch_iso_path}", shell=True, check=False)
             subprocess.run(f"ssh {ssh_ip} -l {ssh_user} rm -rf /var/tmp/archiso_wf", shell=True, check=False)
         if ubuntu_iso_path:
+            print(f"scp -C {ssh_user}@{ssh_ip}:{ubuntu_iso_path} {args.outfolder}")
             subprocess.run(f"scp -C {ssh_user}@{ssh_ip}:{ubuntu_iso_path} {args.outfolder}", shell=True, check=True)
             # Cleanup
             subprocess.run(f"ssh {ssh_ip} -l {ssh_user} rm -rf {ubuntu_chroot_location}/root/ubulive/", shell=True, check=False)
