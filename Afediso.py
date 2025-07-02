@@ -90,7 +90,7 @@ xfce4-whiskermenu-plugin
 xfce4-systemload-plugin
 xfce4-diskperf-plugin
 xfce4-clipman-plugin
-tilix
+ptyxis
 @networkmanager-submodules
 NetworkManager-wifi
 network-manager-applet

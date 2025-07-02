@@ -226,8 +226,6 @@ echo "firmware-ivtv firmware-ivtv/license/accepted boolean true" | debconf-set-s
         CFuncExt.ytdlp_install()
         CFunc.aptinstall("gstreamer1.0-vaapi")
         CFunc.aptinstall("fonts-powerline fonts-noto fonts-roboto")
-        # Tilix
-        CFunc.aptinstall("tilix")
         # VSCodium
         vscode_deb()
         # Flatpak

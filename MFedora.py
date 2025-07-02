@@ -144,10 +144,9 @@ if __name__ == '__main__':
         # Gnome
         CFunc.dnfinstall("--allowerasing @workstation-product @gnome-desktop")
         CFunc.sysctl_enable("-f gdm", error_on_fail=True)
-        # Tilix
-        CFunc.dnfinstall("tilix tilix-nautilus")
+        CFunc.dnfinstall("ptyxis")
         # Some Gnome Extensions
-        CFunc.dnfinstall("gnome-terminal-nautilus gnome-tweak-tool dconf-editor")
+        CFunc.dnfinstall("gnome-tweak-tool dconf-editor")
         CFunc.dnfinstall("gnome-shell-extension-gpaste")
         # Install gs installer script.
         gs_installer = CFunc.downloadfile("https://raw.githubusercontent.com/brunelli/gnome-shell-extension-installer/master/gnome-shell-extension-installer", os.path.join(os.sep, "usr", "local", "bin"), overwrite=True)
@@ -169,8 +168,6 @@ if __name__ == '__main__':
         # MATE
         CFunc.dnfinstall("--allowerasing @mate-desktop @mate-applications")
         CFunc.sysctl_enable("-f lightdm", error_on_fail=True)
-        # Tilix
-        CFunc.dnfinstall("tilix tilix-nautilus")
         # Applications
         CFunc.dnfinstall("dconf-editor")
         # Brisk-menu
@@ -181,14 +178,13 @@ if __name__ == '__main__':
     elif args.desktop == "xfce":
         CFunc.dnfinstall("--allowerasing @xfce-desktop-environment")
         CFunc.dnfinstall("xfce4-whiskermenu-plugin xfce4-systemload-plugin xfce4-diskperf-plugin xfce4-clipman-plugin")
-        # Tilix
-        CFunc.dnfinstall("tilix tilix-nautilus")
+        CFunc.dnfinstall("ptyxis")
     elif args.desktop == "lxqt":
         CFunc.dnfinstall("--allowerasing @lxqt-desktop-environment")
         CFunc.dnfinstall("konsole")
     elif args.desktop == "cinnamon":
         CFunc.dnfinstall("--allowerasing @cinnamon-desktop-environment")
-        CFunc.dnfinstall("tilix")
+        CFunc.dnfinstall("ptyxis")
 
     if not args.nogui:
         # Numix

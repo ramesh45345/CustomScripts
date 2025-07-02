@@ -161,19 +161,19 @@ unmanaged-devices=none""")
 
     # Install GUI
     if args.distro == "arch":
-        CFunc.pacman_install("mate-panel mate-session-manager mate-control-center marco xdg-utils dconf-editor epiphany pluma caja caja-open-terminal tilix mate-terminal mate-themes mate-polkit xdg-user-dirs ttf-roboto noto-fonts ttf-liberation tigervnc")
+        CFunc.pacman_install("mate-panel mate-session-manager mate-control-center marco xdg-utils dconf-editor epiphany pluma caja caja-open-terminal ptyxis mate-terminal mate-themes mate-polkit xdg-user-dirs ttf-roboto noto-fonts ttf-liberation tigervnc")
         MArch.yay_install(USERNAMEVAR, "xrdp xorgxrdp brisk-menu numix-circle-icon-theme-git")
     if args.distro == "ubuntu":
         held_pkgs = "gnome-shell gdm3 gnome-session gnome-session-bin ubuntu-session gnome-control-center cheese"
         CFunc.aptmark(held_pkgs)
-        CFunc.aptinstall("mate-desktop-environment marco mate-polkit mate-menus mate-terminal mate-applet-appmenu mate-applet-brisk-menu mate-tweak xdg-utils dconf-editor epiphany pluma caja caja-open-terminal tilix mate-terminal mate-themes fonts-roboto fonts-noto-extra fonts-noto-ui-extra fonts-liberation2 numix-icon-theme numix-icon-theme-circle gnome-icon-theme network-manager-gnome tigervnc-viewer tigervnc-standalone-server tigervnc-xorg-extension xrdp xorgxrdp")
+        CFunc.aptinstall("mate-desktop-environment marco mate-polkit mate-menus mate-terminal mate-applet-appmenu mate-applet-brisk-menu mate-tweak xdg-utils dconf-editor epiphany pluma caja caja-open-terminal mate-terminal mate-themes fonts-roboto fonts-noto-extra fonts-noto-ui-extra fonts-liberation2 numix-icon-theme numix-icon-theme-circle gnome-icon-theme network-manager-gnome tigervnc-viewer tigervnc-standalone-server tigervnc-xorg-extension xrdp xorgxrdp")
         MDebian.vscode_deb()
     if args.distro == "fedora":
         CFunc.dnfinstall("mate-panel mate-session-manager mate-control-center marco")
         MFedora.repo_vscode()
         subprocess.run("dnf copr enable -y rmkrishna/rpms", shell=True, check=True)
         CFunc.dnfupdate()
-        CFunc.dnfinstall("xdg-utils dconf-editor brisk-menu epiphany pluma caja caja-open-terminal tilix mate-terminal mate-themes google-roboto-fonts google-noto-sans-fonts liberation-mono-fonts numix-icon-theme numix-icon-theme-circle codium")
+        CFunc.dnfinstall("xdg-utils dconf-editor brisk-menu epiphany pluma caja caja-open-terminal mate-terminal mate-themes google-roboto-fonts google-noto-sans-fonts liberation-mono-fonts numix-icon-theme numix-icon-theme-circle codium")
     subprocess.run(["/opt/CustomScripts/DExtMate.py"], check=True)
     # vscode setup
     if args.distro == "ubuntu" or args.distro == "fedora":

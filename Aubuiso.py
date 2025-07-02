@@ -169,7 +169,6 @@ s-tui \
 screen \
 ssh \
 testdisk \
-tilix \
 tmux \
 whois \
 xfsdump \

@@ -226,8 +226,6 @@ renderer: NetworkManager""")
         CFunc.aptinstall("printer-driver-cups-pdf")
         # Media Playback
         CFunc.aptinstall("gstreamer1.0-vaapi")
-        # Tilix
-        CFunc.aptinstall("tilix")
         # Flatpak
         CFunc.aptinstall("flatpak")
         CFunc.AddLineToSudoersFile(sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("flatpak")))

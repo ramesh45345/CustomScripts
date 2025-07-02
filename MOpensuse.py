@@ -94,7 +94,7 @@ if __name__ == '__main__':
     # Install Desktop Software
     if args.desktop == "gnome":
         # Gnome
-        zypp_install("patterns-gnome-gnome patterns-gnome-gnome_x11 patterns-gnome-gnome_yast gnome-shell-extension-gpaste tilix")
+        zypp_install("patterns-gnome-gnome patterns-gnome-gnome_x11 patterns-gnome-gnome_yast gnome-shell-extension-gpaste ptyxis")
         # Install gs installer script.
         gs_installer = CFunc.downloadfile("https://raw.githubusercontent.com/brunelli/gnome-shell-extension-installer/master/gnome-shell-extension-installer", os.path.join(os.sep, "usr", "local", "bin"), overwrite=True)
         os.chmod(gs_installer[0], 0o777)

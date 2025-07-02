@@ -106,7 +106,7 @@ if not args.nogui:
         # Workstation
         CFunc.dnfinstall('@workstation --disablerepo="rpmfusion*"')
         # Misc tools
-        CFunc.dnfinstall("dconf-editor")
+        CFunc.dnfinstall("dconf-editor ptyxis")
         # Gnome Stuff
         CFunc.dnfinstall("gnome-tweaks gnome-extensions-app")
         # Gnome Shell extensions
@@ -181,7 +181,6 @@ if not args.nogui:
 
     # Install nix
     CFuncExt.nix_standalone_install(USERNAMEVAR, """
-  tilix
   # Media tools
   mpv
   ffmpeg

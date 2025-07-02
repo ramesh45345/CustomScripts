@@ -123,7 +123,7 @@ gnome-keyring
 firefox
 gvfs
 gvfs-smb
-tilix
+ptyxis
 
 # Xfce Desktop
 xfce4
