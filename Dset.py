@@ -136,6 +136,18 @@ if shutil.which("tilix"):
     else:
         dconf_write("/com/gexperts/Tilix/profiles/2b7c4080-0ddd-46c5-8f23-563fd3ba789d/use-custom-command", "false")
 
+# ptyxis config
+if shutil.which("ptyxis"):
+    dconf_write("/org/gnome/Ptyxis/restore-window-size", "false")
+    dconf_write("/org/gnome/Ptyxis/restore-session", "false")
+    dconf_write("/org/gnome/Ptyxis/Profiles/42252167cc65db90269998256869218d/limit-scrollback", "false")
+    # Fish config
+    if shutil.which("fish"):
+        dconf_write("/org/gnome/Ptyxis/Profiles/42252167cc65db90269998256869218d/use-custom-command", "true")
+        dconf_write("/org/gnome/Ptyxis/Profiles/42252167cc65db90269998256869218d/custom-command", "'{0}'".format(shutil.which("fish")))
+    else:
+        dconf_write("/org/gnome/Ptyxis/Profiles/42252167cc65db90269998256869218d/use-custom-command", "false")
+
 # Gnome System Monitor
 if shutil.which("gnome-system-monitor"):
     dconf_write("/org/gnome/gnome-system-monitor/cpu-stacked-area-chart", "true")
@@ -268,14 +280,13 @@ if shutil.which("gnome-session") or shutil.which("gnome-shell"):
     gsettings_set("org.gnome.shell", "enabled-extensions", "['window-list@gnome-shell-extensions.gcampax.github.com', 'dash-to-dock@micxgx.gmail.com', 'dash-to-panel@jderose9.github.com', 'GPaste@gnome-shell-extensions.gnome.org', 'user-theme@gnome-shell-extensions.gcampax.github.com', 'appindicatorsupport@rgcjonas.gmail.com', 'system-monitor@gnome-shell-extensions.gcampax.github.com']")
     # Check current variable for gnome-system-monitor. If it doesn't exist, set the variable.
     gnome_desktop_read_list = subprocess.run("gsettings get org.gnome.shell favorite-apps", shell=True, check=False, stdout=subprocess.PIPE).stdout.decode().strip()
-    if "gnome-system-monitor.desktop" not in gnome_desktop_read_list:
-        gnome_desktop_search_list = ["firefox.desktop", "brave-browser.desktop", "chrome.desktop", 'thunderbird.desktop', 'nautilus.desktop', "tilix.desktop", "org.kde.konsole.desktop", 'virt-manager.desktop', 'gnome-system-monitor.desktop', 'org.gnome.SystemMonitor.desktop']
-        gnome_desktop_file_list = []
-        for d in gnome_desktop_search_list:
-            ds = CMimeSet.LocateDesktopFileName(d)
-            if ds:
-                gnome_desktop_file_list.append(ds)
-        gsettings_set("org.gnome.shell", "favorite-apps", str(gnome_desktop_file_list))
+    gnome_desktop_search_list = ["firefox.desktop", "brave-browser.desktop", "chrome.desktop", 'thunderbird.desktop', 'nautilus.desktop', "ptyxis.desktop", "tilix.desktop", "org.kde.konsole.desktop", 'virt-manager.desktop', 'gnome-system-monitor.desktop', 'org.gnome.SystemMonitor.desktop']
+    gnome_desktop_file_list = []
+    for d in gnome_desktop_search_list:
+        ds = CMimeSet.LocateDesktopFileName(d)
+        if ds:
+            gnome_desktop_file_list.append(ds)
+    gsettings_set("org.gnome.shell", "favorite-apps", str(gnome_desktop_file_list))
     gsettings_set("org.gnome.desktop.wm.preferences", "button-layout", ":minimize,maximize,close")
     gsettings_set("org.gnome.desktop.wm.preferences", "num-workspaces", "1")
     gsettings_set("org.gnome.desktop.interface", "locate-pointer", "true")
@@ -535,7 +546,7 @@ if shutil.which("kwriteconfig6") and shutil.which("plasma_session"):
     subprocess.run('kwriteconfig6 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --key "PreloadWeight" "42"'.format(toppanel_appletgroup_id), shell=True, check=False)
 
     plasma_desktop_string = ""
-    plasma_desktop_search_list = ["firefox.desktop", "brave-browser.desktop", "chrome.desktop", 'thunderbird.desktop', 'kde.dolphin.desktop', "org.kde.konsole.desktop", 'virt-manager.desktop', 'org.kde.plasma-systemmonitor.desktop', 'gnome-system-monitor.desktop', 'gnome-system-monitor-kde.desktop']
+    plasma_desktop_search_list = ["firefox.desktop", "brave-browser.desktop", "chrome.desktop", 'thunderbird.desktop', 'kde.dolphin.desktop', "org.kde.konsole.desktop", 'virt-manager.desktop', 'org.kde.plasma-systemmonitor.desktop', 'gnome-system-monitor.desktop', 'gnome-system-monitor-kde.desktop', 'org.gnome.SystemMonitor.desktop']
     plasma_desktop_file_list = []
     for d in plasma_desktop_search_list:
         ds = CMimeSet.LocateDesktopFileName(d)
@@ -873,7 +884,7 @@ if shutil.which("xfconf-query") and shutil.which("xfce4-panel"):
     xfconf("xfce4-panel", "/plugins/plugin-14", "string", "xfce4-clipman-plugin")
     xfconf("xfce4-panel", "/plugins/plugin-15", "string", "pulseaudio")
     # Panel shortcuts
-    xfce_search_list = ["firefox.desktop", "brave-browser.desktop", "chrome.desktop", 'thunderbird.desktop', 'thunar.desktop', "tilix.desktop", "xfce4-terminal.desktop", 'virt-manager.desktop', 'xfce4-taskmanager.desktop', 'gnome-system-monitor.desktop']
+    xfce_search_list = ["firefox.desktop", "brave-browser.desktop", "chrome.desktop", 'thunderbird.desktop', 'thunar.desktop', "ptyxis.desktop", "tilix.desktop", "xfce4-terminal.desktop", 'virt-manager.desktop', 'xfce4-taskmanager.desktop', 'gnome-system-monitor.desktop', 'org.gnome.SystemMonitor.desktop']
     xfce_file_list = []
     xfce_panel_string = ""
     xfce_panel_id = 20
