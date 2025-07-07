@@ -264,12 +264,13 @@ pacman -Sy --noconfirm git; {git_cmdline()}
             print("ERROR: nixconfig {0} must be a folder.".format(args.nixconfig))
             sys.exit()
         # VM commands
-        vmbootstrap_cmd = '''#!/bin/bash
+        vmbootstrap_cmd = f'''#!/bin/bash
 cd ~
 disko --mode destroy,format,mount /nixos_config/modules/disko/ext4-single.nix --yes-wipe-all-disks --arg disks "[ \\"/dev/vda\\" ]" && mkdir -p /mnt/etc
 mv /nixos_config /mnt/etc/nixos
+sed -i 's/qemu-nixos/{vm_name}/g' /mnt/etc/nixos/flake.nix /mnt/etc/nixos/machines/qemu/configuration.nix
 nix-channel --update
-nixos-install --flake /mnt/etc/nixos#qemu-nixos && poweroff'''
+nixos-install --flake /mnt/etc/nixos#{vm_name} && poweroff'''
         vmprovision_cmd = """#!/bin/bash
 mkdir -m 700 -p /root/.ssh
 echo '{sshkey}' > /root/.ssh/authorized_keys

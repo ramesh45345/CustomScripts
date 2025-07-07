@@ -150,6 +150,7 @@ if shutil.which("ptyxis"):
     dconf_write(f"/org/gnome/Ptyxis/Profiles/{ptyxis_profile}/palette", "'nord'")
     dconf_write("/org/gnome/Ptyxis/use-system-font", "false")
     dconf_write("/org/gnome/Ptyxis/font-name", "'Monospace 11'")
+    dconf_write("/org/gnome/Ptyxis/interface-style", "'dark'")
     # Fish config
     if shutil.which("fish"):
         dconf_write(f"/org/gnome/Ptyxis/Profiles/{ptyxis_profile}/use-custom-command", "true")
