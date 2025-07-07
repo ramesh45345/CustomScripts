@@ -7,6 +7,7 @@ import configparser
 import functools
 import os
 import pathlib
+import pty
 import subprocess
 import shutil
 import sys
@@ -138,15 +139,23 @@ if shutil.which("tilix"):
 
 # ptyxis config
 if shutil.which("ptyxis"):
-    dconf_write("/org/gnome/Ptyxis/restore-window-size", "false")
+    ptyxis_profile = CFunc.subpout("dconf read /org/gnome/Ptyxis/default-profile-uuid").strip("'")
+    if ptyxis_profile == "":
+        ptyxis_profile = "42252167cc65db90269998256869218d"
+        dconf_write("/org/gnome/Ptyxis/default-profile-uuid", f"'{ptyxis_profile}'")
+        dconf_write("/org/gnome/Ptyxis/profile-uuids", f"['{ptyxis_profile}']")
+    dconf_write("/org/gnome/Ptyxis/restore-window-size", "true")
     dconf_write("/org/gnome/Ptyxis/restore-session", "false")
-    dconf_write("/org/gnome/Ptyxis/Profiles/42252167cc65db90269998256869218d/limit-scrollback", "false")
+    dconf_write(f"/org/gnome/Ptyxis/Profiles/{ptyxis_profile}/limit-scrollback", "false")
+    dconf_write(f"/org/gnome/Ptyxis/Profiles/{ptyxis_profile}/palette", "nord")
+    dconf_write("/org/gnome/Ptyxis/use-system-font", "false")
+    dconf_write("/org/gnome/Ptyxis/font-name", "'Monospace 11'")
     # Fish config
     if shutil.which("fish"):
-        dconf_write("/org/gnome/Ptyxis/Profiles/42252167cc65db90269998256869218d/use-custom-command", "true")
-        dconf_write("/org/gnome/Ptyxis/Profiles/42252167cc65db90269998256869218d/custom-command", "'{0}'".format(shutil.which("fish")))
+        dconf_write(f"/org/gnome/Ptyxis/Profiles/{ptyxis_profile}/use-custom-command", "true")
+        dconf_write(f"/org/gnome/Ptyxis/Profiles/{ptyxis_profile}/custom-command", "'{0}'".format(shutil.which("fish")))
     else:
-        dconf_write("/org/gnome/Ptyxis/Profiles/42252167cc65db90269998256869218d/use-custom-command", "false")
+        dconf_write(f"/org/gnome/Ptyxis/Profiles/{ptyxis_profile}/use-custom-command", "false")
 
 # Gnome System Monitor
 if shutil.which("gnome-system-monitor"):
