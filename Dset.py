@@ -147,7 +147,7 @@ if shutil.which("ptyxis"):
     dconf_write("/org/gnome/Ptyxis/restore-window-size", "true")
     dconf_write("/org/gnome/Ptyxis/restore-session", "false")
     dconf_write(f"/org/gnome/Ptyxis/Profiles/{ptyxis_profile}/limit-scrollback", "false")
-    dconf_write(f"/org/gnome/Ptyxis/Profiles/{ptyxis_profile}/palette", "nord")
+    dconf_write(f"/org/gnome/Ptyxis/Profiles/{ptyxis_profile}/palette", "'nord'")
     dconf_write("/org/gnome/Ptyxis/use-system-font", "false")
     dconf_write("/org/gnome/Ptyxis/font-name", "'Monospace 11'")
     # Fish config
