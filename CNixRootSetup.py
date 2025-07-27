@@ -94,12 +94,9 @@ def call_nix_update_user(user: str):
 if __name__ == '__main__':
     print("Running {0}".format(__file__))
 
-    # Get non-root user.
-    USERNAMEVAR = CFunc.getnormaluser()[0]
-
     # Get arguments
     parser = argparse.ArgumentParser(description='Setup nix.')
-    parser.add_argument("-u", "--user", help='User to set up nix as.', default=USERNAMEVAR)
+    parser.add_argument("-u", "--user", help='User to set up nix as.', type=str, default="")
     parser.add_argument("-p", "--nixpath", help='Specify custom path to bind mount /nix at.', type=str)
     parser.add_argument("-i", "--install", help="Execute non-root install.", action="store_true")
 

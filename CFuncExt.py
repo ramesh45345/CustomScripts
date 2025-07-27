@@ -157,7 +157,7 @@ def nix_standalone_install(username: str, packages: str):
     """Install standalone version of nix."""
     USERNAMEVAR, USERGROUP, USERHOME = CFunc.getnormaluser(username)
     # Install nix
-    subprocess.run("{0}/CNixRootSetup.py -i".format(SCRIPTDIR), shell=True, check=True)
+    subprocess.run(f"{SCRIPTDIR}/CNixRootSetup.py -i -u {USERNAMEVAR}", shell=True, check=True)
     # Add apps to home.nix
     homeman_filepath = os.path.join(USERHOME, ".config", "home-manager", "home.nix")
     # Check if the pattern isn't found
