@@ -7,7 +7,6 @@ import configparser
 import functools
 import os
 import pathlib
-import pty
 import subprocess
 import shutil
 import sys
@@ -389,6 +388,8 @@ if shutil.which("kwriteconfig6") and shutil.which("plasma_session"):
     # Dolphin settings
     if shutil.which("dolphin"):
         kwriteconfig("dolphinrc", "General", "GlobalViewProps", "true")
+        kwriteconfig("dolphinrc", "General", "OpenNewTabAfterLastTab", "true")
+        kwriteconfig("dolphinrc", "General", "ShowFullPath", "true")
         kwriteconfig("dolphinrc", "General", "ShowZoomSlider", "false")
         kwriteconfig("dolphinrc", "IconsMode", "PreviewSize", "32")
         kwriteconfig("dolphinrc", "DetailsMode", "PreviewSize", "22")
