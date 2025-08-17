@@ -78,6 +78,7 @@ CFunc.commands_check(cmdcheck)
 if args.noprompt is False:
     input("Press Enter to continue.")
 
+os.environ['DEBIAN_FRONTEND'] = "noninteractive"
 # Check symlink for debootstrap.
 if args.forcelink:
     scriptsfolder = os.path.join(os.sep, "usr", "share", "debootstrap", "scripts")
@@ -116,6 +117,7 @@ subprocess.run(BOOTSTRAPSCRIPT, shell=True, check=True)
 SETUPSCRIPT = """#!/bin/bash
 echo "Running Debian Setup Script"
 
+export DEBIAN_FRONTEND=noninteractive
 # Exporting Path for chroot
 export PATH=$PATH:/bin:/usr/local/sbin:/usr/sbin:/sbin
 
