@@ -76,7 +76,7 @@ sysctl -p
 # Host packges
 CFunc.dnfinstall("podman systemd-container")
 # TODO: Remove once passlib is an installable package
-subprocess.run("pip install -U --break-system-packages passlib", shell=True, check=True)
+subprocess.run("pip install -U passlib", shell=True, check=True)
 
 # Clean
 if args.clean is True:
