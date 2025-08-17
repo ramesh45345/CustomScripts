@@ -3,6 +3,7 @@
 
 # Python includes.
 import argparse
+import functools
 import os
 import shutil
 import subprocess
@@ -12,6 +13,9 @@ import tempfile
 import CFunc
 import CFuncExt
 
+# Disable buffered stdout (to ensure prints are in order)
+print = functools.partial(print, flush=True)
+
 # Folder of this script
 SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -20,36 +24,20 @@ CFunc.is_root(True)
 
 
 ### Functions ###
-def vscode_deb():
-    """Install vscode deb and repository."""
-    subprocess.run("""wget https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/raw/master/pub.gpg -O /usr/share/keyrings/vscodium-archive-keyring.asc""", shell=True, check=True)
-    # Install repo
-    subprocess.run("echo 'deb [ arch=amd64 signed-by=/usr/share/keyrings/vscodium-archive-keyring.asc ] https://paulcarroty.gitlab.io/vscodium-deb-rpm-repo/debs vscodium main' | tee /etc/apt/sources.list.d/vscodium.list", shell=True, check=True)
-    CFunc.aptupdate()
-    CFunc.aptinstall("codium")
-def syncthing():
-    """Install syncthing repo and deb."""
-    subprocess.run("mkdir -p /etc/apt/keyrings", shell=True, check=True)
-    subprocess.run("curl -L -o /etc/apt/keyrings/syncthing-archive-keyring.gpg https://syncthing.net/release-key.gpg", shell=True, check=True)
-    # Write syncthing sources list
-    subprocess.run('echo "deb [signed-by=/etc/apt/keyrings/syncthing-archive-keyring.gpg] https://apt.syncthing.net/ syncthing stable" | tee /etc/apt/sources.list.d/syncthing.list', shell=True, check=True)
-    # Update and install syncthing:
-    CFunc.aptupdate()
-    CFunc.aptinstall("syncthing")
-def deb_mm(debrelease: str):
-    """Deb Multimedia"""
-    # Write sources list
-    with open('/etc/apt/sources.list.d/dmo.sources', 'w') as stapt_writefile:
-        stapt_writefile.write("""Types: deb
-URIs: https://www.deb-multimedia.org
-Suites: {0}
-Components: main non-free
-Signed-By: /usr/share/keyrings/deb-multimedia-keyring.pgp""".format(debrelease))
-    subprocess.run("apt-get update -oAcquire::AllowInsecureRepositories=true", shell=True, check=True)
-    subprocess.run("apt-get install -y --allow-unauthenticated deb-multimedia-keyring -oAcquire::AllowInsecureRepositories=true", shell=True, check=True)
-    # Update and upgrade with new repositories
-    CFunc.aptupdate()
-    CFunc.aptdistupg()
+def extrepo_enable(repos: list = []):
+    """Install extrepo and enable repositories."""
+    CFunc.aptinstall("extrepo", error_on_fail=True)
+    CFunc.find_replace(os.path.join(os.sep, "etc", "extrepo"), "# - contrib", "- contrib", "config.yaml")
+    CFunc.find_replace(os.path.join(os.sep, "etc", "extrepo"), "# - non-free", "- non-free", "config.yaml")
+    if shutil.which("extrepo"):
+        for x in repos:
+            print(f"Enabling {x} using extrepo.")
+            subprocess.run(["extrepo", "enable", x], check=True)
+            # Run twice to enable
+            subprocess.run(["extrepo", "enable", x], check=True)
+        subprocess.run(["extrepo", "update"], check=True)
+    else:
+        print("ERROR: extrepo not found.")
 def mpr_install(normaluser: str):
     """Install mpr and mist tool."""
     # Install makedeb
@@ -173,8 +161,6 @@ Acquire::ftp::Timeout "5";''')
     CFunc.aptdistupg()
 
     ### Software ###
-    deb_mm(debrelease)
-
     # Cli Software
     CFunc.aptinstall("ssh tmux zsh fish btrfs-progs f2fs-tools xfsprogs mdadm nano p7zip-full p7zip-rar unrar curl wget rsync less iotop sshfs sudo python-is-python3 nala")
     # Topgrade
@@ -217,6 +203,11 @@ echo "firmware-ivtv firmware-ivtv/license/accepted boolean true" | debconf-set-s
 
     # General GUI software
     if args.nogui is False:
+        # Repos
+        extrepo_enable(["syncthing", "vscodium", "deb-multimedia"])
+        CFunc.aptinstall("syncthing")
+        CFunc.aptinstall("codium")
+        # Misc
         CFunc.aptinstall("synaptic gnome-disk-utility gdebi gparted xdg-utils")
         CFunc.aptinstall("dconf-cli dconf-editor")
         # Cups-pdf
@@ -226,8 +217,6 @@ echo "firmware-ivtv firmware-ivtv/license/accepted boolean true" | debconf-set-s
         CFuncExt.ytdlp_install()
         CFunc.aptinstall("gstreamer1.0-vaapi")
         CFunc.aptinstall("fonts-powerline fonts-noto fonts-roboto")
-        # VSCodium
-        vscode_deb()
         # Flatpak
         CFunc.aptinstall("flatpak")
         CFunc.flatpak_addremote("flathub", "https://flathub.org/repo/flathub.flatpakrepo")
@@ -236,8 +225,6 @@ echo "firmware-ivtv firmware-ivtv/license/accepted boolean true" | debconf-set-s
         # Firefox
         CFunc.flatpak_install("flathub", "org.mozilla.firefox")
         CFunc.flatpak_override("org.mozilla.firefox", "--filesystem=host")
-        # Syncthing
-        syncthing()
         # Install nix
         CFuncExt.nix_standalone_install(USERNAMEVAR, """
         # Media tools
@@ -251,6 +238,7 @@ echo "firmware-ivtv firmware-ivtv/license/accepted boolean true" | debconf-set-s
             CFunc.aptinstall("task-gnome-desktop")
             CFunc.aptinstall("gnome-clocks")
             CFunc.aptinstall("gnome-shell-extensions gnome-shell-extension-gpaste")
+            CFunc.aptinstall("ptyxis", error_on_fail=False)
             # Install gs installer script.
             gs_installer = CFunc.downloadfile("https://raw.githubusercontent.com/brunelli/gnome-shell-extension-installer/master/gnome-shell-extension-installer", os.path.join(os.sep, "usr", "local", "bin"), overwrite=True)
             os.chmod(gs_installer[0], 0o777)

@@ -3,6 +3,7 @@
 
 # Python includes.
 import argparse
+import functools
 import os
 import shutil
 import subprocess
@@ -11,6 +12,9 @@ import sys
 import CFunc
 import CFuncExt
 import MDebian
+
+# Disable buffered stdout (to ensure prints are in order)
+print = functools.partial(print, flush=True)
 
 # Folder of this script
 SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))
@@ -128,8 +132,6 @@ if __name__ == '__main__':
     CFunc.aptinstall("default-jre")
     # Drivers
     CFunc.aptinstall("intel-microcode")
-    # Syncthing
-    MDebian.syncthing()
 
     # Sudoers changes
     CFuncExt.SudoersEnvSettings()
@@ -165,7 +167,12 @@ renderer: NetworkManager""")
 
     # Hold firefox (install flatpak later)
     if args.nogui is False:
-        CFunc.aptmark("firefox")
+        # Repos
+        MDebian.extrepo_enable(["syncthing", "vscodium", "mozilla"])
+        CFunc.aptinstall("syncthing")
+        CFunc.aptinstall("codium")
+        CFunc.aptinstall("firefox")
+
         # Install Desktop Software
         if args.desktop == "gnome":
             print("\n Installing gnome desktop")
@@ -175,6 +182,7 @@ renderer: NetworkManager""")
             CFunc.snap_install("gnome-calculator gnome-characters gnome-logs gnome-system-monitor")
             CFunc.aptinstall("gnome-shell-extensions gnome-shell-extension-gpaste")
             CFunc.aptinstall("gnome-software-plugin-flatpak")
+            CFunc.aptinstall("ptyxis", error_on_fail=False)
             # Install gs installer script.
             gs_installer = CFunc.downloadfile("https://raw.githubusercontent.com/brunelli/gnome-shell-extension-installer/master/gnome-shell-extension-installer", os.path.join(os.sep, "usr", "local", "bin"), overwrite=True)
             os.chmod(gs_installer[0], 0o777)
@@ -230,11 +238,6 @@ renderer: NetworkManager""")
         CFunc.aptinstall("flatpak")
         CFunc.AddLineToSudoersFile(sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("flatpak")))
         subprocess.run(os.path.join(SCRIPTDIR, "CFlatpakConfig.py"), shell=True, check=True)
-        # Browsers
-        CFunc.flatpak_install("flathub", "org.mozilla.firefox")
-        CFunc.flatpak_override("org.mozilla.firefox", "--filesystem=host")
-        # Visual Studio Code
-        MDebian.vscode_deb()
 
         # Post-install mate configuration
         if args.desktop == "mate":
@@ -249,8 +252,6 @@ yt-dlp""")
 
         # Install pacstall
         MDebian.pacstall_install()
-        # Install makedeb and mist
-        MDebian.mpr_install(USERNAMEVAR)
 
     # Install guest software for VMs
     if vmstatus == "kvm":
