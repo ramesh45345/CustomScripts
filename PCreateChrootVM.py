@@ -74,7 +74,7 @@ def vm_create(vmname: str, img_path: str, isopath: str, memory: int):
     efi_bin, efi_nvram = Pkvm.ovmf_bin_nvramcopy(os.path.dirname(img_path), vmname, secureboot=False)
     # virt-install manual: https://www.mankier.com/1/virt-install
     # List of os: osinfo-query os
-    CREATESCRIPT_KVM = Pkvm.cmd_virtinstall(vmname=vmname, diskpath=os.path.join(vmpath, vmname), variant=kvm_variant, efi_bin=efi_bin, efi_nvram=efi_nvram, memory=args.memory, cdrom_path=isopath)
+    CREATESCRIPT_KVM = Pkvm.cmd_virtinstall(vmname=vmname, diskpath=os.path.join(vmpath, vmname), variant=kvm_variant, efi_bin=efi_bin, efi_nvram=efi_nvram, memory=memory, cdrom_path=isopath)
     subprocess.run(CREATESCRIPT_KVM, shell=True, check=True)
     # Log the launch command.
     logging.info(f"""KVM launch command: {Pkvm.cmd_virtinstall(vmname=vmname, diskpath=os.path.join(vmpath, vmname), variant=kvm_variant, efi_bin=efi_bin, efi_nvram=efi_nvram, memory=args.memory)}""")
@@ -213,6 +213,10 @@ if __name__ == '__main__':
     parser.add_argument("--noprompt", help='Do not prompt to continue.', action="store_true")
     args = parser.parse_args()
 
+    debversion = ""
+    vm_name = "Default"
+    vmprovision_cmd = "Command Not Set"
+    vmbootstrap_cmd = "Command Not Set"
     # Set paths
     vmpath = os.path.abspath(args.vmpath)
     iso_path = os.path.abspath(args.iso)
@@ -366,6 +370,8 @@ chown {args.vmuser}:users -R ~{args.vmuser}
     print("VM User is {0}".format(args.vmuser))
     print("SSH Key is \"{0}\"".format(sshkey))
     print("VM Provision Options:", vmprovision_opts)
+    if debversion != "":
+        print(f"Debian/Ubuntu Release: {debversion}")
 
     # Variables less likely to change.
     sship = None
