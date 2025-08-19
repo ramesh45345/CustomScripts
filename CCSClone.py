@@ -55,8 +55,9 @@ cron_hourly_folder = os.path.join(os.sep, "etc", "cron.hourly")
 cron_hourly_file = os.path.join(cron_hourly_folder, reponame)
 
 ### Begin Code ###
-# Clone or update
-CFunc.gitclone(f"https://github.com/{fullrepo}.git", clonepath)
+if not os.path.isdir(clonepath):
+    # Clone
+    CFunc.gitclone(f"https://github.com/{fullrepo}.git", clonepath)
 # Git config
 subprocess.run("git config --global pull.rebase false", shell=True, check=True)
 CFunc.run_as_user(USERNAMEVAR, "git config --global pull.rebase false", error_on_fail=True)

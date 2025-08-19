@@ -249,8 +249,6 @@ yt-dlp""")
 
         # Install pacstall
         MDebian.pacstall_install()
-        # Install makedeb and mist
-        MDebian.mpr_install(USERNAMEVAR)
 
     # Install guest software for VMs
     if vmstatus == "kvm":

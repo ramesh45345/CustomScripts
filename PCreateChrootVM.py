@@ -256,7 +256,6 @@ echo "PermitRootLogin yes" >> /mnt/etc/ssh/sshd_config && poweroff"""
 mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys
 mkdir -m 700 -p ~{args.vmuser}/.ssh; echo '{sshkey}' > ~{args.vmuser}/.ssh/authorized_keys
 chown {args.vmuser}:users -R ~{args.vmuser}
-pacman -Sy --noconfirm git; {git_cmdline()}
 /opt/CustomScripts/MArch.py {vmprovision_opts}"""
         kvm_variant = "archlinux"
     if args.ostype == 2:
@@ -356,7 +355,6 @@ echo '{sshkey}' > /root/.ssh/authorized_keys
 mkdir -m 700 -p ~{args.vmuser}/.ssh
 echo '{sshkey}' > ~{args.vmuser}/.ssh/authorized_keys
 chown {args.vmuser}:users -R ~{args.vmuser}
-{git_cmdline()}
 /opt/CustomScripts/MOpensuse.py {vmprovision_opts}"""
         kvm_variant = "opensusetumbleweed"
 
@@ -420,6 +418,12 @@ chown {args.vmuser}:users -R ~{args.vmuser}
     vm_start(vm_name)
     sship = vm_getip(vm_name)
     ssh_wait(ip=sship, port=localsshport, user="root", password=args.vmpass)
+    # Pre-provision commands
+    if args.ostype == 2:
+        scp_vm(ip=sship, port=localsshport, user="root", password=args.vmpass, filepath=SCRIPTDIR, destination="/var/opt/", folder=True)
+    else:
+        scp_vm(ip=sship, port=localsshport, user="root", password=args.vmpass, filepath=SCRIPTDIR, destination="/opt/", folder=True)
+    # Provision VM
     vm_runscript(ip=sship, port=localsshport, user="root", password=args.vmpass, script=vmprovision_cmd)
     vm_shutdown(vm_name)
     # Save finish time.
