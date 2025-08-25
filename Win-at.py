@@ -8,6 +8,7 @@ import subprocess
 import sys
 # Custom Includes
 import CFunc
+import Wprovision
 
 print("Running {0}".format(__file__))
 
@@ -22,6 +23,13 @@ kms_script = os.path.join(kms_folder, "KMS_VL_ALL_AIO.cmd")
 
 # Clone the repo
 CFunc.gitclone("https://github.com/abbodi1406/KMS_VL_ALL_AIO", kms_folder)
+
+# Add exceptions for defender
+Wprovision.RunWithPwsh(["Add-MpPreference", "-ExclusionPath", r"$env:windir\Temp\SppExtComObjHook.dll"])
+Wprovision.RunWithPwsh(["Add-MpPreference", "-ExclusionPath", r"$env:LOCALAPPDATA\Temp\SppExtComObjHook.dll"])
+Wprovision.RunWithPwsh(["Add-MpPreference", "-ExclusionPath", r"$env:windir\AutoKMS"])
+Wprovision.RunWithPwsh(["Add-MpPreference", "-ExclusionPath", kms_folder])
+Wprovision.RunWithPwsh(["Add-MpPreference", "-ExclusionProcess", kms_script])
 
 # Set auto-act
 with open(kms_script) as f:

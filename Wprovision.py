@@ -5,10 +5,8 @@
 import argparse
 import functools
 import os
-import re
 import shutil
 import subprocess
-import tempfile
 # Custom includes
 import CFunc
 
@@ -29,9 +27,9 @@ powershell_cmd_fullpath = shutil.which(powershell_cmd)
 
 
 ### Utility Functions ###
-def pwsh_run(cmd: list = [], error_on_fail: bool = True):
-    """Run a command with powershell."""
-    subprocess.run([powershell_cmd_fullpath, "-c", cmd], check=error_on_fail)
+def RunWithPwsh(cmd: list = [], error_on_fail: bool = True):
+    """Run a command with powershell 7."""
+    subprocess.run([powershell_cmd_fullpath, "-c"] + cmd, check=error_on_fail)
 def pwsh_subpout(cmd: str):
     """Run a command with powershell and get its output."""
     output = subprocess.run([powershell_cmd_fullpath, "-c", cmd], stdout=subprocess.PIPE, check=False, universal_newlines=True).stdout.strip()

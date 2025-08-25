@@ -10,6 +10,7 @@ import subprocess
 import tempfile
 # Custom includes
 import CFunc
+import Wprovision
 
 print("Running {0}".format(__file__))
 
@@ -28,9 +29,6 @@ args = parser.parse_args()
 
 
 ### Functions ###
-def RunWithPwsh(cmd: list = [], error_on_fail: bool = True):
-    """Run a command with powershell 7."""
-    subprocess.run([powershell_cmd_fullpath, "-c"] + cmd, check=error_on_fail)
 def GetJsonFromFile(filePath):
     """
     Strip comments from json.
@@ -52,16 +50,16 @@ def GetJsonFromFile(filePath):
 ### Powershell Configuration ###
 # Remove profile
 # subprocess.run([powershell_cmd_fullpath, "-c", "Remove-Item", "$PROFILE"], check=False)
-RunWithPwsh(["Remove-Item", "$PROFILE"], error_on_fail=False)
+Wprovision.RunWithPwsh(["Remove-Item", "$PROFILE"], error_on_fail=False)
 # Install powershell modules
 print("Install powershell modules.")
-RunWithPwsh(["Set-PSRepository", "-Name", "PSGallery", "-InstallationPolicy", "Trusted"])
-RunWithPwsh(["Install-Module", "-Name", 'posh-git', "-AllowClobber"])
-RunWithPwsh(["Install-Module", "-Name", "'Get-ChildItemColor'", "-AllowClobber"])
-RunWithPwsh(["Install-Module", "-Name", "'PSReadLine'", "-AllowClobber", "-Force"])
-RunWithPwsh(["Set-ExecutionPolicy", "Bypass", "-Scope", "Process", "-Force"])
+Wprovision.RunWithPwsh(["Set-PSRepository", "-Name", "PSGallery", "-InstallationPolicy", "Trusted"])
+Wprovision.RunWithPwsh(["Install-Module", "-Name", 'posh-git', "-AllowClobber"])
+Wprovision.RunWithPwsh(["Install-Module", "-Name", "'Get-ChildItemColor'", "-AllowClobber"])
+Wprovision.RunWithPwsh(["Install-Module", "-Name", "'PSReadLine'", "-AllowClobber", "-Force"])
+Wprovision.RunWithPwsh(["Set-ExecutionPolicy", "Bypass", "-Scope", "Process", "-Force"])
 # https://ohmyposh.dev/docs/installation/windows
-RunWithPwsh(["winget install --disable-interactivity --uninstall-previous --force JanDeDobbeleer.OhMyPosh -s winget"])
+Wprovision.RunWithPwsh(["winget install --disable-interactivity --uninstall-previous --force JanDeDobbeleer.OhMyPosh -s winget"])
 # Powershell font
 subprocess.run("choco upgrade -y cascadiacodepl", shell=True, check=False)
 
