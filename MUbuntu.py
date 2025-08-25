@@ -3,6 +3,7 @@
 
 # Python includes.
 import argparse
+import functools
 import os
 import shutil
 import subprocess
@@ -11,6 +12,9 @@ import sys
 import CFunc
 import CFuncExt
 import MDebian
+
+# Disable buffered stdout (to ensure prints are in order)
+print = functools.partial(print, flush=True)
 
 # Folder of this script
 SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))
@@ -175,6 +179,7 @@ renderer: NetworkManager""")
             CFunc.snap_install("gnome-calculator gnome-characters gnome-logs gnome-system-monitor")
             CFunc.aptinstall("gnome-shell-extensions gnome-shell-extension-gpaste")
             CFunc.aptinstall("gnome-software-plugin-flatpak")
+            CFunc.aptinstall("ptyxis", error_on_fail=False)
             # Install gs installer script.
             gs_installer = CFunc.downloadfile("https://raw.githubusercontent.com/brunelli/gnome-shell-extension-installer/master/gnome-shell-extension-installer", os.path.join(os.sep, "usr", "local", "bin"), overwrite=True)
             os.chmod(gs_installer[0], 0o777)

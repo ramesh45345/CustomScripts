@@ -3,6 +3,7 @@
 
 # Python includes.
 import argparse
+import functools
 import os
 import shutil
 import subprocess
@@ -11,6 +12,9 @@ import tempfile
 # Custom includes
 import CFunc
 import CFuncExt
+
+# Disable buffered stdout (to ensure prints are in order)
+print = functools.partial(print, flush=True)
 
 # Folder of this script
 SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))
@@ -87,6 +91,20 @@ def pacstall_install():
     # Cleanup
     if os.path.isfile(pacstall_script_file):
         os.remove(pacstall_script_file)
+def extrepo_enable(repos: list = []):
+    """Install extrepo and enable repositories."""
+    CFunc.aptinstall("extrepo", error_on_fail=True)
+    CFunc.find_replace(os.path.join(os.sep, "etc", "extrepo"), "# - contrib", "- contrib", "config.yaml")
+    CFunc.find_replace(os.path.join(os.sep, "etc", "extrepo"), "# - non-free", "- non-free", "config.yaml")
+    if shutil.which("extrepo"):
+        for x in repos:
+            print(f"Enabling {x} using extrepo.")
+            subprocess.run(["extrepo", "enable", x], check=True)
+            # Run twice to enable
+            subprocess.run(["extrepo", "enable", x], check=True)
+        subprocess.run(["extrepo", "update"], check=True)
+    else:
+        print("ERROR: extrepo not found.")
 
 
 if __name__ == '__main__':
@@ -251,6 +269,7 @@ echo "firmware-ivtv firmware-ivtv/license/accepted boolean true" | debconf-set-s
             CFunc.aptinstall("task-gnome-desktop")
             CFunc.aptinstall("gnome-clocks")
             CFunc.aptinstall("gnome-shell-extensions gnome-shell-extension-gpaste")
+            CFunc.aptinstall("ptyxis", error_on_fail=False)
             # Install gs installer script.
             gs_installer = CFunc.downloadfile("https://raw.githubusercontent.com/brunelli/gnome-shell-extension-installer/master/gnome-shell-extension-installer", os.path.join(os.sep, "usr", "local", "bin"), overwrite=True)
             os.chmod(gs_installer[0], 0o777)
