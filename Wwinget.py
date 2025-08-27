@@ -51,7 +51,7 @@ def Util_WingetInstall_Old():
     # Download VCLib
     file_vclib = CFunc.downloadfile(url_vclib, tempfolder)
     # Install VCLib
-    Wprovision.pwsh_run(cmd=f"Add-AppxPackage {file_vclib[0]}", error_on_fail=False)
+    Wprovision.pwsh_run(cmd=["Add-AppxPackage", file_vclib[0]], error_on_fail=False)
     # Download UI Xaml
     file_zip_uixaml = CFunc.downloadfile(url_uixaml, tempfolder)
     uixaml_folder = os.path.join(tempfolder, "uixaml")
@@ -64,15 +64,15 @@ def Util_WingetInstall_Old():
         for file in files:
             if regex.match(file):
                 file_uixaml_appx = os.path.join(uixaml_folder, "tools", "AppX", "x64", "Release", file)
-    Wprovision.pwsh_run(cmd=f"Add-AppxPackage {file_uixaml_appx}", error_on_fail=False)
+    Wprovision.pwsh_run(cmd=["Add-AppxPackage", file_uixaml_appx], error_on_fail=False)
     # Download winget
     file_winget_msix = CFunc.downloadfile(url_winget_msix, tempfolder)
     file_winget_lic = CFunc.downloadfile(url_winget_lic, tempfolder)
     # Install winget
-    Wprovision.pwsh_run(cmd=f"Add-AppxPackage {file_winget_msix[0]}", error_on_fail=False)
+    Wprovision.pwsh_run(cmd=["Add-AppxPackage", file_winget_msix[0]], error_on_fail=False)
     # Configure the WinGet client with the correct license
-    Wprovision.pwsh_run(cmd=f"Add-AppxProvisionedPackage -Online -PackagePath {file_winget_msix[0]} -LicensePath {file_winget_lic[0]}", error_on_fail=False)
-    # Wprovision.pwsh_run(cmd="Repair-WinGetPackageManager -AllUsers -Force -Latest")
+    Wprovision.pwsh_run(cmd=["Add-AppxProvisionedPackage", "-Online", "-PackagePath", file_winget_msix[0], "-LicensePath", file_winget_lic[0]], error_on_fail=False)
+    # Wprovision.pwsh_run(cmd=["Repair-WinGetPackageManager", "-AllUsers", "-Force", "-Latest"])
     # Cleanup
     os.remove(file_vclib[0])
     shutil.rmtree(uixaml_folder, ignore_errors=True)
@@ -81,8 +81,8 @@ def Util_WingetInstall_Old():
     os.remove(file_winget_lic[0])
     return
 def Util_WingetInstall():
-    Wprovision.pwsh_run(cmd=f"choco install -y winget.powershell", error_on_fail=False)
-    Wprovision.pwsh_run(cmd=f"Repair-WinGetPackageManager -AllUsers -Force -Latest", error_on_fail=False)
+    Wprovision.pwsh_run(cmd=["choco", "install", "-y", "winget.powershell"], error_on_fail=False)
+    Wprovision.pwsh_run(cmd=["Repair-WinGetPackageManager", "-AllUsers", "-Force", "-Latest"], error_on_fail=False)
 def Util_MSStore():
     """Install Microsoft Store"""
     mst_folder = os.path.join(USERHOME, "Documents", "LTSC-Add-MicrosoftStore-2021_2024")
@@ -103,10 +103,10 @@ def Util_MSStore():
 def Util_WinTerminalInstall():
     """Install Windows Terminal"""
     print("Install Windows Terminal")
-    Wprovision.pwsh_run("winget install --accept-package-agreements --accept-source-agreements --disable-interactivity --id Microsoft.WindowsTerminal -e", error_on_fail=False)
+    Wprovision.pwsh_run(["winget", "install", "--accept-package-agreements", "--accept-source-agreements", "--disable-interactivity", "--id", "Microsoft.WindowsTerminal", "-e"], error_on_fail=False)
     TargetPath = r"shell:AppsFolder\Microsoft.WindowsTerminal_8wekyb3d8bbwe!App"
     shortcutfile = os.path.join(os.getenv("PUBLIC"), "Desktop", "Windows Terminal.lnk")
-    Wprovision.pwsh_run(f"""
+    Wprovision.pwsh_run_script(f"""
 $WScriptShell = New-Object -ComObject WScript.Shell
 $Shortcut = $WScriptShell.CreateShortcut("{shortcutfile}")
 $Shortcut.TargetPath = "{TargetPath}"

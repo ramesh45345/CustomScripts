@@ -39,11 +39,11 @@ def remove_readonly(func, path, _):
     func(path)
 def ISO_Mount(isopath):
     """Mount an ISO."""
-    Wprovision.pwsh_run(cmd=f"Mount-DiskImage -ImagePath {isopath}")
+    Wprovision.pwsh_run(["Mount-DiskImage", "-ImagePath", isopath])
     return
 def ISO_Dismount(isopath):
     """Dismount an ISO"""
-    Wprovision.pwsh_run(cmd=f"Dismount-DiskImage -ImagePath {isopath}")
+    Wprovision.pwsh_run(["Dismount-DiskImage", "-ImagePath", isopath])
     return
 def ISO_Create(oscdimg_folder: str, iso_files_path: str, iso_out_file: str, debug: bool = False):
     cmd_list = ['oscdimg', '-m', '-o', '-u2', '-udfver102', f'-bootdata:2#p0,e,b{os.path.join(oscdimg_folder, "etfsboot.com")}#pEF,e,b{os.path.join(oscdimg_folder, "efisys.bin")}', iso_files_path, iso_out_file]

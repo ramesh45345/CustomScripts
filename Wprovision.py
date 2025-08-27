@@ -30,6 +30,9 @@ powershell_cmd_fullpath = shutil.which(powershell_cmd)
 def pwsh_run(cmd: list = [], error_on_fail: bool = True):
     """Run a command with powershell 7."""
     subprocess.run([powershell_cmd_fullpath, "-c"] + cmd, check=error_on_fail)
+def pwsh_run_script(cmd_script: str, error_on_fail: bool = True):
+    """Run a script with powershell 7."""
+    subprocess.run([powershell_cmd_fullpath, "-c", cmd_script], check=error_on_fail)
 def pwsh_subpout(cmd: str):
     """Run a command with powershell and get its output."""
     output = subprocess.run([powershell_cmd_fullpath, "-c", cmd], stdout=subprocess.PIPE, check=False, universal_newlines=True).stdout.strip()
