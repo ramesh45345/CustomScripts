@@ -50,16 +50,16 @@ def GetJsonFromFile(filePath):
 ### Powershell Configuration ###
 # Remove profile
 # subprocess.run([powershell_cmd_fullpath, "-c", "Remove-Item", "$PROFILE"], check=False)
-Wprovision.RunWithPwsh(["Remove-Item", "$PROFILE"], error_on_fail=False)
+Wprovision.pwsh_run(["Remove-Item", "$PROFILE"], error_on_fail=False)
 # Install powershell modules
 print("Install powershell modules.")
-Wprovision.RunWithPwsh(["Set-PSRepository", "-Name", "PSGallery", "-InstallationPolicy", "Trusted"])
-Wprovision.RunWithPwsh(["Install-Module", "-Name", 'posh-git', "-AllowClobber"])
-Wprovision.RunWithPwsh(["Install-Module", "-Name", "'Get-ChildItemColor'", "-AllowClobber"])
-Wprovision.RunWithPwsh(["Install-Module", "-Name", "'PSReadLine'", "-AllowClobber", "-Force"])
-Wprovision.RunWithPwsh(["Set-ExecutionPolicy", "Bypass", "-Scope", "Process", "-Force"])
+Wprovision.pwsh_run(["Set-PSRepository", "-Name", "PSGallery", "-InstallationPolicy", "Trusted"])
+Wprovision.pwsh_run(["Install-Module", "-Name", 'posh-git', "-AllowClobber"])
+Wprovision.pwsh_run(["Install-Module", "-Name", "'Get-ChildItemColor'", "-AllowClobber"])
+Wprovision.pwsh_run(["Install-Module", "-Name", "'PSReadLine'", "-AllowClobber", "-Force"])
+Wprovision.pwsh_run(["Set-ExecutionPolicy", "Bypass", "-Scope", "Process", "-Force"])
 # https://ohmyposh.dev/docs/installation/windows
-Wprovision.RunWithPwsh(["winget install --disable-interactivity --uninstall-previous --force JanDeDobbeleer.OhMyPosh -s winget"])
+Wprovision.pwsh_run(["winget install --disable-interactivity --uninstall-previous --force JanDeDobbeleer.OhMyPosh -s winget"])
 # Powershell font
 subprocess.run("choco upgrade -y cascadiacodepl", shell=True, check=False)
 
