@@ -95,7 +95,7 @@ RUN pacman -Syu --needed --noconfirm reflector
 RUN reflector --country 'United States' --latest 10 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
 RUN pacman -Syy
 # Software setup
-RUN pacman -Syu --needed --noconfirm nano sudo git zsh fish python3 shadow tmux
+RUN pacman -Syu --needed --noconfirm nano sudo git zsh fish starship python3 shadow tmux
 RUN pacman -Syu --needed --noconfirm ttf-dejavu ttf-liberation powerline-fonts
 # Enable multilib
 RUN echo -e '\n[multilib]\nInclude = /etc/pacman.d/mirrorlist' >> /etc/pacman.conf ; pacman -Syu --needed --noconfirm
@@ -127,7 +127,7 @@ RUN dnf -y install acl bash curl gawk grep gzip libcap openssl p11-kit pam pytho
 RUN dnf -y install bash-completion bzip2 diffutils dnf-plugins-core findutils flatpak-spawn fpaste fuse fuse-libs git gnupg gnupg2-smime gvfs-client hostname iputils jwhois keyutils krb5-libs less lsof man-db man-pages mtr nano-default-editor nss-mdns openssh-clients passwd pigz procps-ng rsync shadow-utils sudo tcpdump time tmux traceroute tree unzip vte-profile wget which words xorg-x11-xauth xz zip
 
 # Shell Tools
-RUN dnf -y install zsh fish powerline-fonts
+RUN dnf -y install zsh fish starship powerline-fonts
 # Build tools
 RUN dnf -y install make gcc automake autoconf ninja-build
 # Wine
@@ -149,7 +149,7 @@ RUN dnf -y install make gcc automake autoconf
 addtext(r"""
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update; apt-get -y upgrade
-RUN apt-get install -y sudo libcap2-bin bash zsh fish nano p7zip-full p7zip-rar unrar wget curl rsync less python-is-python3 python3-pip git lsb-release software-properties-common apt-transport-https gnupg tmux
+RUN apt-get install -y sudo libcap2-bin bash zsh fish starship nano p7zip-full p7zip-rar unrar wget curl rsync less python-is-python3 python3-pip git lsb-release software-properties-common apt-transport-https gnupg tmux
 
 # Install locales
 RUN apt-get install -y locales && \

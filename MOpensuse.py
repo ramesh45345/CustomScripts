@@ -54,7 +54,7 @@ if __name__ == '__main__':
     repos()
 
     # Software
-    zypp_install("zsh fish nano tmux iotop rsync p7zip zip unzip xdg-utils xdg-user-dirs")
+    zypp_install("zsh fish starship nano tmux iotop rsync p7zip zip unzip xdg-utils xdg-user-dirs")
 
     # NTP
     # CFunc.sysctl_disable("ntpd")

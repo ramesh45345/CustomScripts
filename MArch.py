@@ -141,7 +141,7 @@ if __name__ == '__main__':
         install_aur_pkg("yay-bin", USERNAMEVAR, USERGROUP)
 
     # Cli tools
-    CFunc.pacman_install("bash-completion fish zsh zsh-completions nano git tmux iotop rsync p7zip zip unzip unrar xdg-utils xdg-user-dirs sshfs openssh avahi nss-mdns ntfs-3g exfat-utils python-pip")
+    CFunc.pacman_install("bash-completion fish starship zsh zsh-completions nano git tmux iotop rsync p7zip zip unzip unrar xdg-utils xdg-user-dirs sshfs openssh avahi nss-mdns ntfs-3g exfat-utils python-pip")
     CFunc.sysctl_enable("sshd avahi-daemon", error_on_fail=True)
     # Topgrade
     yay_install(USERNAMEVAR, "topgrade-bin")

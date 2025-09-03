@@ -3,18 +3,579 @@
 
 # Python includes.
 import argparse
+import functools
 import os
 import stat
 import subprocess
 import shutil
-import tempfile
 # Custom includes
 import CFunc
 
-print("Running {0}".format(__file__))
+# Disable buffered stdout (to ensure prints are in order)
+print = functools.partial(print, flush=True)
 
 # Folder of this script
 SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))
+
+
+### Functions ###
+def starship_config(user: str, group: str, userhome: str):
+    """Write starship configuration."""
+    starship_config_path = os.path.join(userhome, ".config", "starship.toml")
+    starship_config_text = r'''"$schema" = 'https://starship.rs/config-schema.json'
+
+format = """
+$username\
+[](bg:dark fg:gray)\
+$directory\
+[](fg:dark bg:#86BBD8)\
+$git_branch\
+$git_status\
+[](fg:git bg:#06969A)\
+$docker_context\
+[ ](fg:#06969A)\
+"""
+right_format = """
+$shell\
+$os\
+"""
+palette = 'custom'
+
+# Disable the blank line at the start of the prompt
+# add_newline = false
+
+[username]
+show_always = true
+style_user = "bg:gray fg:bold usertext"
+style_root = "bg:gray"
+format = '[ $user ]($style)'
+disabled = false
+
+[os]
+style = "bg:dark fg:bold dark"
+disabled = false
+format = '[$symbol]($style)'
+
+[directory]
+style = "bg:dark"
+format = "[ $path ]($style)"
+fish_style_pwd_dir_length = 1
+
+[docker_context]
+symbol = " "
+style = "bg:#06969A"
+format = '[ $symbol $context ]($style)'
+
+[git_branch]
+symbol = ""
+style = "bg:git"
+format = '[ $symbol $branch]($style)'
+
+[git_status]
+style = "bg:git"
+format = '[$all_status$ahead_behind ]($style)'
+
+[time]
+disabled = false
+time_format = "%R" # Hour:Minute Format
+style = "bg:time"
+format = '[ $time ]($style)'
+
+[cmd_duration]
+min_time = 10_000
+format = "[  $duration ]($style)"
+style = "white"
+
+[shell]
+disabled = false
+fish_indicator = "🦈"
+
+[palettes.custom]
+gray = "#cccccc"
+dark = "#333333"
+usertext = "#255e87"
+git = "#86BBD8"
+time = "#33658A"
+'''
+
+    # Create path if it doesn't existing
+    if CFunc.is_windows() or rootstate is False:
+        os.makedirs(os.path.dirname(starship_config_path), exist_ok=True)
+    else:
+        CFunc.run_as_user(user, "mkdir -p {0}".format(os.path.dirname(starship_config_path)))
+
+    with open(starship_config_path, mode='w') as f:
+        f.write(starship_config_text)
+    os.chmod(starship_config_path, 0o644)
+
+    if rootstate is True:
+        CFunc.chown_recursive(os.path.dirname(starship_config_path), user, group)
+
+    return
+def fish_config(user: str, group: str, userhome: str):
+    """Generate fish script."""
+
+    fish_config_path = os.path.join(userhome, ".config", "fish", "config.fish")
+    # Create path if it doesn't existing
+    os.makedirs(os.path.dirname(fish_config_path), exist_ok=True)
+    # fenv
+    fenv_dir = os.path.join(os.path.dirname(fish_config_path), "plugin-foreign-env")
+    CFunc.gitclone("https://github.com/oh-my-fish/plugin-foreign-env", fenv_dir)
+
+    fish_config_text = """
+# Greeting
+function fish_greeting -d "What's up, fish?"
+    set_color $fish_color_autosuggestion
+    uname -nmsr
+    command -q uptime
+    and command uptime
+    set_color normal
+end
+
+# Starship
+function starship_transient_prompt_func
+  starship module character
+end
+function starship_transient_rprompt_func
+  starship module time
+end
+starship init fish | source
+enable_transience
+
+# # Set bobthefish options
+# set -g theme_display_user yes
+# Set root and non-root cmds.
+if [ (id -u) != "0" ]
+    set SUDOCMD "sudo"
+else
+    set SUDOCMD ""
+end
+set CUSTOMSCRIPTPATH "{SCRIPTDIR}"
+# Set editor
+set -gx EDITOR nano
+set -gx XZ_OPT "-T0"
+
+# Function to check if in path
+function checkpath
+    set PATHSPLIT (string split " " $PATH)
+    for x in $PATHSPLIT
+        if test "$argv" = "$x"
+            return 1
+        end
+    end
+    return 0
+end
+# Function to add path
+function pathadd
+    if checkpath "$argv"; and test -d "$argv"
+        set -gx PATH $PATH $argv
+    end
+end
+# Set sbin in path
+pathadd "/sbin"
+pathadd "/usr/sbin"
+pathadd "/usr/local/sbin"
+# Set Custom Scripts in path
+pathadd "$CUSTOMSCRIPTPATH"
+# Set ".local/bin" in path
+pathadd "$HOME/.local/bin"
+# Add snap paths
+pathadd "/snap/bin"
+pathadd "/var/lib/snapd/snap/bin"
+
+# fenv
+set fish_function_path $fish_function_path {fenv_dir}/functions
+
+# Source nix files
+if checkpath "$HOME/.nix-profile/bin"; and test -d "$HOME/.nix-profile/bin"
+    source $HOME/.nix-profile/etc/profile.d/nix.fish
+    fenv source $HOME/.nix-profile/etc/profile.d/hm-session-vars.sh
+end
+
+function sl
+    sudo su -l root
+end
+if [ (id -u) != "0" ]
+    function pc
+        set -x EXISTPATH (pwd)
+        cd "$CUSTOMSCRIPTPATH"
+        git fetch --all
+        git diff
+        git status
+        if not test -z $argv
+            git add -A
+            git commit -m "$argv"
+            git pull
+            git push
+        else
+            echo "No commit message entered. Exiting."
+        end
+        git pull
+        cd "$EXISTPATH"
+        set -e EXISTPATH
+    end
+end
+function sst
+    tmux attach-session -t ssh_tmux || tmux new-session -s ssh_tmux
+end
+function rm_common
+    for todel in $argv
+        echo Deleting (realpath $todel)
+    end
+    echo "Press enter to continue or Ctrl-C to abort"
+    read
+end
+function rms
+    rm_common $argv
+    for todel in $argv
+        sudo rm -rf (realpath $todel)
+    end
+end
+function start
+    echo "Starting systemd service $argv."
+    sudo systemctl start $argv
+    sudo systemctl status --all -l $argv
+end
+function stop
+    echo "Stopping systemd service $argv."
+    sudo systemctl stop $argv
+    sudo systemctl status --all -l $argv
+end
+function en
+    echo "Enabling systemd service $argv."
+    sudo systemctl enable $argv
+    sudo systemctl status --all -l $argv
+end
+function dis
+    echo "Disabling systemd service $argv."
+    sudo systemctl disable $argv
+    sudo systemctl status --all -l $argv
+end
+function res
+    echo "Restarting systemd service $argv."
+    sudo systemctl restart $argv
+    sudo systemctl status --all -l $argv
+end
+function st
+    echo "Getting status for systemd service $argv."
+    sudo systemctl status --all -l $argv
+end
+function jt
+    echo "Getting journal entries."
+    sudo journalctl --all $argv
+end
+function dr
+    echo "Executing systemd daemon-reload."
+    sudo systemctl daemon-reload
+end
+function startu
+    echo "Starting systemd service $argv for user."
+    systemctl --user start $argv
+    systemctl --user status -l $argv
+end
+function stopu
+    echo "Stopping systemd service $argv for user."
+    systemctl --user stop $argv
+    systemctl --user status -l $argv
+end
+function resu
+    echo "Restarting systemd service $argv for user."
+    systemctl --user restart $argv
+    systemctl --user status -l $argv
+end
+function stu
+    echo "Getting status for systemd service $argv for user."
+    systemctl --user status -l $argv
+end
+function jtu
+    echo "Getting user journal entries."
+    journalctl --user --all $argv
+end
+function dru
+    echo "Executing systemd daemon-reload for user."
+    systemctl --user daemon-reload
+end
+function d
+    df -hT | grep -v tmpfs
+end
+function f
+    sudo flatpak $argv
+end
+function fup
+    flatpak_update
+end
+function flatpak_update
+    if type -q flatpak
+        echo "Updating Flatpaks"
+        flatpak update --system --assumeyes
+    end
+end
+function flatpak_clean
+    if type -q flatpak
+        echo "Clean unused Flatpaks"
+        flatpak uninstall --system --delete-data --unused --assumeyes
+    end
+end
+function flatpak_search
+    if type -q flatpak
+        echo "Search Flatpaks"
+        flatpak search $argv
+    end
+end
+function snap_search
+    if type -q snap
+        echo "Search Snaps"
+        snap find $argv
+    end
+end
+function up
+    if type -q nixos-rebuild ; and [ (id -u) != "0" ] ; and checkpath "/etc/nixos"; and test -d "/etc/nixos"
+        cd /etc/nixos
+        git pull
+    end
+    # System upgrade commands
+    if type -q topgrade
+        topgrade -y flatpak --disable firmware $argv
+    else if type -q rpm-ostree
+        sudo rpm-ostree upgrade
+    else if type -q nala
+        sudo nala update
+        sudo nala upgrade
+    else if type -q apt-get
+        sudo apt-get update
+        sudo apt-get dist-upgrade
+    else if type -q dnf
+        sudo dnf update --refresh -y
+    else if type -q yay
+        yay -Syu --needed --noconfirm
+    else if type -q zypper
+        sudo zypper up -y
+        sudo zypper dup -y
+    else if type -q nix; and not string match -qr $USER (which nix);
+        sudo nixos-rebuild switch --upgrade
+    end
+    # Non-root commands
+    if not type -q topgrade
+        distrobox-upgrade --all
+    end
+end
+function upr
+    # Root commands
+    if type -q distrobox-upgrade
+        distrobox-upgrade --root --all
+    end
+end
+
+# Set package manager functions
+if type -q rpm-ostree
+    function ins
+        echo "Installing $argv."
+        sudo rpm-ostree install $argv
+    end
+    function rmv
+        echo "Removing $argv."
+        sudo rpm-ostree remove $argv
+    end
+    function rst
+        sudo rpm-ostree status
+    end
+    function se
+        echo -e "\\nSearching for $argv."
+        if [ (id -u) != "0" ]
+            if not toolbox list --containers | grep -q fedora-toolbox
+                toolbox create
+            end
+            toolbox run sudo dnf search $argv
+            echo -e "\nInfo for $argv."
+            toolbox run sudo dnf info $argv
+        end
+        snap_search $argv
+        flatpak_search $argv
+    end
+    function cln
+        echo "Auto-removing packages."
+        flatpak_clean
+    end
+else if type -q nala
+    function ins
+        echo "Installing $argv."
+        sudo nala install $argv
+    end
+    function rmv
+        echo "Removing $argv."
+        sudo nala purge $argv
+    end
+    function agu
+        echo "Updating Repos."
+        sudo nala update
+    end
+    function se
+        echo "Searching for $argv."
+        apt-cache search $argv
+        echo "Policy for $argv."
+        apt-cache policy $argv
+        snap_search $argv
+        flatpak_search $argv
+    end
+    function cln
+        echo "Cleaning cache."
+        sudo nala clean
+        echo "Auto-removing packages."
+        sudo nala autopurge --purge
+        flatpak_clean
+    end
+else if type -q apt-get
+    function ins
+        echo "Installing $argv."
+        sudo apt-get install $argv
+    end
+    function rmv
+        echo "Removing $argv."
+        sudo apt-get --purge remove $argv
+    end
+    function agu
+        echo "Updating Repos."
+        sudo apt-get update
+    end
+    function se
+        echo "Searching for $argv."
+        apt-cache search $argv
+        echo "Policy for $argv."
+        apt-cache policy $argv
+        snap_search $argv
+        flatpak_search $argv
+    end
+    function cln
+        echo "Auto-cleaning cache."
+        sudo apt-get autoclean
+        echo "Auto-removing packages."
+        sudo apt-get autoremove --purge
+        flatpak_clean
+    end
+else if type -q dnf; or type -q yum
+    if type -q dnf
+        set PKGMGR dnf
+    else if type -q yum
+        set PKGMGR yum
+    end
+    function ins
+        echo "Installing $argv."
+        sudo $PKGMGR install $argv
+    end
+    function rmv
+        echo "Removing $argv."
+        sudo $PKGMGR remove $argv
+    end
+    function se
+        echo -e "\\nSearching for $argv."
+        sudo $PKGMGR search $argv
+        echo -e "\\nSearching installed packages for $argv."
+        sudo $PKGMGR list installed | grep -i $argv
+        echo -e "\\nInfo for $argv."
+        sudo $PKGMGR info $argv
+        snap_search $argv
+        flatpak_search $argv
+    end
+    function cln
+        echo "Auto-removing packages."
+        sudo $PKGMGR autoremove
+        flatpak_clean
+    end
+else if type -q yay
+    function ins
+        echo "Installing $argv.\n"
+        yay --pacman pacman --print --print-format="%n-%v" -S --needed $argv | sort
+        echo "\n"
+        read -P "Press Enter to install or Ctrl-C to cancel."
+        yay -S --noconfirm --needed $argv
+    end
+    function rmv
+        echo "Removing $argv."
+        yay -Rsn $argv
+    end
+    function se
+        echo -e "\\nSearching for $argv."
+        snap_search $argv
+        flatpak_search $argv
+        echo -e "\\nPackage info"
+        yay -Si $argv
+        echo -e "\\nPackages in repo."
+        yay -Ss $argv
+        echo -e "\\nInstalled packages."
+        yay -Qs $argv
+    end
+    function cln
+        echo "Auto-removing packages."
+        yay -Qdtq | yay -Rs -
+        flatpak_clean
+    end
+else if type -q zypper
+    function ins
+        echo "Installing $argv."
+        sudo zypper install $argv
+    end
+    function rmv
+        echo "Removing $argv."
+        sudo zypper remove -u $argv
+    end
+    function se
+        echo "Searching for $argv."
+        sudo zypper search $argv
+        sudo zypper info $argv
+    end
+# NixOS package manager only.
+else if type -q nix; and not string match -qr $USER (which nix);
+    function se
+        echo -e "\\nSearching for $argv."
+        flatpak_search $argv
+        nix search nixpkgs $argv
+    end
+    function cln
+        echo "Auto-removing packages and performing garbage collection."
+        sudo nix-collect-garbage -d
+        flatpak_clean
+    end
+end
+
+# Nix user-mode functions
+if type -q nix;
+    function ned
+        echo "Editing home-manager config"
+        nano $HOME/.config/home-manager/home.nix
+    end
+    function nup
+        echo "Updating Nix userspace."
+        nix-channel --update
+        home-manager switch
+    end
+    function ncln
+        echo "Performing Nix garbage collection."
+        nix-collect-garbage -d
+    end
+    function nroots
+        echo "Show gc roots"
+        find -H /nix/var/nix/gcroots/auto -type l | xargs -I {{}} sh -c 'readlink {{}}; realpath {{}}; echo'
+    end
+    function nse
+        echo "Search nix packages"
+        nix search nixpkgs $argv
+    end
+end
+""".format(SCRIPTDIR=SCRIPTDIR, fenv_dir=fenv_dir)
+
+    # Install fish script for user (overwrite previous script)
+    with open(fish_config_path, mode='w') as f:
+        f.write(fish_config_text)
+    os.chmod(fish_config_path, 0o644)
+
+    if rootstate is True:
+        CFunc.chown_recursive(os.path.dirname(fish_config_path), user, group)
+    return
+
+
+### Code ###
+
+print("Running {0}".format(__file__))
 
 # Get arguments
 parser = argparse.ArgumentParser(description='Configure enhancements for shells.')
@@ -687,479 +1248,9 @@ tmux_conf_theme_status_right=" #{battery_percentage} | #{username}#{root} | #{ho
 
 ######### Fish Section #########
 # Check if fish exists
-if args.fish is True and shutil.which('fish'):
-    # Change to temp dir. User can't install omf if current dir is root home folder.
-    temp_dir = tempfile.gettempdir()
-    os.chdir(temp_dir)
-
-    # Git checkout local omf folder, in case it is unclean.
-    if os.path.isdir(os.path.join(USERVARHOME, ".local", "share", "omf")):
-        os.chdir(os.path.join(USERVARHOME, ".local", "share", "omf"))
-        subprocess.run(["git", "checkout", "-f"], check=False)
-        os.chdir(temp_dir)
-
-    # Test for omf
-    if rootstate is True:
-        status = CFunc.run_as_user(USERNAMEVAR, "omf update", shutil.which("fish"))
-    else:
-        status = subprocess.Popen("omf update", shell=True, executable=shutil.which("fish")).returncode
-
-    # Install omf and plugins, since status was not 0
-    if status != 0:
-        # Install omf
-        omf_git_path = os.path.join(tempfile.gettempdir(), "oh-my-fish")
-        CFunc.gitclone("https://github.com/oh-my-fish/oh-my-fish", omf_git_path)
-        if rootstate is True:
-            CFunc.run_as_user(USERNAMEVAR, "cd {0}; bin/install --offline --noninteractive".format(omf_git_path), shutil.which("fish"), error_on_fail=True)
-        else:
-            subprocess.Popen("cd {0}; bin/install --offline --noninteractive", shell=True, executable=shutil.which("fish"))
-        shutil.rmtree(omf_git_path)
-        # Install bobthefish
-        if rootstate is True:
-            CFunc.run_as_user(USERNAMEVAR, "omf install bobthefish", shutil.which("fish"), error_on_fail=True)
-            CFunc.run_as_user(USERNAMEVAR, "omf install foreign-env", shutil.which("fish"), error_on_fail=True)
-        else:
-            subprocess.Popen("omf install bobthefish", shell=True, executable=shutil.which("fish"))
-            subprocess.Popen("omf install foreign-env", shell=True, executable=shutil.which("fish"))
-
-    # Personal note: To uninstall omf completely, use the following command as a normal user:
-    # omf destroy; rm -rf ~/.config/omf/ ~/.cache/omf/ ~/.local/share/omf/
-
-    # Generate fish script.
-    FISHSCRIPT = """
-# Set bobthefish options
-set -g theme_display_user yes
-# Set root and non-root cmds.
-if [ (id -u) != "0" ]
-    set SUDOCMD "sudo"
-else
-    set SUDOCMD ""
-end
-set CUSTOMSCRIPTPATH "{SCRIPTDIR}"
-# Set editor
-set -gx EDITOR nano
-set -gx XZ_OPT "-T0"
-
-# Function to check if in path
-function checkpath
-    set PATHSPLIT (string split " " $PATH)
-    for x in $PATHSPLIT
-        if test "$argv" = "$x"
-            return 1
-        end
-    end
-    return 0
-end
-# Function to add path
-function pathadd
-    if checkpath "$argv"; and test -d "$argv"
-        set -gx PATH $PATH $argv
-    end
-end
-# Set sbin in path
-pathadd "/sbin"
-pathadd "/usr/sbin"
-pathadd "/usr/local/sbin"
-# Set Custom Scripts in path
-pathadd "$CUSTOMSCRIPTPATH"
-# Set ".local/bin" in path
-pathadd "$HOME/.local/bin"
-# Add snap paths
-pathadd "/snap/bin"
-pathadd "/var/lib/snapd/snap/bin"
-
-# Source nix files
-if checkpath "$HOME/.nix-profile/bin"; and test -d "$HOME/.nix-profile/bin"
-    fenv source $HOME/.nix-profile/etc/profile.d/nix.sh
-    fenv source $HOME/.nix-profile/etc/profile.d/hm-session-vars.sh
-end
-
-function sl
-    sudo su -l root
-end
-if [ (id -u) != "0" ]
-    function pc
-        set -x EXISTPATH (pwd)
-        cd "$CUSTOMSCRIPTPATH"
-        git fetch --all
-        git diff
-        git status
-        if not test -z $argv
-            git add -A
-            git commit -m "$argv"
-            git pull
-            git push
-        else
-            echo "No commit message entered. Exiting."
-        end
-        git pull
-        cd "$EXISTPATH"
-        set -e EXISTPATH
-    end
-end
-function sst
-    tmux attach-session -t ssh_tmux || tmux new-session -s ssh_tmux
-end
-function rm_common
-    for todel in $argv
-        echo Deleting (realpath $todel)
-    end
-    echo "Press enter to continue or Ctrl-C to abort"
-    read
-end
-function rms
-    rm_common $argv
-    for todel in $argv
-        sudo rm -rf (realpath $todel)
-    end
-end
-function start
-    echo "Starting systemd service $argv."
-    sudo systemctl start $argv
-    sudo systemctl status --all -l $argv
-end
-function stop
-    echo "Stopping systemd service $argv."
-    sudo systemctl stop $argv
-    sudo systemctl status --all -l $argv
-end
-function en
-    echo "Enabling systemd service $argv."
-    sudo systemctl enable $argv
-    sudo systemctl status --all -l $argv
-end
-function dis
-    echo "Disabling systemd service $argv."
-    sudo systemctl disable $argv
-    sudo systemctl status --all -l $argv
-end
-function res
-    echo "Restarting systemd service $argv."
-    sudo systemctl restart $argv
-    sudo systemctl status --all -l $argv
-end
-function st
-    echo "Getting status for systemd service $argv."
-    sudo systemctl status --all -l $argv
-end
-function jt
-    echo "Getting journal entries."
-    sudo journalctl --all $argv
-end
-function dr
-    echo "Executing systemd daemon-reload."
-    sudo systemctl daemon-reload
-end
-function startu
-    echo "Starting systemd service $argv for user."
-    systemctl --user start $argv
-    systemctl --user status -l $argv
-end
-function stopu
-    echo "Stopping systemd service $argv for user."
-    systemctl --user stop $argv
-    systemctl --user status -l $argv
-end
-function resu
-    echo "Restarting systemd service $argv for user."
-    systemctl --user restart $argv
-    systemctl --user status -l $argv
-end
-function stu
-    echo "Getting status for systemd service $argv for user."
-    systemctl --user status -l $argv
-end
-function jtu
-    echo "Getting user journal entries."
-    journalctl --user --all $argv
-end
-function dru
-    echo "Executing systemd daemon-reload for user."
-    systemctl --user daemon-reload
-end
-function d
-    df -hT | grep -v tmpfs
-end
-function f
-    sudo flatpak $argv
-end
-function fup
-    flatpak_update
-end
-function flatpak_update
-    if type -q flatpak
-        echo "Updating Flatpaks"
-        flatpak update --system --assumeyes
-    end
-end
-function flatpak_clean
-    if type -q flatpak
-        echo "Clean unused Flatpaks"
-        flatpak uninstall --system --delete-data --unused --assumeyes
-    end
-end
-function flatpak_search
-    if type -q flatpak
-        echo "Search Flatpaks"
-        flatpak search $argv
-    end
-end
-function snap_search
-    if type -q snap
-        echo "Search Snaps"
-        snap find $argv
-    end
-end
-function up
-    if type -q nixos-rebuild ; and [ (id -u) != "0" ] ; and checkpath "/etc/nixos"; and test -d "/etc/nixos"
-        cd /etc/nixos
-        git pull
-    end
-    # System upgrade commands
-    if type -q topgrade
-        topgrade -y flatpak --disable firmware $argv
-    else if type -q rpm-ostree
-        sudo rpm-ostree upgrade
-    else if type -q nala
-        sudo nala update
-        sudo nala upgrade
-    else if type -q apt-get
-        sudo apt-get update
-        sudo apt-get dist-upgrade
-    else if type -q dnf
-        sudo dnf update --refresh -y
-    else if type -q yay
-        yay -Syu --needed --noconfirm
-    else if type -q zypper
-        sudo zypper up -y
-        sudo zypper dup -y
-    else if type -q nix; and not string match -qr $USER (which nix);
-        sudo nixos-rebuild switch --upgrade
-    end
-    # Non-root commands
-    if not type -q topgrade
-        distrobox-upgrade --all
-    end
-end
-function upr
-    # Root commands
-    if type -q distrobox-upgrade
-        distrobox-upgrade --root --all
-    end
-end
-
-# Set package manager functions
-if type -q rpm-ostree
-    function ins
-        echo "Installing $argv."
-        sudo rpm-ostree install $argv
-    end
-    function rmv
-        echo "Removing $argv."
-        sudo rpm-ostree remove $argv
-    end
-    function rst
-        sudo rpm-ostree status
-    end
-    function se
-        echo -e "\\nSearching for $argv."
-        if [ (id -u) != "0" ]
-            if not toolbox list --containers | grep -q fedora-toolbox
-                toolbox create
-            end
-            toolbox run sudo dnf search $argv
-            echo -e "\nInfo for $argv."
-            toolbox run sudo dnf info $argv
-        end
-        snap_search $argv
-        flatpak_search $argv
-    end
-    function cln
-        echo "Auto-removing packages."
-        flatpak_clean
-    end
-else if type -q nala
-    function ins
-        echo "Installing $argv."
-        sudo nala install $argv
-    end
-    function rmv
-        echo "Removing $argv."
-        sudo nala purge $argv
-    end
-    function agu
-        echo "Updating Repos."
-        sudo nala update
-    end
-    function se
-        echo "Searching for $argv."
-        apt-cache search $argv
-        echo "Policy for $argv."
-        apt-cache policy $argv
-        snap_search $argv
-        flatpak_search $argv
-    end
-    function cln
-        echo "Cleaning cache."
-        sudo nala clean
-        echo "Auto-removing packages."
-        sudo nala autopurge --purge
-        flatpak_clean
-    end
-else if type -q apt-get
-    function ins
-        echo "Installing $argv."
-        sudo apt-get install $argv
-    end
-    function rmv
-        echo "Removing $argv."
-        sudo apt-get --purge remove $argv
-    end
-    function agu
-        echo "Updating Repos."
-        sudo apt-get update
-    end
-    function se
-        echo "Searching for $argv."
-        apt-cache search $argv
-        echo "Policy for $argv."
-        apt-cache policy $argv
-        snap_search $argv
-        flatpak_search $argv
-    end
-    function cln
-        echo "Auto-cleaning cache."
-        sudo apt-get autoclean
-        echo "Auto-removing packages."
-        sudo apt-get autoremove --purge
-        flatpak_clean
-    end
-else if type -q dnf; or type -q yum
-    if type -q dnf
-        set PKGMGR dnf
-    else if type -q yum
-        set PKGMGR yum
-    end
-    function ins
-        echo "Installing $argv."
-        sudo $PKGMGR install $argv
-    end
-    function rmv
-        echo "Removing $argv."
-        sudo $PKGMGR remove $argv
-    end
-    function se
-        echo -e "\\nSearching for $argv."
-        sudo $PKGMGR search $argv
-        echo -e "\\nSearching installed packages for $argv."
-        sudo $PKGMGR list installed | grep -i $argv
-        echo -e "\\nInfo for $argv."
-        sudo $PKGMGR info $argv
-        snap_search $argv
-        flatpak_search $argv
-    end
-    function cln
-        echo "Auto-removing packages."
-        sudo $PKGMGR autoremove
-        flatpak_clean
-    end
-else if type -q yay
-    function ins
-        echo "Installing $argv.\n"
-        yay --pacman pacman --print --print-format="%n-%v" -S --needed $argv | sort
-        echo "\n"
-        read -P "Press Enter to install or Ctrl-C to cancel."
-        yay -S --noconfirm --needed $argv
-    end
-    function rmv
-        echo "Removing $argv."
-        yay -Rsn $argv
-    end
-    function se
-        echo -e "\\nSearching for $argv."
-        snap_search $argv
-        flatpak_search $argv
-        echo -e "\\nPackage info"
-        yay -Si $argv
-        echo -e "\\nPackages in repo."
-        yay -Ss $argv
-        echo -e "\\nInstalled packages."
-        yay -Qs $argv
-    end
-    function cln
-        echo "Auto-removing packages."
-        yay -Qdtq | yay -Rs -
-        flatpak_clean
-    end
-else if type -q zypper
-    function ins
-        echo "Installing $argv."
-        sudo zypper install $argv
-    end
-    function rmv
-        echo "Removing $argv."
-        sudo zypper remove -u $argv
-    end
-    function se
-        echo "Searching for $argv."
-        sudo zypper search $argv
-        sudo zypper info $argv
-    end
-# NixOS package manager only.
-else if type -q nix; and not string match -qr $USER (which nix);
-    function se
-        echo -e "\\nSearching for $argv."
-        flatpak_search $argv
-        nix search nixpkgs $argv
-    end
-    function cln
-        echo "Auto-removing packages and performing garbage collection."
-        sudo nix-collect-garbage -d
-        flatpak_clean
-    end
-end
-
-# Nix user-mode functions
-if type -q nix;
-    function ned
-        echo "Editing home-manager config"
-        nano $HOME/.config/home-manager/home.nix
-    end
-    function nup
-        echo "Updating Nix userspace."
-        nix-channel --update
-        home-manager switch
-    end
-    function ncln
-        echo "Performing Nix garbage collection."
-        nix-collect-garbage -d
-    end
-    function nroots
-        echo "Show gc roots"
-        find -H /nix/var/nix/gcroots/auto -type l | xargs -I {{}} sh -c 'readlink {{}}; realpath {{}}; echo'
-    end
-    function nse
-        echo "Search nix packages"
-        nix search nixpkgs $argv
-    end
-end
-""".format(SCRIPTDIR=SCRIPTDIR)
-
-    # Set fish script
-    FISHSCRIPTUSERPATH = os.path.join(USERVARHOME, ".config", "fish", "config.fish")
-    # Create path if it doesn't existing
-    if CFunc.is_windows() or rootstate is False:
-        os.makedirs(os.path.dirname(FISHSCRIPTUSERPATH), exist_ok=True)
-    else:
-        CFunc.run_as_user(USERNAMEVAR, "mkdir -p {0}".format(os.path.dirname(FISHSCRIPTUSERPATH)))
-
-    # Install fish script for user (overwrite previous script)
-    with open(FISHSCRIPTUSERPATH, mode='w') as f:
-        f.write(FISHSCRIPT)
-    os.chmod(FISHSCRIPTUSERPATH, 0o644)
-
-    if rootstate is True:
-        subprocess.run("chown -R {0}:{1} {2}".format(USERNAMEVAR, USERGROUP, os.path.dirname(FISHSCRIPTUSERPATH)), shell=True, check=True)
+if args.fish is True and shutil.which('fish') and shutil.which('starship'):
+    starship_config(user=USERNAMEVAR, group=USERGROUP, userhome=USERVARHOME)
+    fish_config(user=USERNAMEVAR, group=USERGROUP, userhome=USERVARHOME)
 
 
 ######### Default Shell Configuration #########

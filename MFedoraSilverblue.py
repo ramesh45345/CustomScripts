@@ -110,7 +110,7 @@ if args.stage == 1:
 
     ### OSTree Apps ###
     # Cli tools
-    rostreeinstall("fish zsh tmux powerline-fonts google-roboto-fonts samba cups-pdf syncthing numix-icon-theme numix-icon-theme-circle")
+    rostreeinstall("fish starship zsh tmux powerline-fonts google-roboto-fonts samba cups-pdf syncthing numix-icon-theme numix-icon-theme-circle")
     subprocess.run("systemctl enable sshd", shell=True, check=True)
     # Topgrade
     CFuncExt.topgrade_install()

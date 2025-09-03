@@ -92,6 +92,7 @@ partimage
 s-tui
 screen
 smbclient
+starship
 tmux
 unrar
 unzip
