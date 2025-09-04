@@ -886,8 +886,7 @@ if __name__ == '__main__':
         if secureboot is True:
             tpm_process.terminate()
         logging.info("KVM launch command: {0}".format(CREATESCRIPT_KVM))
-        if args.noprompt is False:
-            subprocess.run(CREATESCRIPT_KVM, shell=True, check=False)
+        subprocess.run(CREATESCRIPT_KVM, shell=True, check=False)
 
     # Print finish times
     logging.info("Packer completed in {0}".format(str(packerfinishtime - beforetime)))
