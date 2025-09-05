@@ -18,7 +18,7 @@ print = functools.partial(print, flush=True)
 def detect_customscripts(userhome_folder: str, cs_spec_folder: str = None) -> str:
     """Detect where the CustomScripts folder exists."""
     cs = None
-    if os.path.isdir(cs_spec_folder):
+    if cs_spec_folder and os.path.isdir(cs_spec_folder):
         cs = cs_spec_folder
     elif (CFunc.is_windows() and os.path.isdir(os.path.join(userhome_folder, "Documents", "CustomScripts"))):
         cs = os.path.join(userhome_folder, "Documents", "CustomScripts")
