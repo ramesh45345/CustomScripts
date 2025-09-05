@@ -34,6 +34,12 @@ repo_gpgcheck=1
 gpgkey=https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/raw/master/pub.gpg
 metadata_expire=1h
 """)
+def repo_terra():
+    """
+    Install terra repository
+    https://github.com/terrapkg/packages
+    """
+    subprocess.run("dnf install -y --nogpgcheck --repofrompath 'terra,https://repos.fyralabs.com/terra$releasever' terra-release", shell=True, check=True)
 
 
 if __name__ == '__main__':
@@ -60,6 +66,8 @@ if __name__ == '__main__':
     ### Fedora Repos ###
     # RPMFusion
     repo_rpmfusion()
+    # Terra
+    repo_terra()
     if not args.nogui:
         # Visual Studio Code
         repo_vscode()

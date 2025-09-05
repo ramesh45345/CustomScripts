@@ -56,8 +56,7 @@ MFedora.repo_vscode()
 # https://elrepo.org
 subprocess.run("rpm --import https://www.elrepo.org/RPM-GPG-KEY-v2-elrepo.org ; dnf install -y https://elrepo.org/linux/elrepo/el10/x86_64/RPMS/elrepo-release-10.0-1.el10.elrepo.noarch.rpm ; dnf config-manager --enable elrepo-kernel", shell=True)
 # Terra
-# https://github.com/terrapkg/packages
-CFunc.dnfinstall("--nogpgcheck --repofrompath 'terra,https://repos.fyralabs.com/terrael$releasever' terra-release")
+MFedora.repo_terra()
 
 # Update system after enabling repos.
 CFunc.dnfupdate()

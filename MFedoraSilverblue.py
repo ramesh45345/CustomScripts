@@ -104,13 +104,16 @@ if args.stage == 1:
     ### Fedora Repos ###
     # RPMFusion
     rostreeinstall("https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm")
+    # Terra
+    subprocess.run("curl -fsSL https://github.com/terrapkg/subatomic-repos/raw/main/terra.repo | tee /etc/yum.repos.d/terra.repo", shell=True, check=True)
+    rostreeinstall("terra-release")
 
     # Update system.
     rostreeupdate()
 
     ### OSTree Apps ###
     # Cli tools
-    rostreeinstall("fish starship zsh tmux powerline-fonts google-roboto-fonts samba cups-pdf syncthing numix-icon-theme numix-icon-theme-circle")
+    rostreeinstall("fish zsh tmux powerline-fonts google-roboto-fonts samba cups-pdf syncthing numix-icon-theme numix-icon-theme-circle")
     subprocess.run("systemctl enable sshd", shell=True, check=True)
     # Topgrade
     CFuncExt.topgrade_install()
@@ -191,6 +194,8 @@ if args.stage == 2:
     subprocess.run("rpm-ostree update --uninstall rpmfusion-free-release --uninstall rpmfusion-nonfree-release --install rpmfusion-free-release --install rpmfusion-nonfree-release", shell=True, check=True)
     rostreeinstall("rpmfusion-free-release-tainted rpmfusion-nonfree-release-tainted")
     subprocess.run("systemctl enable smb", shell=True, check=True)
+    # Starship
+    rostreeinstall("starship")
 
     # Freeworld
     # https://rpmfusion.org/Howto/OSTree

@@ -14,11 +14,24 @@ import CFunc
 # Disable buffered stdout (to ensure prints are in order)
 print = functools.partial(print, flush=True)
 
-# Folder of this script
-SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))
-
-
 ### Functions ###
+def detect_customscripts(userhome_folder: str, cs_spec_folder: str = None) -> str:
+    """Detect where the CustomScripts folder exists."""
+    cs = None
+    if os.path.isdir(cs_spec_folder):
+        cs = cs_spec_folder
+    elif (CFunc.is_windows() and os.path.isdir(os.path.join(userhome_folder, "Documents", "CustomScripts"))):
+        cs = os.path.join(userhome_folder, "Documents", "CustomScripts")
+    elif os.path.isdir(os.path.join(os.sep, "var", "opt", "CustomScripts")):
+        cs = os.path.join(os.sep, "var", "opt", "CustomScripts")
+    elif os.path.isdir(os.path.join(os.sep, "opt", "CustomScripts")):
+        cs = os.path.join(os.sep, "opt", "CustomScripts")
+    elif os.path.isdir(os.path.join(userhome_folder, "CustomScripts")):
+        cs = os.path.join(userhome_folder, "CustomScripts")
+    else:
+        # If all else fails, use this folder
+        cs = os.path.abspath(os.path.dirname(__file__))
+    return cs
 def starship_config(user: str, group: str, userhome: str):
     """Write starship configuration."""
     starship_config_path = os.path.join(userhome, ".config", "starship.toml")
@@ -591,6 +604,9 @@ rootstate = CFunc.is_root(checkstate=True, state_exit=False)
 USERNAMEVAR, USERGROUP, USERVARHOME = CFunc.getnormaluser(args.user)
 # Note: This folder is the root home folder.
 ROOTHOME = os.path.expanduser("~root")
+
+# Folder of this script
+SCRIPTDIR = detect_customscripts(USERVARHOME)
 
 # Detect OS information
 distro, release = CFunc.detectdistro()
