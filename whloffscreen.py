@@ -72,11 +72,14 @@ if __name__ == '__main__':
 
     # Get arguments
     parser = argparse.ArgumentParser(description='Turn screen off using dpms.')
-    parser.add_argument("-i", "--init", help='Initial timeout before starting dpms loop.', type=int, default=5)
-    parser.add_argument("-c", "--continuous", help='Continual timeout within dpms loop.', type=int, default=30)
+    parser.add_argument("-i", "--init", help='Initial timeout before starting dpms loop (default: %(default)s)', type=int, default=5)
+    parser.add_argument("-c", "--continuous", help='Continual timeout within dpms loop (default: %(default)s)', type=int, default=30)
+    parser.add_argument("-t", "--type", help='Force method of dpms type.', type=str, choices=["", "kde", "gnome", "x11"], default="")
     args = parser.parse_args()
 
     dpms_system_type = dpms_detect()
+    if args.type != "":
+        dpms_system_type = args.type
     print("Init Timeout: {0}, Continuous Timeout: {1}".format(args.init, args.continuous))
     print("DPMS type: {0}".format(dpms_system_type))
 
