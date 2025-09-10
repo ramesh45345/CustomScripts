@@ -311,7 +311,7 @@ if __name__ == '__main__':
         kvm_variant = "fedora-rawhide"
         isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/42/Server/x86_64/iso/Fedora-Server-dvd-x86_64-42-1.1.iso"
         if args.desktopenv is None:
-            args.desktopenv = "kde"
+            args.desktopenv = "xfce"
     if args.ostype == 1:
         vmname = "Packer-Fedora-{0}".format(hvname)
         vmprovision_defopts = "-d {0}".format(args.desktopenv)
