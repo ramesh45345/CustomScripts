@@ -200,6 +200,19 @@ def cmd_virtinstall(vmname: str,
     if cmd_print:
         print(cmd)
     return cmd
+def sshkey_detect(user: str = os.getenv("USER")):
+    """Detect the ssh public key for the current user."""
+    userdetails = CFunc.getuserdetails(user)
+    userhome = userdetails[1]
+    if os.path.isfile(os.path.join(userhome, ".ssh", "id_ed25519.pub")) is True:
+        with open(os.path.join(userhome, ".ssh", "id_ed25519.pub"), 'r') as sshfile:
+            sshkey = sshfile.read().replace('\n', '')
+    elif os.path.isfile(os.path.join(userhome, ".ssh", "id_rsa.pub")) is True:
+        with open(os.path.join(userhome, ".ssh", "id_rsa.pub"), 'r') as sshfile:
+            sshkey = sshfile.read().replace('\n', '')
+    else:
+        sshkey = " "
+    return sshkey
 def signal_handler(sig, frame):
     """Cleanup if given early termination."""
     if tpm_process:
@@ -531,14 +544,8 @@ if __name__ == '__main__':
     # Detect root ssh key.
     if args.sshkey is not None:
         sshkey = args.rootsshkey
-    elif os.path.isfile(os.path.join(USERHOME, ".ssh", "id_ed25519.pub")) is True:
-        with open(os.path.join(USERHOME, ".ssh", "id_ed25519.pub"), 'r') as sshfile:
-            sshkey = sshfile.read().replace('\n', '')
-    elif os.path.isfile(os.path.join(USERHOME, ".ssh", "id_rsa.pub")) is True:
-        with open(os.path.join(USERHOME, ".ssh", "id_rsa.pub"), 'r') as sshfile:
-            sshkey = sshfile.read().replace('\n', '')
     else:
-        sshkey = " "
+        sshkey = sshkey_detect()
     print("SSH Key is \"{0}\"".format(sshkey))
 
     # Generate hashed password

@@ -230,14 +230,8 @@ if __name__ == '__main__':
     # Detect root ssh key.
     if args.rootsshkey is not None:
         sshkey = args.rootsshkey
-    elif os.path.isfile(os.path.join(USERHOME, ".ssh", "id_ed25519.pub")) is True:
-        with open(os.path.join(USERHOME, ".ssh", "id_ed25519.pub"), 'r') as sshfile:
-            sshkey = sshfile.read().replace('\n', '')
-    elif os.path.isfile(os.path.join(USERHOME, ".ssh", "id_rsa.pub")) is True:
-        with open(os.path.join(USERHOME, ".ssh", "id_rsa.pub"), 'r') as sshfile:
-            sshkey = sshfile.read().replace('\n', '')
     else:
-        sshkey = " "
+        sshkey = Pkvm.sshkey_detect(USERNAMEVAR)
 
     # Determine VM Name
     if args.ostype == 1:
