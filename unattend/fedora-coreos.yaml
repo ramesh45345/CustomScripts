@@ -141,7 +141,7 @@ storage:
         inline: |
           #!/bin/bash
           rpm-ostree update --bypass-driver
-          rpm-ostree install avahi zsh fish tmux perl-Time-HiRes firewalld docker-compose
+          rpm-ostree install avahi zsh tmux perl-Time-HiRes firewalld docker-compose
           # Work around https://github.com/coreos/fedora-coreos-tracker/issues/572 , until client and server are separated properly. Needed for libvirt dependency.
           rpm-ostree override remove nfs-utils-coreos --install nfs-utils
 

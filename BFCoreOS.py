@@ -28,7 +28,7 @@ def cosinstaller_run(cmd=list):
         subprocess.run(["coreos-installer"] + cmd, check=True)
     else:
         ci_podman_list = ["podman", "run", "--pull=always", "--rm", "--tty", "--interactive", "--security-opt", "label=disable", "--volume", "{0}:{0}".format(SCRIPTDIR), "--volume", f"{temp_folder}:{temp_folder}"]
-        if vmpath != SCRIPTDIR:
+        if vmpath and os.path.exists(vmpath) and vmpath != SCRIPTDIR:
             ci_podman_list += ["--volume", "{0}:{0}".format(vmpath)]
         if args.drive:
             ci_podman_list += ["--privileged", "--volume", "/dev:/dev", "--volume", "/run/udev:/run/udev"]
@@ -41,7 +41,7 @@ def ignitionvalidate_run(cmd=list):
         subprocess.run(["ignition-validate"] + cmd, check=True)
     else:
         iv_podman_list = ["podman", "run", "--pull=always", "--rm", "--tty", "--interactive", "--security-opt", "label=disable", "--volume", "{0}:{0}".format(SCRIPTDIR), "--volume", f"{temp_folder}:{temp_folder}"]
-        if vmpath != SCRIPTDIR:
+        if vmpath and os.path.exists(vmpath) and vmpath != SCRIPTDIR:
             iv_podman_list += ["--volume", "{0}:{0}".format(vmpath)]
         iv_podman_list += ["--workdir", SCRIPTDIR, "quay.io/coreos/ignition-validate:release"]
         subprocess.run(iv_podman_list + cmd, check=True)
@@ -52,7 +52,7 @@ def fcct_run(cmd=list):
         subprocess.run(["fcct"] + cmd, check=True)
     else:
         fcct_podman_list = ["podman", "run", "--pull=always", "--rm", "--tty", "--interactive", "--security-opt", "label=disable", "--volume", "{0}:/{0}".format(SCRIPTDIR), "--volume", f"{temp_folder}:{temp_folder}"]
-        if vmpath != SCRIPTDIR:
+        if vmpath and os.path.exists(vmpath) and vmpath != SCRIPTDIR:
             fcct_podman_list += ["--volume", "{0}:{0}".format(vmpath)]
         fcct_podman_list += ["--workdir", SCRIPTDIR, "quay.io/coreos/fcct:release"]
         subprocess.run(fcct_podman_list + cmd, check=True)
@@ -83,10 +83,10 @@ if args.vm:
     print("Installing to VM. Image path: {0}".format(vmpath))
 if args.drive:
     if os.path.exists(args.drive) is True and stat.S_ISBLK(os.stat(args.drive).st_mode) is True:
-        print("Installing to {0}.".format(args.drive))
-        subprocess.run("lsblk -o MODEL {0}".format(args.drive), shell=True, check=True)
-        subprocess.run("lsblk {0}".format(args.drive), shell=True, check=True)
-        print("WARNING: Ensure that {0} is the correct block device, it will be erased.")
+        print(f"Installing to {args.drive}.")
+        subprocess.run(f"lsblk -o MODEL {args.drive}", shell=True, check=True)
+        subprocess.run(f"lsblk {args.drive}", shell=True, check=True)
+        print(f"WARNING: Ensure that {args.drive} is the correct block device, it will be erased.")
     else:
         sys.exit("ERROR: {0} is not a block device. Exiting.")
 if args.sshkey:
