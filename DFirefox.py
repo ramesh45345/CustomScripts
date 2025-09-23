@@ -70,6 +70,8 @@ user_pref("browser.newtabpage.activity-stream.feeds.section.topstories", false);
 user_pref("extensions.pocket.enabled", false);
 /** DOWNLOADS ***/
 user_pref("browser.download.useDownloadDir", false);
+// Disk
+user_pref("browser.cache.disk.enable", true);
 
 user_pref("dom.webnotifications.enabled", false);
 user_pref("general.autoScroll", true);
