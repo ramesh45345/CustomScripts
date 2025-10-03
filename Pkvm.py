@@ -170,6 +170,20 @@ def ovmf_bin_nvramcopy(destpath: str, vmname: str, secureboot: bool = False):
     shutil.copy(ovmf_nvram_fullpath, nvram_copy_path)
     os.chmod(nvram_copy_path, 0o777)
     return ovmf_bin_fullpath, nvram_copy_path
+def nmcli_connecteddevice():
+    """Get the connected device from Network Manager."""
+    # Get the device list, and convert it into a 2D list
+    dev = None
+    nmcli_dev = CFunc.subpout(f"nmcli --terse dev", error_on_fail=False)
+    nmcli_array = []
+    for nmcli_lines in nmcli_dev.split("\n"):
+        nmcli_array += [nmcli_lines.split(":")]
+    # Only return "connected" and not "connected (externally)"
+    for line in nmcli_array:
+        if line[2] == "connected":
+            dev = line[0]
+            break
+    return dev
 def cmd_virtinstall(vmname: str,
                     diskpath: str,
                     variant: str,
