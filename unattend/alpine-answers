@@ -35,4 +35,4 @@ ROOTSSHKEY="INSERTSSHKEYHERE"
 NTPOPTS="-c openntpd"
 
 # Set disk options
-DISKOPTS="-m sys /dev/vda"
+DISKOPTS="-v -m sys /dev/vda"

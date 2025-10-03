@@ -179,7 +179,7 @@ function Fcn-Software {
     if ($VMtype -eq 2) {
       $desktop_folder = "$env:PUBLIC\Desktop"
       # Add script to add network share
-      Set-Content -Path "$desktop_folder\share.bat" -Value "@echo off`nnet use * `"\\192.168.122.1\rootfs`" /PERSISTENT:YES /SAVECRED"
+      Set-Content -Path "$desktop_folder\share.bat" -Value "@echo off`nnet use * `"\\192.168.123.1\rootfs`" /PERSISTENT:YES /SAVECRED"
       # vfs script
       Set-Content -Path "$desktop_folder\vfs.bat" -Value "@echo off`n`"C:\Program Files (x86)\WinFsp\bin\fsreg.bat`" virtiofs `"C:\Program Files\Virtio-Win\VioFS\virtiofs.exe`" `"-t %%1 -m %%2`""
 

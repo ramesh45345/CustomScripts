@@ -198,10 +198,15 @@ def cmd_virtinstall(vmname: str,
                     netdev: str = "virtio",
                     video: str = "virtio",
                     cdrom_path: str = "",
-                    cmd_print: bool = False
+                    cmd_print: bool = False,
+                    isolated: bool = True
                     ):
     """Return a virt-install command to use."""
-    cmd = f"""virt-install --connect qemu:///system --name={vmname} --disk path={diskpath}.qcow2,bus={diskinterface} --disk device=cdrom,path="{cdrom_path}",bus=sata,target=sda,readonly=on --graphics spice --cpu {cpuflags} --vcpu={cpucores},sockets=1,cores={cpucores} --memory {memory} --memorybacking source.type=memfd,access.mode=shared --network bridge=virbr0,model={netdev} --filesystem driver.type=virtiofs,source=/mnt,target=mnt --filesystem driver.type=virtiofs,source=/home,target=home --os-variant={variant} --import --noautoconsole --noreboot --video={video} --channel unix,target_type=virtio,name=org.qemu.guest_agent.0 --channel spicevmc,target_type=virtio,name=com.redhat.spice.0"""
+    cmd = f"""virt-install --connect qemu:///system --name={vmname} --disk path={diskpath}.qcow2,bus={diskinterface} --disk device=cdrom,path="{cdrom_path}",bus=sata,target=sda,readonly=on --graphics spice --cpu {cpuflags} --vcpu={cpucores},sockets=1,cores={cpucores} --memory {memory} --memorybacking source.type=memfd,access.mode=shared --filesystem driver.type=virtiofs,source=/mnt,target=mnt --filesystem driver.type=virtiofs,source=/home,target=home --os-variant={variant} --import --noautoconsole --noreboot --video={video} --channel unix,target_type=virtio,name=org.qemu.guest_agent.0 --channel spicevmc,target_type=virtio,name=com.redhat.spice.0"""
+    if isolated is True and nmcli_connecteddevice() is not None:
+        cmd += f" --network bridge=virbr1,model={netdev} --network type=direct,source={nmcli_connecteddevice()},source_mode=bridge,model={netdev},trustGuestRxFilters=yes"
+    else:
+        cmd += f" --network bridge=virbr0,model={netdev}"
     if efi is True:
         cmd += f" --boot loader={efi_bin},loader_ro=yes,loader_type=pflash,nvram={efi_nvram}"
         if secureboot is True:
@@ -444,7 +449,7 @@ if __name__ == '__main__':
         vboxosid = "Fedora_64"
         kvm_variant = "fedora-rawhide"
         vmprovisionscript = "MAlpine.py"
-        isourl = "http://dl-cdn.alpinelinux.org/alpine/latest-stable/releases/x86_64/alpine-standard-3.21.3-x86_64.iso"
+        isourl = "https://dl-cdn.alpinelinux.org/alpine/latest-stable/releases/x86_64/alpine-standard-3.22.1-x86_64.iso"
         useefi = False
     if args.ostype == 45:
         vmname = "AlpineVM"
@@ -759,7 +764,7 @@ if __name__ == '__main__':
         data['source'][packer_type]['local']["shutdown_command"] = "shutdown -p now"
     if 45 <= args.ostype <= 49:
         data['source'][packer_type]['local']["shutdown_command"] = "poweroff"
-        data['source'][packer_type]['local']["boot_command"] = ["<wait10>root<enter><wait>", "ifconfig eth0 up && udhcpc -i eth0<enter><wait5>", "wget http://{{ .HTTPIP }}:{{ .HTTPPort }}/alpine-answers<enter><wait>", f"setup-alpine -e -f $PWD/alpine-answers; mount /dev/vda3 /mnt; echo 'PermitRootLogin yes' >> /mnt/etc/ssh/sshd_config; echo 'root:{sha512_password}' | chpasswd -e -R /mnt; reboot<enter><wait5>", "<wait30s>y<enter>"]
+        data['source'][packer_type]['local']["boot_command"] = ["<wait10>root<enter><wait>", "ifconfig eth0 up && udhcpc -i eth0<enter><wait5>", "wget http://{{ .HTTPIP }}:{{ .HTTPPort }}/alpine-answers<enter><wait>", f"setup-alpine -e -f $PWD/alpine-answers; mount /dev/vda3 /mnt; echo 'PermitRootLogin yes' >> /mnt/etc/ssh/sshd_config; echo 'root:{sha512_password}' | chpasswd -e -R /mnt; sleep 30; reboot<enter><wait5>", "<wait30s>y<enter>"]
         data['build']['provisioner'][1]["shell"] = {}
         data['build']['provisioner'][1]["shell"]["inline"] = [f"echo '{args.vmuser}:{sha512_password}' | chpasswd -e; addgroup {args.vmuser} wheel; chown -R {args.vmuser}:{args.vmuser} ~{args.vmuser}; apk add git python3; /tmp/CustomScripts/{vmprovisionscript} {vmprovision_opts}"]
     if 50 <= args.ostype <= 59:

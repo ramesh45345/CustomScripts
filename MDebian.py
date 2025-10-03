@@ -194,7 +194,7 @@ Acquire::ftp::Timeout "5";''')
     deb_mm(debrelease)
 
     # Cli Software
-    CFunc.aptinstall("ssh tmux zsh fish starship btrfs-progs f2fs-tools xfsprogs mdadm nano p7zip-full p7zip-rar unrar curl wget rsync less iotop sshfs sudo python-is-python3 nala")
+    CFunc.aptinstall("ssh tmux zsh fish starship btrfs-progs f2fs-tools xfsprogs mdadm nano p7zip-full 7zip-rar unrar curl wget rsync less iotop sshfs sudo python-is-python3 nala")
     # Topgrade
     CFuncExt.topgrade_install()
     # Firmware
