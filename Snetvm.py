@@ -14,6 +14,15 @@ def libvirt_virtnetworks():
     """Find all networks in libvirt"""
     virtnetworks = CFunc.subpout("virsh --connect qemu:///system net-list --all --name").splitlines()
     return virtnetworks
+def libvirt_mactable(hostname: str):
+    """Return array containing all mac addresses for a given VM."""
+    macaddress_fields = CFunc.subpout(f"virsh -q domiflist {hostname}", error_on_fail=False)
+    # Create a 2D list containing the mac information.
+    # 0: Interface, 1: Type, 2: Source, 3: Model, 4: MAC
+    macarray = []
+    for mac_lines in macaddress_fields.split("\n"):
+        macarray += [mac_lines.split()]
+    return macarray
 def libvirt_ipv4(hostname: str):
     """
     Return an ipv4 address for a given VM name.
@@ -21,9 +30,11 @@ def libvirt_ipv4(hostname: str):
     The shell version of this function:
         HOSTNAME=U1 ; MAC=$(virsh -q domiflist $HOSTNAME | awk '{ print $5 }') ; virsh --connect qemu:///system net-dhcp-leases default "$MAC" | grep -i ipv4 | awk '{ print $5 }' | sed 's@/.*$@@g'
     """
-    macaddress_fields = CFunc.subpout(f"virsh -q domiflist {hostname}", error_on_fail=False)
-    # Pipe the mac address fields into awk to get the mac.
-    macaddress = subprocess.run(r"""awk '{ print $5 }'""", shell=True, stdout=subprocess.PIPE, input=macaddress_fields, encoding='ascii').stdout.strip()
+    # Get the MAC for the last interface that has a type of "bridge". Its also possible to filter by the source being "virbr0".
+    macaddress = None
+    for mac_line in libvirt_mactable(hostname):
+        if mac_line[1] == "bridge":
+            macaddress = mac_line[4]
     lease_line_found = None
     # Try to find the ip in every available network.
     for virtnet in libvirt_virtnetworks():
@@ -34,9 +45,11 @@ def libvirt_ipv4(hostname: str):
                 # After looping through every network, if we find the ipv4 line, store the last one we found.
                 if (lease_line != "" or not None) and "ipv4" in lease_line.lower():
                     lease_line_found = lease_line
+    ipv4_addr = None
     if lease_line_found is not None:
-        # Take the output of awk, and remove the / and anything after that.
-        ipv4_addr = subprocess.run(r"""awk '{ print $5 }'""", shell=True, stdout=subprocess.PIPE, input=lease_line_found, encoding='ascii').stdout.strip().split("/")[0]
+        # Instead of using awk, split against spaces, and split the IP address again to remove everything after the /.
+        lease_line_processed = lease_line_found.split()
+        ipv4_addr = lease_line_processed[4].split("/")[0]
     return ipv4_addr
 
 

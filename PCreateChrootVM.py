@@ -16,6 +16,7 @@ import time
 # Custom includes
 import CFunc
 import Pkvm
+import Snetvm
 
 # Disable buffered stdout (to ensure prints are in order)
 print = functools.partial(print, flush=True)
@@ -29,36 +30,19 @@ def vm_getip(vmname: str):
     ip = None
     while ip is None:
         # Note: domifaddr does not always work. Use domiflist to get mac address and then look up ip using "ip neighbor" command.
-        mac_list = []
-        mac_sp = subprocess.run("virsh --connect qemu:///system -q domiflist '{0}'".format(vmname), shell=True, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
-        mac_status = mac_sp.returncode
-        if mac_status == 0:
-            mac_list = mac_sp.stdout.split()
-            # Make sure the output is a list and has 5 elements, as opposed to being empty.
-            if isinstance(mac_list, list) and len(mac_list) == 5:
-                ip_list = subprocess.run("ip neigh show dev virbr0 | grep '{0}'".format(mac_list[4]), shell=True, check=False, stdout=subprocess.PIPE).stdout.splitlines()
-                # Process every IP line given, and split it into a list.
-                for ip_line in ip_list:
-                    ip_line_decoded = ip_line.decode().split()
-                    # Make sure the output is a list and has at least 1 element, as opposed to being empty.
-                    if isinstance(ip_line_decoded, list) and len(ip_line_decoded) == 4:
-                        ip = ip_line_decoded[0]
-                        # Check for a valid IP address.
-                        try:
-                            # Test if it is an IPv4 or IPv6 address.
-                            ipaddress.ip_address(ip)
-                            # For now, enforce ipv4, since can't connect to ssh in ipv6 address.
-                            # TODO: Later convert to ssh connection test, reject IP if ssh doesn't connect.
-                            if not isinstance(ipaddress.ip_address(ip), ipaddress.IPv4Address):
-                                raise Exception()
-                            logging.debug('%s is a correct IP address.', ip)
-                            return ip
-                        except:
-                            logging.debug('Address/Netmask is invalid: %s', ip)
-                            ip = None
-        else:
-            if mac_sp.stderr:
-                logging.debug("Mac stderr: %s", mac_sp.stderr)
+        # Check for a valid IP address.
+        try:
+            ip = Snetvm.libvirt_ipv4(vmname)
+            # Test if it is an IPv4 or IPv6 address.
+            ipaddress.ip_address(address=ip)
+            # For now, enforce ipv4, since can't connect to ssh in ipv6 address.
+            if not isinstance(ipaddress.ip_address(ip), ipaddress.IPv4Address):
+                raise Exception()
+            logging.debug('%s is a correct IP address.', ip)
+            return ip
+        except:
+            logging.debug('Address/Netmask is invalid: %s', ip)
+            ip = None
         time.sleep(1)
     return ip
 def vm_getimgpath(vmname: str, folder_path: str):
@@ -194,7 +178,7 @@ if __name__ == '__main__':
 
     # Get arguments
     parser = argparse.ArgumentParser(description='Create and run a Virtual Machine.')
-    parser.add_argument("-a", "--ostype", type=int, help="OS type (1=Arch. 2=NixOS, 3=Ubuntu)", default="1")
+    parser.add_argument("-a", "--ostype", type=int, help="OS type (1=Arch. 2=NixOS, 3=Ubuntu, 4=Debian, 5=Opensuse)", default="1")
     parser.add_argument("-c", "--nixconfig", help="Path of folder configuration for nix")
     parser.add_argument("-e", "--desktopenv", help="Desktop Environment (default: %(default)s)", default="gnome")
     parser.add_argument("-f", "--fullname", help="Full Name", default="User Name")
