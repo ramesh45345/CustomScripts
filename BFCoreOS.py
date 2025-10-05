@@ -161,7 +161,9 @@ if args.vm and vmpath:
         os.remove(qcow2_deltaimage)
 
     # Create the virtual machine.
-    subprocess.run(['virt-install', '--connect', 'qemu:///system', '--name={0}'.format(vmname), '--disk', 'size=60,backing_store={0},bus=virtio,path={1}'.format(qcow2_baseimage, qcow2_deltaimage), '--graphics', 'spice', '--vcpu=4', '--ram=4096', '--network', 'bridge=virbr0,model=virtio', '--filesystem', 'source=/,target=root,mode=mapped', '--os-variant=fedora-coreos-stable', '--import', '--noautoconsole', '--video=virtio', '--channel', 'unix,target_type=virtio,name=org.qemu.guest_agent.0', '--channel', 'spicevmc,target_type=virtio,name=com.redhat.spice.0', '--qemu-commandline="-fw_cfg"', '--qemu-commandline="name=opt/com.coreos/config,file={0}"'.format(ignition_generated_file)], check=True)
+    kvm_cmd = Pkvm.cmd_virtinstall(vmname=vmname, variant="fedora-coreos-stable", efi=
+    False, noautostart = False) + f' --disk size=60,backing_store={qcow2_baseimage},bus=virtio,path={qcow2_deltaimage} --qemu-commandline="-fw_cfg" --qemu-commandline="name=opt/com.coreos/config,file={ignition_generated_file}"'
+    subprocess.run(kvm_cmd, shell=True, check=False)
 
 ### Install on Bare Metal ###
 if args.drive:

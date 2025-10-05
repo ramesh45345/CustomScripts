@@ -185,8 +185,8 @@ def nmcli_connecteddevice():
             break
     return dev
 def cmd_virtinstall(vmname: str,
-                    diskpath: str,
                     variant: str,
+                    diskpath: str = "",
                     efi_bin: str = "",
                     efi_nvram: str = "",
                     memory: int = vm_memory_range(),
@@ -199,10 +199,16 @@ def cmd_virtinstall(vmname: str,
                     video: str = "virtio",
                     cdrom_path: str = "",
                     cmd_print: bool = False,
-                    isolated: bool = True
+                    isolated: bool = True,
+                    noautostart: bool = True,
                     ):
     """Return a virt-install command to use."""
-    cmd = f"""virt-install --connect qemu:///system --name={vmname} --disk path={diskpath}.qcow2,bus={diskinterface} --disk device=cdrom,path="{cdrom_path}",bus=sata,target=sda,readonly=on --graphics spice --cpu {cpuflags} --vcpu={cpucores},sockets=1,cores={cpucores} --memory {memory} --memorybacking source.type=memfd,access.mode=shared --filesystem driver.type=virtiofs,source=/mnt,target=mnt --filesystem driver.type=virtiofs,source=/home,target=home --os-variant={variant} --import --noautoconsole --noreboot --video={video} --channel unix,target_type=virtio,name=org.qemu.guest_agent.0 --channel spicevmc,target_type=virtio,name=com.redhat.spice.0"""
+    cmd = f"""virt-install --connect qemu:///system --name={vmname} --disk device=cdrom,path="{cdrom_path}",bus=sata,target=sda,readonly=on --graphics spice --cpu {cpuflags} --vcpu={cpucores},sockets=1,cores={cpucores} --memory {memory} --memorybacking source.type=memfd,access.mode=shared --filesystem driver.type=virtiofs,source=/mnt,target=mnt --filesystem driver.type=virtiofs,source=/home,target=home --os-variant={variant} --import --noautoconsole --video={video} --channel unix,target_type=virtio,name=org.qemu.guest_agent.0 --channel spicevmc,target_type=virtio,name=com.redhat.spice.0"""
+    if noautostart is True:
+        cmd += " --noreboot"
+    # No disk is attached if diskpath is not specified.
+    if diskpath != "":
+        cmd += f" --disk path={diskpath}.qcow2,bus={diskinterface}"
     if isolated is True and nmcli_connecteddevice() is not None:
         cmd += f" --network bridge=virbr1,model={netdev} --network type=direct,source={nmcli_connecteddevice()},source_mode=bridge,model={netdev},trustGuestRxFilters=yes"
     else:
