@@ -64,7 +64,10 @@ with open(os.path.join(os.sep, "etc", "apk", "repositories"), 'w') as tfile:
 subprocess.run("apk upgrade --update-cache --available", shell=True)
 
 ### Software ###
-apkinstall("btop git nano sudo bash zsh fish starship shadow tmux perl-datetime-hires rsync curl util-linux util-linux-login")
+apkinstall("btop git nano sudo bash zsh fish starship topgrade shadow tmux perl-datetime-hires rsync curl util-linux util-linux-login")
+# Replace doas with sudo
+subprocess.run("apk del doas", shell=True, check=False)
+apkinstall("sudo")
 # Sudoers changes
 CFuncExt.SudoersEnvSettings()
 # Edit sudoers to add dnf.
@@ -116,6 +119,8 @@ if not args.nogui:
     rcupdate_add("polkit")
     # Browsers
     apkinstall("firefox")
+    # Distrobox
+    apkinstall("distrobox")
 
     # Install Desktop Software
     if args.desktop == "gnome":
