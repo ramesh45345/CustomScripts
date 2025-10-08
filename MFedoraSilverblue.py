@@ -3,6 +3,7 @@
 
 # Python includes.
 import argparse
+import functools
 import os
 import shutil
 import subprocess
@@ -12,7 +13,8 @@ import CFunc
 import CFuncExt
 import MFedora
 
-print("Running {0}".format(__file__))
+# Disable buffered stdout (to ensure prints are in order)
+print = functools.partial(print, flush=True)
 
 # Folder of this script
 SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))
@@ -86,6 +88,7 @@ transient = true
     subprocess.run(f"rpm-ostree initramfs-etc --force-sync --track={tr_path}", shell=True, check=True)
     return
 
+print("Running {0}".format(__file__))
 
 # Get arguments
 parser = argparse.ArgumentParser(description='Install Fedora Silverblue Software.')
@@ -189,7 +192,7 @@ if args.stage == 1:
         rostreeinstall("gnome-disk-utility")
 
     # Remove ro on root filesystem
-    subprocess.run(r"""sed 's/\(.*\s\/\s.*\)\(,ro\)\(.*\)/\1\3/g' /etc/fstab""", shell=True, check=False)
+    subprocess.run(r"""sed -i 's/\(.*\s\/\s.*\)\(,ro\)\(.*\)/\1\3/g' /etc/fstab""", shell=True, check=False)
     # Set root transient, so that nix can be installed.
     root_transient()
 
@@ -273,14 +276,14 @@ yt-dlp""")
         CFunc.chown_recursive(os.path.join(USERHOME, ".config"), USERNAMEVAR, USERGROUP)
 
     # Extra scripts
-    subprocess.run("{0}/CCSClone.py".format(SCRIPTDIR), shell=True, check=True)
-    subprocess.run("{0}/Csshconfig.py".format(SCRIPTDIR), shell=True, check=True)
-    subprocess.run("{0}/CShellConfig.py -f -z -d".format(SCRIPTDIR), shell=True, check=True)
-    subprocess.run("{0}/CDisplayManagerConfig.py".format(SCRIPTDIR), shell=True, check=True)
-    subprocess.run("{0}/CVMGeneral.py".format(SCRIPTDIR), shell=True, check=True)
-    subprocess.run("{0}/Cxdgdirs.py".format(SCRIPTDIR), shell=True, check=True)
-    subprocess.run("{0}/Czram.py".format(SCRIPTDIR), shell=True, check=True)
-    subprocess.run("{0}/CSysConfig.sh".format(SCRIPTDIR), shell=True, check=True)
+    subprocess.run(f"{SCRIPTDIR}/CCSClone.py", shell=True, check=True)
+    subprocess.run(f"{SCRIPTDIR}/Csshconfig.py", shell=True, check=True)
+    subprocess.run(f"{SCRIPTDIR}/CShellConfig.py -f -z -d", shell=True, check=True)
+    subprocess.run(f"{SCRIPTDIR}/CDisplayManagerConfig.py", shell=True, check=True)
+    subprocess.run(f"{SCRIPTDIR}/CVMGeneral.py", shell=True, check=True)
+    subprocess.run(f"{SCRIPTDIR}/Cxdgdirs.py", shell=True, check=True)
+    subprocess.run(f"{SCRIPTDIR}/Czram.py", shell=True, check=True)
+    subprocess.run(f"{SCRIPTDIR}/CSysConfig.sh", shell=True, check=True)
     print("Stage 2 complete! Please reboot.")
 
 print("\nScript End")
