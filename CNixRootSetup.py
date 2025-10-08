@@ -36,11 +36,9 @@ Description=Prepare nix mount points
 [Service]
 Type=oneshot
 RequiresMountsFor={0}
-ExecStartPre=chattr -i /
 ExecStart=/bin/sh -c "mkdir -p /nix"
 ExecStart=/bin/sh -c "mkdir -p {0}/nix"
 ExecStart=/bin/sh -c "mount --bind {0}/nix /nix"
-ExecStopPost=chattr +i /
 
 [Install]
 WantedBy=local-fs.target

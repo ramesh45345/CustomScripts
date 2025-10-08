@@ -10,6 +10,7 @@ import time
 # Custom includes
 import CFunc
 import CFuncExt
+import MFedora
 
 print("Running {0}".format(__file__))
 
@@ -69,6 +70,21 @@ def kargs_getcurrent():
 def kargs_append(arg: str, value: str):
     """Append a kernel command line argument."""
     subprocess.run("rpm-ostree kargs --append={0}={1}".format(arg, value), shell=True, check=True)
+def root_transient():
+    """
+    Enable root transient.
+    To remove: rm /etc/ostree/prepare-root.conf ; rpm-ostree initramfs-etc --untrack=/etc/ostree/prepare-root.conf
+    https://gist.github.com/queeup/1666bc0a5558464817494037d612f094
+    """
+    tr_path = os.path.join(os.sep, "etc", "ostree", "prepare-root.conf")
+    with open(tr_path, 'w') as file:
+        file.write("""[composefs]
+enabled = yes
+[root]
+transient = true
+""")
+    subprocess.run(f"rpm-ostree initramfs-etc --force-sync --track={tr_path}", shell=True, check=True)
+    return
 
 
 # Get arguments
@@ -113,8 +129,10 @@ if args.stage == 1:
 
     ### OSTree Apps ###
     # Cli tools
-    rostreeinstall("fish zsh tmux powerline-fonts google-roboto-fonts samba cups-pdf syncthing numix-icon-theme numix-icon-theme-circle")
+    rostreeinstall("fish zsh tmux powerline-fonts google-roboto-fonts cups-pdf syncthing numix-icon-theme numix-icon-theme-circle")
     subprocess.run("systemctl enable sshd", shell=True, check=True)
+    # Starship
+    rostreeinstall("starship")
     # Topgrade
     CFuncExt.topgrade_install()
     # NTP Configuration
@@ -170,22 +188,10 @@ if args.stage == 1:
         # Gnome Disk Utility
         rostreeinstall("gnome-disk-utility")
 
-    # Install nix
-    CFuncExt.nix_standalone_install(USERNAMEVAR, """
-    # CLI Tools
-    (python3.withPackages(ps: with ps; [ pip wheel setuptools ]))
-    iotop
-    hdparm
-    _7zz
-    tigervnc
-    xorg.xrandr
-    xorg.xset
-    # Media tools
-    mpv
-    ffmpeg
-    yt-dlp
-    # GUI Tools
-    vscodium""")
+    # Remove ro on root filesystem
+    subprocess.run(r"""sed 's/\(.*\s\/\s.*\)\(,ro\)\(.*\)/\1\3/g' /etc/fstab""", shell=True, check=False)
+    # Set root transient, so that nix can be installed.
+    root_transient()
 
     print("Stage 1 Complete! Please reboot and run Stage 2.")
 if args.stage == 2:
@@ -194,8 +200,6 @@ if args.stage == 2:
     subprocess.run("rpm-ostree update --uninstall rpmfusion-free-release --uninstall rpmfusion-nonfree-release --install rpmfusion-free-release --install rpmfusion-nonfree-release", shell=True, check=True)
     rostreeinstall("rpmfusion-free-release-tainted rpmfusion-nonfree-release-tainted")
     subprocess.run("systemctl enable smb", shell=True, check=True)
-    # Starship
-    rostreeinstall("starship")
 
     # Freeworld
     # https://rpmfusion.org/Howto/OSTree
@@ -203,6 +207,24 @@ if args.stage == 2:
     subprocess.run("rpm-ostree override remove mesa-va-drivers --install mesa-va-drivers-freeworld", shell=True, check=False)
     # https://github.com/fedora-silverblue/issue-tracker/issues/536#issuecomment-1974780009
     subprocess.run("rpm-ostree override remove noopenh264 --install openh264 --install mozilla-openh264", shell=True, check=False)
+
+    # VSCode
+    MFedora.repo_vscode()
+    rostreeinstall("codium")
+
+    # Nix
+    CFuncExt.nix_standalone_install(username=USERNAMEVAR, packages="""
+# CLI Tools
+iotop
+hdparm
+_7zz
+tigervnc
+xorg.xrandr
+xorg.xset
+# Media tools
+mpv
+ffmpeg
+yt-dlp""")
 
     # Add normal user to all reasonable groups
     group_silverblueadd("disk")

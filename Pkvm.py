@@ -291,6 +291,7 @@ if __name__ == '__main__':
         print("WARNING: Running script as root. Proceeding.")
 
     # Variables most likely to change.
+    vmname = "Packer-vm"
     vmpath = os.path.abspath(args.vmpath)
     qemu_virtio_diskpath = None
     print("Path to Packer output is {0}".format(vmpath))
@@ -321,6 +322,7 @@ if __name__ == '__main__':
 
     # Determine VM hypervisor
     hvname = ""
+    packer_type = "none"
     if args.vmtype == 1:
         hvname = "vbox"
         packer_type = "virtualbox-iso"
@@ -335,6 +337,7 @@ if __name__ == '__main__':
     tpm_tempdir = None
     tpm_process = None
     vmprovision_defopts = ""
+    vmprovisionscript = ""
     # EFI flag
     useefi = True
     secureboot = False
