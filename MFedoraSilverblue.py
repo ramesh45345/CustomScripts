@@ -247,7 +247,8 @@ if args.stage == 2:
     elif fedora_version.endswith("kinoite"):
         CFunc.flatpak_install("flathub", "org.kde.kclock")
 
-    CFunc.chown_recursive(os.path.join(USERHOME, ".config"), USERNAMEVAR, USERGROUP)
+    if os.path.isdir(os.path.join(USERHOME, ".config")):
+        CFunc.chown_recursive(os.path.join(USERHOME, ".config"), USERNAMEVAR, USERGROUP)
 
     # Extra scripts
     subprocess.run("{0}/CCSClone.py".format(SCRIPTDIR), shell=True, check=True)

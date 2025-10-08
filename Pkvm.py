@@ -709,31 +709,33 @@ if __name__ == '__main__':
     data['build']['provisioner'][0] = {}
     data['build']['provisioner'].append('')
     data['build']['provisioner'][1] = {}
+    dest_basefolder = os.path.join(os.sep, "var", "tmp")
+    dest_path = os.path.join(dest_basefolder, os.path.basename(tempscriptfolderpath))
     # Always copy the current CustomScripts to the VM
     if 1 <= args.ostype <= 49:
         data['build']['provisioner'][0]["file"] = {}
         data['build']['provisioner'][0]["file"]["source"] = os.path.join(tempscriptfolderpath)
-        data['build']['provisioner'][0]["file"]["destination"] = "/tmp"
+        data['build']['provisioner'][0]["file"]["destination"] = dest_basefolder
     if 1 <= args.ostype <= 5:
         data['source'][packer_type]['local']["boot_command"] = ["<up><wait>e<wait><down><wait><down><wait><end> inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/fedora.cfg<wait><f10>"]
         data['build']['provisioner'][1]["shell"] = {}
-        data['build']['provisioner'][1]["shell"]["inline"] = [f"/tmp/CustomScripts/{vmprovisionscript} {vmprovision_opts}"]
+        data['build']['provisioner'][1]["shell"]["inline"] = [f"{dest_path}/{vmprovisionscript} {vmprovision_opts}"]
     if args.ostype == 8:
         CFunc.find_replace(tempunattendfolder, "silverblue", "kinoite", "silverblue.cfg")
     if 8 <= args.ostype <= 9:
         data['source'][packer_type]['local']["boot_command"] = ["<up><wait>e<wait><down><wait><down><wait><end> inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/silverblue.cfg<wait><f10>"]
         data['build']['provisioner'][1]["shell"] = {}
-        data['build']['provisioner'][1]["shell"]["inline"] = [f"/tmp/CustomScripts/{vmprovisionscript} -s 1; systemctl reboot"]
+        data['build']['provisioner'][1]["shell"]["inline"] = [f"{dest_path}/{vmprovisionscript} -s 1; systemctl reboot"]
         data['build']['provisioner'][1]["shell"]["expect_disconnect"] = True
         data['build']['provisioner'].append('')
         data['build']['provisioner'][2] = {}
         data['build']['provisioner'][2]["shell"] = {}
-        data['build']['provisioner'][2]["shell"]["inline"] = [f"/tmp/CustomScripts/{vmprovisionscript} -s 2"]
+        data['build']['provisioner'][2]["shell"]["inline"] = [f"{dest_path}/{vmprovisionscript} -s 2"]
         data['build']['provisioner'][2]["shell"]["pause_before"] = "15s"
         data['build']['provisioner'][2]["shell"]["timeout"] = "90m"
     if 10 <= args.ostype <= 19:
         data['build']['provisioner'][1]["shell"] = {}
-        data['build']['provisioner'][1]["shell"]["inline"] = [f"mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{args.vmuser}/.ssh; echo '{sshkey}' > ~{args.vmuser}/.ssh/authorized_keys; chown {args.vmuser}:{args.vmuser} -R ~{args.vmuser}; /tmp/CustomScripts/{vmprovisionscript} {vmprovision_opts}"]
+        data['build']['provisioner'][1]["shell"]["inline"] = [f"mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{args.vmuser}/.ssh; echo '{sshkey}' > ~{args.vmuser}/.ssh/authorized_keys; chown {args.vmuser}:{args.vmuser} -R ~{args.vmuser}; {dest_path}/{vmprovisionscript} {vmprovision_opts}"]
         # Workaround for ssh being enabled on livecd. Remove this when a method to disable ssh on livecd is found.
         data['source'][packer_type]['local']["ssh_handshake_attempts"] = "9999"
         # Create user-data and meta-data.
@@ -747,32 +749,32 @@ if __name__ == '__main__':
     if 20 <= args.ostype <= 29:
         data['source'][packer_type]['local']["boot_command"] = ["<up><wait>e<wait><down><wait><down><wait><end> inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/almalinux.cfg<wait><f10>"]
         data['build']['provisioner'][1]["shell"] = {}
-        data['build']['provisioner'][1]["shell"]["inline"] = [f"/tmp/CustomScripts/{vmprovisionscript} {vmprovision_opts}"]
+        data['build']['provisioner'][1]["shell"]["inline"] = [f"{dest_path}/{vmprovisionscript} {vmprovision_opts}"]
     if args.ostype == 25:
-        data['build']['provisioner'][1]["shell"]["inline"] = [f"/tmp/CustomScripts/{vmprovisionscript} {vmprovision_opts}; systemctl reboot"]
+        data['build']['provisioner'][1]["shell"]["inline"] = [f"{dest_path}/{vmprovisionscript} {vmprovision_opts}; systemctl reboot"]
         data['build']['provisioner'][1]["shell"]["expect_disconnect"] = True
         data['build']['provisioner'].append('')
         data['build']['provisioner'][2] = {}
         data['build']['provisioner'][2]["shell"] = {}
-        data['build']['provisioner'][2]["shell"]["inline"] = ["/tmp/CustomScripts/Aiso_CreateVM.py"]
+        data['build']['provisioner'][2]["shell"]["inline"] = [f"{dest_path}/Aiso_CreateVM.py"]
         data['build']['provisioner'][2]["shell"]["pause_before"] = "15s"
         data['build']['provisioner'][2]["shell"]["timeout"] = "90m"
     if 30 <= args.ostype <= 39:
         data['build']['provisioner'][1]["shell"] = {}
-        data['build']['provisioner'][1]["shell"]["inline"] = [f"hostnamectl set-hostname '{vmname}'; mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{args.vmuser}/.ssh; echo '{sshkey}' > ~{args.vmuser}/.ssh/authorized_keys; chown {args.vmuser}:{args.vmuser} -R ~{args.vmuser}; apt install -y git dhcpcd5 avahi-daemon sudo; systemctl enable --now avahi-daemon; /tmp/CustomScripts/{vmprovisionscript} {vmprovision_opts}"]
+        data['build']['provisioner'][1]["shell"]["inline"] = [f"hostnamectl set-hostname '{vmname}'; mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{args.vmuser}/.ssh; echo '{sshkey}' > ~{args.vmuser}/.ssh/authorized_keys; chown {args.vmuser}:{args.vmuser} -R ~{args.vmuser}; apt install -y git dhcpcd5 avahi-daemon sudo; systemctl enable --now avahi-daemon; {dest_path}/{vmprovisionscript} {vmprovision_opts}"]
         data['source'][packer_type]['local']["boot_command"] = ["<esc>auto url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/debian.cfg hostname=debian locale=en_US keyboard-configuration/modelcode=SKIP netcfg/choose_interface=auto <enter>"]
     if 40 <= args.ostype <= 41:
         data['source'][packer_type]['local']["boot_command"] = ["<wait2><enter><wait30><right><wait><enter><wait>dhclient -b vtnet0<enter><wait>dhclient -b em0<enter><wait10>fetch -o /tmp/installerconfig http://{{ .HTTPIP }}:{{ .HTTPPort }}/freebsd<wait><enter><wait>bsdinstall script /tmp/installerconfig<wait><enter>"]
         data['build']['provisioner'][1]["shell"] = {}
         # Needed for freebsd: https://www.packer.io/docs/provisioners/shell.html#execute_command
         data['build']['provisioner'][1]["shell"]["execute_command"] = "chmod +x {{ .Path }}; env {{ .Vars }} {{ .Path }}"
-        data['build']['provisioner'][1]["shell"]["inline"] = [f'''export ASSUME_ALWAYS_YES=yes; pw useradd -n {args.vmuser} -m; pw usermod {args.vmuser} -c "{args.fullname}"; chpass -p '{sha512_password}' {args.vmuser}; mkdir -m 700 -p /root/.ssh; echo "{sshkey}" > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{args.vmuser}/.ssh; echo "{sshkey}" > ~{args.vmuser}/.ssh/authorized_keys; chown -R {args.vmuser}:{args.vmuser} ~{args.vmuser}; pkg update -f; pkg install -y git python3; /tmp/CustomScripts/{vmprovisionscript} {vmprovision_opts}''']
+        data['build']['provisioner'][1]["shell"]["inline"] = [f'''export ASSUME_ALWAYS_YES=yes; pw useradd -n {args.vmuser} -m; pw usermod {args.vmuser} -c "{args.fullname}"; chpass -p '{sha512_password}' {args.vmuser}; mkdir -m 700 -p /root/.ssh; echo "{sshkey}" > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{args.vmuser}/.ssh; echo "{sshkey}" > ~{args.vmuser}/.ssh/authorized_keys; chown -R {args.vmuser}:{args.vmuser} ~{args.vmuser}; pkg update -f; pkg install -y git python3; {dest_path}/{vmprovisionscript} {vmprovision_opts}''']
         data['source'][packer_type]['local']["shutdown_command"] = "shutdown -p now"
     if 45 <= args.ostype <= 49:
         data['source'][packer_type]['local']["shutdown_command"] = "poweroff"
         data['source'][packer_type]['local']["boot_command"] = ["<wait10>root<enter><wait>", "ifconfig eth0 up && udhcpc -i eth0<enter><wait5>", "wget http://{{ .HTTPIP }}:{{ .HTTPPort }}/alpine-answers<enter><wait>", f"setup-alpine -e -f $PWD/alpine-answers; mount /dev/vda3 /mnt; echo 'PermitRootLogin yes' >> /mnt/etc/ssh/sshd_config; echo 'root:{sha512_password}' | chpasswd -e -R /mnt; sleep 30; reboot<enter><wait5>", "<wait30s>y<enter>"]
         data['build']['provisioner'][1]["shell"] = {}
-        data['build']['provisioner'][1]["shell"]["inline"] = [f"echo '{args.vmuser}:{sha512_password}' | chpasswd -e; addgroup {args.vmuser} wheel; chown -R {args.vmuser}:{args.vmuser} ~{args.vmuser}; apk add git python3; /tmp/CustomScripts/{vmprovisionscript} {vmprovision_opts}"]
+        data['build']['provisioner'][1]["shell"]["inline"] = [f"echo '{args.vmuser}:{sha512_password}' | chpasswd -e; addgroup {args.vmuser} wheel; chown -R {args.vmuser}:{args.vmuser} ~{args.vmuser}; apk add git python3; {dest_path}/{vmprovisionscript} {vmprovision_opts}"]
     if 50 <= args.ostype <= 59:
         # Reboot after initial script
         data['build']['provisioner'][0]["windows-restart"] = {}
