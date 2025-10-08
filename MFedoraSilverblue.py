@@ -144,6 +144,9 @@ if args.stage == 1:
     # Install software for VMs
     if vmstatus == "vbox":
         rostreeinstall("virtualbox-guest-additions virtualbox-guest-additions-ogl")
+    # Bare metal only software
+    if not vmstatus:
+        rostreeinstall("xsensors lm_sensors")
 
     # Install libvirt software
     rostreeinstall("virt-install libvirt-daemon-config-network libvirt-daemon-kvm qemu-kvm virt-manager swtpm swtpm-tools")
@@ -189,7 +192,7 @@ if args.stage == 1:
         # xorg support
         rostreeinstall("plasma-workspace-x11")
         # Gnome Disk Utility
-        rostreeinstall("gnome-disk-utility")
+        rostreeinstall("gnome-disk-utility gnome-system-monitor")
 
     # Remove ro on root filesystem
     subprocess.run(r"""sed -i 's/\(.*\s\/\s.*\)\(,ro\)\(.*\)/\1\3/g' /etc/fstab""", shell=True, check=False)
