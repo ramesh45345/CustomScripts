@@ -95,7 +95,7 @@ RUN pacman -Syu --needed --noconfirm reflector
 RUN reflector --country 'United States' --latest 10 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
 RUN pacman -Syy
 # Software setup
-RUN pacman -Syu --needed --noconfirm nano sudo git zsh fish starship python3 shadow tmux
+RUN pacman -Syu --needed --noconfirm nano sudo git zsh fish starship python python-pip shadow tmux
 RUN pacman -Syu --needed --noconfirm ttf-dejavu ttf-liberation powerline-fonts
 # Enable multilib
 RUN echo -e '\n[multilib]\nInclude = /etc/pacman.d/mirrorlist' >> /etc/pacman.conf ; pacman -Syu --needed --noconfirm
