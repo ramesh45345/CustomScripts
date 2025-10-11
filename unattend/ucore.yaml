@@ -1,0 +1,226 @@
+variant: fcos
+version: 1.6.0
+passwd:
+  users:
+    - name: core
+      should_exist: false
+    - name: INSERTUSERHERE
+      gecos: "INSERTFULLNAMEHERE"
+      groups:
+        - wheel
+        - docker
+        - sudo
+        - adm
+        - systemd-journal
+      # Generate pasword: mkpasswd --method=yescrypt
+      password_hash: INSERTHASHEDPASSWORDHERE
+      ssh_authorized_keys:
+        - INSERTSSHKEYHERE
+    - name: root
+      password_hash: INSERTHASHEDPASSWORDHERE
+      ssh_authorized_keys:
+        - INSERTSSHKEYHERE
+  groups:
+    - name: core
+      should_exist: false
+kernel_arguments:
+  should_exist:
+    - mitigations=off
+    - selinux=0
+  should_not_exist:
+    - mitigations=auto,nosmt
+storage:
+  directories:
+    - path: /etc/ucore-autorebase
+      mode: 0754
+  files:
+    - path: /etc/ssh/sshd_config.d/20-enable-passwords.conf
+      mode: 0644
+      contents:
+        inline: |
+          # Fedora CoreOS disables SSH password login by default.
+          # Enable it.
+          # This file must sort before 40-disable-passwords.conf.
+          PasswordAuthentication yes
+    - path: /etc/hostname
+      mode: 0644
+      contents:
+        inline: |
+          INSERTHOSTNAMENAMEHERE
+    - path: /etc/systemd/zram-generator.conf
+      mode: 0644
+      contents:
+        inline: |
+          # This config file enables a /dev/zram0 device with the default settings
+          [zram0]
+          zram-fraction=0.7
+          max-zram-size=none
+    - path: /etc/zincati/config.d/90-custom-config.toml
+      contents:
+        inline: |
+          [identity]
+          rollout_wariness = 0.5
+
+          [updates]
+          strategy = "periodic"
+
+          [[updates.periodic.window]]
+          days = [ "Sun" ]
+          start_time = "01:00"
+          length_minutes = 60
+    - path: /etc/sysctl.d/20-silence-audit.conf
+      mode: 0644
+      contents:
+        inline: |
+          # Raise console message logging level from DEBUG (7) to WARNING (4)
+          # to hide audit messages from the interactive console
+          kernel.printk=4
+    - path: /var/tmp/setup1.sh
+      mode: 0755
+      contents:
+        inline: |
+          #!/bin/bash
+          rpm-ostree update --bypass-driver
+          rpm-ostree install avahi zsh tmux perl-Time-HiRes docker-compose
+
+          git clone https://github.com/ramesh45345/CustomScripts /opt/CustomScripts
+
+          # Sudo changes
+          if grep -iq $'^Defaults    secure_path' /etc/sudoers; then
+              sed -e 's/^Defaults    env_reset$/Defaults    !env_reset/g' -i /etc/sudoers
+              sed -i $'/^Defaults    mail_badpass/ s/^#*/#/' /etc/sudoers
+              sed -i $'/^Defaults    secure_path/ s/^#*/#/' /etc/sudoers
+          fi
+          chmod 0440 /etc/sudoers.d/coreos-sudo-group
+          visudo -c
+
+          timedatectl set-timezone "US/Eastern"
+
+          # Cleanup
+          touch /var/tmp/setup1.stamp
+    - path: /var/tmp/setup2.sh
+      mode: 0755
+      contents:
+        inline: |
+          #!/bin/bash
+          systemctl enable avahi-daemon
+          touch /etc/fstab
+
+          # Configure firewalld
+          /opt/CustomScripts/CFuncExt.py -f
+          # Ensure docker containers have internet access with firewalld.
+          firewall-cmd --add-masquerade --permanent
+
+          # CustomScripts
+          /opt/CustomScripts/CCSClone.py
+          /opt/CustomScripts/Csshconfig.py
+          /opt/CustomScripts/CShellConfig.py -z -d -u INSERTUSERHERE
+          /opt/CustomScripts/CVMGeneral.py
+
+          # Cleanup
+          touch /var/tmp/setup2.stamp
+          systemctl disable setup1.service; systemctl disable setup2.service
+          rm /etc/systemd/system/setup1.service /etc/systemd/system/setup2.service /var/tmp/setup1.sh /var/tmp/setup2.sh /var/tmp/setup1.stamp /var/tmp/setup2.stamp
+          rm /etc/systemd/system/ucore-unsigned-autorebase.service /etc/systemd/system/ucore-signed-autorebase.service /etc/ucore-autorebase/unverified /etc/ucore-autorebase/signed
+systemd:
+  units:
+    - name: ucore-unsigned-autorebase.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=uCore autorebase to unsigned OCI and reboot
+        ConditionPathExists=!/etc/ucore-autorebase/unverified
+        ConditionPathExists=!/etc/ucore-autorebase/signed
+        After=network-online.target
+        Wants=network-online.target
+        [Service]
+        Type=oneshot
+        StandardOutput=journal+console
+        ExecStart=/usr/bin/rpm-ostree rebase --bypass-driver ostree-unverified-registry:ghcr.io/ublue-os/ucore-hci:stable
+        ExecStart=/usr/bin/touch /etc/ucore-autorebase/unverified
+        ExecStart=/usr/bin/systemctl disable ucore-unsigned-autorebase.service
+        ExecStart=/usr/bin/systemctl reboot
+        [Install]
+        WantedBy=multi-user.target
+    - name: ucore-signed-autorebase.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=uCore autorebase to signed OCI and reboot
+        ConditionPathExists=/etc/ucore-autorebase/unverified
+        ConditionPathExists=!/etc/ucore-autorebase/signed
+        After=network-online.target
+        Wants=network-online.target
+        [Service]
+        Type=oneshot
+        StandardOutput=journal+console
+        ExecStart=/usr/bin/rpm-ostree rebase --bypass-driver ostree-image-signed:docker://ghcr.io/ublue-os/ucore-hci:stable
+        ExecStart=/usr/bin/touch /etc/ucore-autorebase/signed
+        ExecStart=/usr/bin/systemctl disable ucore-signed-autorebase.service
+        ExecStart=/usr/bin/systemctl reboot
+        [Install]
+        WantedBy=multi-user.target
+    # https://docs.fedoraproject.org/en-US/fedora-coreos/bootloader-updates/
+    - name: custom-bootupd-auto.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Bootupd automatic update
+
+        [Service]
+        ExecStart=/usr/bin/bootupctl update
+        RemainAfterExit=yes
+
+        [Install]
+        WantedBy=multi-user.target
+    - name: setup1.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=setup1.sh
+        # We run after `systemd-machine-id-commit.service` to ensure that
+        # `ConditionFirstBoot=true` services won't rerun on the next boot.
+        After=systemd-machine-id-commit.service
+        After=network-online.target
+        Wants=network-online.target
+        ConditionPathExists=!/var/tmp/setup1.stamp
+        ConditionPathExists=!/var/tmp/setup2.stamp
+        ConditionPathExists=/var/tmp/setup1.sh
+        ConditionPathExists=/etc/ucore-autorebase/unverified
+        ConditionPathExists=/etc/ucore-autorebase/signed
+
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        User=root
+        ExecStart=/bin/bash -c '/var/tmp/setup1.sh |& tee -a /var/tmp/setup.log'
+        ExecStart=/bin/touch /var/tmp/setup1.stamp
+        ExecStartPost=/bin/systemctl --no-block reboot
+
+        [Install]
+        WantedBy=multi-user.target
+    - name: setup2.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=setup2.sh
+        # We run after `systemd-machine-id-commit.service` to ensure that
+        # `ConditionFirstBoot=true` services won't rerun on the next boot.
+        After=systemd-machine-id-commit.service
+        After=network-online.target
+        Wants=network-online.target
+        ConditionPathExists=/var/tmp/setup1.stamp
+        ConditionPathExists=!/var/tmp/setup2.stamp
+        ConditionPathExists=/var/tmp/setup2.sh
+        ConditionPathExists=/etc/ucore-autorebase/unverified
+        ConditionPathExists=/etc/ucore-autorebase/signed
+
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        User=root
+        ExecStart=/bin/bash -c '/var/tmp/setup2.sh |& tee -a /var/tmp/setup.log'
+        ExecStartPost=/bin/systemctl --no-block reboot
+
+        [Install]
+        WantedBy=multi-user.target

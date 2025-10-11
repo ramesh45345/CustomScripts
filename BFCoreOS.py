@@ -68,6 +68,7 @@ parser.add_argument("-f", "--fullname", help="Full Name", default="User Name")
 parser.add_argument("-x", "--sshkey", help="SSH Key")
 parser.add_argument("-y", "--username", help="VM Username", default="user")
 parser.add_argument("-z", "--password", help="VM Password", default="asdf")
+parser.add_argument("-u", "--ucore", help='Use ucore file.', action="store_true")
 parser.add_argument("-n", "--noprompt", help='Do not prompt to continue.', action="store_true")
 args = parser.parse_args()
 
@@ -106,6 +107,8 @@ fullname: {args.fullname}
 os.makedirs(temp_folder, exist_ok=True)
 # Replace hostname in yaml.
 ignition_yaml_stockfile = os.path.join(SCRIPTDIR, "unattend", "fedora-coreos.yaml")
+if args.ucore:
+    ignition_yaml_stockfile = os.path.join(SCRIPTDIR, "unattend", "ucore.yaml")
 ignition_yaml_modified = os.path.join(temp_folder, "fcos-gen.yaml")
 with open(ignition_yaml_stockfile, 'r') as f:
     ignition_yaml_data = f.read()
