@@ -309,6 +309,9 @@ function dru
     systemctl --user daemon-reload
 end
 function d
+    echo "lsblk output"
+    lsblk -T -o name,size,fsused,fsuse%,fstype,path,label,partlabel,mountpoints
+    echo "\ndf output"
     df -hT | grep -v tmpfs
 end
 function f
@@ -771,6 +774,9 @@ function dru () {
     systemctl --user daemon-reload
 }
 function d () {
+    echo "lsblk output"
+    lsblk -T -o name,size,fsused,fsuse%%,fstype,path,label,partlabel,mountpoints
+    echo "\ndf output"
     df -hT | grep -v tmpfs
 }
 function f () {
