@@ -81,7 +81,7 @@ storage:
         inline: |
           #!/bin/bash
           rpm-ostree update --bypass-driver
-          rpm-ostree install avahi zsh tmux perl-Time-HiRes docker-compose
+          rpm-ostree install avahi zsh perl-Time-HiRes
 
           git clone https://github.com/ramesh45345/CustomScripts /opt/CustomScripts
 
@@ -133,6 +133,8 @@ systemd:
         ConditionPathExists=!/etc/ucore-autorebase/signed
         After=network-online.target
         Wants=network-online.target
+        StartLimitIntervalSec=30
+        StartLimitBurst=2
         [Service]
         Type=oneshot
         StandardOutput=journal+console
@@ -140,6 +142,7 @@ systemd:
         ExecStart=/usr/bin/touch /etc/ucore-autorebase/unverified
         ExecStart=/usr/bin/systemctl disable ucore-unsigned-autorebase.service
         ExecStart=/usr/bin/systemctl reboot
+        Restart=on-failure
         [Install]
         WantedBy=multi-user.target
     - name: ucore-signed-autorebase.service
@@ -151,6 +154,8 @@ systemd:
         ConditionPathExists=!/etc/ucore-autorebase/signed
         After=network-online.target
         Wants=network-online.target
+        StartLimitIntervalSec=30
+        StartLimitBurst=2
         [Service]
         Type=oneshot
         StandardOutput=journal+console
@@ -158,6 +163,7 @@ systemd:
         ExecStart=/usr/bin/touch /etc/ucore-autorebase/signed
         ExecStart=/usr/bin/systemctl disable ucore-signed-autorebase.service
         ExecStart=/usr/bin/systemctl reboot
+        Restart=on-failure
         [Install]
         WantedBy=multi-user.target
     # https://docs.fedoraproject.org/en-US/fedora-coreos/bootloader-updates/
