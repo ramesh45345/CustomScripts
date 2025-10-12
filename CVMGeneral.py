@@ -28,10 +28,6 @@ fstab_path = os.path.join(os.sep, "etc", "fstab")
 
 
 ### Begin Code ###
-# Create and set /media folder permissions.
-media_folder = os.path.join(os.sep, "media")
-if not os.path.exists(media_folder):
-    os.makedirs(media_folder, 0o777, exist_ok=True)
 
 # KVM/QEMU section
 if vmstatus == "kvm":
