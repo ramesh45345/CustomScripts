@@ -116,6 +116,7 @@ with open(ignition_yaml_stockfile, 'r') as f:
 ignition_yaml_data = ignition_yaml_data.replace('INSERTHOSTNAMENAMEHERE', args.hostname)
 ignition_yaml_data = ignition_yaml_data.replace('INSERTUSERHERE', args.username)
 ignition_yaml_data = ignition_yaml_data.replace('INSERTPASSWORDHERE', args.password)
+ignition_yaml_data = ignition_yaml_data.replace('INSERTFULLNAMEHERE', args.fullname)
 pw_output = subprocess.run(['mkpasswd', '-s', '--method=yescrypt'], stdout=subprocess.PIPE, universal_newlines=True, check=True, input=args.password).stdout.strip()
 ignition_yaml_data = ignition_yaml_data.replace('INSERTHASHEDPASSWORDHERE', pw_output)
 ignition_yaml_data = ignition_yaml_data.replace('INSERTSSHKEYHERE', ssh_key)
