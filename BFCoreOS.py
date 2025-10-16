@@ -125,6 +125,9 @@ with open(ignition_yaml_modified, 'w') as f:
 
 # Generate ignition file.
 ignition_generated_file = os.path.join(temp_folder, "fcos.ign")
+# Save to VM folder if VM.
+if args.vm:
+    ignition_generated_file = os.path.join(vmpath, f"{args.hostname}.ign")
 fcct_run(['--pretty', '--strict', ignition_yaml_modified, '--output', ignition_generated_file])
 
 # Validate ignition file.
