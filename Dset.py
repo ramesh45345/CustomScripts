@@ -143,7 +143,9 @@ if shutil.which("ptyxis"):
         ptyxis_profile = "42252167cc65db90269998256869218d"
         dconf_write("/org/gnome/Ptyxis/default-profile-uuid", f"'{ptyxis_profile}'")
         dconf_write("/org/gnome/Ptyxis/profile-uuids", f"['{ptyxis_profile}']")
-    dconf_write("/org/gnome/Ptyxis/restore-window-size", "true")
+    dconf_write("/org/gnome/Ptyxis/restore-window-size", "false")
+    dconf_write("/org/gnome/Ptyxis/default-rows", "uint32 25")
+    dconf_write("/org/gnome/Ptyxis/default-columns", "uint32 80")
     dconf_write("/org/gnome/Ptyxis/restore-session", "false")
     dconf_write(f"/org/gnome/Ptyxis/Profiles/{ptyxis_profile}/limit-scrollback", "false")
     dconf_write(f"/org/gnome/Ptyxis/Profiles/{ptyxis_profile}/palette", "'nord'")
