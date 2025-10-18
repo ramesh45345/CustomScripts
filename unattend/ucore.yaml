@@ -96,6 +96,9 @@ storage:
 
           timedatectl set-timezone "US/Eastern"
 
+          # Disable motd message
+          systemctl disable coreos-container-signing-migration-motd.service
+
           # Cleanup
           touch /var/tmp/setup1.stamp
     - path: /var/tmp/setup2.sh
