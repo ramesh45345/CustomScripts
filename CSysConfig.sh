@@ -45,15 +45,9 @@ if [ -f /etc/systemd/journald.conf ]; then
 	sed -i '/^#SystemMaxUse=.*/s/^#//g' /etc/systemd/journald.conf
 	# Edit uncommented lines
 	sed -i 's/^Compress=.*/Compress=yes/g' /etc/systemd/journald.conf
-	sed -i 's/^SystemMaxUse=.*/SystemMaxUse=300M/g' /etc/systemd/journald.conf
+	sed -i 's/^SystemMaxUse=.*/SystemMaxUse=600M/g' /etc/systemd/journald.conf
 	# Vacuum existing logs
-	journalctl --vacuum-size=295M
-	# Vacuum all logs
-	#journalctl --vacuum-time=1s
-fi
-# Disable copy-on-write for journal logs
-if [ -d /var/log/journal ]; then
-	chattr -R +C /var/log/journal/
+	journalctl --vacuum-size=595M
 fi
 
 # Nano Configuration
