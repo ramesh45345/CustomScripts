@@ -254,6 +254,8 @@ for idx in range(1, 6):
         data["gitlens.telemetry.enabled"] = False
         data["window.commandCenter"] = False
         data["chat.commandCenter.enabled"] = False
+        data["chat.disableAIFeatures"] = True
+        data["chat.agent.enabled"] = False
         # Markdown lint config
         data["markdownlint.config"] = {
             "default": True,
