@@ -150,7 +150,9 @@ RUN dnf -y install make gcc automake autoconf
 addtext(r"""
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update; apt-get -y upgrade
-RUN apt-get install -y sudo libcap2-bin bash zsh fish starship nano p7zip-full p7zip-rar unrar wget curl rsync less python-is-python3 python3-pip git lsb-release software-properties-common apt-transport-https gnupg tmux
+RUN apt-get install -y sudo libcap2-bin bash zsh fish nano p7zip-full p7zip-rar unrar wget curl rsync less python-is-python3 python3-pip git lsb-release software-properties-common apt-transport-https gnupg tmux
+# TODO: Remove after 25.04
+RUN curl -sS https://starship.rs/install.sh | sh -s -- --yes
 
 # Install locales
 RUN apt-get install -y locales && \

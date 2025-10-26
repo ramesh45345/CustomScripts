@@ -113,7 +113,9 @@ if __name__ == '__main__':
     ### Software ###
 
     # Cli Software
-    CFunc.aptinstall("ssh tmux zsh fish starship btrfs-progs f2fs-tools xfsprogs mdadm nano p7zip-full p7zip-rar unrar curl rsync less iotop sshfs sudo python-is-python3 nala")
+    CFunc.aptinstall("ssh tmux zsh fish btrfs-progs f2fs-tools xfsprogs mdadm nano p7zip-full p7zip-rar unrar curl rsync less iotop sshfs sudo python-is-python3 nala")
+    # Starship #TODO: Remove for versions after 25.04
+    subprocess.run("curl -sS https://starship.rs/install.sh | sh -s -- --yes", shell=True, check=False)
     # Topgrade
     CFuncExt.topgrade_install()
     # Timezone stuff
