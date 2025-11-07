@@ -5,6 +5,7 @@
 import argparse
 import functools
 import os
+import shlex
 import sys
 import subprocess
 import stat
@@ -25,12 +26,12 @@ def pacman_install_chroot(chroot_folder: str, packages: str):
 def ctr_create(path: str, cmd: str):
     """Run a chroot create command using a container runtime."""
     full_cmd = ["podman", "run", "--rm", "--privileged", "--pull=always", "-it", "--volume={0}:/chrootfld".format(path), "--name=chrootsetup", "docker.io/library/archlinux:latest", "bash", "-c", cmd]
-    print("Running {0}".format(full_cmd))
+    print(f"Running {shlex.join(full_cmd)}")
     subprocess.run(full_cmd, check=True)
 
 
 if __name__ == '__main__':
-    print("Running {0}".format(__file__))
+    print(f"Running {__file__}")
 
     # Get arguments
     parser = argparse.ArgumentParser(description='Install Arch into a folder/chroot.')
@@ -72,7 +73,7 @@ if __name__ == '__main__':
     ctr_create(absinstallpath, "sed -i 's/^#ParallelDownloads/ParallelDownloads/g' /etc/pacman.conf && pacman -Sy --noconfirm --needed arch-install-scripts && pacstrap -Pc /chrootfld base base-devel && genfstab -U /chrootfld > /chrootfld/etc/fstab && sed -i '/zram0/d' /chrootfld/etc/fstab")
 
     # Create and run setup script.
-    SETUPSCRIPT = '''#!/bin/bash
+    setupscript = '''#!/bin/bash
 echo "Running Arch Setup Script"
 
 # Install locales
@@ -148,7 +149,7 @@ git clone "https://github.com/vinadoros/CustomScripts.git" "/opt/CustomScripts"
 chmod a+rwx "/opt/CustomScripts"'''.format(HOSTNAME=args.hostname, USERNAME=args.username, PASSWORD=args.password, FULLNAME=args.fullname)
 
     # Init grub script
-    GRUBSCRIPT = """#!/bin/bash
+    grubscript = """#!/bin/bash
 # Grub Script
 # Install Linux
 pacman -S --needed --noconfirm linux linux-firmware
@@ -160,7 +161,7 @@ pacman -S --needed --noconfirm linux linux-firmware
     elif args.grubtype == 2:
         # Add if partition is a block device
         if stat.S_ISBLK(os.stat(grubpart).st_mode) is True:
-            GRUBSCRIPT += """
+            grubscript += """
 pacman -S --needed --noconfirm grub os-prober
 grub-mkconfig -o /boot/grub/grub.cfg
 grub-install --target=i386-pc --recheck --debug {0}
@@ -171,7 +172,7 @@ grub-install --target=i386-pc --recheck --debug {0}
     elif args.grubtype == 3:
         # Add if /boot/efi is mounted, and partition is a block device.
         if os.path.ismount("{0}/boot/efi".format(absinstallpath)) is True and stat.S_ISBLK(os.stat(grubpart).st_mode) is True:
-            GRUBSCRIPT += """
+            grubscript += """
 pacman -S --needed --noconfirm efibootmgr os-prober grub
 grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=arch --recheck
 grub-mkconfig -o /boot/grub/grub.cfg
@@ -182,13 +183,13 @@ grub-mkconfig -o /boot/grub/grub.cfg
     # Close the setup script.
     SETUPSCRIPT_PATH = os.path.join(absinstallpath, "setupscript.sh")
     SETUPSCRIPT_VAR = open(SETUPSCRIPT_PATH, mode='w')
-    SETUPSCRIPT_VAR.write(SETUPSCRIPT)
+    SETUPSCRIPT_VAR.write(setupscript)
     SETUPSCRIPT_VAR.close()
     os.chmod(SETUPSCRIPT_PATH, 0o777)
     # Close the grub script.
     GRUBSCRIPT_PATH = os.path.join(absinstallpath, "grubscript.sh")
     GRUBSCRIPT_VAR = open(GRUBSCRIPT_PATH, mode='w')
-    GRUBSCRIPT_VAR.write(GRUBSCRIPT)
+    GRUBSCRIPT_VAR.write(grubscript)
     GRUBSCRIPT_VAR.close()
     os.chmod(GRUBSCRIPT_PATH, 0o777)
     # Run the setup script.
