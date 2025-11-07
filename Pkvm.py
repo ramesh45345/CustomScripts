@@ -350,7 +350,7 @@ if __name__ == '__main__':
         vmprovisionscript = "MFedora.py"
         vboxosid = "Fedora_64"
         kvm_variant = "fedora-rawhide"
-        isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/42/Server/x86_64/iso/Fedora-Server-dvd-x86_64-42-1.1.iso"
+        isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/43/Server/x86_64/iso/Fedora-Server-dvd-x86_64-43-1.6.iso"
         if args.desktopenv is None:
             args.desktopenv = "xfce"
     if args.ostype == 1:
@@ -363,14 +363,14 @@ if __name__ == '__main__':
         vmprovisionscript = "MFedoraSilverblue.py"
         vboxosid = "Fedora_64"
         kvm_variant = "silverblue-rawhide"
-        isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/42/Kinoite/x86_64/iso/Fedora-Kinoite-ostree-x86_64-42-1.1.iso"
+        isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/43/Kinoite/x86_64/iso/Fedora-Kinoite-ostree-x86_64-43-1.6.iso"
         vmname = "Packer-FedoraKinoite-{0}".format(hvname)
         vmprovision_defopts = ""
     if args.ostype == 9:
         vmprovisionscript = "MFedoraSilverblue.py"
         vboxosid = "Fedora_64"
         kvm_variant = "silverblue-rawhide"
-        isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/42/Silverblue/x86_64/iso/Fedora-Silverblue-ostree-x86_64-42-1.1.iso"
+        isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/43/Silverblue/x86_64/iso/Fedora-Silverblue-ostree-x86_64-43-1.6.iso"
         vmname = "Packer-FedoraSilverblue-{0}".format(hvname)
         vmprovision_defopts = ""
     if 10 <= args.ostype <= 19:
@@ -728,14 +728,20 @@ if __name__ == '__main__':
     if 8 <= args.ostype <= 9:
         data['source'][packer_type]['local']["boot_command"] = ["<up><wait>e<wait><down><wait><down><wait><end> inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/silverblue.cfg<wait><f10>"]
         data['build']['provisioner'][1]["shell"] = {}
-        data['build']['provisioner'][1]["shell"]["inline"] = [f"{dest_path}/{vmprovisionscript} -s 1; systemctl reboot"]
+        # Work around issues in release ISO, such as https://github.com/coreos/rpm-ostree/issues/5494
+        data['build']['provisioner'][1]["shell"]["inline"] = ["rpm-ostree upgrade; systemctl reboot"]
         data['build']['provisioner'][1]["shell"]["expect_disconnect"] = True
         data['build']['provisioner'].append('')
         data['build']['provisioner'][2] = {}
         data['build']['provisioner'][2]["shell"] = {}
-        data['build']['provisioner'][2]["shell"]["inline"] = [f"{dest_path}/{vmprovisionscript} -s 2"]
-        data['build']['provisioner'][2]["shell"]["pause_before"] = "15s"
-        data['build']['provisioner'][2]["shell"]["timeout"] = "90m"
+        data['build']['provisioner'][2]["shell"]["inline"] = [f"{dest_path}/{vmprovisionscript} -s 1; systemctl reboot"]
+        data['build']['provisioner'][2]["shell"]["expect_disconnect"] = True
+        data['build']['provisioner'].append('')
+        data['build']['provisioner'][3] = {}
+        data['build']['provisioner'][3]["shell"] = {}
+        data['build']['provisioner'][3]["shell"]["inline"] = [f"{dest_path}/{vmprovisionscript} -s 2"]
+        data['build']['provisioner'][3]["shell"]["pause_before"] = "15s"
+        data['build']['provisioner'][3]["shell"]["timeout"] = "90m"
     if 10 <= args.ostype <= 19:
         data['build']['provisioner'][1]["shell"] = {}
         data['build']['provisioner'][1]["shell"]["inline"] = [f"mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{args.vmuser}/.ssh; echo '{sshkey}' > ~{args.vmuser}/.ssh/authorized_keys; chown {args.vmuser}:{args.vmuser} -R ~{args.vmuser}; {dest_path}/{vmprovisionscript} {vmprovision_opts}"]
