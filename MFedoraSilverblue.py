@@ -177,8 +177,10 @@ if args.stage == 1:
 
     # Specific install section
     if fedora_version.endswith("silverblue"):
+        # Samba
+        rostreeinstall("samba")
         # Extra packages
-        rostreeinstall("google-noto-sans-fonts smartmontools p7zip-plugins ptyxis")
+        rostreeinstall("google-noto-sans-fonts smartmontools p7zip-plugins")
         # Some Gnome Extensions
         rostreeinstall("gnome-tweak-tool dconf-editor")
         rostreeinstall("gnome-shell-extension-gpaste")
