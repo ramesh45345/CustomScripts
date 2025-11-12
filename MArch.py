@@ -197,10 +197,10 @@ if __name__ == '__main__':
     # Install Desktop Software
     if args.desktop == "gnome":
         # Gnome
-        CFunc.pacman_install("gnome dconf-editor gedit gnome-tweaks gnome-firmware")
+        CFunc.pacman_install("gnome dconf-editor gedit gnome-tweaks gnome-firmware ptyxis")
         CFunc.sysctl_enable("-f gdm", error_on_fail=True)
         # Some Gnome Extensions
-        CFunc.pacman_install("gpaste")
+        CFunc.pacman_install("gnome-shell-extensions gpaste")
         yay_install(USERNAMEVAR, "aur/gnome-browser-connector")
         # Install gs installer script.
         gs_installer = CFunc.downloadfile("https://raw.githubusercontent.com/brunelli/gnome-shell-extension-installer/master/gnome-shell-extension-installer", os.path.join(os.sep, "usr", "local", "bin"), overwrite=True)
