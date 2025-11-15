@@ -108,7 +108,7 @@ if not args.nogui:
     # Desktop Environments
     if args.desktop == "gnome":
         # Workstation
-        CFunc.dnfinstall('@workstation --disablerepo="rpmfusion*"')
+        CFunc.dnfinstall('@workstation')
         # Misc tools
         CFunc.dnfinstall("dconf-editor ptyxis")
         # Gnome Stuff
@@ -121,7 +121,7 @@ if not args.nogui:
         CFunc.dnfinstall("gnome-shell-extension-window-list gnome-shell-extension-user-theme gnome-shell-extension-system-monitor gnome-shell-extension-status-icons gnome-shell-extension-light-style gnome-shell-extension-appindicator gnome-shell-extension-dash-to-panel")
     elif args.desktop == "kde":
         # Plasma
-        CFunc.dnfinstall('install @"KDE Plasma Workspaces"')
+        CFunc.dnfinstall('@"KDE Plasma Workspaces"')
         CFunc.sysctl_enable("sddm")
     elif args.desktop == "xfce":
         # Xfce
