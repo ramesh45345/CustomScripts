@@ -80,7 +80,7 @@ Import-Module Get-ChildItemColor
 Import-Module -Name posh-git
 
 # Ensure oh-my-posh is loaded
-oh-my-posh init pwsh --config "$env:POSH_THEMES_PATH/agnoster.omp.json" | Invoke-Expression
+oh-my-posh init pwsh --config "agnosterplus" | Invoke-Expression
 
 
 ### Functions ###
