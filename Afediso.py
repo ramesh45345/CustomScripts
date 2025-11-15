@@ -184,17 +184,12 @@ systemctl enable sshd
 sed -i 's/PermitRootLogin.*/PermitRootLogin yes/g' /etc/ssh/sshd_config
 sed -i '/^#PermitRootLogin.*/s/^#//g' /etc/ssh/sshd_config
 
+# RPMFusion
+dnf install -y https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+# RPMSphere
+dnf install -y https://github.com/rpmsphere/noarch/raw/master/r/rpmsphere-release-40-1.noarch.rpm
 # Clonezilla
-git clone https://gitlab.com/stevenshiau/drbl drbl
-cd drbl
-make all
-make install
-cd ..
-git clone https://gitlab.com/stevenshiau/clonezilla clonezilla
-cd clonezilla
-make all
-make install
-cd ..
+dnf install -y clonezilla
 
 # Delete defaults in sudoers.
 sed -e 's/^Defaults    env_reset$/Defaults    !env_reset/g' -i /etc/sudoers

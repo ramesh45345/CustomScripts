@@ -24,8 +24,9 @@ def virsh_get_ip(vm_name: str = "ISOVM", retries: int = 100):
     attempt = 0
     while status != 0 and attempt < retries:
         try:
-            status = 0
             ip = Snetvm.libvirt_ipv4(vm_name)
+            if ip is not None:
+                status = 0
         except:
             status = 1
         if status != 0:
