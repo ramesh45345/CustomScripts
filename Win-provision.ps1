@@ -369,6 +369,9 @@ function Fcn-Customize {
   # Remove copilot - https://learn.microsoft.com/en-us/windows/client-management/manage-windows-copilot#remove-or-prevent-installation-of-the-copilot-app
   Fcn-appxremove("MicrosoftWindows.Client.WebExperience")
   Fcn-appxremove("Microsoft.Copilot")
+  New-Item -Path 'registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name ShowCopilotButton -Value 0 -Force -ErrorAction SilentlyContinue | Out-Null
+  New-Item -Path 'registry::HKEY_CURRENT_USER\Software\Policies\Microsoft\Windows\WindowsCopilot' -Name TurnOffWindowsCopilot -Value 1 -Force -ErrorAction SilentlyContinue | Out-Null
+  New-Item -Path 'registry::HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot' -Name TurnOffWindowsCopilot -Value 1 -Force -ErrorAction SilentlyContinue | Out-Null
 
   # Remove other appx
   Fcn-appxremove("Microsoft.XboxSpeechToTextOverlay")
