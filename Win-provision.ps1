@@ -374,6 +374,7 @@ function Fcn-Customize {
   New-Item -Path 'registry::HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot' -Name TurnOffWindowsCopilot -Value 1 -Force -ErrorAction SilentlyContinue | Out-Null
 
   # Remove other appx
+  Fcn-appxremove("Microsoft.MicrosoftOfficeHub")
   Fcn-appxremove("Microsoft.XboxSpeechToTextOverlay")
   Fcn-appxremove("Microsoft.Xbox.TCUI")
   Fcn-appxremove("Microsoft.XboxGamingOverlay")
@@ -391,10 +392,7 @@ function Fcn-Customize {
   tzutil /s "Eastern Standard Time"
 
   # Add windows defender exclusions
-  Add-MpPreference -ExclusionPath "$env:windir\Temp\SppExtComObjHook.dll"
   Add-MpPreference -ExclusionPath "$env:USERPROFILE\Desktop"
-  Add-MpPreference -ExclusionPath "$env:LOCALAPPDATA\Temp\SppExtComObjHook.dll"
-  Add-MpPreference -ExclusionPath "$env:windir\AutoKMS"
 }
 
 # Set system clock as UTC

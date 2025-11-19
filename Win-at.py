@@ -26,6 +26,7 @@ CFunc.downloadfile("https://raw.githubusercontent.com/massgravel/Microsoft-Activ
 # Add exceptions for defender
 Wprovision.pwsh_run(["Add-MpPreference", "-ExclusionPath", r"$env:windir\Temp\SppExtComObjHook.dll"])
 Wprovision.pwsh_run(["Add-MpPreference", "-ExclusionPath", r"$env:LOCALAPPDATA\Temp\SppExtComObjHook.dll"])
+Wprovision.pwsh_run(["Add-MpPreference", "-ExclusionPath", r"$env:ProgramFiles\Activation-Renewal"])
 Wprovision.pwsh_run(["Add-MpPreference", "-ExclusionProcess", kms_script])
 
 # Run script
