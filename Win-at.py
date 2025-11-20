@@ -21,13 +21,16 @@ if CFunc.is_windows() is False:
 kms_folder = os.path.join(USERHOME, "Documents")
 kms_script = os.path.join(kms_folder, "MAS_AIO.cmd")
 
+# Add exceptions for defender
+Wprovision.pwsh_run(["Add-MpPreference", "-ExclusionPath", r"$env:USERPROFILE\Documents"])
+
 CFunc.downloadfile("https://raw.githubusercontent.com/massgravel/Microsoft-Activation-Scripts/refs/heads/master/MAS/All-In-One-Version-KL/MAS_AIO.cmd", kms_folder)
 
 # Add exceptions for defender
+Wprovision.pwsh_run(["Add-MpPreference", "-ExclusionProcess", kms_script])
 Wprovision.pwsh_run(["Add-MpPreference", "-ExclusionPath", r"$env:windir\Temp\SppExtComObjHook.dll"])
 Wprovision.pwsh_run(["Add-MpPreference", "-ExclusionPath", r"$env:LOCALAPPDATA\Temp\SppExtComObjHook.dll"])
 Wprovision.pwsh_run(["Add-MpPreference", "-ExclusionPath", r"$env:ProgramFiles\Activation-Renewal"])
-Wprovision.pwsh_run(["Add-MpPreference", "-ExclusionProcess", kms_script])
 
 # Run script
 subprocess.run(f"{kms_script} /K-WindowsOffice", shell=True, check=True)
