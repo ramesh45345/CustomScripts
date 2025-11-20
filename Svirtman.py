@@ -105,7 +105,7 @@ if __name__ == '__main__':
                 CFunc.sysctl_enable("libvirtd", now=True, error_on_fail=True)
                 subprocess.run("usermod -aG libvirt {0}".format(USERNAMEVAR), shell=True, check=True)
             elif shutil.which("apt-get"):
-                CFunc.aptinstall("virt-manager qemu-kvm ssh-askpass")
+                CFunc.aptinstall("virt-manager qemu-kvm ssh-askpass python3-passlib")
                 subprocess.run("usermod -aG libvirt {0}".format(USERNAMEVAR), shell=True, check=True)
                 subprocess.run("usermod -aG libvirt-qemu {0}".format(USERNAMEVAR), shell=True, check=True)
             elif shutil.which("pacman"):
