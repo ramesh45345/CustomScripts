@@ -101,15 +101,15 @@ if __name__ == '__main__':
             print("Installing libvirt")
             if shutil.which("dnf"):
                 CFunc.dnfinstall("@virtualization")
-                CFunc.dnfinstall("python3-libguestfs swtpm swtpm-tools")
+                CFunc.dnfinstall("python3-libguestfs swtpm swtpm-tools virtiofsd")
                 CFunc.sysctl_enable("libvirtd", now=True, error_on_fail=True)
                 subprocess.run("usermod -aG libvirt {0}".format(USERNAMEVAR), shell=True, check=True)
             elif shutil.which("apt-get"):
-                CFunc.aptinstall("virt-manager qemu-kvm ssh-askpass python3-passlib")
+                CFunc.aptinstall("virt-manager qemu-kvm ssh-askpass python3-passlib virtiofsd")
                 subprocess.run("usermod -aG libvirt {0}".format(USERNAMEVAR), shell=True, check=True)
                 subprocess.run("usermod -aG libvirt-qemu {0}".format(USERNAMEVAR), shell=True, check=True)
             elif shutil.which("pacman"):
-                CFunc.pacman_install("libvirt virt-manager edk2-ovmf qemu bridge-utils openbsd-netcat iptables-nft dnsmasq dnsmasq swtpm")
+                CFunc.pacman_install("libvirt virt-manager edk2-ovmf qemu bridge-utils openbsd-netcat iptables-nft dnsmasq dnsmasq swtpm virtiofsd")
                 subprocess.run("usermod -aG libvirt {0}".format(USERNAMEVAR), shell=True, check=True)
                 CFunc.sysctl_enable("libvirtd.service", now=True, error_on_fail=True)
 
