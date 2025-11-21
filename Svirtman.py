@@ -106,8 +106,9 @@ if __name__ == '__main__':
                 subprocess.run("usermod -aG libvirt {0}".format(USERNAMEVAR), shell=True, check=True)
             elif shutil.which("apt-get"):
                 CFunc.aptinstall("virt-manager qemu-kvm ssh-askpass python3-passlib virtiofsd")
-                subprocess.run("usermod -aG libvirt {0}".format(USERNAMEVAR), shell=True, check=True)
-                subprocess.run("usermod -aG libvirt-qemu {0}".format(USERNAMEVAR), shell=True, check=True)
+                CFunc.AddUserToGroup("libvirt", USERNAMEVAR)
+                CFunc.AddUserToGroup("libvirt-qemu", USERNAMEVAR)
+                CFunc.AddUserToGroup("kvm", USERNAMEVAR)
             elif shutil.which("pacman"):
                 CFunc.pacman_install("libvirt virt-manager edk2-ovmf qemu bridge-utils openbsd-netcat iptables-nft dnsmasq dnsmasq swtpm virtiofsd")
                 subprocess.run("usermod -aG libvirt {0}".format(USERNAMEVAR), shell=True, check=True)
