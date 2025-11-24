@@ -372,6 +372,15 @@ if __name__ == '__main__':
     if args.ostype == 2:
         vmname = "Packer-FedoraCLI-{0}".format(hvname)
         vmprovision_defopts = "-x"
+    if args.ostype == 5:
+        vmname = "ISOVM"
+        # Override memory and disk setting if they are set to the default values.
+        if mem_mib == args.memory:
+            args.memory = vm_memory_range(sizemb_lower=8192, sizemb_upper=32768)
+        if size_disk_default_gb == args.imgsize:
+            args.imgsize = 120
+        # Use cli settings for ISOVM.
+        vmprovision_defopts = "-x"
     if args.ostype == 8:
         vmprovisionscript = "MFedoraSilverblue.py"
         vboxosid = "Fedora_64"
@@ -426,15 +435,6 @@ if __name__ == '__main__':
         vmprovision_defopts = "-d {0}".format(args.desktopenv)
     if args.ostype == 21:
         vmname = "Packer-AlmaLinuxCLI-{0}".format(hvname)
-        vmprovision_defopts = "-x"
-    if args.ostype == 25:
-        vmname = "ISOVM"
-        # Override memory and disk setting if they are set to the default values.
-        if mem_mib == args.memory:
-            args.memory = vm_memory_range(sizemb_lower=8192, sizemb_upper=32768)
-        if size_disk_default_gb == args.imgsize:
-            args.imgsize = 120
-        # Use cli settings for ISOVM.
         vmprovision_defopts = "-x"
     if 30 <= args.ostype <= 39:
         vboxosid = "Debian_64"
@@ -736,6 +736,15 @@ if __name__ == '__main__':
         data['source'][packer_type]['local']["boot_command"] = ["<up><wait>e<wait><down><wait><down><wait><end> inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/fedora.cfg<wait><f10>"]
         data['build']['provisioner'][1]["shell"] = {}
         data['build']['provisioner'][1]["shell"]["inline"] = [f"{dest_path}/{vmprovisionscript} {vmprovision_opts}"]
+    if args.ostype == 5:
+        data['build']['provisioner'][1]["shell"]["inline"] = [f"{dest_path}/{vmprovisionscript} {vmprovision_opts}; systemctl reboot"]
+        data['build']['provisioner'][1]["shell"]["expect_disconnect"] = True
+        data['build']['provisioner'].append('')
+        data['build']['provisioner'][2] = {}
+        data['build']['provisioner'][2]["shell"] = {}
+        data['build']['provisioner'][2]["shell"]["inline"] = [f"{dest_path}/Aiso_CreateVM.py"]
+        data['build']['provisioner'][2]["shell"]["pause_before"] = "15s"
+        data['build']['provisioner'][2]["shell"]["timeout"] = "90m"
     if args.ostype == 8:
         CFunc.find_replace(tempunattendfolder, "silverblue", "kinoite", "silverblue.cfg")
     if 8 <= args.ostype <= 9:
@@ -772,15 +781,6 @@ if __name__ == '__main__':
         data['source'][packer_type]['local']["boot_command"] = ["<up><wait>e<wait><down><wait><down><wait><end> inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/almalinux.cfg<wait><f10>"]
         data['build']['provisioner'][1]["shell"] = {}
         data['build']['provisioner'][1]["shell"]["inline"] = [f"{dest_path}/{vmprovisionscript} {vmprovision_opts}"]
-    if args.ostype == 25:
-        data['build']['provisioner'][1]["shell"]["inline"] = [f"{dest_path}/{vmprovisionscript} {vmprovision_opts}; systemctl reboot"]
-        data['build']['provisioner'][1]["shell"]["expect_disconnect"] = True
-        data['build']['provisioner'].append('')
-        data['build']['provisioner'][2] = {}
-        data['build']['provisioner'][2]["shell"] = {}
-        data['build']['provisioner'][2]["shell"]["inline"] = [f"{dest_path}/Aiso_CreateVM.py"]
-        data['build']['provisioner'][2]["shell"]["pause_before"] = "15s"
-        data['build']['provisioner'][2]["shell"]["timeout"] = "90m"
     if 30 <= args.ostype <= 39:
         data['build']['provisioner'][1]["shell"] = {}
         data['build']['provisioner'][1]["shell"]["inline"] = [f"hostnamectl set-hostname '{vmname}'; mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{args.vmuser}/.ssh; echo '{sshkey}' > ~{args.vmuser}/.ssh/authorized_keys; chown {args.vmuser}:{args.vmuser} -R ~{args.vmuser}; apt install -y git dhcpcd5 avahi-daemon sudo; systemctl enable --now avahi-daemon; {dest_path}/{vmprovisionscript} {vmprovision_opts}"]
