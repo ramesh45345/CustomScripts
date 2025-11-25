@@ -566,24 +566,27 @@ def json_configwrite(json_data: list, json_path: str, print_json: bool = False):
 # Apt
 def aptupdate():
     """Update apt sources"""
-    subprocess.run("apt-get update", shell=True, check=True)
-def aptdistupg(options=""):
+    cmd = "apt"
+    if shutil.which("nala"):
+        cmd = "nala"
+    subprocess.run(f"{cmd} update", shell=True, check=True)
+def aptdistupg():
     """Upgrade/Dist-Upgrade system using apt"""
-    aptupdate()
-    print("\nPerforming (dist)upgrade.")
-    subprocess.run("apt-get upgrade -y {0}".format(options), shell=True, check=True)
-    subprocess.run("apt-get dist-upgrade -y {0}".format(options), shell=True, check=True)
+    cmd = "apt"
+    if shutil.which("nala"):
+        cmd = "nala"
+    print(f"\nPerforming full-upgrade using {cmd}.")
+    subprocess.run(f"{cmd} full-upgrade -y --update", shell=True, check=True)
 def aptinstall(aptapps, error_on_fail=True):
     """Install application(s) using apt"""
-    print("\nInstalling {0} using apt.".format(aptapps))
+    cmd = "apt"
+    if shutil.which("nala"):
+        cmd = "nala"
+    print(f"\nInstalling {aptapps} using {cmd}.")
     if os.geteuid() == 0:
-        subprocess.run("apt-get install -y {0}".format(aptapps), shell=True, check=error_on_fail)
+        subprocess.run(f"{cmd} install -y {aptapps}", shell=True, check=error_on_fail)
     else:
-        subprocess.run("sudo apt-get install -y {0}".format(aptapps), shell=True, check=error_on_fail)
-def addppa(ppasource):
-    """Add a ppa"""
-    subprocess.run("add-apt-repository -y '{0}'".format(ppasource), shell=True, check=True)
-    aptupdate()
+        subprocess.run(f"sudo {cmd} install -y {aptapps}", shell=True, check=error_on_fail)
 def aptmark(aptapps, mark=True):
     """Set or unset apt-mark hold for packages. mark=True for holding, mark=False for unholding."""
     if mark is True:

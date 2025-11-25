@@ -69,11 +69,10 @@ def mpr_install(normaluser: str):
     # CFunc.gitclone("https://mpr.makedeb.org/mist.git", os.path.join(tempfolder, "mist"))
     # CFunc.chmod_recursive(os.path.join(tempfolder, "mist"), 0o777)
     # CFunc.run_as_user_su(normaluser, "cd {0}; makedeb -si -H 'MPR-Package: yes' --no-confirm".format(os.path.join(tempfolder, "mist")), error_on_fail=True)
-def repos_experimental(deburl: str = "http://http.us.debian.org/debian"):
+def repos_experimental():
     """Install experimental repo, with low priority to ensure packages don't get installed by accident."""
     # Install repo
-    with open('/etc/apt/sources.list.d/experimental.list', 'w') as f:
-        f.write(f'deb {deburl} experimental main contrib non-free')
+    mirrorselect("experimental", os.path.join(os.sep, "etc", "apt", "sources.list.d", "experimental.list"))
     # Reduce priority so its never chosen by default.
     with open('/etc/apt/preferences.d/99experimental', 'w') as f:
         f.write('''Package: *
@@ -105,6 +104,11 @@ def extrepo_enable(repos: list = []):
         subprocess.run(["extrepo", "update"], check=True)
     else:
         print("ERROR: extrepo not found.")
+def mirrorselect(distro: str = "stable", outfile: str = os.path.join(os.sep, "etc", "apt", "sources.list")):
+    """Set mirrors for debian."""
+    CFunc.aptinstall("netselect-apt")
+    cmd  = ["netselect-apt", "--nonfree", "--outfile", outfile, "--country", "US", distro]
+    subprocess.run(cmd, check=True)
 
 
 if __name__ == '__main__':
@@ -113,7 +117,7 @@ if __name__ == '__main__':
     # Get arguments
     parser = argparse.ArgumentParser(description='Install Debian Software.')
     parser.add_argument("-d", "--desktop", help='Desktop Environment (choices: %(choices)s) (default: %(default)s)', default=None, choices=["gnome", "kde", "xfce", "mate", "lxqt"])
-    parser.add_argument("-u", "--unstable", help='Upgrade to unstable.', action="store_true")
+    parser.add_argument("-u", "--unstable", help='Set as Debian unstable/sid.', action="store_true")
     parser.add_argument("-x", "--nogui", help='Configure script to disable GUI.', action="store_true")
 
     # Save arguments.
@@ -146,39 +150,24 @@ if __name__ == '__main__':
     # Set non-interactive flag
     os.environ['DEBIAN_FRONTEND'] = "noninteractive"
 
-    ### Begin Code ###
-    # Get Debian Release
+
+    ### Set up Debian Repos ###
     CFunc.aptupdate()
-    CFunc.aptinstall("lsb-release software-properties-common apt-transport-https gnupg")
-    # Needed for add-apt-repositories
-    CFunc.aptinstall("python3-lazr.restfulclient python3-lazr.uri")
+    CFunc.aptinstall("nala netselect-apt")
+    if args.unstable:
+        mirrorselect("unstable")
+    else:
+        mirrorselect("stable")
+    # Install experimental repo
+    repos_experimental()
+
+    # CFunc.aptinstall("lsb-release software-properties-common apt-transport-https gnupg")
+    # # Needed for add-apt-repositories
+    # CFunc.aptinstall("python3-lazr.restfulclient python3-lazr.uri")
     # Detect OS information
     distro, debrelease = CFunc.detectdistro()
     print("Distro is {0}.".format(distro))
     print("Release is {0}.".format(debrelease))
-
-    ### Set up Debian Repos ###
-    # Change to unstable.
-    if args.unstable:
-        debrelease = "sid"
-        print("\n Enable unstable repositories.")
-        with open('/etc/apt/sources.list', 'w') as writefile:
-            writefile.write('deb {0} sid main contrib non-free'.format(URL))
-        CFunc.aptupdate()
-    # Main, Contrib, Non-Free for Debian.
-    subprocess.run("""
-add-apt-repository -y main
-add-apt-repository -y contrib
-add-apt-repository -y non-free
-    """, shell=True, check=True)
-    # Install non-free-firmware
-    subprocess.run("add-apt-repository -y non-free-firmware", shell=True, check=True)
-
-    # Install experimental repo
-    repos_experimental()
-
-    # Comment out lines containing httpredir.
-    subprocess.run("sed -i '/httpredir/ s/^#*/#/' /etc/apt/sources.list", shell=True, check=True)
 
     # Add timeouts for repository connections
     with open('/etc/apt/apt.conf.d/99timeout', 'w') as writefile:
@@ -186,22 +175,21 @@ add-apt-repository -y non-free
 Acquire::https::Timeout "5";
 Acquire::ftp::Timeout "5";''')
 
+
+    ### Begin Code ###
+
     # Update and upgrade with new base repositories
-    CFunc.aptupdate()
     CFunc.aptdistupg()
 
     ### Software ###
     deb_mm(debrelease)
 
     # Cli Software
-    CFunc.aptinstall("ssh tmux zsh fish starship btrfs-progs f2fs-tools xfsprogs mdadm nano p7zip-full 7zip-rar unrar curl wget rsync less iotop sshfs sudo python-is-python3 nala")
+    CFunc.aptinstall("ssh tmux zsh fish starship btrfs-progs f2fs-tools xfsprogs mdadm nano p7zip-full 7zip-rar unrar curl wget rsync less iotop sshfs sudo python-is-python3")
     # Topgrade
     CFuncExt.topgrade_install()
     # Firmware
     CFunc.aptinstall("firmware-linux")
-    subprocess.run("""echo "firmware-ipw2x00 firmware-ipw2x00/license/accepted boolean true" | debconf-set-selections
-echo "firmware-ivtv firmware-ivtv/license/accepted boolean true" | debconf-set-selections""", shell=True, check=True)
-    subprocess.run("""DEBIAN_FRONTEND=noninteractive apt install -y bluez-firmware firmware-amd-graphics firmware-atheros firmware-brcm80211 firmware-intel-sound firmware-ipw2x00 firmware-iwlwifi firmware-libertas firmware-misc-nonfree firmware-realtek firmware-zd1211""", shell=True, check=True)
     # Needed for systemd user sessions.
     CFunc.aptinstall("dbus-user-session")
     # Samba

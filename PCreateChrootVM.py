@@ -296,6 +296,8 @@ echo -e "nameserver 1.0.0.1\\nnameserver 1.1.1.1\\nnameserver 2606:4700:4700::11
             debversion = args.debversion
         else:
             debversion = "unstable"
+        if debversion == "unstable":
+            vmprovision_opts += " -u"
         # VM commands
         vmbootstrap_cmd = f'''#!/bin/bash
 cd ~

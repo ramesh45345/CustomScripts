@@ -65,7 +65,7 @@ print("Grub partition to be used:", grubpart)
 if args.type == "ubuntu":
     osurl = "http://archive.ubuntu.com/ubuntu/"
 else:
-    osurl = "http://ftp.us.debian.org/debian/"
+    osurl = "http://http.us.debian.org/debian/"
 print("URL to use:", osurl)
 
 # Exit if not root.
@@ -288,7 +288,7 @@ if args.grubtype == 2:
         GRUBSCRIPT += """
 DEBIAN_FRONTEND=noninteractive apt install -y grub-pc
 update-grub2
-grub-install --target=i386-pc --recheck --debug {0}
+grub-install --target=i386-pc --recheck {0}
 """.format(grubpart)
     else:
         print("ERROR Grub Mode 2, partition {0} is not a block device.".format(grubpart))
@@ -299,7 +299,7 @@ elif args.grubtype == 3:
         GRUBSCRIPT += """
 DEBIAN_FRONTEND=noninteractive apt install -y grub-efi-amd64
 update-grub2
-grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id={0} --recheck --debug
+grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id={0} --recheck
 """.format(args.type)
     else:
         print("ERROR Grub Mode 3, {0}/boot/efi isn't a mount point or {1} is not a block device.".format(absinstallpath, grubpart))
