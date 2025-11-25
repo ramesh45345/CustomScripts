@@ -15,12 +15,19 @@ import shutil
 import stat
 # Custom includes
 import CFunc
+import zch
 
 # Disable buffered stdout (to ensure prints are in order)
 print = functools.partial(print, flush=True)
 
 # Folder of this script
 SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))
+
+### Functions ###
+def apt_install_chroot(chroot_folder: str, packages: str):
+    """Install apt packages in chroot."""
+    zch.ChrootCommand(chroot_folder, "apt install -y {0}".format(packages))
+    return
 
 # Get arguments
 parser = argparse.ArgumentParser(description='Install Debian/Ubuntu into a folder/chroot.')
@@ -33,8 +40,6 @@ parser.add_argument("-g", "--grubtype", type=int, help='Grub Install Number', de
 parser.add_argument("-i", "--grubpartition", help='Grub Custom Parition (if autodetection isnt working, i.e. /dev/sdb)', default=None)
 parser.add_argument("-t", "--type", help='OS Type (debian, ubuntu, etc)', default="debian")
 parser.add_argument("-r", "--release", help='Release Distribution', default="unstable")
-parser.add_argument("-a", "--architecture", help='Architecture (amd64, i386, armhf, arm64, etc)', default="amd64")
-parser.add_argument("-z", "--zch", help='Use zch instead of systemd-nspawn', action="store_true")
 parser.add_argument("--forcelink", help='Force symlink to be created for release. Not to be used unless debootstrap version is out of date. Example: No symlink exists for version "mantic" in ubuntu.', action="store_true")
 parser.add_argument("installpath", help='Path of Installation')
 
@@ -57,10 +62,7 @@ if args.grubpartition is not None and stat.S_ISBLK(os.stat(args.grubpartition).s
 else:
     grubpart = grubautopart
 print("Grub partition to be used:", grubpart)
-print("Architecture to install:", args.architecture)
-if args.type == "ubuntu" and "arm" in args.architecture:
-    osurl = "http://ports.ubuntu.com/ubuntu-ports/"
-elif args.type == "ubuntu":
+if args.type == "ubuntu":
     osurl = "http://archive.ubuntu.com/ubuntu/"
 else:
     osurl = "http://ftp.us.debian.org/debian/"
@@ -71,8 +73,6 @@ CFunc.is_root(True)
 
 # Ensure that certain commands exist.
 cmdcheck = ["debootstrap"]
-if args.zch is False:
-    cmdcheck += ["systemd-nspawn"]
 CFunc.commands_check(cmdcheck)
 
 if args.noprompt is False:
@@ -92,26 +92,7 @@ if args.forcelink:
             os.chdir(currentpath)
             print("\nNOTE: symlink for {0} created at {1}.\n".format(args.release, scriptsfolder))
 # Bootstrap the chroot environment.
-BOOTSTRAPSCRIPT = ""
-if "arm" in args.architecture:
-    if args.architecture == "armhf":
-        qemu_cmd = "qemu-arm-static"
-    if args.architecture == "arm64":
-        qemu_cmd = "qemu-aarch64-static"
-    # Ensure that certain commands exist.
-    CFunc.commands_check(["update-binfmts", qemu_cmd])
-    # ARM specific init here.
-    BOOTSTRAPSCRIPT += """
-debootstrap --foreign --no-check-gpg --include=ca-certificates --arch {DEBARCH} {DISTROCHOICE} {INSTALLPATH} {URL}
-cp -av /usr/bin/{qemu_cmd} {INSTALLPATH}/usr/bin
-update-binfmts --enable
-chroot {INSTALLPATH}/ /debootstrap/debootstrap --second-stage --verbose
-""".format(DEBARCH=args.architecture, DISTROCHOICE=args.release, INSTALLPATH=absinstallpath, URL=osurl, qemu_cmd=qemu_cmd)
-else:
-    BOOTSTRAPSCRIPT += """
-debootstrap --no-check-gpg --arch {DEBARCH} {DISTROCHOICE} {INSTALLPATH} {URL}
-""".format(DEBARCH=args.architecture, DISTROCHOICE=args.release, INSTALLPATH=absinstallpath, URL=osurl)
-subprocess.run(BOOTSTRAPSCRIPT, shell=True, check=True)
+subprocess.run(f"debootstrap --no-check-gpg --arch amd64 {args.release} {absinstallpath} {osurl}", shell=True, check=True)
 
 # Create and run setup script.
 SETUPSCRIPT = """#!/bin/bash
@@ -149,13 +130,14 @@ echo "LANG=en_US.UTF-8" > /etc/locale.conf
 echo "console-setup	console-setup/charmap47	select	UTF-8" | debconf-set-selections
 
 # Install lsb_release
-DEBIAN_FRONTEND=noninteractive apt install -y lsb-release nano sudo less apt-transport-https psmisc
+apt install -y lsb-release nano sudo less apt-transport-https psmisc
 
 # Store distro being used.
 DISTRO=$(lsb_release -si)
 DEBRELEASE=$(lsb_release -sc)
 
-DEBIAN_FRONTEND=noninteractive apt install -y software-properties-common
+apt install -y software-properties-common
+apt install -y python3 python-is-python3
 
 # Unlocking root account
 apt install -y passwd
@@ -223,11 +205,7 @@ fi
 if ! grep -i "{DEBRELEASE}-backports main" /etc/apt/sources.list; then
     add-apt-repository "deb {URL} {DEBRELEASE}-backports main restricted universe multiverse"
 fi
-# Install firmware for armhf architecture.
-if [[ "{DEBARCH}" = "armhf" || "{DEBARCH}" = "arm64" ]]; then
-    apt install -y linux-firmware
-fi
-""".format(DEBRELEASE=args.release, URL=osurl, DEBARCH=args.architecture)
+""".format(DEBRELEASE=args.release, URL=osurl)
 else:
     SETUPSCRIPT += """
 # Contrib and non-free for normal distro
@@ -239,17 +217,11 @@ if [[ "{DEBRELEASE}" != "sid" && "{DEBRELEASE}" != "unstable" && "{DEBRELEASE}" 
 fi
 # Comment out lines containing httpredir.
 sed -i '/httpredir/ s/^#*/#/' /etc/apt/sources.list
-# Install firmware for armhf architecture.
-if [[ "{DEBARCH}" = "armhf" || "{DEBARCH}" = "arm64" ]]; then
-    apt install -y firmware-linux
-fi
-""".format(DEBRELEASE=args.release, DEBARCH=args.architecture)
+""".format(DEBRELEASE=args.release)
 
 SETUPSCRIPT += """
 # Enable 32-bit support for 64-bit arch.
-if [[ "{DEBARCH}" = "amd64" ]]; then
-    dpkg --add-architecture i386
-fi
+dpkg --add-architecture i386
 apt update
 apt dist-upgrade -y
 
@@ -274,7 +246,7 @@ apt install -y git
 git clone "https://github.com/ramesh45345/CustomScripts.git" "/opt/CustomScripts"
 chmod a+rwx "/opt/CustomScripts"
 
-""".format(DEBARCH=args.architecture)
+"""
 
 # Init grub script
 GRUBSCRIPT = """#!/bin/bash
@@ -294,15 +266,13 @@ DEBIAN_FRONTEND=noninteractive apt install -y gfxboot gfxboot-theme-ubuntu linux
 """
     else:
         GRUBSCRIPT += """
-if [[ "{DEBARCH}" = "amd64" ]]; then
-    DEBIAN_FRONTEND=noninteractive apt install -y linux-image-amd64
-fi
+DEBIAN_FRONTEND=noninteractive apt install -y linux-image-amd64
 
 apt install -y firmware-linux gfxboot
 echo "firmware-ipw2x00 firmware-ipw2x00/license/accepted boolean true" | debconf-set-selections
 echo "firmware-ivtv firmware-ivtv/license/accepted boolean true" | debconf-set-selections
 DEBIAN_FRONTEND=noninteractive apt install -y ^firmware-*
-""".format(DEBARCH=args.architecture)
+"""
 
 # Grub install selection statement.
 if args.grubtype == 1:
@@ -350,15 +320,13 @@ os.chmod(GRUBSCRIPT_PATH, 0o777)
 if os.path.exists("{0}/etc/resolv.conf".format(absinstallpath)):
     os.remove("{0}/etc/resolv.conf".format(absinstallpath))
 # Run the setup script.
-if args.zch is True:
-    subprocess.run("{1}/zch.py {0} -c /setupscript.sh".format(absinstallpath, SCRIPTDIR), shell=True)
-else:
-    subprocess.run("systemd-nspawn -D {0} /setupscript.sh".format(absinstallpath), shell=True)
+zch.ChrootCommand(absinstallpath, "rpm --import https://download.opensuse.org/tumbleweed/repo/oss/gpg-pubkey-29b700a4-62b07e22.asc")
+zch.ChrootCommand(absinstallpath, "/setupscript.sh")
 # Copy resolv.conf into chroot (needed for chroot)
 if os.path.exists("/etc/resolv.conf"):
     shutil.copy2("/etc/resolv.conf", "{0}/etc/resolv.conf".format(absinstallpath))
 # Run the grub script.
-subprocess.run("{1}/zch.py {0} -c /grubscript.sh".format(absinstallpath, SCRIPTDIR), shell=True)
+zch.ChrootCommand(absinstallpath, "/grubscript.sh")
 # Remove after running
 os.remove(SETUPSCRIPT_PATH)
 os.remove(GRUBSCRIPT_PATH)

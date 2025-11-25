@@ -29,7 +29,7 @@ if __name__ == '__main__':
     print("Running {0}".format(__file__))
 
     # Get arguments
-    parser = argparse.ArgumentParser(description='Install Arch into a folder/chroot.')
+    parser = argparse.ArgumentParser(description='Install Opensuse into a folder/chroot.')
     parser.add_argument("-n", "--noprompt", help='Do not prompt to continue.', action="store_true")
     parser.add_argument("-c", "--hostname", help='Hostname', default="OpensuseTest")
     parser.add_argument("-u", "--username", help='Username', default="user")
