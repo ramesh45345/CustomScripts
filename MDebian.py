@@ -254,12 +254,12 @@ Acquire::ftp::Timeout "5";''')
         # Install Desktop Software
         if args.desktop == "gnome":
             print("\n Installing gnome desktop")
-            CFunc.aptinstall("task-gnome-desktop")
+            CFunc.aptinstall("gnome-core")
             CFunc.aptinstall("gnome-clocks")
             CFunc.aptinstall("gnome-shell-extensions gnome-shell-extension-gpaste")
             CFunc.aptinstall("ptyxis", error_on_fail=False)
             # Install gs installer script.
-            gs_installer = CFunc.downloadfile("https://raw.githubusercontent.com/brunelli/gnome-shell-extension-installer/master/gnome-shell-extension-installer", os.path.join(os.sep, "usr", "local", "bin"), overwrite=True)
+            gs_installer = CFunc.downloadfile("https://raw.githubusercontent.com/PedMan/gnome-shell-extension-installer/master/gnome-shell-extension-installer", os.path.join(os.sep, "usr", "local", "bin"), overwrite=True)
             os.chmod(gs_installer[0], 0o777)
             # Dash to panel
             CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 1160".format(gs_installer[0]))
@@ -314,12 +314,17 @@ Acquire::ftp::Timeout "5";''')
     if os.path.isfile("/etc/apt/apt.conf.d/20auto-upgrades"):
         os.remove("/etc/apt/apt.conf.d/20auto-upgrades")
 
+    # Plymouth and grub
+    CFunc.aptinstall("plymouth plymouth-themes")
+    subprocess.run("plymouth-set-default-theme -R spinner", shell=True, check=True)
     # Ensure sbin is in path for grub
     pathvar = os.environ.get('PATH')
     pathvar = pathvar + ":/sbin:/usr/sbin"
     os.environ['PATH'] = pathvar
     # Disable mitigations
     CFuncExt.GrubEnvAdd(os.path.join(os.sep, "etc", "default", "grub"), "GRUB_CMDLINE_LINUX_DEFAULT", "mitigations=off")
+    # Splash (plymouth)
+    CFuncExt.GrubEnvAdd(os.path.join(os.sep, "etc", "default", "grub"), "GRUB_CMDLINE_LINUX_DEFAULT", "splash")
     CFuncExt.GrubUpdate()
 
     # Add normal user to all reasonable groups

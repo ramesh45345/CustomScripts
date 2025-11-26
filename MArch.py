@@ -203,7 +203,7 @@ if __name__ == '__main__':
         CFunc.pacman_install("gnome-shell-extensions gpaste")
         yay_install(USERNAMEVAR, "aur/gnome-browser-connector")
         # Install gs installer script.
-        gs_installer = CFunc.downloadfile("https://raw.githubusercontent.com/brunelli/gnome-shell-extension-installer/master/gnome-shell-extension-installer", os.path.join(os.sep, "usr", "local", "bin"), overwrite=True)
+        gs_installer = CFunc.downloadfile("https://raw.githubusercontent.com/PedMan/gnome-shell-extension-installer/master/gnome-shell-extension-installer", os.path.join(os.sep, "usr", "local", "bin"), overwrite=True)
         os.chmod(gs_installer[0], 0o777)
         # Dash to panel
         CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 1160".format(gs_installer[0]))
