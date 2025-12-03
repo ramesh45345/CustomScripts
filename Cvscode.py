@@ -246,6 +246,7 @@ for idx in range(1, 6):
         data["git.confirmSync"] = False
         data["git.autofetch"] = True
         data["git.discardUntrackedChangesToTrash"] = False
+        data["git.defaultBranchName"] = ""
         data["[nix]"] = {"editor.tabSize": 2}
         data["markdown.extension.preview.autoShowPreviewToSide"] = False
         data["pasteImage.path"] = "${currentFileDir}/assets/images"
