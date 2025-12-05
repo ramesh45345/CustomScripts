@@ -87,7 +87,7 @@ if __name__ == '__main__':
     CFunc.sysctl_enable("sshd", error_on_fail=True)
     CFunc.dnfinstall("powerline-fonts google-roboto-fonts google-noto-sans-fonts")
     # Topgrade
-    CFuncExt.topgrade_install()
+    CFunc.dnfinstall("topgrade")
     # Samba
     CFunc.dnfinstall("samba")
     CFunc.sysctl_enable("smb", error_on_fail=True)
@@ -100,7 +100,8 @@ if __name__ == '__main__':
     # firewalld
     CFunc.dnfinstall("firewalld")
     CFunc.sysctl_enable("firewalld", now=True, error_on_fail=True)
-    CFuncExt.FirewalldConfig()
+    if sysd_status is True:
+        CFuncExt.FirewalldConfig()
     # Podman
     CFunc.dnfinstall("podman")
     # Sudoers changes
@@ -125,8 +126,6 @@ if __name__ == '__main__':
         CFunc.dnfinstall("@firefox")
         # Cups
         CFunc.dnfinstall("cups-pdf")
-        # Remote access
-        CFunc.dnfinstall("remmina remmina-plugins-vnc remmina-plugins-rdp")
         # Multimedia
         CFunc.dnfinstall("@multimedia")
         CFunc.dnfinstall("gstreamer1-vaapi")
@@ -136,12 +135,6 @@ if __name__ == '__main__':
         CFunc.dnfinstall("codium")
         # Syncthing
         CFunc.dnfinstall("syncthing")
-        # Flameshot
-        CFunc.dnfinstall("flameshot")
-        os.makedirs(os.path.join(USERHOME, ".config", "autostart"), exist_ok=True)
-        # Start flameshot on user login.
-        shutil.copy(os.path.join(os.sep, "usr", "share", "applications", "org.flameshot.Flameshot.desktop"), os.path.join(USERHOME, ".config", "autostart"))
-        CFunc.chown_recursive(os.path.join(USERHOME, ".config", ), USERNAMEVAR, USERGROUP)
         # Flatpak setup
         CFunc.dnfinstall("flatpak xdg-desktop-portal")
         CFunc.AddLineToSudoersFile(fedora_sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("flatpak")))
@@ -175,8 +168,6 @@ if __name__ == '__main__':
         # KDE
         CFunc.dnfinstall("--allowerasing @kde-desktop-environment")
         CFunc.dnfinstall("ark")
-        # xorg support
-        CFunc.dnfinstall("plasma-workspace-x11")
         CFunc.sysctl_enable("-f sddm", error_on_fail=True)
     elif args.desktop == "mate":
         # MATE
@@ -236,25 +227,27 @@ if __name__ == '__main__':
 
     # Plymouth and grub
     CFunc.dnfinstall("plymouth-theme-spinner")
-    subprocess.run("plymouth-set-default-theme spinner -R", shell=True, check=True)
-    grub_config = os.path.join(os.sep, "etc", "default", "grub")
-    # Comment grub console
-    subprocess.run("sed -i '/GRUB_CONSOLE/ s/^#*/#/' {0}".format(grub_config), shell=True, check=True)
-    # Disable Selinux
-    # To get selinux status: sestatus, getenforce
-    CFuncExt.GrubEnvAdd(grub_config, "GRUB_CMDLINE_LINUX", "selinux=0")
-    # Disable mitigations
-    CFuncExt.GrubEnvAdd(grub_config, "GRUB_CMDLINE_LINUX", "mitigations=off")
-    CFuncExt.GrubUpdate()
+    if sysd_status is True:
+        subprocess.run("plymouth-set-default-theme spinner -R", shell=True, check=True)
+        grub_config = os.path.join(os.sep, "etc", "default", "grub")
+        # Comment grub console
+        subprocess.run("sed -i '/GRUB_CONSOLE/ s/^#*/#/' {0}".format(grub_config), shell=True, check=True)
+        # Disable Selinux
+        # To get selinux status: sestatus, getenforce
+        CFuncExt.GrubEnvAdd(grub_config, "GRUB_CMDLINE_LINUX", "selinux=0")
+        # Disable mitigations
+        CFuncExt.GrubEnvAdd(grub_config, "GRUB_CMDLINE_LINUX", "mitigations=off")
+        CFuncExt.GrubUpdate()
 
     # Extra scripts
-    subprocess.run(os.path.join(SCRIPTDIR, "CCSClone.py"), shell=True, check=True)
-    subprocess.run(os.path.join(SCRIPTDIR, "Csshconfig.py"), shell=True, check=True)
-    subprocess.run(os.path.join(SCRIPTDIR, "CShellConfig.py") + " -f -z -d", shell=True, check=True)
-    subprocess.run(os.path.join(SCRIPTDIR, "CDisplayManagerConfig.py"), shell=True, check=True)
-    subprocess.run(os.path.join(SCRIPTDIR, "CVMGeneral.py"), shell=True, check=True)
-    subprocess.run(os.path.join(SCRIPTDIR, "Cxdgdirs.py"), shell=True, check=True)
-    subprocess.run(os.path.join(SCRIPTDIR, "Czram.py"), shell=True, check=True)
-    subprocess.run(os.path.join(SCRIPTDIR, "CSysConfig.sh"), shell=True, check=True)
+    if sysd_status is True:
+        subprocess.run(os.path.join(SCRIPTDIR, "CCSClone.py"), shell=True, check=True)
+        subprocess.run(os.path.join(SCRIPTDIR, "Csshconfig.py"), shell=True, check=True)
+        subprocess.run(os.path.join(SCRIPTDIR, "CShellConfig.py") + " -f -z -d", shell=True, check=True)
+        subprocess.run(os.path.join(SCRIPTDIR, "CDisplayManagerConfig.py"), shell=True, check=True)
+        subprocess.run(os.path.join(SCRIPTDIR, "CVMGeneral.py"), shell=True, check=True)
+        subprocess.run(os.path.join(SCRIPTDIR, "Cxdgdirs.py"), shell=True, check=True)
+        subprocess.run(os.path.join(SCRIPTDIR, "Czram.py"), shell=True, check=True)
+        subprocess.run(os.path.join(SCRIPTDIR, "CSysConfig.sh"), shell=True, check=True)
 
     print("\nScript End")

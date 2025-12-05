@@ -200,6 +200,8 @@ def topgrade_install(dest_folder: str = os.path.join(os.sep, "usr", "local", "bi
         # Cleanup
         if os.path.isfile(topgrade_gz_file):
             os.remove(topgrade_gz_file)
+        # Set ownership of destfolder so that topgrade can upgrade
+        os.chmod(dest_folder, 0o777)
     else:
         print(f"ERROR: {dest_folder} does not exist.")
 
