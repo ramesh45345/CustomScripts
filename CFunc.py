@@ -371,16 +371,23 @@ def chmod_recursive_mask(path: str, mask: oct, and_mask: bool = False):
             for fname in filenames:
                 chmod_mask(os.path.join(dirpath, fname), mask, and_mask)
 ### Systemd Functions ###
+def sysctl_isrunning() -> bool:
+    status = False
+    if shutil.which("systemctl"):
+        sysctl_statuscode = subprocess.run(["systemctl"], check=False, shell=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode
+        if sysctl_statuscode == 0:
+            status = True
+    return status
 def sysctl_enable(options: str, now: bool = False, error_on_fail: bool = False):
     """Enable systemctl services"""
     sysctl_cmd = "systemctl enable {0}".format(options)
-    if now:
+    if now is True and sysctl_isrunning() is True:
         sysctl_cmd += " --now"
     subprocess.run(sysctl_cmd, shell=True, check=error_on_fail)
 def sysctl_disable(options, now: bool = False, error_on_fail: bool = False):
     """Disable systemctl services"""
     sysctl_cmd = "systemctl disable {0}".format(options)
-    if now:
+    if now is True and sysctl_isrunning() is True:
         sysctl_cmd += " --now"
     subprocess.run(sysctl_cmd, shell=True, check=error_on_fail)
 def systemd_createsystemunit(sysunitname, sysunittext, sysenable=False):

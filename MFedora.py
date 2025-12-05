@@ -65,6 +65,8 @@ if __name__ == '__main__':
 
     # Get VM State
     vmstatus = CFunc.getvmstate()
+    # Get systemd state
+    sysd_status = CFunc.sysctl_isrunning()
 
     ### Fedora Repos ###
     # RPMFusion
@@ -93,7 +95,8 @@ if __name__ == '__main__':
     CFunc.dnfinstall("cifs-utils")
     # NTP Configuration
     CFunc.sysctl_enable("systemd-timesyncd", error_on_fail=True)
-    subprocess.run("timedatectl set-local-rtc false; timedatectl set-ntp 1", shell=True, check=True)
+    if sysd_status is True:
+        subprocess.run("timedatectl set-local-rtc false; timedatectl set-ntp 1", shell=True, check=True)
     # firewalld
     CFunc.dnfinstall("firewalld")
     CFunc.sysctl_enable("firewalld", now=True, error_on_fail=True)
