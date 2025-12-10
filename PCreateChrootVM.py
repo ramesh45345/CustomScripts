@@ -276,7 +276,7 @@ while ! test -f /var/opt/CustomScripts/MNixOS.py; do sleep 1; done;
 cd ~
 export LANG=en_US.UTF-8
 /opt/CustomScripts/ZSlimDrive.py -n -g
-/opt/CustomScripts/BDebian.py -n -t ubuntu -r {debversion} -g 3 -i /dev/vda2 -c "{vm_name}" -u {args.vmuser} -q "{args.vmpass}" -f "{args.fullname}" --forcelink /mnt
+/opt/CustomScripts/BDebian.py -n -t ubuntu -r {debversion} -g efi -i /dev/vda2 -c "{vm_name}" -u {args.vmuser} -q "{args.vmpass}" -f "{args.fullname}" --forcelink /mnt
 echo "PermitRootLogin yes" >> /mnt/etc/ssh/sshd_config
 poweroff"""
         vmprovision_cmd = f"""#!/bin/bash
@@ -303,7 +303,7 @@ echo -e "nameserver 1.0.0.1\\nnameserver 1.1.1.1\\nnameserver 2606:4700:4700::11
 cd ~
 export LANG=en_US.UTF-8
 /opt/CustomScripts/ZSlimDrive.py -n -g
-/opt/CustomScripts/BDebian.py -n -t debian -r {debversion} -g 3 -i /dev/vda2 -c "{vm_name}" -u {args.vmuser} -q "{args.vmpass}" -f "{args.fullname}" /mnt
+/opt/CustomScripts/BDebian.py -n -t debian -r {debversion} -g efi -i /dev/vda2 -c "{vm_name}" -u {args.vmuser} -q "{args.vmpass}" -f "{args.fullname}" /mnt
 echo "PermitRootLogin yes" >> /mnt/etc/ssh/sshd_config
 poweroff'''
         vmprovision_cmd = f"""#!/bin/bash

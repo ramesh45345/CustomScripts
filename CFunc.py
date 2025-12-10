@@ -242,6 +242,21 @@ def storage_path_detect(folders_in_path: list = ["VMs"], folder_primary: str = "
             storage_path = path
             break
     return storage_path
+def partition_detect(mounted_path: str = "/"):
+    """Detect a partition from available mounts."""
+    dfout = subpout("df -l -x tmpfs -x devtmpfs -x efivarfs --output=source,fstype,target")
+    dfout_array = []
+    for df_lines in dfout.split("\n"):
+        dfout_array += [df_lines.split()]
+    # Remove header
+    del dfout_array[0]
+
+    fs_detect = ""
+    for df_line in dfout_array:
+        if df_line[2] == mounted_path:
+            fs_detect = df_line[0]
+            break
+    return fs_detect
 def is_root(checkstate: bool=True, state_exit: bool=True) -> bool:
     """
     Check if current user is root or not.

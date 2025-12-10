@@ -24,90 +24,89 @@ print = functools.partial(print, flush=True)
 SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))
 
 ### Functions ###
-def apt_install_chroot(chroot_folder: str, packages: str):
-    """Install apt packages in chroot."""
-    zch.ChrootCommand(chroot_folder, "apt install -y {0}".format(packages))
-    return
+def apt_chroot(chroot_folder: str, cmd: str):
+    """Use apt in chroot."""
+    zch.ChrootCommand(chroot_folder, f"DEBIAN_FRONTEND=noninteractive apt {cmd}")
 
-# Get arguments
-parser = argparse.ArgumentParser(description='Install Debian/Ubuntu into a folder/chroot.')
-parser.add_argument("-n", "--noprompt", help='Do not prompt to continue.', action="store_true")
-parser.add_argument("-c", "--hostname", help='Hostname', default="DebianTest")
-parser.add_argument("-u", "--username", help='Username', default="user")
-parser.add_argument("-f", "--fullname", help='Full Name', default="User Name")
-parser.add_argument("-q", "--password", help='Password', default="asdf")
-parser.add_argument("-g", "--grubtype", type=int, help='Grub Install Number', default=1)
-parser.add_argument("-i", "--grubpartition", help='Grub Custom Parition (if autodetection isnt working, i.e. /dev/sdb)', default=None)
-parser.add_argument("-t", "--type", help='OS Type (debian, ubuntu, etc)', default="debian")
-parser.add_argument("-r", "--release", help='Release Distribution', default="unstable")
-parser.add_argument("--forcelink", help='Force symlink to be created for release. Not to be used unless debootstrap version is out of date. Example: No symlink exists for version "mantic" in ubuntu.', action="store_true")
-parser.add_argument("installpath", help='Path of Installation')
 
-# Save arguments.
-args = parser.parse_args()
-print("Hostname:", args.hostname)
-print("Username:", args.username)
-print("Full Name:", args.fullname)
-print("Grub Install Number:", args.grubtype)
-# Get absolute path of the given path.
-absinstallpath = os.path.realpath(args.installpath)
-print("Path of Installation:", absinstallpath)
-print("OS Type:", args.type)
-print("Release Distribution:", args.release)
-DEVPART = subprocess.run('sh -c df -m | grep " \+{0}$" | grep -Eo "/dev/[a-z]d[a-z]"'.format(absinstallpath), shell=True, stdout=subprocess.PIPE, universal_newlines=True)
-grubautopart = format(DEVPART.stdout.strip())
-print("Autodetect grub partition:", grubautopart)
-if args.grubpartition is not None and stat.S_ISBLK(os.stat(args.grubpartition).st_mode) is True:
-    grubpart = args.grubpartition
-else:
-    grubpart = grubautopart
-print("Grub partition to be used:", grubpart)
-if args.type == "ubuntu":
-    osurl = "http://archive.ubuntu.com/ubuntu/"
-else:
-    osurl = "http://http.us.debian.org/debian/"
-print("URL to use:", osurl)
+if __name__ == '__main__':
 
-# Exit if not root.
-CFunc.is_root(True)
+    # Get arguments
+    parser = argparse.ArgumentParser(description='Install Debian/Ubuntu into a folder/chroot.')
+    parser.add_argument("-n", "--noprompt", help='Do not prompt to continue.', action="store_true")
+    parser.add_argument("-c", "--hostname", help='Hostname', default="DebianTest")
+    parser.add_argument("-u", "--username", help='Username', default="user")
+    parser.add_argument("-f", "--fullname", help='Full Name', default="User Name")
+    parser.add_argument("-q", "--password", help='Password', default="asdf")
+    parser.add_argument("-g", "--grubtype", help='Grub Install Type (choices: %(choices)s) (default: %(default)s)', default="efi", choices=["none", "efi"])
+    parser.add_argument("-i", "--grubpartition", help='Grub EFI Parition (if autodetection isnt working, i.e. /dev/vda2)', default=None)
+    parser.add_argument("-t", "--type", help='OS Type (choices: %(choices)s) (default: %(default)s)', default="debian", choices=["debian", "ubuntu"])
+    parser.add_argument("-r", "--release", help='Release Distribution', default="unstable")
+    parser.add_argument("--forcelink", help='Force symlink to be created for release. Not to be used unless debootstrap version is out of date. Example: No symlink exists for version "mantic" in ubuntu.', action="store_true")
+    parser.add_argument("installpath", help='Path of Installation')
 
-# Ensure that certain commands exist.
-cmdcheck = ["debootstrap"]
-CFunc.commands_check(cmdcheck)
+    # Save arguments.
+    args = parser.parse_args()
+    print("Hostname:", args.hostname)
+    print("Username:", args.username)
+    print("Full Name:", args.fullname)
+    print("Grub Install Type:", args.grubtype)
+    # Get absolute path of the given path.
+    absinstallpath = os.path.realpath(args.installpath)
+    print("Path of Installation:", absinstallpath)
+    print("OS Type:", args.type)
+    print("Release Distribution:", args.release)
+    if args.grubpartition is not None and stat.S_ISBLK(os.stat(args.grubpartition).st_mode) is True:
+        grubpart = args.grubpartition
+    else:
+        grubpart = CFunc.partition_detect(os.path.join(absinstallpath, "boot", "efi"))
+    print("Grub partition to be used:", grubpart)
+    if args.type == "ubuntu":
+        osurl = "http://archive.ubuntu.com/ubuntu/"
+    else:
+        osurl = "http://http.us.debian.org/debian/"
+    print("URL to use:", osurl)
 
-if args.noprompt is False:
-    input("Press Enter to continue.")
+    # Exit if not root.
+    CFunc.is_root(True)
 
-os.environ['DEBIAN_FRONTEND'] = "noninteractive"
-# Check symlink for debootstrap.
-if args.forcelink:
-    scriptsfolder = os.path.join(os.sep, "usr", "share", "debootstrap", "scripts")
-    if os.path.isdir(scriptsfolder):
-        # Check that the release exists
-        if not os.path.islink(os.path.join(scriptsfolder, args.release)):
-            currentpath = os.getcwd()
-            os.chdir(scriptsfolder)
-            # Symlink if it doesn't exist
-            os.symlink("gutsy", args.release)
-            os.chdir(currentpath)
-            print("\nNOTE: symlink for {0} created at {1}.\n".format(args.release, scriptsfolder))
-# Bootstrap the chroot environment.
-subprocess.run(f"debootstrap --no-check-gpg --arch amd64 {args.release} {absinstallpath} {osurl}", shell=True, check=True)
+    # Ensure that certain commands exist.
+    cmdcheck = ["debootstrap"]
+    CFunc.commands_check(cmdcheck)
 
-# Create and run setup script.
-SETUPSCRIPT = """#!/bin/bash
+    if args.noprompt is False:
+        input("Press Enter to continue.")
+
+    os.environ['DEBIAN_FRONTEND'] = "noninteractive"
+    # Check symlink for debootstrap.
+    if args.forcelink:
+        scriptsfolder = os.path.join(os.sep, "usr", "share", "debootstrap", "scripts")
+        if os.path.isdir(scriptsfolder):
+            # Check that the release exists
+            if not os.path.islink(os.path.join(scriptsfolder, args.release)):
+                currentpath = os.getcwd()
+                os.chdir(scriptsfolder)
+                # Symlink if it doesn't exist
+                os.symlink("gutsy", args.release)
+                os.chdir(currentpath)
+                print("\nNOTE: symlink for {0} created at {1}.\n".format(args.release, scriptsfolder))
+    # Bootstrap the chroot environment.
+    subprocess.run(f"debootstrap --no-check-gpg --arch amd64 {args.release} {absinstallpath} {osurl}", shell=True, check=True)
+
+    # Post-bootstrap Setup
+    # Timezone
+    if os.path.exists(os.path.join(absinstallpath, "etc", "localtime")):
+        os.remove(os.path.join(absinstallpath, "etc", "localtime"))
+    subprocess.run(f"ln -sfr {absinstallpath}/usr/share/zoneinfo/US/Eastern {absinstallpath}/etc/localtime", shell=True, check=True)
+    # Hostname
+    with open(os.path.join(absinstallpath, "etc", "hostname"), 'w') as f:
+        f.write(args.hostname)
+    zch.ChrootCommand(absinstallpath, '''sed -i 's/\(127.0.0.1\\tlocalhost\)\(.*\)/\\1 {HOSTNAME}/g' "/etc/hosts"''')
+    apt_chroot(absinstallpath, "update")
+
+    # Create and run setup script.
+    SETUPSCRIPT = """#!/bin/bash
 echo "Running Debian Setup Script"
-
-export DEBIAN_FRONTEND=noninteractive
-# Exporting Path for chroot
-export PATH=$PATH:/bin:/usr/local/sbin:/usr/sbin:/sbin
-
-# Set hostname
-echo "{HOSTNAME}" > /etc/hostname
-sed -i 's/\(127.0.0.1\\tlocalhost\)\(.*\)/\\1 {HOSTNAME}/g' "/etc/hosts"
-
-# Update repos
-apt update
 
 # Set timezone
 echo "America/New_York" > "/etc/timezone"
@@ -187,11 +186,11 @@ fi
 # ln -sf ../run/systemd/resolve/resolv.conf /etc/resolv.conf
 # DEBIAN_FRONTEND=noninteractive dpkg-reconfigure openresolv
 
-""".format(HOSTNAME=args.hostname, USERNAME=args.username, PASSWORD=args.password, FULLNAME=args.fullname)
+    """.format(HOSTNAME=args.hostname, USERNAME=args.username, PASSWORD=args.password, FULLNAME=args.fullname)
 
 # Set up repositories for debian/ubuntu.
-if args.type == "ubuntu":
-    SETUPSCRIPT += """
+    if args.type == "ubuntu":
+        SETUPSCRIPT += """
 # Restricted, universe, and multiverse for Ubuntu.
 add-apt-repository restricted
 add-apt-repository universe
@@ -205,9 +204,9 @@ fi
 if ! grep -i "{DEBRELEASE}-backports main" /etc/apt/sources.list; then
     add-apt-repository "deb {URL} {DEBRELEASE}-backports main restricted universe multiverse"
 fi
-""".format(DEBRELEASE=args.release, URL=osurl)
-else:
-    SETUPSCRIPT += """
+    """.format(DEBRELEASE=args.release, URL=osurl)
+    else:
+        SETUPSCRIPT += """
 # Contrib and non-free for normal distro
 add-apt-repository main
 add-apt-repository contrib
@@ -217,9 +216,9 @@ if [[ "{DEBRELEASE}" != "sid" && "{DEBRELEASE}" != "unstable" && "{DEBRELEASE}" 
 fi
 # Comment out lines containing httpredir.
 sed -i '/httpredir/ s/^#*/#/' /etc/apt/sources.list
-""".format(DEBRELEASE=args.release)
+    """.format(DEBRELEASE=args.release)
 
-SETUPSCRIPT += """
+    SETUPSCRIPT += """
 # Enable 32-bit support for 64-bit arch.
 dpkg --add-architecture i386
 apt update
@@ -248,24 +247,24 @@ chmod a+rwx "/opt/CustomScripts"
 
 """
 
-# Init grub script
-GRUBSCRIPT = """#!/bin/bash
+    # Init grub script
+    GRUBSCRIPT = """#!/bin/bash
 
 # Debian Grub Script
 
 # Exporting Path for chroot
 export PATH=$PATH:/bin:/usr/local/sbin:/usr/sbin:/sbin
 """
-# Install kernel, grub.
-if 2 <= args.grubtype <= 3:
+    # Install kernel, grub.
+    if args.grubtype == "efi":
 
-    if args.type == "ubuntu":
-        GRUBSCRIPT += """
+        if args.type == "ubuntu":
+            GRUBSCRIPT += """
 DEBIAN_FRONTEND=noninteractive apt install -y linux-image-generic linux-headers-generic
 DEBIAN_FRONTEND=noninteractive apt install -y gfxboot gfxboot-theme-ubuntu linux-firmware
 """
-    else:
-        GRUBSCRIPT += """
+        else:
+            GRUBSCRIPT += """
 DEBIAN_FRONTEND=noninteractive apt install -y linux-image-amd64
 
 apt install -y firmware-linux gfxboot
@@ -274,60 +273,47 @@ echo "firmware-ivtv firmware-ivtv/license/accepted boolean true" | debconf-set-s
 DEBIAN_FRONTEND=noninteractive apt install -y ^firmware-*
 """
 
-# Grub install selection statement.
-if args.grubtype == 1:
-    print("Not installing grub.")
-else:
-    # Create fstab for other grub scenarios
-    subprocess.run("genfstab -U {INSTALLPATH} > {INSTALLPATH}/etc/fstab".format(INSTALLPATH=absinstallpath), shell=True)
-    subprocess.run("sed -i '/zram0/d' {INSTALLPATH}/etc/fstab".format(INSTALLPATH=absinstallpath), shell=True)
-# Use autodetected or specified grub partition.
-if args.grubtype == 2:
-    # Add if partition is a block device
-    if stat.S_ISBLK(os.stat(grubpart).st_mode) is True:
-        GRUBSCRIPT += """
-DEBIAN_FRONTEND=noninteractive apt install -y grub-pc
-update-grub2
-grub-install --target=i386-pc --recheck {0}
-""".format(grubpart)
-    else:
-        print("ERROR Grub Mode 2, partition {0} is not a block device.".format(grubpart))
-# Use efi partitioning
-elif args.grubtype == 3:
-    # Add if /boot/efi is mounted, and partition is a block device.
-    if os.path.ismount("{0}/boot/efi".format(absinstallpath)) is True and stat.S_ISBLK(os.stat(grubpart).st_mode) is True:
-        GRUBSCRIPT += """
+    # Grub install, use efi partitioning
+    if args.grubtype == "efi":
+        # Create fstab for other grub scenarios
+        subprocess.run(f"genfstab -U {absinstallpath} > {absinstallpath}/etc/fstab", shell=True)
+        subprocess.run(f"sed -i '/zram0/d' {absinstallpath}/etc/fstab", shell=True)
+        # Add if /boot/efi is mounted, and partition is a block device.
+        if os.path.ismount(f"{absinstallpath}/boot/efi") is True and stat.S_ISBLK(os.stat(grubpart).st_mode) is True:
+            GRUBSCRIPT += """
 DEBIAN_FRONTEND=noninteractive apt install -y grub-efi-amd64
 update-grub2
 grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id={0} --recheck
-""".format(args.type)
+    """.format(args.type)
+        else:
+            print(f"ERROR Grub Mode efi, {absinstallpath}/boot/efi isn't a mount point or {grubpart} is not a block device.")
     else:
-        print("ERROR Grub Mode 3, {0}/boot/efi isn't a mount point or {1} is not a block device.".format(absinstallpath, grubpart))
+        print("Not installing grub.")
 
-# Close the setup script.
-SETUPSCRIPT_PATH = os.path.join(absinstallpath, "setupscript.sh")
-SETUPSCRIPT_VAR = open(SETUPSCRIPT_PATH, mode='w')
-SETUPSCRIPT_VAR.write(SETUPSCRIPT)
-SETUPSCRIPT_VAR.close()
-os.chmod(SETUPSCRIPT_PATH, 0o777)
-# Close the grub script.
-GRUBSCRIPT_PATH = os.path.join(absinstallpath, "grubscript.sh")
-GRUBSCRIPT_VAR = open(GRUBSCRIPT_PATH, mode='w')
-GRUBSCRIPT_VAR.write(GRUBSCRIPT)
-GRUBSCRIPT_VAR.close()
-os.chmod(GRUBSCRIPT_PATH, 0o777)
-# Remove resolv.conf before chroot
-if os.path.exists("{0}/etc/resolv.conf".format(absinstallpath)):
-    os.remove("{0}/etc/resolv.conf".format(absinstallpath))
-# Run the setup script.
-zch.ChrootCommand(absinstallpath, "rpm --import https://download.opensuse.org/tumbleweed/repo/oss/gpg-pubkey-29b700a4-62b07e22.asc")
-zch.ChrootCommand(absinstallpath, "/setupscript.sh")
-# Copy resolv.conf into chroot (needed for chroot)
-if os.path.exists("/etc/resolv.conf"):
-    shutil.copy2("/etc/resolv.conf", "{0}/etc/resolv.conf".format(absinstallpath))
-# Run the grub script.
-zch.ChrootCommand(absinstallpath, "/grubscript.sh")
-# Remove after running
-os.remove(SETUPSCRIPT_PATH)
-os.remove(GRUBSCRIPT_PATH)
-print("Script finished successfully.")
+    # Close the setup script.
+    SETUPSCRIPT_PATH = os.path.join(absinstallpath, "setupscript.sh")
+    SETUPSCRIPT_VAR = open(SETUPSCRIPT_PATH, mode='w')
+    SETUPSCRIPT_VAR.write(SETUPSCRIPT)
+    SETUPSCRIPT_VAR.close()
+    os.chmod(SETUPSCRIPT_PATH, 0o777)
+    # Close the grub script.
+    GRUBSCRIPT_PATH = os.path.join(absinstallpath, "grubscript.sh")
+    GRUBSCRIPT_VAR = open(GRUBSCRIPT_PATH, mode='w')
+    GRUBSCRIPT_VAR.write(GRUBSCRIPT)
+    GRUBSCRIPT_VAR.close()
+    os.chmod(GRUBSCRIPT_PATH, 0o777)
+    # Remove resolv.conf before chroot
+    if os.path.exists("{0}/etc/resolv.conf".format(absinstallpath)):
+        os.remove("{0}/etc/resolv.conf".format(absinstallpath))
+    # Run the setup script.
+    zch.ChrootCommand(absinstallpath, "rpm --import https://download.opensuse.org/tumbleweed/repo/oss/gpg-pubkey-29b700a4-62b07e22.asc")
+    zch.ChrootCommand(absinstallpath, "/setupscript.sh")
+    # Copy resolv.conf into chroot (needed for chroot)
+    if os.path.exists("/etc/resolv.conf"):
+        shutil.copy2("/etc/resolv.conf", "{0}/etc/resolv.conf".format(absinstallpath))
+    # Run the grub script.
+    zch.ChrootCommand(absinstallpath, "/grubscript.sh")
+    # Remove after running
+    os.remove(SETUPSCRIPT_PATH)
+    os.remove(GRUBSCRIPT_PATH)
+    print("Script finished successfully.")
