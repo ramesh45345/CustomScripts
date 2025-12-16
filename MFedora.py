@@ -43,6 +43,65 @@ def repo_terra(el: bool = False):
     if el:
         eltext = "el"
     subprocess.run(f"dnf install -y --nogpgcheck --repofrompath 'terra,https://repos.fyralabs.com/terra{eltext}$releasever' terra-release", shell=True, check=True)
+def fed_desktop(desktop: str = None):
+    """Fedora: Install Desktop"""
+    if desktop == "gnome":
+        # Gnome
+        CFunc.dnfinstall("--allowerasing @workstation-product @gnome-desktop")
+        CFunc.sysctl_enable("-f gdm", error_on_fail=True)
+        CFunc.dnfinstall("ptyxis")
+        # Some Gnome Extensions
+        CFunc.dnfinstall("gnome-tweak-tool dconf-editor")
+        CFunc.dnfinstall("gnome-shell-extension-gpaste")
+        # Install gs installer script.
+        gs_installer = CFunc.downloadfile("https://raw.githubusercontent.com/PedMan/gnome-shell-extension-installer/master/gnome-shell-extension-installer", os.path.join(os.sep, "usr", "local", "bin"), overwrite=True)
+        os.chmod(gs_installer[0], 0o777)
+        # Dash to panel
+        CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 1160".format(gs_installer[0]))
+        # Kstatusnotifier
+        CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 615".format(gs_installer[0]))
+        # Extensions app
+        CFunc.flatpak_install("flathub", "org.gnome.Extensions")
+    elif desktop == "kde":
+        # KDE
+        CFunc.dnfinstall("--allowerasing @kde-desktop-environment")
+        CFunc.dnfinstall("ark")
+        CFunc.sysctl_enable("-f sddm", error_on_fail=True)
+    elif desktop == "mate":
+        # MATE
+        CFunc.dnfinstall("--allowerasing @mate-desktop @mate-applications")
+        CFunc.sysctl_enable("-f lightdm", error_on_fail=True)
+        # Applications
+        CFunc.dnfinstall("dconf-editor")
+        # Brisk-menu
+        subprocess.run("dnf copr enable -y rmkrishna/rpms", shell=True, check=True)
+        CFunc.dnfinstall("brisk-menu")
+        # Run MATE Configuration
+        subprocess.run("{0}/DExtMate.py".format(SCRIPTDIR), shell=True, check=False)
+    elif desktop == "xfce":
+        CFunc.dnfinstall("--allowerasing @xfce-desktop-environment")
+        CFunc.dnfinstall("xfce4-whiskermenu-plugin xfce4-systemload-plugin xfce4-diskperf-plugin xfce4-clipman-plugin")
+        CFunc.dnfinstall("ptyxis")
+    elif desktop == "lxqt":
+        CFunc.dnfinstall("--allowerasing @lxqt-desktop-environment")
+        CFunc.dnfinstall("konsole")
+    elif desktop == "cinnamon":
+        CFunc.dnfinstall("--allowerasing @cinnamon-desktop-environment")
+        CFunc.dnfinstall("ptyxis")
+    if desktop:
+        # Enable graphical target
+        subprocess.run("systemctl set-default graphical.target", shell=True, check=True)
+def fed_flatpak():
+    """Fedora: Flatpak setup"""
+    CFunc.dnfinstall("flatpak xdg-desktop-portal")
+    CFunc.AddLineToSudoersFile(fedora_sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("flatpak")))
+    subprocess.run(os.path.join(SCRIPTDIR, "CFlatpakConfig.py"), shell=True, check=True)
+def fed_numix():
+    """Fedora: Install numix icons"""
+    # Numix
+    CFunc.dnfinstall("numix-icon-theme-circle gdk-pixbuf2")
+    # Update pixbuf cache after installing icons (for some reason doesn't do this automatically).
+    subprocess.run("gdk-pixbuf-query-loaders-64 --update-cache", shell=True, check=True)
 
 
 if __name__ == '__main__':
@@ -52,6 +111,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Install Fedora Software.')
     parser.add_argument("-d", "--desktop", help='Desktop Environment', choices=['gnome', 'kde', 'mate', 'xfce', 'lxqt', 'cinnamon', None], default=None)
     parser.add_argument("-x", "--nogui", help='Configure script to disable GUI.', action="store_true")
+    parser.add_argument("-b", "--bootc", help='Configure script for bootc image.', action="store_true")
 
     # Save arguments.
     args = parser.parse_args()
@@ -121,8 +181,6 @@ if __name__ == '__main__':
         # Base Packages
         CFunc.dnfinstall("@fonts @base-x @networkmanager-submodules xrandr xset")
         # Browsers
-        # Official Google Chrome
-        # CFunc.dnfinstall("https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm")
         CFunc.dnfinstall("@firefox")
         # Cups
         CFunc.dnfinstall("cups-pdf")
@@ -135,10 +193,7 @@ if __name__ == '__main__':
         CFunc.dnfinstall("codium")
         # Syncthing
         CFunc.dnfinstall("syncthing")
-        # Flatpak setup
-        CFunc.dnfinstall("flatpak xdg-desktop-portal")
-        CFunc.AddLineToSudoersFile(fedora_sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("flatpak")))
-        subprocess.run(os.path.join(SCRIPTDIR, "CFlatpakConfig.py"), shell=True, check=True)
+        fed_flatpak()
 
     # Install software for VMs
     if vmstatus == "kvm":
@@ -146,58 +201,9 @@ if __name__ == '__main__':
     if vmstatus == "vbox":
         CFunc.dnfinstall("virtualbox-guest-additions")
 
-    # Install Desktop Software
-    if args.desktop == "gnome":
-        # Gnome
-        CFunc.dnfinstall("--allowerasing @workstation-product @gnome-desktop")
-        CFunc.sysctl_enable("-f gdm", error_on_fail=True)
-        CFunc.dnfinstall("ptyxis")
-        # Some Gnome Extensions
-        CFunc.dnfinstall("gnome-tweak-tool dconf-editor")
-        CFunc.dnfinstall("gnome-shell-extension-gpaste")
-        # Install gs installer script.
-        gs_installer = CFunc.downloadfile("https://raw.githubusercontent.com/PedMan/gnome-shell-extension-installer/master/gnome-shell-extension-installer", os.path.join(os.sep, "usr", "local", "bin"), overwrite=True)
-        os.chmod(gs_installer[0], 0o777)
-        # Dash to panel
-        CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 1160".format(gs_installer[0]))
-        # Kstatusnotifier
-        CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 615".format(gs_installer[0]))
-        # Extensions app
-        CFunc.flatpak_install("flathub", "org.gnome.Extensions")
-    elif args.desktop == "kde":
-        # KDE
-        CFunc.dnfinstall("--allowerasing @kde-desktop-environment")
-        CFunc.dnfinstall("ark")
-        CFunc.sysctl_enable("-f sddm", error_on_fail=True)
-    elif args.desktop == "mate":
-        # MATE
-        CFunc.dnfinstall("--allowerasing @mate-desktop @mate-applications")
-        CFunc.sysctl_enable("-f lightdm", error_on_fail=True)
-        # Applications
-        CFunc.dnfinstall("dconf-editor")
-        # Brisk-menu
-        subprocess.run("dnf copr enable -y rmkrishna/rpms", shell=True, check=True)
-        CFunc.dnfinstall("brisk-menu")
-        # Run MATE Configuration
-        subprocess.run("{0}/DExtMate.py".format(SCRIPTDIR), shell=True, check=False)
-    elif args.desktop == "xfce":
-        CFunc.dnfinstall("--allowerasing @xfce-desktop-environment")
-        CFunc.dnfinstall("xfce4-whiskermenu-plugin xfce4-systemload-plugin xfce4-diskperf-plugin xfce4-clipman-plugin")
-        CFunc.dnfinstall("ptyxis")
-    elif args.desktop == "lxqt":
-        CFunc.dnfinstall("--allowerasing @lxqt-desktop-environment")
-        CFunc.dnfinstall("konsole")
-    elif args.desktop == "cinnamon":
-        CFunc.dnfinstall("--allowerasing @cinnamon-desktop-environment")
-        CFunc.dnfinstall("ptyxis")
-
     if not args.nogui:
-        # Numix
-        CFunc.dnfinstall("numix-icon-theme-circle")
-        # Update pixbuf cache after installing icons (for some reason doesn't do this automatically).
-        subprocess.run("gdk-pixbuf-query-loaders-64 --update-cache", shell=True, check=True)
-        # Enable graphical target
-        subprocess.run("systemctl set-default graphical.target", shell=True, check=True)
+        fed_desktop(args.desktop)
+        fed_numix()
 
     # Add normal user to all reasonable groups
     CFunc.AddUserToGroup("disk")
