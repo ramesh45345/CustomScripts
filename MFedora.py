@@ -43,6 +43,63 @@ def repo_terra(el: bool = False):
     if el:
         eltext = "el"
     subprocess.run(f"dnf install -y --nogpgcheck --repofrompath 'terra,https://repos.fyralabs.com/terra{eltext}$releasever' terra-release", shell=True, check=True)
+def fed_cli(sysd_status: bool, vmstatus: str):
+    """Fedora: Cli tools"""
+    CFunc.dnfinstall("git fish starship zsh nano tmux perl-Time-HiRes iotop rsync p7zip p7zip-plugins zip unzip xdg-utils xdg-user-dirs util-linux-user fuse-sshfs lsb_release openssh-server openssh-clients avahi nss-mdns dnf-plugin-system-upgrade xfsprogs python3-pip python3-passlib")
+    CFunc.dnfinstall("unrar")
+    CFunc.sysctl_enable("sshd", error_on_fail=True)
+    CFunc.dnfinstall("powerline-fonts google-roboto-fonts google-noto-sans-fonts")
+    # Topgrade
+    CFunc.dnfinstall("topgrade")
+    # Samba
+    CFunc.dnfinstall("samba")
+    CFunc.sysctl_enable("smb", error_on_fail=True)
+    # cifs-utils
+    CFunc.dnfinstall("cifs-utils")
+    # NTP Configuration
+    CFunc.sysctl_enable("systemd-timesyncd", error_on_fail=True)
+    if sysd_status is True:
+        subprocess.run("timedatectl set-local-rtc false; timedatectl set-ntp 1", shell=True, check=True)
+    # firewalld
+    CFunc.dnfinstall("firewalld")
+    CFunc.sysctl_enable("firewalld", now=True, error_on_fail=True)
+    if sysd_status is True:
+        CFuncExt.FirewalldConfig()
+    # Podman
+    CFunc.dnfinstall("podman")
+    # Sudoers changes
+    CFuncExt.SudoersEnvSettings()
+    # Edit sudoers to add dnf.
+    fedora_sudoersfile = os.path.join(os.sep, "etc", "sudoers.d", "pkmgt")
+    CFunc.AddLineToSudoersFile(fedora_sudoersfile, "%wheel ALL=(ALL) ALL", overwrite=True)
+    CFunc.AddLineToSudoersFile(fedora_sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("dnf")))
+    CFunc.AddLineToSudoersFile(fedora_sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("podman")))
+    if vmstatus:
+        CFunc.AddLineToSudoersFile(os.path.join(os.sep, "etc", "sudoers.d", "vmconfig"), f"{USERNAMEVAR} ALL=(ALL) NOPASSWD: ALL", overwrite=True)
+    # Install software for VMs
+    if vmstatus == "kvm":
+        CFunc.dnfinstall("spice-vdagent qemu-guest-agent")
+    if vmstatus == "vbox":
+        CFunc.dnfinstall("virtualbox-guest-additions")
+def fed_gui():
+    """Fedora: GUI apps"""
+    # Distrobox
+    CFunc.dnfinstall("distrobox")
+    # Base Packages
+    CFunc.dnfinstall("@fonts @base-x @networkmanager-submodules xrandr xset")
+    # Browsers
+    CFunc.dnfinstall("@firefox")
+    # Cups
+    CFunc.dnfinstall("cups-pdf")
+    # Multimedia
+    CFunc.dnfinstall("@multimedia")
+    CFunc.dnfinstall("gstreamer1-vaapi")
+    CFunc.dnfinstall("--allowerasing ffmpeg mpv")
+    CFuncExt.ytdlp_install()
+    # Editors
+    CFunc.dnfinstall("codium")
+    # Syncthing
+    CFunc.dnfinstall("syncthing")
 def fed_desktop(desktop: str = None):
     """Fedora: Install Desktop"""
     if desktop == "gnome":
@@ -94,7 +151,8 @@ def fed_desktop(desktop: str = None):
 def fed_flatpak():
     """Fedora: Flatpak setup"""
     CFunc.dnfinstall("flatpak xdg-desktop-portal")
-    CFunc.AddLineToSudoersFile(fedora_sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("flatpak")))
+    flatpak_sudoersfile = os.path.join(os.sep, "etc", "sudoers.d", "flatpak")
+    CFunc.AddLineToSudoersFile(flatpak_sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("flatpak")))
     subprocess.run(os.path.join(SCRIPTDIR, "CFlatpakConfig.py"), shell=True, check=True)
 def fed_numix():
     """Fedora: Install numix icons"""
@@ -141,65 +199,13 @@ if __name__ == '__main__':
     CFunc.dnfupdate()
 
     ### Install Fedora Software ###
-    # Cli tools
-    CFunc.dnfinstall("git fish starship zsh nano tmux perl-Time-HiRes iotop rsync p7zip p7zip-plugins zip unzip xdg-utils xdg-user-dirs util-linux-user fuse-sshfs lsb_release openssh-server openssh-clients avahi nss-mdns dnf-plugin-system-upgrade xfsprogs python3-pip python3-passlib")
-    CFunc.dnfinstall("unrar")
-    CFunc.sysctl_enable("sshd", error_on_fail=True)
-    CFunc.dnfinstall("powerline-fonts google-roboto-fonts google-noto-sans-fonts")
-    # Topgrade
-    CFunc.dnfinstall("topgrade")
-    # Samba
-    CFunc.dnfinstall("samba")
-    CFunc.sysctl_enable("smb", error_on_fail=True)
-    # cifs-utils
-    CFunc.dnfinstall("cifs-utils")
-    # NTP Configuration
-    CFunc.sysctl_enable("systemd-timesyncd", error_on_fail=True)
-    if sysd_status is True:
-        subprocess.run("timedatectl set-local-rtc false; timedatectl set-ntp 1", shell=True, check=True)
-    # firewalld
-    CFunc.dnfinstall("firewalld")
-    CFunc.sysctl_enable("firewalld", now=True, error_on_fail=True)
-    if sysd_status is True:
-        CFuncExt.FirewalldConfig()
-    # Podman
-    CFunc.dnfinstall("podman")
-    # Sudoers changes
-    CFuncExt.SudoersEnvSettings()
-    # Edit sudoers to add dnf.
-    fedora_sudoersfile = os.path.join(os.sep, "etc", "sudoers.d", "pkmgt")
-    CFunc.AddLineToSudoersFile(fedora_sudoersfile, "%wheel ALL=(ALL) ALL", overwrite=True)
-    CFunc.AddLineToSudoersFile(fedora_sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("dnf")))
-    CFunc.AddLineToSudoersFile(fedora_sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("podman")))
-    if vmstatus:
-        CFunc.AddLineToSudoersFile(os.path.join(os.sep, "etc", "sudoers.d", "vmconfig"), f"{USERNAMEVAR} ALL=(ALL) NOPASSWD: ALL", overwrite=True)
+    fed_cli(sysd_status=sysd_status, vmstatus=vmstatus)
 
     # GUI Packages
     if not args.nogui:
-        # Distrobox
-        CFunc.dnfinstall("distrobox")
-        # Base Packages
-        CFunc.dnfinstall("@fonts @base-x @networkmanager-submodules xrandr xset")
-        # Browsers
-        CFunc.dnfinstall("@firefox")
-        # Cups
-        CFunc.dnfinstall("cups-pdf")
-        # Multimedia
-        CFunc.dnfinstall("@multimedia")
-        CFunc.dnfinstall("gstreamer1-vaapi")
-        CFunc.dnfinstall("--allowerasing ffmpeg mpv")
-        CFuncExt.ytdlp_install()
-        # Editors
-        CFunc.dnfinstall("codium")
-        # Syncthing
-        CFunc.dnfinstall("syncthing")
-        fed_flatpak()
-
-    # Install software for VMs
-    if vmstatus == "kvm":
-        CFunc.dnfinstall("spice-vdagent qemu-guest-agent")
-    if vmstatus == "vbox":
-        CFunc.dnfinstall("virtualbox-guest-additions")
+        fed_gui()
+        if not args.bootc:
+            fed_flatpak()
 
     if not args.nogui:
         fed_desktop(args.desktop)
@@ -247,13 +253,12 @@ if __name__ == '__main__':
 
     # Extra scripts
     if sysd_status is True:
-        subprocess.run(os.path.join(SCRIPTDIR, "CCSClone.py"), shell=True, check=True)
-        subprocess.run(os.path.join(SCRIPTDIR, "Csshconfig.py"), shell=True, check=True)
-        subprocess.run(os.path.join(SCRIPTDIR, "CShellConfig.py") + " -f -z -d", shell=True, check=True)
-        subprocess.run(os.path.join(SCRIPTDIR, "CDisplayManagerConfig.py"), shell=True, check=True)
-        subprocess.run(os.path.join(SCRIPTDIR, "CVMGeneral.py"), shell=True, check=True)
-        subprocess.run(os.path.join(SCRIPTDIR, "Cxdgdirs.py"), shell=True, check=True)
-        subprocess.run(os.path.join(SCRIPTDIR, "Czram.py"), shell=True, check=True)
-        subprocess.run(os.path.join(SCRIPTDIR, "CSysConfig.sh"), shell=True, check=True)
-
+        subprocess.run([os.path.join(SCRIPTDIR, "CCSClone.py")], check=True)
+        subprocess.run([os.path.join(SCRIPTDIR, "CShellConfig.py"), "-f", "-z", "-d"], check=True)
+    subprocess.run([os.path.join(SCRIPTDIR, "Csshconfig.py")], check=True)
+    subprocess.run([os.path.join(SCRIPTDIR, "CDisplayManagerConfig.py")], check=True)
+    subprocess.run([os.path.join(SCRIPTDIR, "CVMGeneral.py")], check=True)
+    subprocess.run([os.path.join(SCRIPTDIR, "Cxdgdirs.py")], check=True)
+    subprocess.run([os.path.join(SCRIPTDIR, "Czram.py")], check=True)
+    subprocess.run([os.path.join(SCRIPTDIR, "CSysConfig.sh")], check=True)
     print("\nScript End")
