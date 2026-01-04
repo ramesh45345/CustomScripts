@@ -471,7 +471,7 @@ if __name__ == '__main__':
         vboxosid = "Fedora_64"
         kvm_variant = "fedora-rawhide"
         vmprovisionscript = "MAlpine.py"
-        isourl = "https://dl-cdn.alpinelinux.org/alpine/latest-stable/releases/x86_64/alpine-standard-3.22.2-x86_64.iso"
+        isourl = "https://dl-cdn.alpinelinux.org/alpine/latest-stable/releases/x86_64/alpine-standard-3.23.2-x86_64.iso"
         useefi = False
     if args.ostype == 45:
         vmname = "AlpineVM"
