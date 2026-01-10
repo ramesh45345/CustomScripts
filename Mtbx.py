@@ -91,8 +91,7 @@ LABEL com.github.containers.toolbox="true" \
 # Software
 addtext(r"""
 # Setup mirrors
-RUN pacman -Syu --needed --noconfirm reflector
-RUN reflector --country 'United States' --latest 10 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
+RUN pacman -Syu --needed --noconfirm pacman-mirrorlist
 RUN pacman -Syy
 # Software setup
 RUN pacman -Syu --needed --noconfirm nano sudo git zsh fish starship python python-pip shadow tmux

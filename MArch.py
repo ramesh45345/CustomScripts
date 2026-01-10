@@ -121,8 +121,7 @@ if __name__ == '__main__':
     vmstatus = CFunc.getvmstate()
 
     # Update mirrors.
-    CFunc.pacman_install("reflector")
-    subprocess.run("reflector --country 'United States' --latest 10 --protocol https --sort rate --save /etc/pacman.d/mirrorlist", shell=True, check=True)
+    CFunc.pacman_install("pacman-mirrorlist")
     CFunc.pacman_invoke("-Syy")
 
     ### Install Software ###

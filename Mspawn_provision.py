@@ -68,9 +68,7 @@ USERNAMEVAR, USERGROUP, USERHOME = CFunc.getnormaluser()
 # Install basic packages
 if args.distro == "arch":
     subprocess.run("sed -i 's/^#ParallelDownloads/ParallelDownloads/g' /etc/pacman.conf", shell=True, check=True)
-    CFunc.pacman_install("nano sudo which git zsh python python-pip base-devel reflector")
-    # Reflector
-    subprocess.run("reflector --country 'United States' --latest 7 --protocol https --sort rate --save /etc/pacman.d/mirrorlist", shell=True, check=True)
+    CFunc.pacman_install("nano sudo which git zsh python python-pip base-devel")
     MArch.pacman_update()
 if args.distro == "ubuntu":
     # Get Ubuntu Release
