@@ -356,6 +356,8 @@ if __name__ == '__main__':
     secureboot = False
     # Predetermined iso checksum.
     md5_isourl = None
+    # Local ansible folder
+    ansiblefolder = os.path.join(os.sep, "var", "opt", "ansible-config")
 
     # Set OS options.
     # KVM os options can be found by running "osinfo-query os"
@@ -381,13 +383,16 @@ if __name__ == '__main__':
             args.imgsize = 120
         # Use cli settings for ISOVM.
         vmprovision_defopts = "-x"
-    if args.ostype == 8:
+    if 7 <= args.ostype <= 8:
         vmprovisionscript = "MFedoraSilverblue.py"
         vboxosid = "Fedora_64"
         kvm_variant = "silverblue-rawhide"
         isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/43/Kinoite/x86_64/iso/Fedora-Kinoite-ostree-x86_64-43-1.6.iso"
-        vmname = "Packer-FedoraKinoite-{0}".format(hvname)
         vmprovision_defopts = ""
+    if args.ostype == 7:
+        vmname = "Packer-FedoraKA-{0}".format(hvname)
+    if args.ostype == 8:
+        vmname = "Packer-FedoraKinoite-{0}".format(hvname)
     if args.ostype == 9:
         vmprovisionscript = "MFedoraSilverblue.py"
         vboxosid = "Fedora_64"
@@ -726,6 +731,7 @@ if __name__ == '__main__':
     data['build']['provisioner'].append('')
     data['build']['provisioner'][1] = {}
     dest_basefolder = os.path.join(os.sep, "var", "tmp")
+    dest_basefolder_opt = os.path.join(os.sep, "var", "opt")
     dest_path = os.path.join(dest_basefolder, os.path.basename(tempscriptfolderpath))
     # Always copy the current CustomScripts to the VM
     if 1 <= args.ostype <= 49:
@@ -745,10 +751,30 @@ if __name__ == '__main__':
         data['build']['provisioner'][2]["shell"]["inline"] = [f"{dest_path}/Aiso_CreateVM.py"]
         data['build']['provisioner'][2]["shell"]["pause_before"] = "15s"
         data['build']['provisioner'][2]["shell"]["timeout"] = "90m"
-    if args.ostype == 8:
-        CFunc.find_replace(tempunattendfolder, "silverblue", "kinoite", "silverblue.cfg")
-    if 8 <= args.ostype <= 9:
+    if 7 <= args.ostype <= 9:
         data['source'][packer_type]['local']["boot_command"] = ["<up><wait>e<wait><down><wait><down><wait><end> inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/silverblue.cfg<wait><f10>"]
+    if 7 <= args.ostype <= 8:
+        CFunc.find_replace(tempunattendfolder, "silverblue", "kinoite", "silverblue.cfg")
+    if args.ostype == 7:
+        data['packer']["required_plugins"]["ansible"] = {}
+        data['packer']["required_plugins"]["ansible"]["version"] = "~> 1"
+        data['packer']["required_plugins"]["ansible"]["source"] = "github.com/hashicorp/ansible"
+        data['build']['provisioner'][1]["file"] = {}
+        # Ansilbe folder
+        data['build']['provisioner'][1]["file"]["source"] = ansiblefolder
+        data['build']['provisioner'][1]["file"]["destination"] = dest_basefolder_opt
+        data['build']['provisioner'].append('')
+        data['build']['provisioner'][2] = {}
+        data['build']['provisioner'][2]["shell"] = {}
+        data['build']['provisioner'][2]["shell"]["inline"] = [f"rpm-ostree upgrade; systemctl reboot"]
+        data['build']['provisioner'][2]["shell"]["expect_disconnect"] = True
+        data['build']['provisioner'].append('')
+        data['build']['provisioner'][3] = {}
+        data['build']['provisioner'][3]["ansible"] = {}
+        data['build']['provisioner'][3]["ansible"]["playbook_file"] = os.path.join(ansiblefolder, "playbook", "config.yml")
+        data['build']['provisioner'][3]["ansible"]["ansible_env_vars"] = [ f"ANSIBLE_ROLES_PATH={os.path.join(ansiblefolder, "roles")}" ]
+        # data['build']['provisioner'][3]["ansible"]["user"] = "root"
+    if 8 <= args.ostype <= 9:
         data['build']['provisioner'][1]["shell"] = {}
         # Work around issues in release ISO, such as https://github.com/coreos/rpm-ostree/issues/5494
         data['build']['provisioner'][1]["shell"]["inline"] = ["rpm-ostree upgrade; systemctl reboot"]
