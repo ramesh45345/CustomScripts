@@ -214,7 +214,7 @@ if args.stage == 2:
     rostreeinstall("intel-media-driver libva-intel-driver")
     subprocess.run("rpm-ostree override remove mesa-va-drivers --install mesa-va-drivers-freeworld", shell=True, check=False)
     # https://github.com/fedora-silverblue/issue-tracker/issues/536#issuecomment-1974780009
-    subprocess.run("rpm-ostree override remove noopenh264 --install openh264 --install mozilla-openh264", shell=True, check=False)
+    subprocess.run("rpm-ostree override remove noopenh264 --install openh264 --install gstreamer1-plugin-openh264 --install mozilla-openh264", shell=True, check=False)
 
     # VSCode
     MFedora.repo_vscode()
