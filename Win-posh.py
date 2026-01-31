@@ -109,7 +109,7 @@ function which($name) {
     Get-Command $name | Select-Object -ExpandProperty Definition
 }
 # topgrade
-Set-Alias up topgrade
+Set-Alias up topgrade -y --tmux --no-self-update --no-retry
 
 """
 os.makedirs(powershell_profile_folder, exist_ok=True)
