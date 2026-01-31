@@ -57,6 +57,7 @@ Wprovision.pwsh_run(["Set-PSRepository", "-Name", "PSGallery", "-InstallationPol
 Wprovision.pwsh_run(["Install-Module", "-Name", 'posh-git', "-AllowClobber"])
 Wprovision.pwsh_run(["Install-Module", "-Name", "'Get-ChildItemColor'", "-AllowClobber"])
 Wprovision.pwsh_run(["Install-Module", "-Name", "'PSReadLine'", "-AllowClobber", "-Force"])
+Wprovision.pwsh_run(["Install-Module", "-Name", "'PSWindowsUpdate'", "-AllowClobber", "-Force"])
 Wprovision.pwsh_run(["Set-ExecutionPolicy", "Bypass", "-Scope", "Process", "-Force"])
 # https://ohmyposh.dev/docs/installation/windows
 Wprovision.pwsh_run(["winget install --disable-interactivity --uninstall-previous --force JanDeDobbeleer.OhMyPosh -s winget"])
@@ -68,7 +69,7 @@ subprocess.run("choco upgrade -y cascadiacodepl", shell=True, check=False)
 powershell_profile_script = CFunc.subpout('{0} -c "echo $PROFILE"'.format(powershell_cmd))
 powershell_profile_folder = os.path.dirname(powershell_profile_script)
 
-powershell_profile_text = """<#
+powershell_profile_text = r"""<#
 .SYNOPSIS
   Powershell Profile.
 #>
@@ -108,9 +109,17 @@ Set-Alias ls Get-ChildItemColorFormatWide -Option AllScope
 function which($name) {
     Get-Command $name | Select-Object -ExpandProperty Definition
 }
+function inf($name) {
+    choco install -y --force $name
+}
 # topgrade
-Set-Alias up topgrade -y --tmux --no-self-update --no-retry
-
+function up {
+    topgrade -y --tmux --no-self-update --no-retry --disable system
+}
+function upr {
+    inf("topgrade")
+    topgrade -y --tmux --no-self-update --no-retry
+}
 """
 os.makedirs(powershell_profile_folder, exist_ok=True)
 with open(powershell_profile_script, 'w') as powershell_profile_script_handle:
