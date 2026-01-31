@@ -112,6 +112,12 @@ function which($name) {
 function inf($name) {
     choco install -y --force $name
 }
+function pc {
+    $initialDir = Get-Location
+    cd $env:USERPROFILE\Documents\CustomScripts
+    git pull
+    Set-Location $initialDir
+}
 # topgrade
 function up {
     topgrade -y --tmux --no-self-update --no-retry --disable system
