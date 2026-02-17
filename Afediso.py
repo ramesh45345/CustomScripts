@@ -36,10 +36,10 @@ args = parser.parse_args()
 
 # Process variables
 buildfolder = os.path.abspath(args.workfolderroot)
-print("Root of Working Folder:", buildfolder)
+print(f"Root of Working Folder: {buildfolder}")
 outfolder = os.path.abspath(args.output)
-print("ISO Output Folder:", outfolder)
-print("Release Version is {0}".format(args.releasever))
+print(f"ISO Output Folder: {outfolder}")
+print(f"Release Version is {args.releasever}")
 
 if args.noprompt is False:
     input("Press Enter to continue.")
@@ -51,150 +51,167 @@ else:
     print("Creating work folder {0}.".format(buildfolder))
     os.makedirs(buildfolder, 0o777)
 
-# Clone fedora-kickstarts to work folder
-spinkickstarts_folder = os.path.join(buildfolder, "fedora-kickstarts")
-CFunc.gitclone("https://pagure.io/fedora-kickstarts.git", spinkickstarts_folder)
-# Modify lorax isolinux config
-subprocess.run('sed -i "s/^timeout.*/timeout 10/g" /usr/share/lorax/templates.d/99-generic/config_files/x86/isolinux.cfg', shell=True, check=True)
-subprocess.run('sed -i "/menu default/d" /usr/share/lorax/templates.d/99-generic/config_files/x86/isolinux.cfg', shell=True, check=True)
-subprocess.run(r'sed -i "/label linux/a \ \ menu default" /usr/share/lorax/templates.d/99-generic/config_files/x86/isolinux.cfg', shell=True, check=True)
-# Grub settings
-subprocess.run('sed -i "s/^set default=.*/set default=0/g" /usr/share/lorax/templates.d/99-generic/live/config_files/x86/grub2-efi.cfg /usr/share/lorax/templates.d/99-generic/config_files/x86/grub2-efi.cfg /usr/share/lorax/templates.d/99-generic/live/config_files/x86/grub2-bios.cfg /usr/share/lorax/templates.d/99-generic/config_files/x86/grub2-bios.cfg', shell=True, check=True)
-subprocess.run('sed -i "s/^set timeout=.*/set timeout=1/g" /usr/share/lorax/templates.d/99-generic/live/config_files/x86/grub2-efi.cfg /usr/share/lorax/templates.d/99-generic/config_files/x86/grub2-efi.cfg /usr/share/lorax/templates.d/99-generic/live/config_files/x86/grub2-bios.cfg /usr/share/lorax/templates.d/99-generic/config_files/x86/grub2-bios.cfg', shell=True, check=True)
-# Disable selinux and mitigations
-subprocess.run('sed -i "s/ quiet$/ quiet selinux=0 mitigations=off/g" /usr/share/lorax/templates.d/99-generic/live/config_files/x86/grub2-bios.cfg /usr/share/lorax/templates.d/99-generic/config_files/x86/grub2-bios.cfg /usr/share/lorax/templates.d/99-generic/config_files/x86/isolinux.cfg /usr/share/lorax/templates.d/99-generic/live/config_files/x86/grub2-efi.cfg /usr/share/lorax/templates.d/99-generic/config_files/x86/grub2-efi.cfg', shell=True, check=True)
-# Modify kickstart repos
-with open(os.path.join(spinkickstarts_folder, "fedora-repo.ks"), 'w') as f:
-    f.write("%include fedora-repo-not-rawhide.ks")
-# Remove auth statements. Temporary workaround, to be removed.
-subprocess.run(f"sed -i '/^auth */d' {spinkickstarts_folder}/fedora-live-base.ks", shell=True, check=False)
-# Remove x86-baremetal-tools. Temporary workaround, to be removed when https://github.com/rhinstaller/kickstart-tests/issues/740 is fixed.
-subprocess.run(f"sed -i '/x86-baremetal-tools/d' {spinkickstarts_folder}/fedora-live-base.ks", shell=True, check=False)
+# Clone fedora-kiwi to work folder
+fedoralivegit_folder = os.path.join(buildfolder, "fedora-kiwi-descriptions")
+CFunc.gitclone("https://pagure.io/fedora-kiwi-descriptions.git", fedoralivegit_folder)
+subprocess.run(f"cd {fedoralivegit_folder}; git checkout -f; git pull; git checkout f{args.releasever}", shell=True)
+
+# Clean
+imgroot = os.path.join(fedoralivegit_folder, "outdir-build", "build", "image-root")
+if os.path.exists(imgroot):
+    shutil.rmtree(imgroot)
+
+# grub timeout
+subprocess.run(f"""sed -i 's/^set default=.*/set default="0"/g' {os.path.join(fedoralivegit_folder, "grub-x86.cfg.iso-template")}""", shell=True, check=True)
+subprocess.run(f"""sed -i 's/^set timeout=.*/set timeout=1/g' {os.path.join(fedoralivegit_folder, "grub-x86.cfg.iso-template")}""", shell=True, check=True)
+
+# config.sh
+configsh_text = r"""#!/bin/bash
+
+set -euxo pipefail
+
+#======================================
+# Functions...
+#--------------------------------------
+test -f /.kconfig && . /.kconfig
+test -f /.profile && . /.profile
+
+#======================================
+# Greeting...
+#--------------------------------------
+echo "Configure image: [$kiwi_iname]-[$kiwi_profiles]..."
+
+#======================================
+# Set SELinux booleans
+#--------------------------------------
+if [[ "$kiwi_profiles" != *"Container"* ]] && [[ "$kiwi_profiles" != *"FEX"* ]] && [[ "$kiwi_profiles" != *"WSL"* ]]; then
+	## Fixes KDE Plasma, see rhbz#2058657
+	setsebool -P selinuxuser_execmod 1
+fi
+
+#======================================
+# Clear machine specific configuration
+#--------------------------------------
+## Clear machine-id on pre generated images
+rm -f /etc/machine-id
+echo 'uninitialized' > /etc/machine-id
+## remove random seed, the newly installed instance should make its own
+rm -f /var/lib/systemd/random-seed
+
+#======================================
+# Configure grub correctly
+#--------------------------------------
+## Works around issues with grub-bls
+## See: https://github.com/OSInside/kiwi/issues/2198
+echo "GRUB_DEFAULT=0" >> /etc/default/grub
+echo "GRUB_TIMEOUT=1" >> /etc/default/grub
+## Disable submenus to match Fedora
+echo "GRUB_DISABLE_SUBMENU=true" >> /etc/default/grub
+## Disable recovery entries to match Fedora
+echo "GRUB_DISABLE_RECOVERY=true" >> /etc/default/grub
+
+# Unlock root
+passwd -u root
+chsh -s /bin/bash root
+
+# Xfce
+echo 'livesys_session="xfce"' > /etc/sysconfig/livesys
+
+cat > /etc/sudoers.d/cssudo << EOSUDOER
+## Ensure the liveuser user always can use sudo
+Defaults:liveuser !requiretty
+liveuser ALL=(ALL) NOPASSWD: ALL
+EOSUDOER
+chmod 0440 /etc/sudoers.d/cssudo
 
 
-### Prep Environment ###
-# https://fedoraproject.org/wiki/Livemedia-creator-_How_to_create_and_use_a_Live_CD
-# https://github.com/rhinstaller/lorax/blob/master/docs/livemedia-creator.rst
-ks_text = r"""
-%include {0}/fedora-live-base.ks
-%include {0}/fedora-live-minimization.ks
+# Set install langs macro so that new rpms that get installed will
+# only install langs that we limit it to.
+LANG="en_US"
+echo "%_install_langs $LANG" > /etc/rpm/macros.image-language-conf
 
-part / --size 7168
-selinux --disabled
+# https://bugzilla.redhat.com/show_bug.cgi?id=1727489
+echo 'LANG="C.UTF-8"' >  /etc/locale.conf
 
-%packages
-
-# Desktop Environment
-@xfce-desktop-environment
-xfce4-whiskermenu-plugin
-xfce4-systemload-plugin
-xfce4-diskperf-plugin
-xfce4-clipman-plugin
-ptyxis
-@networkmanager-submodules
-NetworkManager-wifi
-network-manager-applet
-xrandr
-
-# Firmware
-linux-firmware
-iwlwifi-dvm-firmware
-iwlwifi-mvm-firmware
-libertas-firmware
-atheros-firmware
-
-# CLI Utils
-arch-install-scripts
-avahi
-btop
-chntpw
-debootstrap
-gdisk
-git
-gnupg
-iotop
-nano
-openssh-clients
-openssh-server
-p7zip
-p7zip-plugins
-pacman
-perl-Time-HiRes
-podman
-powerline-fonts
-python3-passlib
-rsync
-s-tui
-screen
-tmux
-unzip
-zip
-zsh
-zypper
-
-# Filesystem utils
-fstransform
-partclone
-btrfs-progs
-f2fs-tools
-exfatprogs
-cryptsetup
-device-mapper
-
-# VM Utils
-spice-vdagent
-qemu-guest-agent
-open-vm-tools
-open-vm-tools-desktop
-
-# Graphical Utils
-gnome-disk-utility
-gparted
-xset
-
-# For clonezilla
-dialog
-make
-bc
-
-# Exclusions
--thunderbird
--pidgin
-
-%end
-
-
-%post
-
-# Set DNS nameservers
-rm -f /etc/resolv.conf
-echo -e "nameserver 1.0.0.1\\nnameserver 1.1.1.1\\nnameserver 2606:4700:4700::1111\\nnameserver 2606:4700:4700::1001" > /etc/resolv.conf
-
-# Pull CustomScripts
-git clone https://github.com/ramesh45345/CustomScripts /opt/CustomScripts
-
-# Create liveuser ahead of when it will really be created
-useradd -m liveuser
-# ShellConfig
-python3 /opt/CustomScripts/CShellConfig.py -z -d -u liveuser
-
-# Enable openssh
-systemctl enable sshd
-# Enable ssh root login with password
-sed -i 's/PermitRootLogin.*/PermitRootLogin yes/g' /etc/ssh/sshd_config
-sed -i '/^#PermitRootLogin.*/s/^#//g' /etc/ssh/sshd_config
+# https://bugzilla.redhat.com/show_bug.cgi?id=1400682
+echo "Import RPM GPG key"
+releasever=$(rpm --eval '%{?fedora}')
+rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-$releasever-primary
 
 # RPMFusion
 dnf install -y https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
 # RPMSphere
 dnf install -y https://github.com/rpmsphere/noarch/raw/master/r/rpmsphere-release-40-1.noarch.rpm
+# Terra
+dnf install -y --nogpgcheck --repofrompath 'terra,https://repos.fyralabs.com/terra$releasever' terra-release
+# vscodium
+tee -a /etc/yum.repos.d/vscodium.repo << 'EOF'
+[gitlab.com_paulcarroty_vscodium_repo]
+name=gitlab.com_paulcarroty_vscodium_repo
+baseurl=https://paulcarroty.gitlab.io/vscodium-deb-rpm-repo/rpms/
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/raw/master/pub.gpg
+metadata_expire=1h
+EOF
+
+# Packages
+dnf install -y  \
+    arch-install-scripts \
+    btop \
+    chntpw \
+    fish \
+    git \
+    iotop \
+    openssh-server \
+    p7zip \
+    p7zip-plugins \
+    perl-Time-HiRes \
+    podman \
+    powerline-fonts \
+    python3-passlib \
+    qemu-guest-agent \
+    rsync \
+    s-tui \
+    spice-vdagent \
+    starship \
+    tmux \
+    unzip \
+    vscodium \
+    xfce4-clipman-plugin \
+    xfce4-diskperf-plugin \
+    xfce4-systemload-plugin \
+    xfce4-whiskermenu-plugin \
+    xrandr \
+    xset \
+    zip \
+    zsh
+# Filesystem utils
+dnf install -y \
+    btrfs-progs \
+    cryptsetup \
+    device-mapper \
+    exfatprogs \
+    f2fs-tools \
+    fstransform \
+    gdisk \
+    gnome-disk-utility \
+    gparted \
+    partclone
 # Clonezilla
 dnf install -y clonezilla
 
-# Delete defaults in sudoers.
-sed -e 's/^Defaults    env_reset$/Defaults    !env_reset/g' -i /etc/sudoers
-sed -i $'/^Defaults    mail_badpass/ s/^#*/#/' /etc/sudoers
-sed -i $'/^Defaults    secure_path/ s/^#*/#/' /etc/sudoers
+# Enable ssh root login with password
+sed -i 's/PermitRootLogin.*/PermitRootLogin yes/g' /etc/ssh/sshd_config
+sed -i '/^#PermitRootLogin.*/s/^#//g' /etc/ssh/sshd_config
+sed -i 's/PasswordAuthentication.*/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+sed -i '/^#PasswordAuthentication.*/s/^#//g' /etc/ssh/sshd_config
+sed -i 's/PermitEmptyPasswords.*/PermitEmptyPasswords yes/g' /etc/ssh/sshd_config
+sed -i '/^#PermitEmptyPasswords.*/s/^#//g' /etc/ssh/sshd_config
+
+git clone https://github.com/ramesh45345/CustomScripts /opt/CustomScripts
+chown 1000:1000 -R /opt/CustomScripts
 
 # Update CustomScripts on startup
 cat >"/etc/systemd/system/updatecs.service" <<'EOL'
@@ -209,17 +226,32 @@ ExecStart=/bin/bash -c "cd /opt/CustomScripts; git pull"
 Restart=on-failure
 RestartSec=3s
 TimeoutStopSec=7s
+User=liveuser
 
 [Install]
 WantedBy=graphical.target
 EOL
 systemctl enable updatecs.service
 
+# Init scripts
+cat > "/usr/local/bin/initsetup" <<"EOL"
+#!/bin/bash
+/opt/CustomScripts/Cvscode.py &
+sudo /opt/CustomScripts/CShellConfig.py -z -f -d
+# Set root password
+echo "root:asdf" | sudo chpasswd
+# Enabling ssh doesn't work during provision for some reason. Do it now.
+sudo systemctl daemon-reload
+sudo systemctl enable --now sshd
+/opt/CustomScripts/Dset.py -p
+EOL
+chmod a+rwx /usr/local/bin/initsetup
+
 # Run Settings script on desktop startup.
-cat >"/etc/xdg/autostart/dset.desktop" <<"EOL"
+cat >"/etc/xdg/autostart/initsetup.desktop" <<"EOL"
 [Desktop Entry]
 Name=Settings Script
-Exec=/opt/CustomScripts/Dset.py -p
+Exec=/usr/local/bin/initsetup
 Terminal=false
 Type=Application
 EOL
@@ -246,7 +278,7 @@ while true; do
     while true; do
         sleep 1
         # Loop through every detected display and autoset them.
-        for disp in ${{RADISPLAYS[@]}}; do
+        for disp in ${RADISPLAYS[@]}; do
             xrandr --output $disp --auto
         done
     done
@@ -254,70 +286,26 @@ done
 EOL
 chmod a+rwx /usr/local/bin/ra.sh
 
-# Script run on boot
-cat > /var/lib/livesys/livesys-session-late-extra << EOF
+"""
+configsh_path = os.path.join(fedoralivegit_folder, "config.sh")
+with open(configsh_path, 'w') as ks_write:
+    ks_write.write(configsh_text)
 
-# Set root password
-passwd -u root
-echo "root:asdf" | chpasswd
-
-# Change shell to zsh
-chsh -s /bin/zsh liveuser
-# Set path
-# echo 'PATH=$PATH:/opt/CustomScripts' | tee -a /root/.bashrc /home/liveuser/.bashrc /root/.zshrc /home/liveuser/.zshrc
-
-# LightDM Autologin
-sed -i 's/^#autologin-user=.*/autologin-user=liveuser/' /etc/lightdm/lightdm.conf
-# sed -i 's/^#autologin-user-timeout=.*/autologin-user-timeout=0/' /etc/lightdm/lightdm.conf
-echo -e "[SeatDefaults]\nautologin-user=liveuser\nuser-session=xfce" > /etc/lightdm/lightdm.conf.d/12-autologin.conf
-groupadd autologin
-gpasswd -a liveuser autologin
-
-# rebuild schema cache with any overrides we installed
-glib-compile-schemas /usr/share/glib-2.0/schemas
-
-# set xfce as default session, otherwise login will fail
-sed -i 's/^#user-session=.*/user-session=xfce/' /etc/lightdm/lightdm.conf
-
-# Turn off PackageKit-command-not-found while uninstalled
-if [ -f /etc/PackageKit/CommandNotFound.conf ]; then
-  sed -i -e 's/^SoftwareSourceSearch=true/SoftwareSourceSearch=false/' /etc/PackageKit/CommandNotFound.conf
-fi
-
-# no updater applet in live environment
-rm -f /etc/xdg/autostart/org.mageia.dnfdragora-updater.desktop
-
-mkdir -p /home/liveuser/Desktop
-# make sure to set the right permissions and selinux contexts
-chown -R liveuser:liveuser /home/liveuser/
-restorecon -R /home/liveuser/
-EOF
-
-%end
-""".format(spinkickstarts_folder)
-ks_path = os.path.join(buildfolder, "fediso.ks")
-with open(ks_path, 'w') as ks_write:
-    ks_write.write(ks_text)
-
-# Flatten kickstart file
-ks_flat = os.path.join(buildfolder, "flat_fediso.ks")
-subprocess.run("ksflatten --config {0} -o {1}".format(ks_path, ks_flat), shell=True, check=True)
-
-### Build LiveCD ###
-resultsfolder = os.path.join(buildfolder, "results")
-if os.path.isdir(resultsfolder):
-    shutil.rmtree(resultsfolder)
 # Get Dates
 currentdatetime = time.strftime("%Y-%m-%d_%H%M")
 shortdate = time.strftime("%Y%m%d")
 beforetime = datetime.now()
 isoname = "Fedora-CustomLive-{0}.iso".format(currentdatetime)
-# Start Build
-subprocess.run("livemedia-creator --ks {ks} --resultdir {resultdir} --logfile {outfolder}/livemedia.log --project Fedora-CustomLive --make-iso --volid Fedora-CustomLive-{shortdate} --iso-only --iso-name {isoname} --releasever {releasever} --fs-label Fedora-CustomLive --nomacboot --no-virt".format(ks=ks_flat, resultdir=resultsfolder, isoname=isoname, shortdate=shortdate, outfolder=outfolder, releasever=args.releasever), shell=True, check=False)
-subprocess.run("chmod a+rw -R {0}".format(buildfolder), shell=True, check=True)
-if os.path.isfile(os.path.join(buildfolder, "results", isoname)):
-    shutil.move(os.path.join(buildfolder, "results", isoname), outfolder)
-    print('Run to test: "qemu-system-x86_64 -enable-kvm -m 4096 {0}"'.format(os.path.join(outfolder, isoname)))
+
+# Build
+os.chdir(fedoralivegit_folder)
+subprocess.run(f"{fedoralivegit_folder}/kiwi-build --kiwi-file=Fedora.kiwi --image-type=iso --image-profile=Xfce-Live --output-dir {fedoralivegit_folder}/outdir --debug", check=True, shell=True)
+
+### Build LiveCD ###
+output_iso = os.path.join(fedoralivegit_folder, "outdir-build", f"Fedora.x86_64-{args.releasever}.iso")
+if os.path.isfile(output_iso):
+    subprocess.run(f"chmod a+rw {output_iso}; chown 1000:100 {output_iso}", shell=True, check=False)
+    shutil.move(output_iso, os.path.join(outfolder, isoname))
 else:
     print("ERROR: Build failed, iso not found.")
 print("Build completed in :", datetime.now() - beforetime)

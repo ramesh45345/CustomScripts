@@ -91,7 +91,7 @@ if args.clean is True:
 # Create chroot if it doesn't exist
 if not os.path.isdir(fedora_chroot_location) and shutil.which("dnf"):
     create_chroot_fedora(fedora_chroot_location)
-    zch.ChrootCommand(fedora_chroot_location, "sh -c 'dnf install -y nano livecd-tools pykickstart anaconda util-linux libblockdev-nvdimm git'")
+    zch.ChrootCommand(fedora_chroot_location, "sh -c 'dnf install -y nano livecd-tools pykickstart anaconda util-linux libblockdev-nvdimm git kiwi kiwi-systemdeps distribution-gpg-keys'")
 if os.path.isdir(fedora_chroot_location):
     # Update packages
     zch.ChrootCommand(fedora_chroot_location, "sh -c 'dnf upgrade -y'")
