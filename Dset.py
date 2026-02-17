@@ -402,7 +402,7 @@ if shutil.which("kwriteconfig6") and shutil.which("plasma_session"):
     os.makedirs("{0}/.kde/share/config".format(USERHOME), exist_ok=True)
     if icon_theme_is_present():
         subprocess.run('kwriteconfig6 --file kdeglobals --group Icons --key Theme "Numix-Circle"', shell=True, check=False)
-        subprocess.run('kwriteconfig6 --file ~/.kde/share/config/kdeglobals --group Icons --key Theme "Numix-Circle"', shell=True, check=False)
+    subprocess.run('kwriteconfig6 --file kdeglobals --group General --key ColorScheme "BreezeDark"', shell=True, check=False)
     # Keyboard shortcuts
     kwriteconfig("kglobalshortcutsrc", "kwin", "Window Maximize", "Meta+Up,Meta+PgUp,Maximize Window")
     kwriteconfig("kglobalshortcutsrc", "kwin", "Window Minimize", "Meta+Down,Meta+PgDown,Minimize Window")

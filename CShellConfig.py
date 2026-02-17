@@ -1273,6 +1273,9 @@ tmux_conf_theme_status_right=" #{battery_percentage} | #{username}#{root} | #{ho
 if args.fish is True and shutil.which('fish') and shutil.which('starship'):
     starship_config(user=USERNAMEVAR, group=USERGROUP, userhome=USERVARHOME)
     fish_config(user=USERNAMEVAR, group=USERGROUP, userhome=USERVARHOME)
+    if rootstate is True:
+        starship_config(user="root", group="root", userhome=ROOTHOME)
+        fish_config(user="root", group="root", userhome=ROOTHOME)
 
 
 ######### Default Shell Configuration #########
