@@ -137,10 +137,10 @@ noto-fonts
 
 with open(os.path.join(workingfolder, "airootfs/root/customize_airootfs.sh"), 'a') as f:
     f.write(r"""set -x
-SCRIPTBASENAME="/opt/CustomScripts"
+SCRIPTBASENAME="/var/opt/CustomScripts"
 
-git clone https://github.com/ramesh45345/CustomScripts.git /opt/CustomScripts
-chmod a+rwx -R /opt/CustomScripts
+git clone https://github.com/ramesh45345/CustomScripts.git /var/opt/CustomScripts
+chmod a+rwx -R /var/opt/CustomScripts
 
 # Set timezone
 ln -sf /usr/share/zoneinfo/US/Eastern /etc/localtime
@@ -162,7 +162,7 @@ chsh -s /bin/bash root
 useradd -m liveuser
 echo "liveuser:asdf" | chpasswd
 usermod -aG wheel,network,floppy,audio,input,disk,video,storage,optical,systemd-journal,lp liveuser
-/opt/CustomScripts/CShellConfig.py -z -d -f -u liveuser
+/var/opt/CustomScripts/CShellConfig.py -z -d -f -u liveuser
 echo "liveuser ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/nopw
 chmod 0440 /etc/sudoers.d/nopw
 
@@ -186,7 +186,7 @@ After=network.target nss-lookup.target network-online.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/bash -c "cd /opt/CustomScripts; git pull"
+ExecStart=/usr/bin/bash -c "cd /var/opt/CustomScripts; git pull"
 Restart=on-failure
 RestartSec=3s
 TimeoutStopSec=7s
@@ -202,7 +202,7 @@ systemctl enable updatecs.service
 cat >"/etc/xdg/autostart/dsettings.desktop" <<"EOL"
 [Desktop Entry]
 Name=Settings Script
-Exec=/opt/CustomScripts/Dset.py
+Exec=/var/opt/CustomScripts/Dset.py
 Terminal=false
 Type=Application
 EOL

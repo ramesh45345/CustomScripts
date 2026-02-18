@@ -145,7 +145,7 @@ storage:
           # Work around https://github.com/coreos/fedora-coreos-tracker/issues/572 , until client and server are separated properly. Needed for libvirt dependency.
           rpm-ostree override remove nfs-utils-coreos --install nfs-utils
 
-          git clone https://github.com/ramesh45345/CustomScripts /opt/CustomScripts
+          git clone https://github.com/ramesh45345/CustomScripts /var/opt/CustomScripts
 
           # Sudo changes
           if grep -iq $'^Defaults    secure_path' /etc/sudoers; then
@@ -169,15 +169,15 @@ storage:
           touch /etc/fstab
 
           # Configure firewalld
-          /opt/CustomScripts/CFuncExt.py -f
+          /var/opt/CustomScripts/CFuncExt.py -f
           # Ensure docker containers have internet access with firewalld.
           firewall-cmd --add-masquerade --permanent
 
           # CustomScripts
-          /opt/CustomScripts/CCSClone.py
-          /opt/CustomScripts/Csshconfig.py
-          /opt/CustomScripts/CShellConfig.py -z -f -d -u INSERTUSERHERE
-          /opt/CustomScripts/CVMGeneral.py
+          /var/opt/CustomScripts/CCSClone.py
+          /var/opt/CustomScripts/Csshconfig.py
+          /var/opt/CustomScripts/CShellConfig.py -z -f -d -u INSERTUSERHERE
+          /var/opt/CustomScripts/CVMGeneral.py
 
           # Cleanup
           touch /var/tmp/setup2.stamp

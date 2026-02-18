@@ -242,8 +242,8 @@ visudo -c
 
 # Fetch scripts
 apt install -y git
-git clone "https://github.com/ramesh45345/CustomScripts.git" "/opt/CustomScripts"
-chmod a+rwx "/opt/CustomScripts"
+git clone "https://github.com/ramesh45345/CustomScripts.git" "/var/opt/CustomScripts"
+chmod a+rwx "/var/opt/CustomScripts"
 
 """
 

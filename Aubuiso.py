@@ -229,17 +229,17 @@ dpkg-reconfigure --frontend=noninteractive resolvconf
 passwd -u root
 chpasswd <<<"root:asdf"
 
-[ ! -d /opt/CustomScripts ] && git clone https://github.com/ramesh45345/CustomScripts /opt/CustomScripts
-[ -d /opt/CustomScripts ] && cd /opt/CustomScripts && git pull
+[ ! -d /var/opt/CustomScripts ] && git clone https://github.com/ramesh45345/CustomScripts /var/opt/CustomScripts
+[ -d /var/opt/CustomScripts ] && cd /var/opt/CustomScripts && git pull
 
 # Create liveuser ahead of when it will really be created
 useradd -m ubuntu
 
 # Shell Configuration
-/opt/CustomScripts/CShellConfig.py -z -d -u ubuntu
+/var/opt/CustomScripts/CShellConfig.py -z -d -u ubuntu
 
 # Sudoers configuration
-/opt/CustomScripts/CFuncExt.py -s
+/var/opt/CustomScripts/CFuncExt.py -s
 
 # Update CustomScripts on startup
 cat >"/etc/systemd/system/updatecs.service" <<'EOL'
@@ -250,7 +250,7 @@ After=network.target nss-lookup.target network-online.target
 
 [Service]
 Type=simple
-ExecStart=/bin/bash -c "cd /opt/CustomScripts; git pull"
+ExecStart=/bin/bash -c "cd /var/opt/CustomScripts; git pull"
 Restart=on-failure
 RestartSec=3s
 TimeoutStopSec=7s
@@ -264,7 +264,7 @@ systemctl enable updatecs.service
 # cat >"/etc/xdg/autostart/dset.desktop" <<"EOL"
 # [Desktop Entry]
 # Name=Dset
-# Exec=/opt/CustomScripts/Dset.py -p
+# Exec=/var/opt/CustomScripts/Dset.py -p
 # Terminal=false
 # Type=Application
 # EOL
@@ -329,7 +329,7 @@ esac
 log_begin_msg "$DESCRIPTION"
 
 # Add CustomScripts to path
-SCRIPTBASENAME="/opt/CustomScripts"
+SCRIPTBASENAME="/var/opt/CustomScripts"
 if ! grep "$SCRIPTBASENAME" /root/.bashrc; then
     cat >>/root/.bashrc <<EOLBASH
 

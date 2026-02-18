@@ -110,12 +110,12 @@ if args.distro == "ubuntu":
 CFunc.AddUserToGroup("wheel", USERNAMEVAR)
 CFunc.AddUserToGroup("sudo", USERNAMEVAR)
 # Scripts
-if not os.path.isdir(os.path.join(os.sep, "opt", "CustomScripts")):
-    subprocess.run("chmod a+rwx /opt && git clone https://github.com/ramesh45345/CustomScripts /opt/CustomScripts", check=True, shell=True)
+if not os.path.isdir(os.path.join(os.sep, "var", "opt", "CustomScripts")):
+    subprocess.run("chmod a+rwx /var/opt && git clone https://github.com/ramesh45345/CustomScripts /var/opt/CustomScripts", check=True, shell=True)
 else:
-    subprocess.run("cd /opt/CustomScripts && git pull", check=True, shell=True)
-subprocess.run("chown -R {0}:{1} /opt/CustomScripts".format(USERNAMEVAR, USERGROUP), check=True, shell=True)
-subprocess.run(['/opt/CustomScripts/CShellConfig.py', '-z', '-d'], check=True)
+    subprocess.run("cd /var/opt/CustomScripts && git pull", check=True, shell=True)
+subprocess.run("chown -R {0}:{1} /var/opt/CustomScripts".format(USERNAMEVAR, USERGROUP), check=True, shell=True)
+subprocess.run(['/var/opt/CustomScripts/CShellConfig.py', '-z', '-d'], check=True)
 subprocess.run("""echo 'cd $HOME' | tee -a ~{0}/.zshrc ~{0}/.bashrc""".format(USERNAMEVAR), shell=True, check=True)
 
 # Create ssh authorized_keys
@@ -172,7 +172,7 @@ unmanaged-devices=none""")
         subprocess.run("dnf copr enable -y rmkrishna/rpms", shell=True, check=True)
         CFunc.dnfupdate()
         CFunc.dnfinstall("xdg-utils dconf-editor brisk-menu epiphany pluma caja caja-open-terminal mate-terminal mate-themes google-roboto-fonts google-noto-sans-fonts liberation-mono-fonts numix-icon-theme numix-icon-theme-circle codium")
-    subprocess.run(["/opt/CustomScripts/DExtMate.py"], check=True)
+    subprocess.run(["/var/opt/CustomScripts/DExtMate.py"], check=True)
     # vscode setup
     if args.distro == "ubuntu" or args.distro == "fedora":
         CFunc.run_as_user(USERNAMEVAR, os.path.join(SCRIPTDIR, "Cvscode.py"), shutil.which("bash"), error_on_fail=True)
@@ -181,16 +181,16 @@ unmanaged-devices=none""")
     with open("/etc/xdg/autostart/mate-dset.desktop", 'w') as f:
         f.write(r"""[Desktop Entry]
 Name=Dset
-Exec=/opt/CustomScripts/Dset.py -p
+Exec=/var/opt/CustomScripts/Dset.py -p
 Terminal=false
 Type=Application""")
     with open("/etc/xdg/autostart/csupdate.desktop", 'w') as f:
         f.write(r"""[Desktop Entry]
 Name=csupdate
-Exec=/bin/bash -c "cd /opt/CustomScripts; git pull"
+Exec=/bin/bash -c "cd /var/opt/CustomScripts; git pull"
 Terminal=false
 Type=Application""")
-    subprocess.run(["/opt/CustomScripts/Cxdgdirs.py"], check=True)
+    subprocess.run(["/var/opt/CustomScripts/Cxdgdirs.py"], check=True)
 
     # VNC Config
     subprocess.run("mkdir -p {2}/.vnc && chown {0}:{1} -R {2} && echo 'asdf' | vncpasswd -f | tee /etc/vncpasswd".format(USERNAMEVAR, USERGROUP, USERHOME), shell=True, check=True)

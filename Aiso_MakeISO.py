@@ -64,12 +64,12 @@ if __name__ == '__main__':
         ssh_ip = virsh_get_ip()
         PCreateChrootVM.ssh_wait(ip=ssh_ip, user=ssh_user)
         # Sync CustomScripts on host to VM.
-        subprocess.run(f"rsync -axHAX --info=progress2 {sys.path[0]}/ {ssh_user}@{ssh_ip}:/opt/CustomScripts/", shell=True, check=True)
+        subprocess.run(f"rsync -axHAX --info=progress2 {sys.path[0]}/ {ssh_user}@{ssh_ip}:/var/opt/CustomScripts/", shell=True, check=True)
         # Initiate logger
         buildlog_path = os.path.join(args.outfolder, f"isovm_{datetime.now()}.log")
         CFunc.log_config(buildlog_path)
         # Execute Stage 2
-        stagetwocmd = f"ssh {ssh_ip} -l {ssh_user} /opt/CustomScripts/Aiso_MakeISO.py -s 2 -t {args.distrotype}"
+        stagetwocmd = f"ssh {ssh_ip} -l {ssh_user} /var/opt/CustomScripts/Aiso_MakeISO.py -s 2 -t {args.distrotype}"
         if args.clean:
             stagetwocmd += " -c"
         CFunc.subpout_logger(cmd=stagetwocmd)
@@ -103,16 +103,16 @@ if __name__ == '__main__':
         # Custom includes
         import zch
         # Update chroots
-        chroot_update_cmd = f"/opt/CustomScripts/Aiso_CreateVM.py -d {sys.path[0]}"
+        chroot_update_cmd = f"/var/opt/CustomScripts/Aiso_CreateVM.py -d {sys.path[0]}"
         if args.clean:
             chroot_update_cmd += " -c"
         subprocess.run(chroot_update_cmd, shell=True, check=True)
         if args.distrotype == "all" or args.distrotype == "fedora":
             # Fedora ISO
-            zch.ChrootCommand(fedora_chroot_location, "sh -c '/opt/CustomScripts/Afediso.py -n'")
+            zch.ChrootCommand(fedora_chroot_location, "sh -c '/var/opt/CustomScripts/Afediso.py -n'")
         if args.distrotype == "all" or args.distrotype == "arch":
             # Arch ISO
-            zch.ChrootCommand(arch_chroot_location, "sh -c '/opt/CustomScripts/Aarchiso.py -n'")
+            zch.ChrootCommand(arch_chroot_location, "sh -c '/var/opt/CustomScripts/Aarchiso.py -n'")
         if args.distrotype == "all" or args.distrotype == "ubuntu":
             # Ubuntu ISO
-            zch.ChrootCommand(ubuntu_chroot_location, "sh -c '/opt/CustomScripts/Aubuiso.py -n'")
+            zch.ChrootCommand(ubuntu_chroot_location, "sh -c '/var/opt/CustomScripts/Aubuiso.py -n'")

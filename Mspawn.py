@@ -128,7 +128,7 @@ if os.path.islink(os.path.join(pathvar, "etc", "resolv.conf")):
     os.remove(os.path.join(pathvar, "etc", "resolv.conf"))
 
 # Copy CustomScripts into chroot
-cspath = os.path.join(pathvar, "opt", "CustomScripts")
+cspath = os.path.join(pathvar, "var", "opt", "CustomScripts")
 if os.path.isdir(cspath):
     shutil.rmtree(cspath)
 shutil.copytree(SCRIPTDIR, cspath)
@@ -139,7 +139,7 @@ subprocess.run(['git', 'config', 'remote.origin.url', "https://github.com/ramesh
 os.chdir(currentpath)
 
 # Run provisioner script
-provision_cmd = ["systemd-nspawn", "-D", pathvar, "/opt/CustomScripts/Mspawn_provision.py", "--distro", args.distro, "--user", CT_USERNAME, "--uid", str(CT_USERID), "--group", CT_GROUPNAME, "--gid", str(CT_GROUPID), "--password", "asdf", "--sshkey", sshauthkey_get(), "--hostname", chroot_hostname]
+provision_cmd = ["systemd-nspawn", "-D", pathvar, "/var/opt/CustomScripts/Mspawn_provision.py", "--distro", args.distro, "--user", CT_USERNAME, "--uid", str(CT_USERID), "--group", CT_GROUPNAME, "--gid", str(CT_GROUPID), "--password", "asdf", "--sshkey", sshauthkey_get(), "--hostname", chroot_hostname]
 if args.bootable:
     provision_cmd.append("-b")
 print(provision_cmd)

@@ -156,7 +156,7 @@ def git_branch_retrieve():
     else:
         git_branch = "master"
     return git_branch
-def git_cmdline(destination=os.path.join(os.sep, "opt", "CustomScripts")):
+def git_cmdline(destination=os.path.join(os.sep, "var", "opt", "CustomScripts")):
     """Compose the git command line to check out the repo."""
     git_branch = git_branch_retrieve()
     git_cmd = "git clone https://github.com/ramesh45345/CustomScripts {0} -b {1}".format(destination, git_branch)
@@ -227,14 +227,14 @@ if __name__ == '__main__':
         vmbootstrap_cmd = f"""#!/bin/bash
 cd ~
 export LANG=en_US.UTF-8
-/opt/CustomScripts/ZSlimDrive.py -b -n -g
-/opt/CustomScripts/BArch.py -n -g 3 -i /dev/vda2 -c "{vm_name}" -u {args.vmuser} -q "{args.vmpass}" -f "{args.fullname}" /mnt
+/var/opt/CustomScripts/ZSlimDrive.py -b -n -g
+/var/opt/CustomScripts/BArch.py -n -g 3 -i /dev/vda2 -c "{vm_name}" -u {args.vmuser} -q "{args.vmpass}" -f "{args.fullname}" /mnt
 echo "PermitRootLogin yes" >> /mnt/etc/ssh/sshd_config && poweroff"""
         vmprovision_cmd = f"""#!/bin/bash
 mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys
 mkdir -m 700 -p ~{args.vmuser}/.ssh; echo '{sshkey}' > ~{args.vmuser}/.ssh/authorized_keys
 chown {args.vmuser}:users -R ~{args.vmuser}
-/opt/CustomScripts/MArch.py {vmprovision_opts}"""
+/var/opt/CustomScripts/MArch.py {vmprovision_opts}"""
         kvm_variant = "archlinux"
     if args.ostype == 2:
         if args.vmname is not None:
@@ -275,8 +275,8 @@ while ! test -f /var/opt/CustomScripts/MNixOS.py; do sleep 1; done;
         vmbootstrap_cmd = f"""#!/bin/bash
 cd ~
 export LANG=en_US.UTF-8
-/opt/CustomScripts/ZSlimDrive.py -n -g
-/opt/CustomScripts/BDebian.py -n -t ubuntu -r {debversion} -g efi -i /dev/vda2 -c "{vm_name}" -u {args.vmuser} -q "{args.vmpass}" -f "{args.fullname}" --forcelink /mnt
+/var/opt/CustomScripts/ZSlimDrive.py -n -g
+/var/opt/CustomScripts/BDebian.py -n -t ubuntu -r {debversion} -g efi -i /dev/vda2 -c "{vm_name}" -u {args.vmuser} -q "{args.vmpass}" -f "{args.fullname}" --forcelink /mnt
 echo "PermitRootLogin yes" >> /mnt/etc/ssh/sshd_config
 poweroff"""
         vmprovision_cmd = f"""#!/bin/bash
@@ -285,7 +285,7 @@ mkdir -m 700 -p ~{args.vmuser}/.ssh; echo '{sshkey}' > ~{args.vmuser}/.ssh/autho
 chown {args.vmuser}:users -R ~{args.vmuser}
 rm -f /etc/resolv.conf
 echo -e "nameserver 1.0.0.1\\nnameserver 1.1.1.1\\nnameserver 2606:4700:4700::1111\\nnameserver 2606:4700:4700::1001" > /etc/resolv.conf
-/opt/CustomScripts/MUbuntu.py {vmprovision_opts}"""
+/var/opt/CustomScripts/MUbuntu.py {vmprovision_opts}"""
         kvm_variant = "ubuntu22.04"
     if args.ostype == 4:
         if args.vmname is not None:
@@ -302,8 +302,8 @@ echo -e "nameserver 1.0.0.1\\nnameserver 1.1.1.1\\nnameserver 2606:4700:4700::11
         vmbootstrap_cmd = f'''#!/bin/bash
 cd ~
 export LANG=en_US.UTF-8
-/opt/CustomScripts/ZSlimDrive.py -n -g
-/opt/CustomScripts/BDebian.py -n -t debian -r {debversion} -g efi -i /dev/vda2 -c "{vm_name}" -u {args.vmuser} -q "{args.vmpass}" -f "{args.fullname}" /mnt
+/var/opt/CustomScripts/ZSlimDrive.py -n -g
+/var/opt/CustomScripts/BDebian.py -n -t debian -r {debversion} -g efi -i /dev/vda2 -c "{vm_name}" -u {args.vmuser} -q "{args.vmpass}" -f "{args.fullname}" /mnt
 echo "PermitRootLogin yes" >> /mnt/etc/ssh/sshd_config
 poweroff'''
         vmprovision_cmd = f"""#!/bin/bash
@@ -314,7 +314,7 @@ echo '{sshkey}' > ~{args.vmuser}/.ssh/authorized_keys
 chown {args.vmuser}:users -R ~{args.vmuser}
 rm -f /etc/resolv.conf
 echo -e "nameserver 1.0.0.1\\nnameserver 1.1.1.1\\nnameserver 2606:4700:4700::1111\\nnameserver 2606:4700:4700::1001" > /etc/resolv.conf
-/opt/CustomScripts/MDebian.py {vmprovision_opts}"""
+/var/opt/CustomScripts/MDebian.py {vmprovision_opts}"""
         kvm_variant = "debiantesting"
     if args.ostype == 5:
         if args.vmname is not None:
@@ -325,8 +325,8 @@ echo -e "nameserver 1.0.0.1\\nnameserver 1.1.1.1\\nnameserver 2606:4700:4700::11
         vmbootstrap_cmd = f'''#!/bin/bash
 cd ~
 export LANG=en_US.UTF-8
-/opt/CustomScripts/ZSlimDrive.py -n -g
-/opt/CustomScripts/BOpensuse.py -n -g 3 -i /dev/vda2 -c "{vm_name}" -u {args.vmuser} -q "{args.vmpass}" -f "{args.fullname}" /mnt
+/var/opt/CustomScripts/ZSlimDrive.py -n -g
+/var/opt/CustomScripts/BOpensuse.py -n -g 3 -i /dev/vda2 -c "{vm_name}" -u {args.vmuser} -q "{args.vmpass}" -f "{args.fullname}" /mnt
 echo "PermitRootLogin yes" >> /mnt/etc/ssh/sshd_config
 poweroff'''
         vmprovision_cmd = f"""#!/bin/bash
@@ -335,7 +335,7 @@ echo '{sshkey}' > /root/.ssh/authorized_keys
 mkdir -m 700 -p ~{args.vmuser}/.ssh
 echo '{sshkey}' > ~{args.vmuser}/.ssh/authorized_keys
 chown {args.vmuser}:users -R ~{args.vmuser}
-/opt/CustomScripts/MOpensuse.py {vmprovision_opts}"""
+/var/opt/CustomScripts/MOpensuse.py {vmprovision_opts}"""
         kvm_variant = "opensusetumbleweed"
 
     # Override VM Name if provided
@@ -383,10 +383,7 @@ chown {args.vmuser}:users -R ~{args.vmuser}
     # Pre-bootstrap commands
     if args.ostype == 2:
         scp_vm(ip=sship, port=localsshport, user=args.livesshuser, password=args.livesshpass, filepath=args.nixconfig, destination="/nixos_config", folder=True)
-        scp_vm(ip=sship, port=localsshport, user=args.livesshuser, password=args.livesshpass, filepath=SCRIPTDIR, destination="/CustomScripts", folder=True)
-    # All else besides nixos, sync the CustomScripts folder into the live environment.
-    else:
-        scp_vm(ip=sship, port=localsshport, user=args.livesshuser, password=args.livesshpass, filepath=SCRIPTDIR, destination="/opt/", folder=True)
+    scp_vm(ip=sship, port=localsshport, user=args.livesshuser, password=args.livesshpass, filepath=SCRIPTDIR, destination="/var/opt/", folder=True)
     # Bootstrap
     vm_runscript(ip=sship, port=localsshport, user=args.livesshuser, password=args.livesshpass, script=vmbootstrap_cmd)
     vm_shutdown(vm_name)
@@ -398,10 +395,7 @@ chown {args.vmuser}:users -R ~{args.vmuser}
     sship = vm_getip(vm_name)
     ssh_wait(ip=sship, port=localsshport, user="root", password=args.vmpass)
     # Pre-provision commands
-    if args.ostype == 2:
-        scp_vm(ip=sship, port=localsshport, user="root", password=args.vmpass, filepath=SCRIPTDIR, destination="/var/opt/", folder=True)
-    else:
-        scp_vm(ip=sship, port=localsshport, user="root", password=args.vmpass, filepath=SCRIPTDIR, destination="/opt/", folder=True)
+    scp_vm(ip=sship, port=localsshport, user="root", password=args.vmpass, filepath=SCRIPTDIR, destination="/var/opt/", folder=True)
     # Provision VM
     vm_runscript(ip=sship, port=localsshport, user="root", password=args.vmpass, script=vmprovision_cmd)
     vm_shutdown(vm_name)

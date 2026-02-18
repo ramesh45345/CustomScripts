@@ -96,7 +96,7 @@ if os.path.isdir(fedora_chroot_location):
     # Update packages
     zch.ChrootCommand(fedora_chroot_location, "sh -c 'dnf upgrade -y'")
     # Rsync Host CustomScripts
-    subprocess.run("rsync -axHAX --info=progress2 {0} {1}/opt/CustomScripts/".format(cslocation, fedora_chroot_location), shell=True, check=True)
+    subprocess.run("rsync -axHAX --info=progress2 {0} {1}/var/opt/CustomScripts/".format(cslocation, fedora_chroot_location), shell=True, check=True)
 
 
 # Arch Chroot
@@ -107,7 +107,7 @@ if os.path.isdir(arch_chroot_location):
     # Update packages
     zch.ChrootCommand(arch_chroot_location, "sh -c 'pacman -Syu --needed --noconfirm'")
     # Rsync Host CustomScripts
-    subprocess.run("rsync -axHAX --info=progress2 {0} {1}/opt/CustomScripts/".format(cslocation, arch_chroot_location), shell=True, check=True)
+    subprocess.run("rsync -axHAX --info=progress2 {0} {1}/var/opt/CustomScripts/".format(cslocation, arch_chroot_location), shell=True, check=True)
 
 
 # Ubuntu Chroot
@@ -122,4 +122,4 @@ if os.path.isdir(ubuntu_chroot_location):
     # Update packages
     zch.ChrootCommand(ubuntu_chroot_location, "sh -c 'apt update; apt upgrade -y; apt dist-upgrade -y'")
     # Rsync Host CustomScripts
-    subprocess.run("rsync -axHAX --info=progress2 {0} {1}/opt/CustomScripts/".format(cslocation, ubuntu_chroot_location), shell=True, check=True)
+    subprocess.run("rsync -axHAX --info=progress2 {0} {1}/var/opt/CustomScripts/".format(cslocation, ubuntu_chroot_location), shell=True, check=True)

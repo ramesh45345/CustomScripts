@@ -210,8 +210,8 @@ sed -i '/^#PasswordAuthentication.*/s/^#//g' /etc/ssh/sshd_config
 sed -i 's/PermitEmptyPasswords.*/PermitEmptyPasswords yes/g' /etc/ssh/sshd_config
 sed -i '/^#PermitEmptyPasswords.*/s/^#//g' /etc/ssh/sshd_config
 
-git clone https://github.com/ramesh45345/CustomScripts /opt/CustomScripts
-chown 1000:1000 -R /opt/CustomScripts
+git clone https://github.com/ramesh45345/CustomScripts /var/opt/CustomScripts
+chown 1000:1000 -R /var/opt/CustomScripts
 
 # Update CustomScripts on startup
 cat >"/etc/systemd/system/updatecs.service" <<'EOL'
@@ -222,7 +222,7 @@ After=network.target nss-lookup.target network-online.target
 
 [Service]
 Type=simple
-ExecStart=/bin/bash -c "cd /opt/CustomScripts; git pull"
+ExecStart=/bin/bash -c "cd /var/opt/CustomScripts; git pull"
 Restart=on-failure
 RestartSec=3s
 TimeoutStopSec=7s
@@ -236,14 +236,14 @@ systemctl enable updatecs.service
 # Init scripts
 cat > "/usr/local/bin/initsetup" <<"EOL"
 #!/bin/bash
-/opt/CustomScripts/Cvscode.py &
-sudo /opt/CustomScripts/CShellConfig.py -z -f -d
+/var/opt/CustomScripts/Cvscode.py &
+sudo /var/opt/CustomScripts/CShellConfig.py -z -f -d
 # Set root password
 echo "root:asdf" | sudo chpasswd
 # Enabling ssh doesn't work during provision for some reason. Do it now.
 sudo systemctl daemon-reload
 sudo systemctl enable --now sshd
-/opt/CustomScripts/Dset.py -p
+/var/opt/CustomScripts/Dset.py -p
 EOL
 chmod a+rwx /usr/local/bin/initsetup
 

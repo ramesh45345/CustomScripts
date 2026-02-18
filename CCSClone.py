@@ -43,10 +43,7 @@ else:
     if CFunc.is_windows():
         clonepath = os.path.join(USERHOME, "Documents", "CustomScripts")
     elif CFunc.is_root():
-        if CFunc.is_nixos():
-            clonepath = os.path.join(os.sep, "var", "opt", "CustomScripts")
-        else:
-            clonepath = os.path.join(os.sep, "opt", "CustomScripts")
+        clonepath = os.path.join(os.sep, "var", "opt", "CustomScripts")
     else:
         clonepath = os.path.join(USERHOME, "CustomScripts")
 

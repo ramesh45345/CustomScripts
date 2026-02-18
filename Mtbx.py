@@ -178,10 +178,10 @@ RUN echo '%wheel ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/user-group && \
     chmod 440 /etc/sudoers.d/user-group
 """)
 # Scripts setup
-addtext("RUN git clone https://github.com/ramesh45345/CustomScripts /opt/CustomScripts && chown 1000:1000 -R /opt/CustomScripts")
+addtext("RUN git clone https://github.com/ramesh45345/CustomScripts /var/opt/CustomScripts && chown 1000:1000 -R /var/opt/CustomScripts")
 # Run shell config when zsh loads for the first time.
-addtext("RUN echo '/opt/CustomScripts/CShellConfig.py -z' > /etc/skel/.zshrc")
-addtext("RUN /opt/CustomScripts/CFuncExt.py -s")
+addtext("RUN echo '/var/opt/CustomScripts/CShellConfig.py -z' > /etc/skel/.zshrc")
+addtext("RUN /var/opt/CustomScripts/CFuncExt.py -s")
 # Timezone
 addtext("RUN ln -sf /usr/share/zoneinfo/US/Eastern /etc/localtime")
 

@@ -145,8 +145,8 @@ pacman -S --needed --noconfirm python
 
 # Custom Scripts
 pacman -S --needed --noconfirm git
-git clone "https://github.com/vinadoros/CustomScripts.git" "/opt/CustomScripts"
-chmod a+rwx "/opt/CustomScripts"'''.format(HOSTNAME=args.hostname, USERNAME=args.username, PASSWORD=args.password, FULLNAME=args.fullname)
+git clone "https://github.com/vinadoros/CustomScripts.git" "/var/opt/CustomScripts"
+chmod a+rwx "/var/opt/CustomScripts"'''.format(HOSTNAME=args.hostname, USERNAME=args.username, PASSWORD=args.password, FULLNAME=args.fullname)
 
     # Init grub script
     grubscript = """#!/bin/bash
