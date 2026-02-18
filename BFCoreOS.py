@@ -11,6 +11,7 @@ import sys
 import tempfile
 # Custom includes
 import CFunc
+import PCreateChrootVM
 import Pkvm
 
 print("Running {0}".format(__file__))
@@ -27,7 +28,7 @@ def cosinstaller_run(cmd=list):
     if shutil.which("coreos-installer"):
         subprocess.run(["coreos-installer"] + cmd, check=True)
     else:
-        ci_podman_list = ["podman", "run", "--pull=always", "--rm", "--tty", "--interactive", "--security-opt", "label=disable", "--volume", "{0}:{0}".format(SCRIPTDIR), "--volume", f"{temp_folder}:{temp_folder}"]
+        ci_podman_list = ["podman", "run", "--pull=newer", "--rm", "--tty", "--interactive", "--security-opt", "label=disable", "--volume", "{0}:{0}".format(SCRIPTDIR), "--volume", f"{temp_folder}:{temp_folder}"]
         if vmpath and os.path.exists(vmpath) and vmpath != SCRIPTDIR:
             ci_podman_list += ["--volume", "{0}:{0}".format(vmpath)]
         if args.drive:
@@ -40,7 +41,7 @@ def ignitionvalidate_run(cmd=list):
     if shutil.which("ignition-validate"):
         subprocess.run(["ignition-validate"] + cmd, check=True)
     else:
-        iv_podman_list = ["podman", "run", "--pull=always", "--rm", "--tty", "--interactive", "--security-opt", "label=disable", "--volume", "{0}:{0}".format(SCRIPTDIR), "--volume", f"{temp_folder}:{temp_folder}"]
+        iv_podman_list = ["podman", "run", "--pull=newer", "--rm", "--tty", "--interactive", "--security-opt", "label=disable", "--volume", "{0}:{0}".format(SCRIPTDIR), "--volume", f"{temp_folder}:{temp_folder}"]
         if vmpath and os.path.exists(vmpath) and vmpath != SCRIPTDIR:
             iv_podman_list += ["--volume", "{0}:{0}".format(vmpath)]
         iv_podman_list += ["--workdir", SCRIPTDIR, "quay.io/coreos/ignition-validate:release"]
@@ -51,7 +52,7 @@ def fcct_run(cmd=list):
     if shutil.which("fcct"):
         subprocess.run(["fcct"] + cmd, check=True)
     else:
-        fcct_podman_list = ["podman", "run", "--pull=always", "--rm", "--tty", "--interactive", "--security-opt", "label=disable", "--volume", "{0}:/{0}".format(SCRIPTDIR), "--volume", f"{temp_folder}:{temp_folder}"]
+        fcct_podman_list = ["podman", "run", "--pull=newer", "--rm", "--tty", "--interactive", "--security-opt", "label=disable", "--volume", "{0}:/{0}".format(SCRIPTDIR), "--volume", f"{temp_folder}:{temp_folder}"]
         if vmpath and os.path.exists(vmpath) and vmpath != SCRIPTDIR:
             fcct_podman_list += ["--volume", "{0}:{0}".format(vmpath)]
         fcct_podman_list += ["--workdir", SCRIPTDIR, "quay.io/coreos/fcct:release"]
@@ -140,14 +141,11 @@ if args.noprompt is False:
 ### Create VM ###
 if args.vm and vmpath:
     qcow2_baseimage = os.path.join(vmpath, "CoreOS_BaseImage.qcow2")
-    qcow2_deltaimage = os.path.join(vmpath, "{0}.qcow2".format(args.hostname))
+    qcow2_deltaimage = os.path.join(vmpath, f"{args.hostname}.qcow2")
     vmname = args.hostname
 
     # Remove the libvirt entry if it already exists.
-    kvmlist = subprocess.run("virsh --connect qemu:///system -q list --all", shell=True, stdout=subprocess.PIPE, universal_newlines=True, check=True).stdout.strip()
-    if vmname.lower() in kvmlist.lower():
-        subprocess.run('virsh --connect qemu:///system destroy "{0}"'.format(vmname), shell=True, check=False)
-        subprocess.run('virsh --connect qemu:///system undefine --snapshots-metadata --nvram "{0}"'.format(vmname), shell=True, check=True)
+    PCreateChrootVM.vm_cleanup(vmname=vmname, img_path=qcow2_deltaimage)
 
     # Get the Base image.
     if not os.path.isfile(qcow2_baseimage):
@@ -162,10 +160,6 @@ if args.vm and vmpath:
                     break
         # Rename the image.
         os.rename(qcow2_baseimage_originaldl, qcow2_baseimage)
-
-    # Remove the original Delta image.
-    if os.path.isfile(qcow2_deltaimage):
-        os.remove(qcow2_deltaimage)
 
     # Create the virtual machine.
     kvm_cmd = Pkvm.cmd_virtinstall(vmname=vmname, variant="fedora-coreos-stable", efi=

@@ -26,6 +26,7 @@ import xml.etree.ElementTree as ET
 # Custom includes
 from passlib import hash
 import CFunc
+import PCreateChrootVM
 
 # Disable buffered stdout (to ensure prints are in order)
 print = functools.partial(print, flush=True)
@@ -921,13 +922,7 @@ if __name__ == '__main__':
             shutil.rmtree(os.path.join(vmpath, vmname))
         # Remove existing VMs in KVM
         if args.vmtype == 2:
-            kvmlist = CFunc.subpout("virsh --connect qemu:///system -q list --all")
-            if vmname.lower() in kvmlist.lower():
-                subprocess.run('virsh --connect qemu:///system destroy "{0}"'.format(vmname), shell=True, check=False)
-                subprocess.run('virsh --connect qemu:///system undefine --snapshots-metadata --nvram "{0}"'.format(vmname), shell=True, check=True)
-        # Remove previous file for kvm.
-        if args.vmtype == 2 and os.path.isfile(os.path.join(vmpath, vmname + ".qcow2")):
-            os.remove(os.path.join(vmpath, vmname + ".qcow2"))
+            PCreateChrootVM.vm_cleanup(vmname=vmname, img_path=os.path.join(vmpath, vmname + ".qcow2"))
         logging.info("\nCopying {0} to {1}.".format(output_folder, vmpath))
         if args.vmtype != 2:
             shutil.copytree(output_folder, os.path.join(vmpath, vmname))

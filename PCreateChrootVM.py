@@ -120,16 +120,35 @@ def vm_shutdown(vmname: str, timeout_seconds: int = 30):
         if vm_is_on and current_time_diff >= timeout_seconds:
             logging.debug("Force Shutting down VM %s", vmname)
             subprocess.run("virsh --connect qemu:///system destroy {0}".format(vmname), shell=True, check=True, stdout=subprocess.DEVNULL)
-def vm_cleanup(vmname: str, img_path: str):
+def vm_cleanup(vmname: str, img_path: str = ""):
     """Cleanup existing VM."""
     # Destroy and undefine the VM.
-    vm_shutdown(vmname)
-    subprocess.run("virsh --connect qemu:///system undefine --snapshots-metadata --nvram {0}".format(vmname), shell=True, check=False)
+    if vm_exists(vmname):
+        vm_shutdown(vmname)
+        subprocess.run(f"virsh --connect qemu:///system undefine --snapshots-metadata --nvram {vmname}", shell=True, check=False)
     # Delete the image file.
-    if os.path.isfile(img_path):
+    if img_path != "" and os.path.isfile(img_path):
         os.remove(img_path)
+def vm_list(connection: str = "qemu:///system"):
+    """Get a list of all VMs in libvirt."""
+    kvmlist = subprocess.run(f"virsh --connect {connection} -q list --all", shell=True, stdout=subprocess.PIPE, universal_newlines=True, check=True)
+    kvmlist = kvmlist.stdout.split("\n")
+    kvmlist_append = []
+    for x in kvmlist:
+        if x != '':
+            # Split by whitespace, and ignore the first column since its usually a dash or other number.
+            kvmlist_append.append(x.split()[1])
+    return kvmlist_append
+def vm_exists(vmname: str, vmlist: list = vm_list()):
+    """Determine if a VM exists in the list of VMs for libvirt. Converts names to lowercase before checking."""
+    exists = False
+    for x in vmlist:
+        if vmname.lower() == x.lower():
+            exists = True
+    return exists
 def vm_runscript(ip: str, script: str, port: int = 22, user: str = "root", password: str = "asdf"):
     """Run a script (passed as a variable) on a VM."""
+    status = 0
     # Write the script to a file.
     tempfolder = tempfile.gettempdir()
     tempscript_path = os.path.join(tempfolder, "tempscript")
@@ -138,13 +157,14 @@ def vm_runscript(ip: str, script: str, port: int = 22, user: str = "root", passw
     # Make the file executable.
     os.chmod(tempscript_path, 0o777)
     # SCP the file to the host.
-    scp_vm(ip=ip, filepath=tempscript_path, destination=f"{tempfolder}/", port=port, user=user, password=password, folder=False)
+    status += scp_vm(ip=ip, filepath=tempscript_path, destination=f"{tempfolder}/", port=port, user=user, password=password, folder=False)
     # Run the file in the VM.
-    ssh_vm(ip=ip, command=f"bash {tempscript_path}", port=port, user=user, password=password)
+    status += ssh_vm(ip=ip, command=f"bash {tempscript_path}", port=port, user=user, password=password)
     # Remove the file from host and guest.
     if os.path.isfile(tempscript_path):
         os.remove(tempscript_path)
     ssh_vm(ip=ip, command=f"rm {tempscript_path}", port=port, user=user, password=password)
+    return status
 def git_branch_retrieve():
     """Retrieve the current branch of this script's git repo."""
     git_branch = None

@@ -136,8 +136,9 @@ systemd:
         ConditionPathExists=!/etc/ucore-autorebase/signed
         After=network-online.target
         Wants=network-online.target
-        StartLimitIntervalSec=30
-        StartLimitBurst=2
+        StartLimitIntervalSec=25
+        StartLimitBurst=5
+
         [Service]
         Type=oneshot
         StandardOutput=journal+console
@@ -146,6 +147,8 @@ systemd:
         ExecStart=/usr/bin/systemctl disable ucore-unsigned-autorebase.service
         ExecStart=/usr/bin/systemctl reboot
         Restart=on-failure
+        RestartSec=5
+
         [Install]
         WantedBy=multi-user.target
     - name: ucore-signed-autorebase.service
@@ -157,8 +160,9 @@ systemd:
         ConditionPathExists=!/etc/ucore-autorebase/signed
         After=network-online.target
         Wants=network-online.target
-        StartLimitIntervalSec=30
-        StartLimitBurst=2
+        StartLimitIntervalSec=25
+        StartLimitBurst=5
+
         [Service]
         Type=oneshot
         StandardOutput=journal+console
@@ -167,6 +171,8 @@ systemd:
         ExecStart=/usr/bin/systemctl disable ucore-signed-autorebase.service
         ExecStart=/usr/bin/systemctl reboot
         Restart=on-failure
+        RestartSec=5
+
         [Install]
         WantedBy=multi-user.target
     # https://docs.fedoraproject.org/en-US/fedora-coreos/bootloader-updates/
@@ -197,6 +203,8 @@ systemd:
         ConditionPathExists=/var/tmp/setup1.sh
         ConditionPathExists=/etc/ucore-autorebase/unverified
         ConditionPathExists=/etc/ucore-autorebase/signed
+        StartLimitBurst=5
+        StartLimitIntervalSec=25
 
         [Service]
         Type=oneshot
@@ -205,6 +213,8 @@ systemd:
         ExecStart=/bin/bash -c '/var/tmp/setup1.sh |& tee -a /var/tmp/setup.log'
         ExecStart=/bin/touch /var/tmp/setup1.stamp
         ExecStartPost=/bin/systemctl --no-block reboot
+        Restart=on-failure
+        RestartSec=5
 
         [Install]
         WantedBy=multi-user.target
@@ -223,6 +233,8 @@ systemd:
         ConditionPathExists=/var/tmp/setup2.sh
         ConditionPathExists=/etc/ucore-autorebase/unverified
         ConditionPathExists=/etc/ucore-autorebase/signed
+        StartLimitBurst=5
+        StartLimitIntervalSec=25
 
         [Service]
         Type=oneshot
@@ -230,6 +242,8 @@ systemd:
         User=root
         ExecStart=/bin/bash -c '/var/tmp/setup2.sh |& tee -a /var/tmp/setup.log'
         ExecStartPost=/bin/systemctl --no-block reboot
+        Restart=on-failure
+        RestartSec=5
 
         [Install]
         WantedBy=multi-user.target

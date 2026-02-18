@@ -58,6 +58,8 @@ systemd:
         ConditionPathExists=!/var/tmp/setup1.stamp
         ConditionPathExists=!/var/tmp/setup2.stamp
         ConditionPathExists=/var/tmp/setup1.sh
+        StartLimitBurst=5
+        StartLimitIntervalSec=25
 
         [Service]
         Type=oneshot
@@ -66,6 +68,8 @@ systemd:
         ExecStart=/bin/bash -c '/var/tmp/setup1.sh |& tee -a /var/tmp/setup.log'
         ExecStart=/bin/touch /var/tmp/setup1.stamp
         ExecStartPost=/bin/systemctl --no-block reboot
+        Restart=on-failure
+        RestartSec=5
 
         [Install]
         WantedBy=multi-user.target
@@ -82,6 +86,8 @@ systemd:
         ConditionPathExists=/var/tmp/setup1.stamp
         ConditionPathExists=!/var/tmp/setup2.stamp
         ConditionPathExists=/var/tmp/setup2.sh
+        StartLimitBurst=5
+        StartLimitIntervalSec=25
 
         [Service]
         Type=oneshot
@@ -89,6 +95,8 @@ systemd:
         User=root
         ExecStart=/bin/bash -c '/var/tmp/setup2.sh |& tee -a /var/tmp/setup.log'
         ExecStartPost=/bin/systemctl --no-block reboot
+        Restart=on-failure
+        RestartSec=5
 
         [Install]
         WantedBy=multi-user.target
