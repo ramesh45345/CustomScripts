@@ -15,7 +15,8 @@ print = functools.partial(print, flush=True)
 USERNAMEVAR, USERGROUP, USERHOME = CFunc.getnormaluser()
 
 firefox_profiles_paths = [os.path.join(USERHOME, ".mozilla", "firefox"),
-                          os.path.join(USERHOME, ".var", "app", "org.mozilla.firefox", ".mozilla", "firefox"),
+                          os.path.join(USERHOME, ".config", "mozilla", "firefox"),
+                          os.path.join(USERHOME, ".var", "app", "org.mozilla.firefox", "config", "mozilla", "firefox"),
                           os.path.join(USERHOME, "AppData", "Roaming", "Mozilla", "Firefox", "Profiles"),
                           os.path.join(USERHOME, ".librewolf"),
                           os.path.join(USERHOME, ".var", "app", "io.gitlab.librewolf-community", ".librewolf")]
