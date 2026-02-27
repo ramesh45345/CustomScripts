@@ -142,8 +142,6 @@ rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-$releasever-primary
 dnf install -y https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
 # RPMSphere
 dnf install -y https://github.com/rpmsphere/noarch/raw/master/r/rpmsphere-release-40-1.noarch.rpm
-# Terra
-dnf install -y --nogpgcheck --repofrompath 'terra,https://repos.fyralabs.com/terra$releasever' terra-release
 # vscodium
 tee -a /etc/yum.repos.d/vscodium.repo << 'EOF'
 [gitlab.com_paulcarroty_vscodium_repo]
@@ -187,6 +185,8 @@ dnf install -y  \
     xset \
     zip \
     zsh
+dnf copr enable -y atim/starship
+dnf install -y starship
 # Filesystem utils
 dnf install -y \
     btrfs-progs \

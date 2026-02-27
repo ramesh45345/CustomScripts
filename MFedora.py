@@ -34,23 +34,17 @@ repo_gpgcheck=1
 gpgkey=https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/raw/master/pub.gpg
 metadata_expire=1h
 """)
-def repo_terra(el: bool = False):
-    """
-    Install terra repository
-    https://github.com/terrapkg/packages
-    """
-    eltext = ""
-    if el:
-        eltext = "el"
-    subprocess.run(f"dnf install -y --nogpgcheck --repofrompath 'terra,https://repos.fyralabs.com/terra{eltext}$releasever' terra-release", shell=True, check=True)
+def fed_starship():
+    """Install starship"""
+    subprocess.run("dnf copr enable -y atim/starship", shell=True, check=True)
+    CFunc.dnfinstall("starship")
 def fed_cli(sysd_status: bool, vmstatus: str):
     """Fedora: Cli tools"""
-    CFunc.dnfinstall("git fish starship zsh nano tmux perl-Time-HiRes iotop rsync p7zip p7zip-plugins zip unzip xdg-utils xdg-user-dirs util-linux-user fuse-sshfs lsb_release openssh-server openssh-clients avahi nss-mdns dnf-plugin-system-upgrade xfsprogs python3-pip python3-passlib")
+    CFunc.dnfinstall("git fish zsh nano tmux perl-Time-HiRes iotop rsync p7zip p7zip-plugins zip unzip xdg-utils xdg-user-dirs util-linux-user fuse-sshfs lsb_release openssh-server openssh-clients avahi nss-mdns dnf-plugin-system-upgrade xfsprogs python3-pip python3-passlib")
+    fed_starship()
     CFunc.dnfinstall("unrar")
     CFunc.sysctl_enable("sshd", error_on_fail=True)
     CFunc.dnfinstall("powerline-fonts google-roboto-fonts google-noto-sans-fonts")
-    # Topgrade
-    CFunc.dnfinstall("topgrade")
     # Samba
     CFunc.dnfinstall("samba")
     CFunc.sysctl_enable("smb", error_on_fail=True)
@@ -65,6 +59,8 @@ def fed_cli(sysd_status: bool, vmstatus: str):
     CFunc.sysctl_enable("firewalld", now=True, error_on_fail=True)
     if sysd_status is True:
         CFuncExt.FirewalldConfig()
+    # Topgrade
+    # CFuncExt.topgrade_install()
     # Podman
     CFunc.dnfinstall("podman")
     # Sudoers changes
@@ -189,8 +185,6 @@ if __name__ == '__main__':
     ### Fedora Repos ###
     # RPMFusion
     repo_rpmfusion()
-    # Terra
-    repo_terra()
     if not args.nogui:
         # Visual Studio Code
         repo_vscode()

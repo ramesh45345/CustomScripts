@@ -123,9 +123,8 @@ if args.stage == 1:
     ### Fedora Repos ###
     # RPMFusion
     rostreeinstall("https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm")
-    # Terra
-    subprocess.run("curl -fsSL https://github.com/terrapkg/subatomic-repos/raw/main/terra.repo | tee /etc/yum.repos.d/terra.repo", shell=True, check=True)
-    rostreeinstall("terra-release")
+    # https://copr.fedorainfracloud.org/coprs/atim/starship
+    CFunc.downloadfile(url="https://copr.fedorainfracloud.org/coprs/atim/starship/repo/fedora-rawhide/atim-starship-fedora-rawhide.repo", localpath=os.path.join(os.sep, "etc", "yum.repos.d"), overwrite=True)
 
     # Update system.
     rostreeupdate()

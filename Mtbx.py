@@ -122,12 +122,13 @@ RUN git clone https://aur.archlinux.org/yay-bin.git /tmp/yay-bin && \
 addtext(r"""
 # From stock image.
 RUN sed -i '/tsflags=nodocs/d' /etc/dnf/dnf.conf
-RUN dnf -y install --nogpgcheck --repofrompath 'terra,https://repos.fyralabs.com/terra$releasever' terra-release
 RUN dnf -y install acl bash curl gawk grep gzip libcap openssl p11-kit pam python3 rpm sed systemd tar
 RUN dnf -y install bash-completion bzip2 diffutils dnf-plugins-core findutils flatpak-spawn fpaste fuse fuse-libs git gnupg gnupg2-smime gvfs-client hostname iputils jwhois keyutils krb5-libs less lsof man-db man-pages mtr nano-default-editor nss-mdns openssh-clients passwd pigz procps-ng rsync shadow-utils sudo tcpdump time tmux traceroute tree unzip vte-profile wget which words xorg-x11-xauth xz zip
 
 # Shell Tools
-RUN dnf -y install zsh fish starship powerline-fonts
+RUN dnf -y install zsh fish powerline-fonts
+RUN dnf copr enable -y atim/starship
+RUN dnf -y install starship
 # Build tools
 RUN dnf -y install make gcc automake autoconf ninja-build
 # Wine
@@ -137,13 +138,14 @@ addtext(r"""
 # From stock image.
 RUN sed -i '/tsflags=nodocs/d' /etc/dnf/dnf.conf
 RUN dnf install -y epel-release
-RUN dnf install -y --nogpgcheck --repofrompath 'terra,https://repos.fyralabs.com/terrael$releasever' terra-release
 RUN dnf install -y https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-10.noarch.rpm https://mirrors.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-10.noarch.rpm
 RUN dnf -y install --allowerasing acl bash nano curl gawk grep gzip libcap openssl p11-kit pam python3 rpm sed systemd tar xorg-x11-xauth
 RUN dnf -y install bash-completion bzip2 diffutils dnf-plugins-core findutils flatpak-spawn fuse fuse-libs git gnupg gnupg2-smime gvfs-client hostname iputils keyutils krb5-libs less lsof man-db man-pages mtr openssh-clients passwd pigz procps-ng rsync shadow-utils sudo tcpdump time tmux traceroute tree unzip vte-profile wget which words xz zip
 
 # Shell Tools
-RUN dnf -y install zsh powerline-fonts fish starship
+RUN dnf -y install zsh powerline-fonts fish
+RUN dnf copr enable -y atim/starship
+RUN dnf -y install starship
 # Build tools
 RUN dnf -y install make gcc automake autoconf
 """, "alma")
