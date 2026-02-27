@@ -139,8 +139,9 @@ def vm_list(connection: str = "qemu:///system"):
             # Split by whitespace, and ignore the first column since its usually a dash or other number.
             kvmlist_append.append(x.split()[1])
     return kvmlist_append
-def vm_exists(vmname: str, vmlist: list = vm_list()):
+def vm_exists(vmname: str, connection: str = "qemu:///system"):
     """Determine if a VM exists in the list of VMs for libvirt. Converts names to lowercase before checking."""
+    vmlist = vm_list(connection=connection)
     exists = False
     for x in vmlist:
         if vmname.lower() == x.lower():
