@@ -58,7 +58,7 @@ def vm_create(vmname: str, img_path: str, isopath: str, memory: int):
     efi_bin, efi_nvram = Pkvm.ovmf_bin_nvramcopy(os.path.dirname(img_path), vmname, secureboot=False)
     # virt-install manual: https://www.mankier.com/1/virt-install
     # List of os: osinfo-query os
-    CREATESCRIPT_KVM = Pkvm.cmd_virtinstall(vmname=vmname, diskpath=os.path.join(vmpath, vmname), variant=kvm_variant, efi_bin=efi_bin, efi_nvram=efi_nvram, memory=memory, cdrom_path=isopath, noautostart=False)
+    CREATESCRIPT_KVM = Pkvm.cmd_virtinstall(vmname=vmname, diskpath=os.path.join(vmpath, f"{vmname}.qcow2"), variant=kvm_variant, efi_bin=efi_bin, efi_nvram=efi_nvram, memory=memory, cdrom_path=isopath, noautostart=False)
     subprocess.run(CREATESCRIPT_KVM, shell=True, check=True)
     # Log the launch command.
     logging.info(f"""KVM launch command: {Pkvm.cmd_virtinstall(vmname=vmname, diskpath=os.path.join(vmpath, vmname), variant=kvm_variant, efi_bin=efi_bin, efi_nvram=efi_nvram, memory=args.memory)}""")

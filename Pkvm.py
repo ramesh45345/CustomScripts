@@ -222,7 +222,7 @@ def cmd_virtinstall(vmname: str,
         cmd += " --noreboot"
     # No disk is attached if diskpath is not specified.
     if diskpath != "":
-        cmd += f" --disk path={diskpath}.qcow2,bus={diskinterface}"
+        cmd += f" --disk path={diskpath},bus={diskinterface}"
     if isolated is True and nmcli_connecteddevice() is not None:
         cmd += f" --network bridge=virbr1,model={netdev} --network type=direct,source={nmcli_connecteddevice()},source_mode=bridge,model={netdev},trustGuestRxFilters=yes"
     else:
@@ -959,7 +959,7 @@ if __name__ == '__main__':
             cpuflags = f"host-model,match=exact{lscpu_flag}"
         # virt-install manual: https://www.mankier.com/1/virt-install
         # List of os: osinfo-query os
-        CREATESCRIPT_KVM = cmd_virtinstall(vmname=vmname, diskpath=os.path.join(vmpath, vmname), variant=kvm_variant, efi=useefi, efi_bin=efi_bin, efi_nvram=efi_nvram, secureboot=secureboot, memory=args.memory, video=kvm_video, cpuflags=cpuflags)
+        CREATESCRIPT_KVM = cmd_virtinstall(vmname=vmname, diskpath=os.path.join(vmpath, f"{vmname}.qcow2"), variant=kvm_variant, efi=useefi, efi_bin=efi_bin, efi_nvram=efi_nvram, secureboot=secureboot, memory=args.memory, video=kvm_video, cpuflags=cpuflags)
         if secureboot is True:
             tpm_process.terminate()
         logging.info("KVM launch command: {0}".format(CREATESCRIPT_KVM))

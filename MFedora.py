@@ -60,7 +60,7 @@ def fed_cli(sysd_status: bool, vmstatus: str):
     if sysd_status is True:
         CFuncExt.FirewalldConfig()
     # Topgrade
-    # CFuncExt.topgrade_install()
+    CFuncExt.topgrade_install()
     # Podman
     CFunc.dnfinstall("podman")
     # Sudoers changes

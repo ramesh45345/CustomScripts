@@ -143,7 +143,7 @@ dnf install -y https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-
 # RPMSphere
 dnf install -y https://github.com/rpmsphere/noarch/raw/master/r/rpmsphere-release-40-1.noarch.rpm
 # vscodium
-tee -a /etc/yum.repos.d/vscodium.repo << 'EOF'
+tee /etc/yum.repos.d/vscodium.repo << 'EOF'
 [gitlab.com_paulcarroty_vscodium_repo]
 name=gitlab.com_paulcarroty_vscodium_repo
 baseurl=https://paulcarroty.gitlab.io/vscodium-deb-rpm-repo/rpms/
@@ -153,12 +153,17 @@ repo_gpgcheck=1
 gpgkey=https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/raw/master/pub.gpg
 metadata_expire=1h
 EOF
+# Starship
+dnf copr enable -y atim/starship
+
+dnf upgrade -y
 
 # Packages
 dnf install -y  \
     arch-install-scripts \
     btop \
     chntpw \
+    debootstrap \
     fish \
     git \
     iotop \
@@ -176,7 +181,7 @@ dnf install -y  \
     starship \
     tmux \
     unzip \
-    vscodium \
+    codium \
     xfce4-clipman-plugin \
     xfce4-diskperf-plugin \
     xfce4-systemload-plugin \
@@ -286,6 +291,8 @@ done
 EOL
 chmod a+rwx /usr/local/bin/ra.sh
 
+dnf -y autoremove
+dnf clean all
 """
 configsh_path = os.path.join(fedoralivegit_folder, "config.sh")
 with open(configsh_path, 'w') as ks_write:
