@@ -12,6 +12,9 @@ iface lo inet loopback
 auto eth0
 iface eth0 inet dhcp
     hostname INSERTHOSTNAMENAMEHERE
+auto eth1
+iface eth1 inet dhcp
+    hostname INSERTHOSTNAMENAMEHERE
 "
 
 # Set timezone
@@ -36,3 +39,6 @@ NTPOPTS="-c openntpd"
 
 # Set disk options
 DISKOPTS="-v -m sys /dev/vda"
+export ERASE_DISKS="/dev/vda"
+export BOOTLOADER="grub"
+export USE_EFI=1

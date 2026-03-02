@@ -478,7 +478,7 @@ if __name__ == '__main__':
         kvm_variant = "fedora-rawhide"
         vmprovisionscript = "MAlpine.py"
         isourl = "https://dl-cdn.alpinelinux.org/alpine/latest-stable/releases/x86_64/alpine-standard-3.23.2-x86_64.iso"
-        useefi = False
+        useefi = True
     if args.ostype == 45:
         vmname = "AlpineVM"
         if args.desktopenv is None:
@@ -821,7 +821,7 @@ if __name__ == '__main__':
         data['source'][packer_type]['local']["shutdown_command"] = "shutdown -p now"
     if 45 <= args.ostype <= 49:
         data['source'][packer_type]['local']["shutdown_command"] = "poweroff"
-        data['source'][packer_type]['local']["boot_command"] = ["<wait10>root<enter><wait>", "ifconfig eth0 up && udhcpc -i eth0<enter><wait5>", "wget http://{{ .HTTPIP }}:{{ .HTTPPort }}/alpine-answers<enter><wait>", f"setup-alpine -e -f $PWD/alpine-answers; mount /dev/vda3 /mnt; echo 'PermitRootLogin yes' >> /mnt/etc/ssh/sshd_config; echo 'root:{sha512_password}' | chpasswd -e -R /mnt; sleep 30; reboot<enter><wait5>", "<wait30s>y<enter>"]
+        data['source'][packer_type]['local']["boot_command"] = ["<wait10>root<enter><wait>", "ifconfig eth0 up && udhcpc -i eth0<enter><wait5>", "wget http://{{ .HTTPIP }}:{{ .HTTPPort }}/alpine-answers<enter><wait>", f"setup-alpine -e -f $PWD/alpine-answers; mount /dev/vda3 /mnt; echo 'PermitRootLogin yes' >> /mnt/etc/ssh/sshd_config; echo 'root:{sha512_password}' | chpasswd -e -R /mnt; apk add efibootmgr; efibootmgr -b 0001 -B; reboot<enter><wait5>"]
         data['build']['provisioner'][1]["shell"] = {}
         data['build']['provisioner'][1]["shell"]["inline"] = [f"echo '{args.vmuser}:{sha512_password}' | chpasswd -e; addgroup {args.vmuser} wheel; chown -R {args.vmuser}:{args.vmuser} ~{args.vmuser}; apk add git python3; {dest_path}/{vmprovisionscript} {vmprovision_opts}"]
     if 50 <= args.ostype <= 59:
