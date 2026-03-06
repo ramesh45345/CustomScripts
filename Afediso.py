@@ -30,6 +30,7 @@ parser.add_argument("-n", "--noprompt", help='Do not prompt.', action="store_tru
 parser.add_argument("-w", "--workfolderroot", help='Location of Working Folder (default: %(default)s)', default=workfolder_default)
 parser.add_argument("-o", "--output", help='Output Location of ISO (default: %(default)s)', default=workfolder_default)
 parser.add_argument("-r", "--releasever", help='Release Version, default: %(default)s', type=int, default=43)
+parser.add_argument("-d", "--debug", help='Build with debug flag.', action="store_true")
 
 # Save arguments.
 args = parser.parse_args()
@@ -306,7 +307,10 @@ isoname = "Fedora-CustomLive-{0}.iso".format(currentdatetime)
 
 # Build
 os.chdir(fedoralivegit_folder)
-subprocess.run(f"{fedoralivegit_folder}/kiwi-build --kiwi-file=Fedora.kiwi --image-type=iso --image-profile=Xfce-Live --output-dir {fedoralivegit_folder}/outdir --debug", check=True, shell=True)
+debug_text = ""
+if args.debug:
+    debug_text = "--debug"
+subprocess.run(f"{fedoralivegit_folder}/kiwi-build {debug_text} --kiwi-file=Fedora.kiwi --image-type=iso --image-profile=Xfce-Live --output-dir {fedoralivegit_folder}/outdir", check=True, shell=True)
 
 ### Build LiveCD ###
 output_iso = os.path.join(fedoralivegit_folder, "outdir-build", f"Fedora.x86_64-{args.releasever}.iso")
