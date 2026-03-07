@@ -3,6 +3,7 @@
 
 # Python includes.
 import ctypes
+import encodings.idna  # pyright: ignore[reportUnusedImport], needed for downloadfile() which sometimes errors with "LookupError: unknown encoding: idna"
 import fnmatch
 import functools
 import json
