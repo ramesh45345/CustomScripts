@@ -379,7 +379,7 @@ if __name__ == '__main__':
         vmname = "ISOVM"
         # Override memory and disk setting if they are set to the default values.
         if mem_mib == args.memory:
-            args.memory = vm_memory_range(sizemb_lower=8192, sizemb_upper=32768)
+            args.memory = vm_memory_range(sizemb_lower=12288, sizemb_upper=32768)
         if size_disk_default_gb == args.imgsize:
             args.imgsize = 120
         # Use cli settings for ISOVM.
