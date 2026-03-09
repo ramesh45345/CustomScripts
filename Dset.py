@@ -280,12 +280,13 @@ if shutil.which("gnome-session") or shutil.which("gnome-shell"):
     gsettings_set("org.gnome.settings-daemon.plugins.power", "sleep-inactive-ac-timeout", "3600")
     gsettings_set("org.gnome.settings-daemon.plugins.power", "sleep-inactive-ac-type", "nothing")
     gsettings_set("org.gnome.settings-daemon.plugins.power", "sleep-inactive-battery-timeout", "1800")
-    gsettings_set("org.gnome.settings-daemon.plugins.power", "sleep-inactive-battery-type", "nothing")
+    dconf_write("/org/gnome/settings-daemon/plugins/power/sleep-inactive-battery-type", "'suspend'")
+    dconf_write("/org/gnome/settings-daemon/plugins/power/idle-dim", "false")
     gsettings_set("org.gnome.desktop.screensaver", "lock-enabled", "false")
     if vmstatus or args.disable_powersave:
-        gsettings_set("org.gnome.desktop.session", "idle-delay", "0")
+        dconf_write("/org/gnome/desktop/session/idle-delay", "0")
     else:
-        gsettings_set("org.gnome.desktop.session", "idle-delay", "300")
+        dconf_write("/org/gnome/desktop/session/idle-delay", "600")
     dconf_write("/org/gnome/desktop/interface/font-antialiasing", "'rgba'")
     dconf_write("/org/gnome/desktop/interface/font-hinting", "'full'")
     gsettings_set("org.gnome.shell", "enabled-extensions", "['window-list@gnome-shell-extensions.gcampax.github.com', 'dash-to-dock@micxgx.gmail.com', 'dash-to-panel@jderose9.github.com', 'GPaste@gnome-shell-extensions.gnome.org', 'user-theme@gnome-shell-extensions.gcampax.github.com', 'appindicatorsupport@rgcjonas.gmail.com', 'system-monitor@gnome-shell-extensions.gcampax.github.com']")
