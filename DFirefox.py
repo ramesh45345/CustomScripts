@@ -50,6 +50,13 @@ for ff_path in firefox_profiles_paths:
                     # https://github.com/yokoffing/Betterfox/blob/main/user.js
                     userjs_file = os.path.join(firefox_profilefolder, "user-overrides.js")
                     userjs_text = """
+/*** AI ***/
+user_pref("browser.ai.control.default", "blocked");
+user_pref("browser.ai.control.linkPreviewKeyPoints", "blocked");
+user_pref("browser.ai.control.pdfjsAltText", "blocked");
+user_pref("browser.ai.control.sidebarChatbot", "blocked");
+user_pref("browser.ai.control.smartTabGroups", "blocked");
+user_pref("browser.ai.control.translations", "available");
 /** GFX ***/
 user_pref("gfx.webrender.all", true);
 // https://wiki.archlinux.org/title/Firefox#Hardware_video_acceleration
