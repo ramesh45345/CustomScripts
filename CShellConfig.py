@@ -312,7 +312,7 @@ function d
     echo "lsblk output"
     lsblk -T -o name,size,fsused,fsuse%,fstype,path,label,partlabel,mountpoints
     echo "\ndf output"
-    df -hT | grep -v tmpfs
+    df -hT | grep -vE " tmpfs | overlay | devtmpfs | efivarfs "
 end
 function f
     sudo flatpak $argv
@@ -777,7 +777,7 @@ function d () {
     echo "lsblk output"
     lsblk -T -o name,size,fsused,fsuse%%,fstype,path,label,partlabel,mountpoints
     echo "\ndf output"
-    df -hT | grep -v tmpfs
+    df -hT | grep -vE " tmpfs | overlay | devtmpfs | efivarfs "
 }
 function f () {
     sudo flatpak $@
