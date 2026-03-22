@@ -125,6 +125,8 @@ if args.stage == 1:
     rostreeinstall("https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm")
     # https://copr.fedorainfracloud.org/coprs/atim/starship
     CFunc.downloadfile(url="https://copr.fedorainfracloud.org/coprs/atim/starship/repo/fedora-rawhide/atim-starship-fedora-rawhide.repo", localpath=os.path.join(os.sep, "etc", "yum.repos.d"), overwrite=True)
+    # Packer repo
+    MFedora.fed_packer_repo()
 
     # Update system.
     rostreeupdate()
@@ -149,6 +151,8 @@ if args.stage == 1:
 
     # Install libvirt software
     rostreeinstall("virt-install libvirt-daemon-config-network libvirt-daemon-kvm qemu-kvm virt-manager swtpm swtpm-tools")
+    # Packer from packer repo
+    rostreeinstall("packer")
 
     # Sudoers changes
     CFuncExt.SudoersEnvSettings()

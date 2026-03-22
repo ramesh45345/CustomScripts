@@ -38,6 +38,9 @@ def fed_starship():
     """Install starship"""
     subprocess.run("dnf copr enable -y atim/starship", shell=True, check=True)
     CFunc.dnfinstall("starship")
+def fed_packer_repo():
+    """Install packer repo"""
+    CFunc.downloadfile(url="https://rpm.releases.hashicorp.com/fedora/hashicorp.repo", localpath=os.path.join(os.sep, "etc", "yum.repos.d"), overwrite=True)
 def fed_cli(sysd_status: bool, vmstatus: str):
     """Fedora: Cli tools"""
     CFunc.dnfinstall("git fish zsh nano tmux perl-Time-HiRes iotop rsync p7zip p7zip-plugins zip unzip xdg-utils xdg-user-dirs util-linux-user fuse-sshfs lsb_release openssh-server openssh-clients avahi nss-mdns dnf-plugin-system-upgrade xfsprogs python3-pip python3-passlib")
@@ -96,6 +99,11 @@ def fed_gui():
     CFunc.dnfinstall("codium")
     # Syncthing
     CFunc.dnfinstall("syncthing")
+    # libvirt
+    CFunc.dnfinstall("virt-install libvirt-daemon-config-network libvirt-daemon-kvm qemu-kvm virt-manager swtpm swtpm-tools")
+    # Packer from packer repo
+    fed_packer_repo()
+    CFunc.dnfinstall("packer")
 def fed_desktop(desktop: str = None):
     """Fedora: Install Desktop"""
     if desktop == "gnome":
