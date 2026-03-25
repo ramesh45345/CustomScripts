@@ -11,6 +11,11 @@ fi
 export ZFSBOOT_DISKS="$GEOM"
 export nonInteractive="YES"
 
+# For some reason after dhclient, once installer runs, resolvconf doesn't work anymore.
+echo "nameserver 8.8.8.8" > /etc/resolv.conf
+# Url to get archives
+export BSDINSTALL_DISTSITE="ftp://ftp.freebsd.org/pub/FreeBSD/releases/amd64/`uname -r`/"
+
 #!/bin/sh -e
 
 # Basic network options

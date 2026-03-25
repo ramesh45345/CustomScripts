@@ -470,8 +470,8 @@ if __name__ == '__main__':
         vboxosid = "FreeBSD_64"
         vmprovisionscript = "MFreeBSD.py"
         vmprovision_defopts = "-d {0}".format(args.desktopenv)
-        kvm_variant = "freebsd14.0"
-        isourl = "https://download.freebsd.org/releases/amd64/amd64/ISO-IMAGES/14.2/FreeBSD-14.2-RELEASE-amd64-disc1.iso"
+        kvm_variant = "freebsd15.0"
+        isourl = "https://download.freebsd.org/releases/amd64/amd64/ISO-IMAGES/15.0/FreeBSD-15.0-RELEASE-amd64-bootonly.iso"
         useefi = False
     if 45 <= args.ostype <= 49:
         vboxosid = "Fedora_64"
@@ -813,7 +813,7 @@ if __name__ == '__main__':
         data['build']['provisioner'][1]["shell"]["inline"] = [f"hostnamectl set-hostname '{vmname}'; mkdir -m 700 -p /root/.ssh; echo '{sshkey}' > /root/.ssh/authorized_keys; mkdir -m 700 -p ~{args.vmuser}/.ssh; echo '{sshkey}' > ~{args.vmuser}/.ssh/authorized_keys; chown {args.vmuser}:{args.vmuser} -R ~{args.vmuser}; apt install -y git dhcpcd5 avahi-daemon sudo; systemctl enable --now avahi-daemon; {dest_path}/{vmprovisionscript} {vmprovision_opts}"]
         data['source'][packer_type]['local']["boot_command"] = ["<esc>auto url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/debian.cfg hostname=debian locale=en_US keyboard-configuration/modelcode=SKIP netcfg/choose_interface=auto <enter>"]
     if 40 <= args.ostype <= 41:
-        data['source'][packer_type]['local']["boot_command"] = ["<wait2><enter><wait30><right><wait><enter><wait>dhclient -b vtnet0<enter><wait>dhclient -b em0<enter><wait10>fetch -o /tmp/installerconfig http://{{ .HTTPIP }}:{{ .HTTPPort }}/freebsd<wait><enter><wait>bsdinstall script /tmp/installerconfig<wait><enter>"]
+        data['source'][packer_type]['local']["boot_command"] = ["<wait2><enter><wait30><right><wait><enter><wait>dhclient vtnet0<enter><wait>dhclient em0<enter><wait10>fetch -o /tmp/installerconfig http://{{ .HTTPIP }}:{{ .HTTPPort }}/freebsd<wait><enter><wait>bsdinstall script /tmp/installerconfig<wait><enter>"]
         data['build']['provisioner'][1]["shell"] = {}
         # Needed for freebsd: https://www.packer.io/docs/provisioners/shell.html#execute_command
         data['build']['provisioner'][1]["shell"]["execute_command"] = "chmod +x {{ .Path }}; env {{ .Vars }} {{ .Path }}"
