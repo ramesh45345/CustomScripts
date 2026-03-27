@@ -52,16 +52,16 @@ def vm_getimgpath(vmname: str, folder_path: str):
 def vm_createimage(img_path: str, size_gb: int):
     """Create a VM image file."""
     subprocess.run("qemu-img create -f qcow2 -o compression_type=zstd,compat=1.1,lazy_refcounts=on '{0}' {1}G".format(img_path, size_gb), shell=True, check=True)
-def vm_create(vmname: str, img_path: str, isopath: str, memory: int):
+def vm_create(vmname: str, img_path: str, isopath: str, memory: int, variant: str = "archlinux"):
     """Create the VM in libvirt."""
     # Copy efi firmware (ensure non-secureboot firmware is chosen)
     efi_bin, efi_nvram = Pkvm.ovmf_bin_nvramcopy(os.path.dirname(img_path), vmname, secureboot=False)
     # virt-install manual: https://www.mankier.com/1/virt-install
     # List of os: osinfo-query os
-    CREATESCRIPT_KVM = Pkvm.cmd_virtinstall(vmname=vmname, diskpath=os.path.join(vmpath, f"{vmname}.qcow2"), variant=kvm_variant, efi_bin=efi_bin, efi_nvram=efi_nvram, memory=memory, cdrom_path=isopath, noautostart=False)
+    CREATESCRIPT_KVM = Pkvm.cmd_virtinstall(vmname=vmname, diskpath=img_path, variant=variant, efi_bin=efi_bin, efi_nvram=efi_nvram, memory=memory, cdrom_path=isopath, noautostart=False)
     subprocess.run(CREATESCRIPT_KVM, shell=True, check=True)
     # Log the launch command.
-    logging.info(f"""KVM launch command: {Pkvm.cmd_virtinstall(vmname=vmname, diskpath=os.path.join(vmpath, vmname), variant=kvm_variant, efi_bin=efi_bin, efi_nvram=efi_nvram, memory=args.memory)}""")
+    logging.info(f"""KVM launch command: {Pkvm.cmd_virtinstall(vmname=vmname, diskpath=img_path, variant=variant, efi_bin=efi_bin, efi_nvram=efi_nvram, memory=memory)}""")
 def vm_ejectiso(vmname: str):
     """Eject an iso from a VM."""
     subprocess.run("virsh --connect qemu:///system change-media {0} sda --eject --config".format(vmname), shell=True, check=False)
@@ -222,6 +222,7 @@ if __name__ == '__main__':
     vm_name = "Default"
     vmprovision_cmd = "Command Not Set"
     vmbootstrap_cmd = "Command Not Set"
+    kvm_variant = "archlinux"
     # Set paths
     vmpath = os.path.abspath(args.vmpath)
     iso_path = os.path.abspath(args.iso)
@@ -397,7 +398,7 @@ chown {args.vmuser}:users -R ~{args.vmuser}
     # Create new VM.
     print("\nCreating VM.")
     vm_createimage(imgpath, args.imgsize)
-    vm_create(vm_name, imgpath, iso_path, memory=args.memory)
+    vm_create(vm_name, imgpath, iso_path, memory=args.memory, variant=kvm_variant)
     # Bootstrap the VM.
     sship = vm_getip(vm_name)
     ssh_wait(ip=sship, port=localsshport, user=args.livesshuser, password=args.livesshpass)
