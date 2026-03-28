@@ -65,9 +65,9 @@ def vm_create(vmname: str, img_path: str, isopath: str, memory: int, variant: st
 def vm_ejectiso(vmname: str):
     """Eject an iso from a VM."""
     subprocess.run("virsh --connect qemu:///system change-media {0} sda --eject --config".format(vmname), shell=True, check=False)
-def ssh_vm(ip: str, command: str, ssh_opts: str = "", port: int = 22, user: str = "root", password: str = "asdf"):
+def ssh_vm(ip: str, command: str, ssh_opts: str = "", port: int = 22, user: str = "root", password: str = "asdf", suppress_out: bool = False):
     """SSH into the Virtual Machine and run a command."""
-    status = CFunc.subpout_logger("""sshpass -p "{password}" ssh {ssh_opts} {ip} -p {port} -l {user} '{command}'""".format(password=password, ip=ip, port=port, user=user, command=command, ssh_opts=ssh_opts))
+    status = CFunc.subpout_logger(cmd="""sshpass -p "{password}" ssh {ssh_opts} {ip} -p {port} -l {user} '{command}'""".format(password=password, ip=ip, port=port, user=user, command=command, ssh_opts=ssh_opts), suppress_out=suppress_out)
     return status
 def scp_vm(ip: str, filepath: str, destination: str, port: int = 22, user: str = "root", password: str = "asdf", folder: bool = False):
     """Copy files into the Virtual Machine."""
@@ -78,17 +78,19 @@ def scp_vm(ip: str, filepath: str, destination: str, port: int = 22, user: str =
     return status
 def ssh_wait(ip: str, port: int = 22, user: str = "root", password: str = "asdf", retries: int = 10000):
     """Wait for ssh to connect successfully to the VM."""
-    logging.info("Waiting for VM to boot.")
+    logging.info(f"Waiting for VM at {ip} to boot.")
     status = 1
     attempt = 0
     # Run ssh in quiet mode.
     while status != 0 and attempt < retries:
         logging.debug("SSH status was %s, attempt %s, waiting.", status, attempt)
         time.sleep(5)
-        status = ssh_vm(ip=ip, port=port, user=user, password=password, command="echo Connected", ssh_opts="-q")
+        status = ssh_vm(ip=ip, port=port, user=user, password=password, command="echo Connected", ssh_opts="-q", suppress_out=True)
+        print('.', end='')
         attempt += 1
     if status != 0:
         logging.info("ERROR: ssh_wait could not connect.")
+    print('.')
     return status
 def vm_check_onoff(vmname: str):
     """Check if a VM is started or not. Return True if VM is on."""
@@ -164,7 +166,7 @@ def vm_runscript(ip: str, script: str, port: int = 22, user: str = "root", passw
     # Remove the file from host and guest.
     if os.path.isfile(tempscript_path):
         os.remove(tempscript_path)
-    ssh_vm(ip=ip, command=f"rm {tempscript_path}", port=port, user=user, password=password)
+    ssh_vm(ip=ip, command=f"rm {tempscript_path}", port=port, user=user, password=password, suppress_out=True)
     return status
 def git_branch_retrieve():
     """Retrieve the current branch of this script's git repo."""

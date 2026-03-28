@@ -132,18 +132,26 @@ def log_subprocess_output(pipe):
     for line in iter(pipe.readline, b''):
         # Remove the newlines and decode.
         logging.info('%s', line.strip().decode(errors="ignore"))
-def subpout_logger(cmd: str = None, cmd_list: list = None):
+def subpout_logger(cmd: str = None, cmd_list: list = None, suppress_out: bool = False):
     """Run command which will output stdout to logger"""
+    stdout_opt = subprocess.PIPE
+    stderr_opt = subprocess.STDOUT
+    if suppress_out is True:
+        stdout_opt = subprocess.DEVNULL
+        stderr_opt = subprocess.DEVNULL
     if cmd is not None:
-        logging.info("Running command: %s", cmd)
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+        if suppress_out is False:
+            logging.info("Running command: %s", cmd)
+        process = subprocess.Popen(cmd, stdout=stdout_opt, stderr=stderr_opt, shell=True)
     elif cmd_list is not None:
-        logging.info(f"Running command: {shlex.join(cmd_list)}")
-        process = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        if suppress_out is False:
+            logging.info(f"Running command: {shlex.join(cmd_list)}")
+        process = subprocess.Popen(cmd_list, stdout=stdout_opt, stderr=stderr_opt)
     else:
         logging.info("ERROR: cmd and cmd_list is None, cannot run command.")
-    with process.stdout:
-        log_subprocess_output(process.stdout)
+    if suppress_out is False:
+        with process.stdout:
+            log_subprocess_output(process.stdout)
     exitcode = process.wait()
     if process.returncode != 0:
         print("ERROR: {0} has non-zero return code.".format(cmd))
