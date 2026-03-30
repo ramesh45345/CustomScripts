@@ -95,13 +95,11 @@ if __name__ == '__main__':
     if args.desktop == "gnome":
         # Gnome
         zypp_install("patterns-gnome-gnome patterns-gnome-gnome_x11 patterns-gnome-gnome_yast gnome-shell-extension-gpaste ptyxis")
-        # Install gs installer script.
-        gs_installer = CFunc.downloadfile("https://raw.githubusercontent.com/PedMan/gnome-shell-extension-installer/master/gnome-shell-extension-installer", os.path.join(os.sep, "usr", "local", "bin"), overwrite=True)
-        os.chmod(gs_installer[0], 0o777)
+        gs_installer = CFuncExt.gse_script_install()
         # Dash to panel
-        CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 1160".format(gs_installer[0]))
+        CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 1160".format(gs_installer))
         # Kstatusnotifier
-        CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 615".format(gs_installer[0]))
+        CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 615".format(gs_installer))
     elif args.desktop == "kde":
         # KDE
         zypp_install("patterns-kde-kde_plasma patterns-kde-kde_yast patterns-kde-kde_utilities")

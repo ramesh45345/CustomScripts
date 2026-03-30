@@ -112,9 +112,7 @@ if not args.nogui:
         # Gnome Stuff
         CFunc.dnfinstall("gnome-tweaks gnome-extensions-app")
         # Gnome Shell extensions
-        # Install gs installer script.
-        gs_installer = CFunc.downloadfile("https://raw.githubusercontent.com/PedMan/gnome-shell-extension-installer/master/gnome-shell-extension-installer", os.path.join(os.sep, "usr", "local", "bin"), overwrite=True)
-        os.chmod(gs_installer[0], 0o777)
+        gs_installer = CFuncExt.gse_script_install()
         # Install extensions
         CFunc.dnfinstall("gnome-shell-extension-window-list gnome-shell-extension-user-theme gnome-shell-extension-system-monitor gnome-shell-extension-status-icons gnome-shell-extension-light-style gnome-shell-extension-appindicator gnome-shell-extension-dash-to-panel")
     elif args.desktop == "kde":

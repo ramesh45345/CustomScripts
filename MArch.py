@@ -201,13 +201,11 @@ if __name__ == '__main__':
         # Some Gnome Extensions
         CFunc.pacman_install("gnome-shell-extensions gpaste")
         yay_install(USERNAMEVAR, "aur/gnome-browser-connector")
-        # Install gs installer script.
-        gs_installer = CFunc.downloadfile("https://raw.githubusercontent.com/PedMan/gnome-shell-extension-installer/master/gnome-shell-extension-installer", os.path.join(os.sep, "usr", "local", "bin"), overwrite=True)
-        os.chmod(gs_installer[0], 0o777)
+        gs_installer = CFuncExt.gse_script_install()
         # Dash to panel
-        CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 1160".format(gs_installer[0]))
+        CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 1160".format(gs_installer))
         # Kstatusnotifier
-        CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 615".format(gs_installer[0]))
+        CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 615".format(gs_installer))
     elif args.desktop == "kde":
         # KDE
         CFunc.pacman_install("plasma-meta kio-extras sddm okular gwenview kio-extras kio-zeroconf kde-system-meta ark konsole kcalc kwrite kwalletmanager")

@@ -258,13 +258,11 @@ Acquire::ftp::Timeout "5";''')
             CFunc.aptinstall("gnome-clocks")
             CFunc.aptinstall("gnome-shell-extensions gnome-shell-extension-gpaste")
             CFunc.aptinstall("ptyxis", error_on_fail=False)
-            # Install gs installer script.
-            gs_installer = CFunc.downloadfile("https://raw.githubusercontent.com/PedMan/gnome-shell-extension-installer/master/gnome-shell-extension-installer", os.path.join(os.sep, "usr", "local", "bin"), overwrite=True)
-            os.chmod(gs_installer[0], 0o777)
+            gs_installer = CFuncExt.gse_script_install()
             # Dash to panel
-            CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 1160".format(gs_installer[0]))
+            CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 1160".format(gs_installer))
             # Kstatusnotifier
-            CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 615".format(gs_installer[0]))
+            CFunc.run_as_user_su(USERNAMEVAR, "{0} --yes 615".format(gs_installer))
         elif args.desktop == "mate":
             print("\n Installing mate desktop")
             CFunc.aptinstall("task-mate-desktop mate-tweak dconf-cli")
@@ -319,7 +317,7 @@ Acquire::ftp::Timeout "5";''')
     subprocess.run("plymouth-set-default-theme -R spinner", shell=True, check=True)
     # Ensure sbin is in path for grub
     pathvar = os.environ.get('PATH')
-    pathvar = pathvar + ":/sbin:/usr/sbin"
+    pathvar = f"{pathvar}:/sbin:/usr/sbin"
     os.environ['PATH'] = pathvar
     # Disable mitigations
     CFuncExt.GrubEnvAdd(os.path.join(os.sep, "etc", "default", "grub"), "GRUB_CMDLINE_LINUX_DEFAULT", "mitigations=off")

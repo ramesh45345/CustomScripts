@@ -177,6 +177,7 @@ def nix_standalone_install(username: str, packages: str):
 def topgrade_install(dest_folder: str = os.path.join(os.sep, "usr", "local", "bin")):
     """Install the latest topgrade version from github"""
     releasejson_link = "https://api.github.com/repos/topgrade-rs/topgrade/tags"
+    latestrelease = ""
     # Get the json data from GitHub.
     with urllib.request.urlopen(releasejson_link) as releasejson_handle:
         releasejson_data = json.load(releasejson_handle)
@@ -204,6 +205,11 @@ def topgrade_install(dest_folder: str = os.path.join(os.sep, "usr", "local", "bi
         os.chmod(dest_folder, 0o777)
     else:
         print(f"ERROR: {dest_folder} does not exist.")
+def gse_script_install(localpath: str = os.path.join(os.sep, "usr", "local", "bin")):
+    """ Install gs installer script. """
+    gs_installer = CFunc.downloadfile("https://raw.githubusercontent.com/PedMan/gnome-shell-extension-installer/master/gnome-shell-extension-installer", localpath, overwrite=True)
+    os.chmod(gs_installer[0], 0o777)
+    return gs_installer[0]
 
 
 if __name__ == '__main__':
