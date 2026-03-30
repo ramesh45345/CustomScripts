@@ -54,21 +54,6 @@ Signed-By: /usr/share/keyrings/deb-multimedia-keyring.pgp""".format(debrelease))
     # Update and upgrade with new repositories
     CFunc.aptupdate()
     CFunc.aptdistupg()
-def mpr_install(normaluser: str):
-    """Install mpr and mist tool."""
-    # Install makedeb
-    subprocess.run("wget -qO - 'https://proget.makedeb.org/debian-feeds/makedeb.pub' | gpg --dearmor | sudo tee /usr/share/keyrings/makedeb-archive-keyring.gpg 1> /dev/null", shell=True, check=True)
-    subprocess.run("echo 'deb [signed-by=/usr/share/keyrings/makedeb-archive-keyring.gpg arch=all] https://proget.makedeb.org/ makedeb main' | sudo tee /etc/apt/sources.list.d/makedeb.list", shell=True, check=True)
-    CFunc.aptupdate()
-    CFunc.aptinstall("makedeb")
-    # # Install rustup (for mist)
-    # print("Installing rustup")
-    # subprocess.run("curl -sSf https://sh.rustup.rs | sh -s -- -y", shell=True, check=True)
-    # # Install mist
-    # tempfolder = tempfile.gettempdir()
-    # CFunc.gitclone("https://mpr.makedeb.org/mist.git", os.path.join(tempfolder, "mist"))
-    # CFunc.chmod_recursive(os.path.join(tempfolder, "mist"), 0o777)
-    # CFunc.run_as_user_su(normaluser, "cd {0}; makedeb -si -H 'MPR-Package: yes' --no-confirm".format(os.path.join(tempfolder, "mist")), error_on_fail=True)
 def repos_experimental():
     """Install experimental repo, with low priority to ensure packages don't get installed by accident."""
     # Install repo
