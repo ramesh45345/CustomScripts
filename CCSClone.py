@@ -3,12 +3,16 @@
 
 # Python includes.
 import argparse
+import functools
 import json
 import os
 import shutil
 import subprocess
 # Custom includes
 import CFunc
+
+# Disable buffered stdout (to ensure prints are in order)
+print = functools.partial(print, flush=True)
 
 print("Running {0}".format(__file__))
 
@@ -55,13 +59,16 @@ cron_hourly_file = os.path.join(cron_hourly_folder, reponame)
 if not os.path.isdir(clonepath):
     # Clone
     CFunc.gitclone(f"https://github.com/{fullrepo}.git", clonepath)
+else:
+    # Make sure root considers this a safe folder.
+    subprocess.run(f"git config --global --add safe.directory {clonepath}", shell=True, check=True)
 # Git config
 subprocess.run("git config --global pull.rebase false", shell=True, check=True)
 CFunc.run_as_user(USERNAMEVAR, "git config --global pull.rebase false", error_on_fail=True)
 
 # Git pull.
 os.chdir(clonepath)
-subprocess.run(['git', 'config', 'remote.origin.url', "https://github.com/{0}.git".format(fullrepo)], check=True)
+subprocess.run(['git', 'config', 'remote.origin.url', f"https://github.com/{fullrepo}.git"], check=True)
 subprocess.run(['git', 'pull'], check=True)
 
 # If variables were sourced, set remote details for comitting.
@@ -70,7 +77,7 @@ if os.path.isfile(variablefile):
     with open(variablefile, 'r') as variablefile_handle:
         json_privdata = json.load(variablefile_handle)
     os.chdir(clonepath)
-    subprocess.run(['git', 'config', 'remote.origin.url', "git@github.com:{0}.git".format(fullrepo)], check=True)
+    subprocess.run(['git', 'config', 'remote.origin.url', f"git@github.com:{fullrepo}.git"], check=True)
     subprocess.run(['git', 'config', 'push.default', 'simple'], check=True)
     subprocess.run(['git', 'config', 'user.name', json_privdata['GITHUBCOMMITNAME']], check=True)
     subprocess.run(['git', 'config', 'user.email', json_privdata['GITHUBCOMMITEMAIL']], check=True)

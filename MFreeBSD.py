@@ -4,12 +4,16 @@
 # Python includes.
 import argparse
 from datetime import datetime
+import functools
 import os
 import shutil
 import subprocess
 # Custom includes
 import CFunc
 import CFuncExt
+
+# Disable buffered stdout (to ensure prints are in order)
+print = functools.partial(print, flush=True)
 
 print("Running {0}".format(__file__))
 
@@ -61,7 +65,7 @@ time_start = datetime.now()
 # Override FreeBSD Quarterly repo with latest repo
 os.makedirs("/usr/local/etc/pkg/repos", exist_ok=True)
 with open("/usr/local/etc/pkg/repos/FreeBSD.conf", 'w') as file:
-    file.write('FreeBSD: { url: "pkg+http://pkg.FreeBSD.org/${ABI}/latest" }')
+    file.write('FreeBSD-ports: { url: "pkg+https://pkg.FreeBSD.org/${ABI}/latest" }')
 
 # Update system
 subprocess.run(["freebsd-update", "--not-running-from-cron", "fetch", "install"], check=True)
@@ -75,16 +79,13 @@ vmstatus = CFunc.getvmstate()
 
 ### Install FreeBSD Software ###
 # Cli tools
-pkg_install("git python3 sudo nano bash zsh tmux rsync wget 7-zip zip unzip xdg-utils xdg-user-dirs fusefs-sshfs")
-pkg_install("powerline-fonts ubuntu-font roboto-fonts-ttf noto-basic liberation-fonts-ttf")
+pkg_install("git python3 sudo nano bash zsh fish starship tmux rsync wget 7-zip zip unzip xdg-utils xdg-user-dirs fusefs-sshfs")
+pkg_install("nerd-fonts-dejavusansmono nerd-fonts-droidsansmono nerd-fonts-noto nerd-fonts-robotomono nerd-fonts-symbols nerd-fonts-ubuntu nerd-fonts-ubuntumono nerd-fonts-ubuntusans roboto-fonts-ttf liberation-fonts-ttf")
 # Portmaster
 pkg_install("portmaster")
 # Avahi
 pkg_install("avahi-app avahi-autoipd avahi-libdns nss_mdns")
 sysrc_cmd('dbus_enable=yes avahi_daemon_enable=yes avahi_dnsconfd_enable=yes')
-# Samba
-pkg_install("samba419")
-sysrc_cmd('samba_server_enable=yes winbindd_enable=yes')
 # NTP Configuration
 sysrc_cmd('ntpd_enable=yes')
 # GUI Packages
@@ -141,12 +142,12 @@ CFunc.AddLineToSudoersFile(sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USE
 subprocess.run("pw usermod {0} -G wheel,video,operator".format(USERNAMEVAR), shell=True, check=True)
 
 # Extra scripts
-subprocess.run("{0}/CCSClone.py".format(SCRIPTDIR), shell=True, check=True)
-subprocess.run("{0}/CShellConfig.py -z -d".format(SCRIPTDIR), shell=True, check=True)
-subprocess.run("{0}/CDisplayManagerConfig.py".format(SCRIPTDIR), shell=True, check=True)
-subprocess.run("{0}/CVMGeneral.py".format(SCRIPTDIR), shell=True, check=True)
-subprocess.run("{0}/Cxdgdirs.py".format(SCRIPTDIR), shell=True, check=True)
-subprocess.run("bash {0}/CSysConfig.sh".format(SCRIPTDIR), shell=True, check=True)
+subprocess.run(f"{SCRIPTDIR}/CShellConfig.py -z -d", shell=True, check=True)
+subprocess.run(f"{SCRIPTDIR}/CCSClone.py", shell=True, check=True)
+subprocess.run(f"{SCRIPTDIR}/CDisplayManagerConfig.py", shell=True, check=True)
+subprocess.run(f"{SCRIPTDIR}/CVMGeneral.py", shell=True, check=True)
+subprocess.run(f"{SCRIPTDIR}/Cxdgdirs.py", shell=True, check=True)
+subprocess.run(f"bash {SCRIPTDIR}/CSysConfig.sh", shell=True, check=True)
 
 # Wait for processes to finish before exiting.
 time_finishmain = datetime.now()
