@@ -153,7 +153,7 @@ def subpout_logger(cmd: str = None, cmd_list: list = None, suppress_out: bool = 
         with process.stdout:
             log_subprocess_output(process.stdout)
     exitcode = process.wait()
-    if process.returncode != 0:
+    if process.returncode != 0 and suppress_out is False:
         print("ERROR: {0} has non-zero return code.".format(cmd))
     return exitcode
 ### OS Functions ###

@@ -62,7 +62,7 @@ if __name__ == '__main__':
         # Start the VM if it is not started.
         PCreateChrootVM.vm_start(vm_name)
         ssh_ip = virsh_get_ip()
-        PCreateChrootVM.ssh_wait(ip=ssh_ip, user=ssh_user)
+        PCreateChrootVM.ssh_wait(ip=ssh_ip, user=ssh_user, retries=200)
         # Sync CustomScripts on host to VM.
         subprocess.run(f"rsync -axHAX --info=progress2 {sys.path[0]}/ {ssh_user}@{ssh_ip}:/var/opt/CustomScripts/", shell=True, check=True)
         # Initiate logger
