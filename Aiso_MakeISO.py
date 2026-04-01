@@ -22,6 +22,7 @@ def virsh_get_ip(vm_name: str = "ISOVM", retries: int = 100):
     """Get the ip address of a started VM from virsh."""
     status = 1
     attempt = 0
+    ip = ""
     while status != 0 and attempt < retries:
         try:
             ip = Snetvm.libvirt_ipv4(vm_name)
@@ -59,45 +60,48 @@ if __name__ == '__main__':
     print(f"Running {__file__}")
     if args.stage == 1:
         print("Running Stage 1, only for host.")
-        # Start the VM if it is not started.
-        PCreateChrootVM.vm_start(vm_name)
-        ssh_ip = virsh_get_ip()
-        PCreateChrootVM.ssh_wait(ip=ssh_ip, user=ssh_user, retries=200)
-        # Sync CustomScripts on host to VM.
-        subprocess.run(f"rsync -axHAX --info=progress2 {sys.path[0]}/ {ssh_user}@{ssh_ip}:/var/opt/CustomScripts/", shell=True, check=True)
-        # Initiate logger
-        buildlog_path = os.path.join(args.outfolder, f"isovm_{datetime.now()}.log")
-        CFunc.log_config(buildlog_path)
-        # Execute Stage 2
-        stagetwocmd = f"ssh {ssh_ip} -l {ssh_user} /var/opt/CustomScripts/Aiso_MakeISO.py -s 2 -t {args.distrotype}"
-        if args.clean:
-            stagetwocmd += " -c"
-        CFunc.subpout_logger(cmd=stagetwocmd)
+        try:
+            # Stop the VM if it is running right now.
+            PCreateChrootVM.vm_shutdown(vm_name)
+            # Start the VM.
+            PCreateChrootVM.vm_start(vm_name)
+            ssh_ip = virsh_get_ip()
+            PCreateChrootVM.ssh_wait(ip=ssh_ip, user=ssh_user, retries=200)
+            # Sync CustomScripts on host to VM.
+            subprocess.run(f"rsync -axHAX --info=progress2 {sys.path[0]}/ {ssh_user}@{ssh_ip}:/var/opt/CustomScripts/", shell=True, check=True)
+            # Initiate logger
+            buildlog_path = os.path.join(args.outfolder, f"isovm_{datetime.now()}.log")
+            CFunc.log_config(buildlog_path)
+            # Execute Stage 2
+            stagetwocmd = f"ssh {ssh_ip} -l {ssh_user} /var/opt/CustomScripts/Aiso_MakeISO.py -s 2 -t {args.distrotype}"
+            if args.clean:
+                stagetwocmd += " -c"
+            CFunc.subpout_logger(cmd=stagetwocmd)
 
-        # Retrieve ISO paths
-        fedora_iso_path = subprocess.run(f"ssh {ssh_ip} -l {ssh_user} find {fedora_chroot_location}/root/fedlive/ -maxdepth 1 -type f -name '*.iso'", shell=True, check=False, stdout=subprocess.PIPE, universal_newlines=True).stdout.strip()
-        arch_iso_path = subprocess.run(f"ssh {ssh_ip} -l {ssh_user} find {arch_chroot_location}/root/ -maxdepth 1 -type f -name '*.iso'", shell=True, check=False, stdout=subprocess.PIPE, universal_newlines=True).stdout.strip()
-        ubuntu_iso_path = subprocess.run(f"ssh {ssh_ip} -l {ssh_user} find {ubuntu_chroot_location}/root/ubulive/ -maxdepth 1 -type f -name '*.iso'", shell=True, check=False, stdout=subprocess.PIPE, universal_newlines=True).stdout.strip()
-        print(f"Found {fedora_iso_path}, {arch_iso_path}, and {ubuntu_iso_path} .")
+            # Retrieve ISO paths
+            fedora_iso_path = subprocess.run(f"ssh {ssh_ip} -l {ssh_user} find {fedora_chroot_location}/root/fedlive/ -maxdepth 1 -type f -name '*.iso'", shell=True, check=False, stdout=subprocess.PIPE, universal_newlines=True).stdout.strip()
+            arch_iso_path = subprocess.run(f"ssh {ssh_ip} -l {ssh_user} find {arch_chroot_location}/root/ -maxdepth 1 -type f -name '*.iso'", shell=True, check=False, stdout=subprocess.PIPE, universal_newlines=True).stdout.strip()
+            ubuntu_iso_path = subprocess.run(f"ssh {ssh_ip} -l {ssh_user} find {ubuntu_chroot_location}/root/ubulive/ -maxdepth 1 -type f -name '*.iso'", shell=True, check=False, stdout=subprocess.PIPE, universal_newlines=True).stdout.strip()
+            print(f"Found {fedora_iso_path}, {arch_iso_path}, and {ubuntu_iso_path} .")
 
-        # Retrieve ISOs using scp
-        if fedora_iso_path:
-            subprocess.run(f"scp -C {ssh_user}@{ssh_ip}:{fedora_iso_path} {args.outfolder}", shell=True, check=True)
-            # Cleanup
-            subprocess.run(f"ssh {ssh_ip} -l {ssh_user} rm -rf {fedora_chroot_location}/root/fedlive/", shell=True, check=False)
-        if arch_iso_path:
-            subprocess.run(f"scp -C {ssh_user}@{ssh_ip}:{arch_iso_path} {args.outfolder}", shell=True, check=True)
-            # Cleanup
-            subprocess.run(f"ssh {ssh_ip} -l {ssh_user} rm -rf {arch_iso_path}", shell=True, check=False)
-            subprocess.run(f"ssh {ssh_ip} -l {ssh_user} rm -rf /var/tmp/archiso_wf", shell=True, check=False)
-        if ubuntu_iso_path:
-            print(f"scp -C {ssh_user}@{ssh_ip}:{ubuntu_iso_path} {args.outfolder}")
-            subprocess.run(f"scp -C {ssh_user}@{ssh_ip}:{ubuntu_iso_path} {args.outfolder}", shell=True, check=True)
-            # Cleanup
-            subprocess.run(f"ssh {ssh_ip} -l {ssh_user} rm -rf {ubuntu_chroot_location}/root/ubulive/", shell=True, check=False)
-
-        # Shutdown the VM.
-        PCreateChrootVM.vm_shutdown(vm_name)
+            # Retrieve ISOs using scp
+            if fedora_iso_path:
+                subprocess.run(f"scp -C {ssh_user}@{ssh_ip}:{fedora_iso_path} {args.outfolder}", shell=True, check=True)
+                # Cleanup
+                subprocess.run(f"ssh {ssh_ip} -l {ssh_user} rm -rf {fedora_chroot_location}/root/fedlive/", shell=True, check=False)
+            if arch_iso_path:
+                subprocess.run(f"scp -C {ssh_user}@{ssh_ip}:{arch_iso_path} {args.outfolder}", shell=True, check=True)
+                # Cleanup
+                subprocess.run(f"ssh {ssh_ip} -l {ssh_user} rm -rf {arch_iso_path}", shell=True, check=False)
+                subprocess.run(f"ssh {ssh_ip} -l {ssh_user} rm -rf /var/tmp/archiso_wf", shell=True, check=False)
+            if ubuntu_iso_path:
+                print(f"scp -C {ssh_user}@{ssh_ip}:{ubuntu_iso_path} {args.outfolder}")
+                subprocess.run(f"scp -C {ssh_user}@{ssh_ip}:{ubuntu_iso_path} {args.outfolder}", shell=True, check=True)
+                # Cleanup
+                subprocess.run(f"ssh {ssh_ip} -l {ssh_user} rm -rf {ubuntu_chroot_location}/root/ubulive/", shell=True, check=False)
+        finally:
+            # Shutdown the VM, regardless of what happened.
+            PCreateChrootVM.vm_shutdown(vm_name)
     if args.stage == 2:
         print("Running Stage 2, only for VM.")
         # Custom includes
