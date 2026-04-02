@@ -16,7 +16,7 @@ def libvirt_virtnetworks():
     return virtnetworks
 def libvirt_mactable(hostname: str):
     """Return array containing all mac addresses for a given VM."""
-    macaddress_fields = CFunc.subpout(f"virsh -q domiflist {hostname}", error_on_fail=False)
+    macaddress_fields = CFunc.subpout(f"virsh --connect qemu:///system -q domiflist {hostname}", error_on_fail=False)
     # Create a 2D list containing the mac information.
     # 0: Interface, 1: Type, 2: Source, 3: Model, 4: MAC
     macarray = []
