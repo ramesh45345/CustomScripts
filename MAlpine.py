@@ -106,7 +106,7 @@ if not args.nogui:
     # Xorg and wayland
     subprocess.run("setup-xorg-base", shell=True)
     subprocess.run("setup-wayland-base", shell=True)
-    apkinstall("xhost xrandr font-ubuntu font-dejavu font-liberation font-noto")
+    apkinstall("xhost xrandr ttf-ubuntu-font-family font-dejavu font-liberation font-noto")
     # Addons for GUI
     apkinstall("libinput")
     # Gvfs
@@ -135,7 +135,7 @@ if not args.nogui:
         subprocess.run("setup-desktop xfce", shell=True)
         apkinstall("network-manager-applet")
     elif args.desktop == "lxqt":
-        subprocess.run("setup-desktop lxqt")
+        subprocess.run("setup-desktop lxqt", shell=True)
     # Numix icons
     CFuncExt.numix_icons()
 
