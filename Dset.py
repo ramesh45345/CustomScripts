@@ -97,6 +97,8 @@ CFunc.is_root(False)
 
 # Get VM State
 vmstatus = CFunc.getvmstate()
+# Get memory
+mem_mb = int(((os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')) / (1024.**2)))
 
 # Home folder
 USERHOME = str(pathlib.Path.home())
@@ -514,6 +516,10 @@ if shutil.which("kwriteconfig6") and shutil.which("plasma_session"):
     kwriteconfig("ksmserver.notifyrc", "Event/locked", "Execute", os.path.join(sys.path[0], "whloffscreen.py"))
     kwriteconfig("ksmserver.notifyrc", "Event/unlocked", "Action", "Execute")
     kwriteconfig("ksmserver.notifyrc", "Event/unlocked", "Execute", '{0} $(pgrep -f "whloffscreen.py")'.format(shutil.which("kill")))
+    # Baloo (disable it on low memory or VMs)
+    if vmstatus or mem_mb < 6144:
+        kwriteconfig("krunnerrc", "Plugins", "baloosearchEnabled", "false")
+        kwriteconfig("baloofilerc", "Basic Settings", "Indexing-Enabled", "false")
 
     if shutil.which("qdbus"):
         # Reload kwin.
