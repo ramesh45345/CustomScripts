@@ -127,13 +127,17 @@ if not args.nogui:
         subprocess.run("setup-desktop gnome", shell=True)
     elif args.desktop == "kde":
         subprocess.run("setup-desktop plasma", shell=True)
-        apkinstall("plasma-nm")
+        apkinstall("plasma-nm gnome-system-monitor")
     elif args.desktop == "mate":
         subprocess.run("setup-desktop mate", shell=True)
         apkinstall("network-manager-applet")
     elif args.desktop == "xfce":
         subprocess.run("setup-desktop xfce", shell=True)
         apkinstall("network-manager-applet")
+    elif args.desktop == "lxqt":
+        subprocess.run("setup-desktop lxqt")
+    # Numix icons
+    CFuncExt.numix_icons()
 
 # Install software for VMs
 if vmstatus == "kvm":
