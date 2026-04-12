@@ -138,7 +138,7 @@ def file_ifexists(paths: list):
             return f
     return None
 def ovmf_bin_nvramcopy(destpath: str, vmname: str, secureboot: bool = False):
-    """Get the edk2 ovmf bin, and copy and return the corresponding nvram path."""
+    """Get the edk2 ovmf bin, and copy and return the corresponding code and nvram path."""
     # Files to be found.
     ovmf_bin_fullpath = ""
     ovmf_nvram_fullpath = ""
@@ -174,16 +174,23 @@ def ovmf_bin_nvramcopy(destpath: str, vmname: str, secureboot: bool = False):
     if not os.path.isfile(ovmf_bin_fullpath) or not os.path.isfile(ovmf_nvram_fullpath):
         print("\nERROR: OVMF_CODE or OVMF_VARS not detected!")
         sys.exit(1)
+    # code copy logic
+    code_filename = "{0}_CODE.fd".format(vmname)
+    code_copy_path = os.path.join(destpath, code_filename)
     # nvram copy logic
     nvram_filename = "{0}_VARS.fd".format(vmname)
     nvram_copy_path = os.path.join(destpath, nvram_filename)
-    # Remove nvram if it exists.
+    # Remove files if they exists.
+    if os.path.isfile(code_copy_path):
+        os.remove(code_copy_path)
     if os.path.isfile(nvram_copy_path):
         os.remove(nvram_copy_path)
-    # Copy nvram to destination path.
+    # Copy files to destination path.
+    shutil.copy(ovmf_bin_fullpath, code_copy_path)
+    os.chmod(code_copy_path, 0o777)
     shutil.copy(ovmf_nvram_fullpath, nvram_copy_path)
     os.chmod(nvram_copy_path, 0o777)
-    return ovmf_bin_fullpath, nvram_copy_path
+    return code_copy_path, nvram_copy_path
 def nmcli_connecteddevice():
     """Get the connected device from Network Manager."""
     # Get the device list, and convert it into a 2D list
@@ -823,7 +830,7 @@ if __name__ == '__main__':
         data['source'][packer_type]['local']["shutdown_command"] = "shutdown -p now"
     if 45 <= args.ostype <= 49:
         data['source'][packer_type]['local']["shutdown_command"] = "poweroff"
-        data['source'][packer_type]['local']["boot_command"] = ["<wait10>root<enter><wait>", "ifconfig eth0 up && udhcpc -i eth0<enter><wait5>", "wget http://{{ .HTTPIP }}:{{ .HTTPPort }}/alpine-answers<enter><wait>", f"setup-alpine -e -f $PWD/alpine-answers; mount /dev/vda3 /mnt; echo 'PermitRootLogin yes' >> /mnt/etc/ssh/sshd_config; echo 'root:{sha512_password}' | chpasswd -e -R /mnt; apk add efibootmgr; efibootmgr -b 0001 -B; reboot<enter><wait5>"]
+        data['source'][packer_type]['local']["boot_command"] = ["<wait10>root<enter><wait>", "ifconfig eth0 up && udhcpc -i eth0<enter><wait5>", "wget http://{{ .HTTPIP }}:{{ .HTTPPort }}/alpine-answers<enter><wait>", f"""setup-alpine -e -f $PWD/alpine-answers; mount /dev/vda3 /mnt; echo 'PermitRootLogin yes' >> /mnt/etc/ssh/sshd_config; echo 'root:{sha512_password}' | chpasswd -e -R /mnt; apk add efibootmgr; efibootmgr -c -L "alpine" -d /dev/vda -p 1 -l 'EFI/alpine/grubx64.efi'; reboot<enter>"""]
         data['build']['provisioner'][1]["shell"] = {}
         data['build']['provisioner'][1]["shell"]["inline"] = [f"echo '{args.vmuser}:{sha512_password}' | chpasswd -e; addgroup {args.vmuser} wheel; chown -R {args.vmuser}:{args.vmuser} ~{args.vmuser}; apk add git python3; {dest_path}/{vmprovisionscript} {vmprovision_opts}"]
     if 50 <= args.ostype <= 59:
@@ -932,8 +939,10 @@ if __name__ == '__main__':
         if args.vmtype == 2 and os.path.isfile(os.path.join(output_folder, vmname + ".qcow2")):
             shutil.copy2(os.path.join(output_folder, vmname + ".qcow2"), os.path.join(vmpath, vmname + ".qcow2"))
             if useefi:
+                shutil.copy2(efi_bin, vmpath)
                 shutil.copy2(efi_nvram, vmpath)
-                # Set nvram path to copied path.
+                # Set code and nvram path to copied path.
+                efi_bin = os.path.join(vmpath, os.path.basename(efi_bin))
                 efi_nvram = os.path.join(vmpath, os.path.basename(efi_nvram))
     if args.debug:
         logging.info("Not removing {0}, debug flag is set. Please remove this folder manually.".format(packer_temp_folder))
