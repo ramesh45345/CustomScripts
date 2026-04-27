@@ -10,20 +10,20 @@ import CFunc
 
 
 ### Functions ###
-def libvirt_virtnetworks():
+def libvirt_virtnetworks(remote: str = "qemu:///system"):
     """Find all networks in libvirt"""
-    virtnetworks = CFunc.subpout("virsh --connect qemu:///system net-list --all --name").splitlines()
+    virtnetworks = CFunc.subpout(f"virsh --connect {remote} net-list --all --name").splitlines()
     return virtnetworks
-def libvirt_mactable(hostname: str):
+def libvirt_mactable(hostname: str, remote: str = "qemu:///system"):
     """Return array containing all mac addresses for a given VM."""
-    macaddress_fields = CFunc.subpout(f"virsh --connect qemu:///system -q domiflist {hostname}", error_on_fail=False)
+    macaddress_fields = CFunc.subpout(f"virsh --connect {remote} -q domiflist {hostname}", error_on_fail=False)
     # Create a 2D list containing the mac information.
     # 0: Interface, 1: Type, 2: Source, 3: Model, 4: MAC
     macarray = []
     for mac_lines in macaddress_fields.split("\n"):
         macarray += [mac_lines.split()]
     return macarray
-def libvirt_ipv4(hostname: str):
+def libvirt_ipv4(hostname: str, remote: str = "qemu:///system"):
     """
     Return an ipv4 address for a given VM name.
     Inspired by https://github.com/earlruby/create-vm/blob/main/get-vm-ip
@@ -32,15 +32,15 @@ def libvirt_ipv4(hostname: str):
     """
     # Get the MAC for the last interface that has a type of "bridge". Its also possible to filter by the source being "virbr0".
     macaddress = None
-    for mac_line in libvirt_mactable(hostname):
+    for mac_line in libvirt_mactable(hostname=hostname, remote=remote):
         if mac_line[1] == "bridge":
             macaddress = mac_line[4]
     lease_line_found = None
     # Try to find the ip in every available network.
-    for virtnet in libvirt_virtnetworks():
+    for virtnet in libvirt_virtnetworks(remote=remote):
         if virtnet is not None:
             # Get the lines containing the leases for the given network. Keep the \n, since we will split the lines by them and loop over those lines.
-            lease_lines_all = subprocess.run(f'virsh --connect qemu:///system net-dhcp-leases {virtnet} --mac "{macaddress}"', stdout=subprocess.PIPE, universal_newlines=False, shell=True).stdout
+            lease_lines_all = subprocess.run(f'virsh --connect {remote} net-dhcp-leases {virtnet} --mac "{macaddress}"', stdout=subprocess.PIPE, universal_newlines=False, shell=True).stdout
             for lease_line in lease_lines_all.decode('ascii').split('\n'):
                 # After looping through every network, if we find the ipv4 line, store the last one we found.
                 if (lease_line != "" or not None) and "ipv4" in lease_line.lower():
@@ -57,11 +57,12 @@ if __name__ == '__main__':
 
     # Get arguments
     parser = argparse.ArgumentParser(description='List IP addressess of VMs')
+    parser.add_argument("-r", "--remote", help='Remote libvirt connection. Example: qemu+ssh://root@hostname/system (default: %(default)s)', default="qemu:///system")
     parser.add_argument("-v", "--vmname", help='Get the ipv4 address of a libvirt VM (case sensitive and exact name)')
     args = parser.parse_args()
 
     if args.vmname:
-        print(libvirt_ipv4(args.vmname))
+        print(libvirt_ipv4(hostname=args.vmname, remote=args.remote))
     else:
         ### Virtualbox Section ###
         if shutil.which("VBoxManage"):
@@ -75,8 +76,8 @@ if __name__ == '__main__':
 
         ### libvirt section ###
         if shutil.which("virsh"):
-            virtnetworks = libvirt_virtnetworks()
+            virtnetworks = libvirt_virtnetworks(remote=args.remote)
             for virtnet in virtnetworks:
                 if virtnet is not None:
                     print("\nIPs for libvirt network", virtnet)
-                    subprocess.run("virsh --connect qemu:///system net-dhcp-leases {0}".format(virtnet), shell=True)
+                    subprocess.run(f"virsh --connect {args.remote} net-dhcp-leases {virtnet}", shell=True)
