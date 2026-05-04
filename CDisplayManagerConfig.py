@@ -70,16 +70,19 @@ if shutil.which("gdm") or shutil.which("gdm3") or shutil.which("/usr/sbin/gdm3")
 
 
 ### SDDM Section ###
-if shutil.which("sddm"):
-    print("\n Processing sddm configuration.")
+kdelogin = ""
+if shutil.which("plasmalogin"):
+    kdelogin = "plasmalogin"
+elif shutil.which("sddm"):
+    kdelogin = "sddm"
+if kdelogin != "":
+    print(f"\n Processing {kdelogin} configuration.")
     # Enable autologin
     if vmstatus or args.autologin is True:
         plasma_desktop_file = "plasma.desktop"
-        if os.path.isfile("/usr/share/xsessions/plasmax11.desktop"):
-            plasma_desktop_file = "plasmax11.desktop"
-        os.makedirs("/etc/sddm.conf.d", exist_ok=True)
-        with open("/etc/sddm.conf.d/autologin.conf", 'w') as f:
-            f.write("""[Autologin]
-User={0}
-Session={1}
-""".format(USERNAMEVAR, plasma_desktop_file))
+        os.makedirs(f"/etc/{kdelogin}.conf.d", exist_ok=True)
+        with open(f"/etc/{kdelogin}.conf.d/autologin.conf", 'w') as f:
+            f.write(f"""[Autologin]
+User={USERNAMEVAR}
+Session={plasma_desktop_file}
+""")
