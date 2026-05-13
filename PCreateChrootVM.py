@@ -294,7 +294,7 @@ while ! test -f /var/opt/CustomScripts/MNixOS.py; do sleep 1; done;
         if args.debversion is not None:
             debversion = args.debversion
         else:
-            debversion = "noble"
+            debversion = "resolute"
         # VM commands
         vmbootstrap_cmd = f"""#!/bin/bash
 cd ~

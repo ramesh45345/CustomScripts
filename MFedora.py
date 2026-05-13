@@ -156,12 +156,6 @@ def fed_flatpak():
     flatpak_sudoersfile = os.path.join(os.sep, "etc", "sudoers.d", "flatpak")
     CFunc.AddLineToSudoersFile(flatpak_sudoersfile, "{0} ALL=(ALL) NOPASSWD: {1}".format(USERNAMEVAR, shutil.which("flatpak")))
     subprocess.run(os.path.join(SCRIPTDIR, "CFlatpakConfig.py"), shell=True, check=True)
-def fed_numix():
-    """Fedora: Install numix icons"""
-    # Numix
-    CFunc.dnfinstall("numix-icon-theme-circle gdk-pixbuf2")
-    # Update pixbuf cache after installing icons (for some reason doesn't do this automatically).
-    subprocess.run("gdk-pixbuf-query-loaders-64 --update-cache", shell=True, check=True)
 
 
 if __name__ == '__main__':
@@ -209,7 +203,7 @@ if __name__ == '__main__':
 
     if not args.nogui:
         fed_desktop(args.desktop)
-        fed_numix()
+        CFuncExt.numix_icons()
 
     # Add normal user to all reasonable groups
     CFunc.AddUserToGroup("disk")

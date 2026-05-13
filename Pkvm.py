@@ -373,7 +373,7 @@ if __name__ == '__main__':
         vmprovisionscript = "MFedora.py"
         vboxosid = "Fedora_64"
         kvm_variant = "fedora-rawhide"
-        isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/43/Server/x86_64/iso/Fedora-Server-dvd-x86_64-43-1.6.iso"
+        isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/44/Server/x86_64/iso/Fedora-Server-dvd-x86_64-44-1.7.iso"
         if args.desktopenv is None:
             args.desktopenv = "xfce"
     if args.ostype == 1:
@@ -395,7 +395,7 @@ if __name__ == '__main__':
         vmprovisionscript = "MFedoraSilverblue.py"
         vboxosid = "Fedora_64"
         kvm_variant = "silverblue-rawhide"
-        isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/43/Kinoite/x86_64/iso/Fedora-Kinoite-ostree-x86_64-43-1.6.iso"
+        isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/44/Kinoite/x86_64/iso/Fedora-Kinoite-ostree-x86_64-44-1.7.iso"
         vmprovision_defopts = ""
     if args.ostype == 7:
         vmname = "Packer-FedoraKA-{0}".format(hvname)
@@ -405,7 +405,7 @@ if __name__ == '__main__':
         vmprovisionscript = "MFedoraSilverblue.py"
         vboxosid = "Fedora_64"
         kvm_variant = "silverblue-rawhide"
-        isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/43/Silverblue/x86_64/iso/Fedora-Silverblue-ostree-x86_64-43-1.6.iso"
+        isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/44/Silverblue/x86_64/iso/Fedora-Silverblue-ostree-x86_64-44-1.7.iso"
         vmname = "Packer-FedoraSilverblue-{0}".format(hvname)
         vmprovision_defopts = ""
     if 10 <= args.ostype <= 19:

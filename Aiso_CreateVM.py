@@ -28,8 +28,8 @@ fedora_chroot_location = os.path.join(workfolder, "chroot_fedora")
 arch_chroot_location = os.path.join(workfolder, "chroot_arch")
 ubuntu_chroot_location = os.path.join(workfolder, "chroot_ubuntu")
 cslocation = os.path.join(os.path.abspath(args.cslocation), '')
-ubuntu_version = "noble"
-fedora_version = "43"
+ubuntu_version = "resolute"
+fedora_version = "44"
 
 # Check variables
 if not os.path.isdir(cslocation):
