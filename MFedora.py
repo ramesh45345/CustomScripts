@@ -41,6 +41,8 @@ def fed_starship():
 def fed_packer_repo():
     """Install packer repo"""
     CFunc.downloadfile(url="https://rpm.releases.hashicorp.com/fedora/hashicorp.repo", localpath=os.path.join(os.sep, "etc", "yum.repos.d"), overwrite=True)
+    # TODO: Remove once fedora 44 is supported
+    CFunc.find_replace(os.path.join(os.sep, "etc", "yum.repos.d"), "$releasever", "43", "hashicorp.repo")
 def fed_cli(sysd_status: bool, vmstatus: str):
     """Fedora: Cli tools"""
     CFunc.dnfinstall("git fish zsh nano tmux perl-Time-HiRes iotop rsync p7zip p7zip-plugins zip unzip xdg-utils xdg-user-dirs util-linux-user fuse-sshfs lsb_release openssh-server openssh-clients avahi nss-mdns dnf-plugin-system-upgrade xfsprogs python3-pip python3-passlib")
