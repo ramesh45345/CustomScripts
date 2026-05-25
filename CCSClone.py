@@ -64,7 +64,7 @@ else:
     subprocess.run(f"git config --global --add safe.directory {clonepath}", shell=True, check=True)
 # Git config
 subprocess.run("git config --global pull.rebase false", shell=True, check=True)
-CFunc.run_as_user(USERNAMEVAR, "git config --global pull.rebase false", error_on_fail=True)
+CFunc.run_as_user(USERNAMEVAR, "cd ~; git config --global pull.rebase false", error_on_fail=True)
 
 # Git pull.
 os.chdir(clonepath)
