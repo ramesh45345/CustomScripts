@@ -294,7 +294,7 @@ if shutil.which("gnome-session") or shutil.which("gnome-shell"):
     gsettings_set("org.gnome.shell", "enabled-extensions", "['window-list@gnome-shell-extensions.gcampax.github.com', 'dash-to-dock@micxgx.gmail.com', 'dash-to-panel@jderose9.github.com', 'GPaste@gnome-shell-extensions.gnome.org', 'user-theme@gnome-shell-extensions.gcampax.github.com', 'appindicatorsupport@rgcjonas.gmail.com', 'system-monitor@gnome-shell-extensions.gcampax.github.com']")
     # Check current variable for gnome-system-monitor. If it doesn't exist, set the variable.
     gnome_desktop_read_list = subprocess.run("gsettings get org.gnome.shell favorite-apps", shell=True, check=False, stdout=subprocess.PIPE).stdout.decode().strip()
-    gnome_desktop_search_list = ["firefox.desktop", "brave-browser.desktop", "chrome.desktop", 'thunderbird.desktop', 'nautilus.desktop', "ptyxis.desktop", "tilix.desktop", "org.kde.konsole.desktop", 'virt-manager.desktop', 'gnome-system-monitor.desktop', 'org.gnome.SystemMonitor.desktop']
+    gnome_desktop_search_list = ["firefox.desktop", "brave-browser.desktop", "chrome.desktop", 'org.mozilla.thunderbird_esr.desktop', 'thunderbird.desktop', 'nautilus.desktop', "ptyxis.desktop", "tilix.desktop", "org.kde.konsole.desktop", 'virt-manager.desktop', 'org.gnome.SystemMonitor.desktop']
     gnome_desktop_file_list = []
     for d in gnome_desktop_search_list:
         ds = CMimeSet.LocateDesktopFileName(d)
@@ -566,7 +566,7 @@ if shutil.which("kwriteconfig6") and shutil.which("plasma_session"):
     subprocess.run('kwriteconfig6 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "2" --group "Applets" --group "{0}" --group "Configuration" --key "PreloadWeight" "42"'.format(toppanel_appletgroup_id), shell=True, check=False)
 
     plasma_desktop_string = ""
-    plasma_desktop_search_list = ["firefox.desktop", "brave-browser.desktop", "chrome.desktop", 'thunderbird.desktop', 'kde.dolphin.desktop', "org.kde.konsole.desktop", 'virt-manager.desktop', 'org.kde.plasma-systemmonitor.desktop', 'gnome-system-monitor.desktop', 'gnome-system-monitor-kde.desktop', 'org.gnome.SystemMonitor.desktop']
+    plasma_desktop_search_list = ["firefox.desktop", "brave-browser.desktop", "chrome.desktop", 'org.mozilla.thunderbird_esr.desktop', 'thunderbird.desktop', 'kde.dolphin.desktop', "org.kde.konsole.desktop", 'virt-manager.desktop', 'org.gnome.SystemMonitor.desktop']
     plasma_desktop_file_list = []
     for d in plasma_desktop_search_list:
         ds = CMimeSet.LocateDesktopFileName(d)
@@ -904,7 +904,7 @@ if shutil.which("xfconf-query") and shutil.which("xfce4-panel"):
     xfconf("xfce4-panel", "/plugins/plugin-14", "string", "xfce4-clipman-plugin")
     xfconf("xfce4-panel", "/plugins/plugin-15", "string", "pulseaudio")
     # Panel shortcuts
-    xfce_search_list = ["firefox.desktop", "brave-browser.desktop", "chrome.desktop", 'thunderbird.desktop', 'thunar.desktop', "ptyxis.desktop", "tilix.desktop", "xfce4-terminal.desktop", 'virt-manager.desktop', 'xfce4-taskmanager.desktop', 'gnome-system-monitor.desktop', 'org.gnome.SystemMonitor.desktop']
+    xfce_search_list = ["firefox.desktop", "brave-browser.desktop", "chrome.desktop", 'org.mozilla.thunderbird_esr.desktop', 'thunderbird.desktop', 'thunar.desktop', "ptyxis.desktop", "tilix.desktop", "xfce4-terminal.desktop", 'virt-manager.desktop', 'xfce4-taskmanager.desktop', 'org.gnome.SystemMonitor.desktop']
     xfce_file_list = []
     xfce_panel_string = ""
     xfce_panel_id = 20
@@ -979,7 +979,7 @@ if shutil.which("lxqt-panel"):
     os.makedirs(lxqt_config_basefolder, exist_ok=True)
 
     # Panel shortcuts
-    lxqt_search_list = ["firefox.desktop", "brave-browser.desktop", "chrome.desktop", 'thunderbird.desktop', 'pcmanfm-qt.desktop', "konsole.desktop", "tilix.desktop", 'virt-manager.desktop', "org.gnome.SystemMonitor.desktop"]
+    lxqt_search_list = ["firefox.desktop", "brave-browser.desktop", "chrome.desktop", 'org.mozilla.thunderbird_esr.desktop', 'thunderbird.desktop', 'pcmanfm-qt.desktop', "konsole.desktop", "tilix.desktop", 'virt-manager.desktop', "org.gnome.SystemMonitor.desktop"]
     lxqt_file_list = []
     lxqt_panel_string = ""
     lxqt_panel_id = 0
