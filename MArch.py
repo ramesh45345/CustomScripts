@@ -7,6 +7,7 @@ import os
 import shutil
 import subprocess
 import sys
+import time
 # Custom includes
 import CFunc
 import CFuncExt
@@ -159,7 +160,9 @@ if __name__ == '__main__':
     CFunc.sysctl_enable("systemd-oomd", error_on_fail=True)
     # firewalld
     CFunc.pacman_install("firewalld")
-    CFunc.sysctl_enable("firewalld", now=True, error_on_fail=True)
+    CFunc.sysctl_enable("firewalld.service", now=True, error_on_fail=True)
+    # Wait until firewalld starts
+    time.sleep(1)
     CFuncExt.FirewalldConfig()
     # GUI Packages
     if not args.nogui:
