@@ -13,7 +13,10 @@ import CFunc
 
 ### Functions ###
 def getenvfromfile(filepath: str):
-    """ Read environment variables from a file."""
+    """
+    Read environment variables from a file.
+    https://stackoverflow.com/a/50456924
+    """
     envre = re.compile(r'''^(.+?)\s*=\s*(?:["']*)(.+?)(?:[\s"']*)$''')
     result = {}
     with open(filepath) as ins:
@@ -23,7 +26,26 @@ def getenvfromfile(filepath: str):
                 result[match.group(1)] = match.group(2)
     return result
 def detect_update():
+    """Detect the os in use."""
     update_list = []
+    # Get variables
+    file_osrelease = pathlib.Path(os.path.join(os.sep, "etc", "os-release"))
+    vars_osrelease = {}
+    if file_osrelease.exists():
+        vars_osrelease = getenvfromfile(file_osrelease)
+    file_lsbrelease = pathlib.Path(os.path.join(os.sep, "etc", "lsb-release"))
+    vars_lsbrelease = {}
+    if file_lsbrelease.exists():
+        vars_lsbrelease = getenvfromfile(file_lsbrelease)
+    # print(vars_osrelease, vars_lsbrelease)
+
+    # Check commands to determine os.
+    if shutil.which("topgrade"):
+        update_list.append("topgrade")
+    else:
+        # If topgrade is not available, or for exceptions, add OS updates to the list.
+        if shutil.which("flatpak"):
+            update_list.append("flatpak")
     return update_list
 def ensure_root():
     """Elevate to root if not running as root"""
@@ -104,7 +126,6 @@ if __name__ == "__main__":
         user = os.environ.get("SUDO_USER") or os.environ.get("USER") or ""
         if user and user not in nix_path:
             update_nixos()
-    update_flatpak()
 
     # Non-root commands
     if not shutil.which("topgrade"):
