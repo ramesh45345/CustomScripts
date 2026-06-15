@@ -544,11 +544,11 @@ else if type -q nix; and not string match -qr $USER (which nix);
     function se
         echo -e "\\nSearching for $argv."
         flatpak_search $argv
-        nix search nixpkgs $argv
+        nh search $argv
     end
     function cln
         echo "Auto-removing packages and performing garbage collection."
-        sudo nix-collect-garbage -d
+        sudo nh clean all
         flatpak_clean
     end
 end
@@ -1023,11 +1023,11 @@ elif type nix &> /dev/null && ! [[ "$(which nix)" == *"$USER"* ]]; then
     function se () {
         echo -e "\nSearching for $@."
         flatpak_search "$@"
-        nix search nixpkgs "$@"
+        nh search "$@"
     }
     function cln () {
         echo "Auto-removing packages and performing garbage collection."
-        $SUDOCMD nix-collect-garbage -d
+        $SUDOCMD nh clean all
         flatpak_clean
     }
 fi
