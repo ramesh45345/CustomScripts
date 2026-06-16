@@ -80,9 +80,14 @@ def update_zypper():
     subprocess.run(["zypper", "up", "-y"], check=True)
     subprocess.run(["zypper", "dup", "-y"], check=True)
 def update_nixos():
-    subprocess.run(["nixos-rebuild", "boot", "--upgrade"], check=True)
+    if shutil.which("nh"):
+        subprocess.run(["nh", "os", "boot", "-u"], check=True)
+    else:
+        subprocess.run(["nixos-rebuild", "boot", "--upgrade"], check=True)
 def update_distrobox():
     subprocess.run(["distrobox-upgrade", "--all"], check=True)
+def update_distrobox_user():
+    return
 def update_flatpak():
     if shutil.which("flatpak"):
         subprocess.run(["flatpak", "update", "--system", "--assumeyes"], check=True)
