@@ -179,14 +179,17 @@ if shutil.which("flatpak") and cmd_silent(vlc_fp_cmd) == 0:
 # Resize interface to the native video size (boolean)
 qt-video-autoresize=0
 
-# Save the recently played items in the menu (boolean)
-qt-recentplay=0
-
 # Ask for network policy at start (boolean)
 qt-privacy-ask=0
 
 # Maximum Volume displayed (integer)
 qt-max-volume=100
+
+# Continue playback? (integer)
+qt-continue=2
+
+# Use only one instance when started from file manager (boolean)
+one-instance-when-started-from-file=1
 """
     if os.path.isdir(vlc_config_fld_data):
         os.makedirs(vlc_config_fld_datavlc, exist_ok=True)

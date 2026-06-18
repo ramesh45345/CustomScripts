@@ -39,7 +39,6 @@ if args.configure_remotes is False:
     CFunc.flatpak_install("flathub", "org.libreoffice.LibreOffice")
     # Media apps
     CFunc.flatpak_install("flathub", "org.videolan.VLC")
-    CFunc.flatpak_install("flathub", "info.smplayer.SMPlayer")
     CFunc.flatpak_install("flathub", "org.atheme.audacious")
     # Meld
     if not CFunc.is_nixos():
