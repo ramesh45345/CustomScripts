@@ -63,19 +63,50 @@ def detect_update():
     update_list = []
     update_cmd_list = []
     update_cmd_nonroot_list = []
+    topgrade_disable_system = False
     # Get variables
     var_os= osvars_get()
 
+    # Arch
+    if detect_os(["arch"], var_os):
+        update_list.append("arch")
+        topgrade_disable_system = True
+        if shutil.which("yay"):
+            # Yay needs to run without root permissions
+            update_cmd_nonroot_list.append(["yay", "-Syu", "--needed", "--noconfirm"])
+        elif shutil.which("pacman"):
+            update_cmd_list.append(["pacman", "-Syu", "--needed", "--noconfirm"])
+        else:
+            topgrade_disable_system = False
     # Nixos
     if detect_os(["nixos"], var_os) and shutil.which("nixos-rebuild"):
         update_list.append("nixos")
-        update_cmd_list.append(update_nixos())
+        topgrade_disable_system = True
+        if shutil.which("nh"):
+            update_cmd_list.append(["nh", "os", "boot", "-u"])
+        elif shutil.which("nixos-rebuild"):
+            update_cmd_list.append(["nixos-rebuild", "boot", "--upgrade"])
+        else:
+            topgrade_disable_system = False
 
     # Topgrade or other upgrades.
     if shutil.which("topgrade"):
         update_list.append("topgrade")
-        update_cmd_nonroot_list.append(update_topgrade(update_list))
+        update_cmd_nonroot_list.append(update_topgrade(dis_system=topgrade_disable_system))
     else:
+        # Alpine
+        if detect_os(["alpine"], var_os) and shutil.which("apk"):
+            update_list.append("alpine")
+            update_cmd_list.append(["apk", "update"])
+            update_cmd_list.append(["apk", "upgrade"])
+        # Debian/Ubuntu
+        if detect_os(["debian", "ubuntu"], var_os):
+            if shutil.which("nala"):
+                subprocess.run(["nala", "update"], check=True)
+                subprocess.run(["nala", "upgrade"], check=True)
+            elif shutil.which("apt"):
+                subprocess.run(["apt", "update", "-y"], check=True)
+                subprocess.run(["apt", "dist-upgrade", "-y"], check=True)
         # Fedora/RHEL bootc or rpm-ostree
         if detect_os(["fedora"], var_os) and shutil.which("dnf") and shutil.which("rpm-ostree"):
             update_list.append("fedora-rpmostree")
@@ -84,11 +115,26 @@ def detect_update():
         if detect_os(["fedora"], var_os) and shutil.which("dnf") and not shutil.which("rpm-ostree"):
             update_list.append("fedora")
             update_cmd_list.append(["dnf", "update", "--refresh", "-y"])
+        # Opensuse
+        if detect_os(["opensuse"], var_os) and shutil.which("zypper"):
+            update_list.append("opensuse")
+            update_cmd_list.append(["zypper", "up", "-y"])
+            update_cmd_list.append(["zypper", "dup", "-y"])
         # If topgrade is not available, or for exceptions, add OS updates to the list.
         if shutil.which("flatpak"):
             update_list.append("flatpak")
             update_cmd_list.append(update_flatpak())
             update_cmd_nonroot_list.append(update_flatpak_user())
+        # Distrobox user
+        if shutil.which("distrobox"):
+            update_list.append("distrobox-user")
+            update_cmd_nonroot_list.append(["distrobox", "upgrade", "--all"])
+
+    # Distrobox root
+    if shutil.which("distrobox"):
+        update_list.append("distrobox-root")
+        # Distrobox root expects to run as non-root first.
+        update_cmd_nonroot_list.append(["distrobox", "upgrade", "--root", "--all"])
 
     return update_list, update_cmd_list, update_cmd_nonroot_list
 def ensure_root():
@@ -102,37 +148,16 @@ def nixos_config_pull():
     if shutil.which("nixos-rebuild") and nixos_path.exists():
         # Run git pull
         CFunc.run_as_user(user_name=nixos_path.owner(), cmd=f"cd {nixos_path} && git pull")
-def update_topgrade(oslist: list = []):
+def update_topgrade(dis_system: bool = False):
     """Build and run topgrade command."""
     # Topgrade command
     topgrade_cmd_array = ["topgrade", "-y", "--disable=firmware"]
-    # If nixos, exclude system
-    if "nixos" in oslist:
+    # Remove home-manager, it always fails if nh is present, and should be upgraded separately.
+    topgrade_cmd_array += ["--disable=home_manager"]
+    # Exclude system if option is set
+    if dis_system:
         topgrade_cmd_array += ["--disable=system"]
     return topgrade_cmd_array
-def update_nala():
-    subprocess.run(["nala", "update"], check=True)
-    subprocess.run(["nala", "upgrade"], check=True)
-def update_apt():
-    subprocess.run(["apt-get", "update"], check=True)
-    subprocess.run(["apt-get", "dist-upgrade"], check=True)
-def update_arch():
-    if shutil.which("yay"):
-        subprocess.run(["yay", "-Syu", "--needed", "--noconfirm"], check=True)
-    else:
-        subprocess.run(["pacman", "-Syu", "--needed", "--noconfirm"], check=True)
-def update_zypper():
-    subprocess.run(["zypper", "up", "-y"], check=True)
-    subprocess.run(["zypper", "dup", "-y"], check=True)
-def update_nixos():
-    cmd = ["nixos-rebuild", "boot", "--upgrade"]
-    if shutil.which("nh"):
-        cmd = ["nh", "os", "boot", "-u"]
-    return cmd
-def update_distrobox():
-    subprocess.run(["distrobox-upgrade", "--all"], check=True)
-def update_distrobox_user():
-    return
 def update_flatpak():
     return ["flatpak", "update", "--system", "--assumeyes"]
 def update_flatpak_user():
