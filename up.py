@@ -25,11 +25,8 @@ def getenvfromfile(filepath: str):
             if match is not None:
                 result[match.group(1)] = match.group(2)
     return result
-def detect_update():
-    """Detect the os in use."""
-    update_list = []
-    update_cmd_list = []
-    # Get variables
+def osvars_get(printvars: bool = False):
+    """Get variables from osrelease and lsbrelease."""
     file_osrelease = pathlib.Path(os.path.join(os.sep, "etc", "os-release"))
     vars_osrelease = {}
     if file_osrelease.exists():
@@ -38,24 +35,62 @@ def detect_update():
     vars_lsbrelease = {}
     if file_lsbrelease.exists():
         vars_lsbrelease = getenvfromfile(file_lsbrelease)
-    # print(vars_osrelease, vars_lsbrelease)
+    if printvars:
+        print("\nOS Release vars:")
+        for key, val in vars_osrelease.items():
+            print(f"{key}: {val}")
+        print("\nLSB Release vars:")
+        for key, val in vars_lsbrelease.items():
+            print(f"{key}: {val}")
+    # Merge dicts
+    vars = {**vars_osrelease, **vars_lsbrelease}
+    return vars
+def detect_user():
+    """Get the normal user to run commands as."""
+    # Check SUDO_USER first. If that doesn't work, use CFunc to get the normal user.
+    return os.environ.get("SUDO_USER", CFunc.getnormaluser()[0])
+def detect_os(osid: list = [], osvars: dict = osvars_get()):
+    """Check if the os string is detected in os variables."""
+    detected = False
+    for x in osid:
+        for osvar_item in osvars.items():
+            # 0 is key, 1 is value for dict items
+            if x == osvar_item[1]:
+                detected = True
+    return detected
+def detect_update():
+    """Detect the os in use."""
+    update_list = []
+    update_cmd_list = []
+    update_cmd_nonroot_list = []
+    # Get variables
+    var_os= osvars_get()
 
     # Nixos
-    if "ID" in vars_osrelease and vars_osrelease["ID"] == "nixos" and shutil.which("nixos-rebuild"):
+    if detect_os(["nixos"], var_os) and shutil.which("nixos-rebuild"):
         update_list.append("nixos")
         update_cmd_list.append(update_nixos())
 
     # Topgrade or other upgrades.
     if shutil.which("topgrade"):
         update_list.append("topgrade")
-        update_cmd_list.append(update_topgrade(update_list))
+        update_cmd_nonroot_list.append(update_topgrade(update_list))
     else:
+        # Fedora/RHEL bootc or rpm-ostree
+        if detect_os(["fedora"], var_os) and shutil.which("dnf") and shutil.which("rpm-ostree"):
+            update_list.append("fedora-rpmostree")
+            update_cmd_list.append(["rpm-ostree", "upgrade"])
+        # Fedora/RHEL
+        if detect_os(["fedora"], var_os) and shutil.which("dnf") and not shutil.which("rpm-ostree"):
+            update_list.append("fedora")
+            update_cmd_list.append(["dnf", "update", "--refresh", "-y"])
         # If topgrade is not available, or for exceptions, add OS updates to the list.
         if shutil.which("flatpak"):
             update_list.append("flatpak")
             update_cmd_list.append(update_flatpak())
-    
-    return update_list, update_cmd_list
+            update_cmd_nonroot_list.append(update_flatpak_user())
+
+    return update_list, update_cmd_list, update_cmd_nonroot_list
 def ensure_root():
     """Elevate to root if not running as root"""
     if not CFunc.is_windows() and CFunc.is_root(state_exit=False):
@@ -69,26 +104,18 @@ def nixos_config_pull():
         CFunc.run_as_user(user_name=nixos_path.owner(), cmd=f"cd {nixos_path} && git pull")
 def update_topgrade(oslist: list = []):
     """Build and run topgrade command."""
-    # TODO: Run topgrade as user?
     # Topgrade command
     topgrade_cmd_array = ["topgrade", "-y", "--disable=firmware"]
-    # Check if topgrade config exists
-    topgrade_config_file = os.path.join(os.sep, "etc", "topgrade.toml")
-    if not os.path.exists(topgrade_config_file):
-        # If nixos, exclude system
-        if "nixos" in oslist:
-            topgrade_cmd_array += ["--disable=system"]
+    # If nixos, exclude system
+    if "nixos" in oslist:
+        topgrade_cmd_array += ["--disable=system"]
     return topgrade_cmd_array
-def update_rostree():
-    subprocess.run(["rpm-ostree", "upgrade"], check=True)
 def update_nala():
     subprocess.run(["nala", "update"], check=True)
     subprocess.run(["nala", "upgrade"], check=True)
 def update_apt():
     subprocess.run(["apt-get", "update"], check=True)
     subprocess.run(["apt-get", "dist-upgrade"], check=True)
-def update_dnf():
-    subprocess.run(["dnf", "update", "--refresh", "-y"], check=True)
 def update_arch():
     if shutil.which("yay"):
         subprocess.run(["yay", "-Syu", "--needed", "--noconfirm"], check=True)
@@ -108,6 +135,8 @@ def update_distrobox_user():
     return
 def update_flatpak():
     return ["flatpak", "update", "--system", "--assumeyes"]
+def update_flatpak_user():
+    return ["flatpak", "update", "--user", "--assumeyes"]
 
 
 ### Begin Code ###
@@ -119,12 +148,14 @@ if __name__ == "__main__":
     parser.add_argument("-d", "--dryrun", help='Print commands to run only.', action="store_true")
     args = parser.parse_args()
 
-    upgrade_list, upgrade_cmd_list = detect_update()
+    upgrade_list, upgrade_cmd_list, update_cmd_nonroot_list = detect_update()
     if args.dryrun:
         print("\nUpgrade List:")
         print(*upgrade_list, sep='\n')
-        print("\nUpgrade commands:")
+        print("\nUpgrade commands (root):")
         print(*upgrade_cmd_list, sep='\n')
+        print("\nUpgrade commands (nonroot):")
+        print(*update_cmd_nonroot_list, sep='\n')
         exit(0)
 
     if args.flatpak and "flatpak" in upgrade_list:
@@ -133,6 +164,8 @@ if __name__ == "__main__":
 
     # Require root before proceeding
     ensure_root()
+    # Get sudo user
+    normal_user = detect_user()
     # Update nixos config
     nixos_config_pull()
 
@@ -141,3 +174,5 @@ if __name__ == "__main__":
         subprocess.run(cmd, check=True)
 
     # Non-root commands
+    for cmd in update_cmd_nonroot_list:
+        CFunc.run_as_user(normal_user, cmd, error_on_fail=True)
