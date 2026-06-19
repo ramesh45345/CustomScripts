@@ -300,7 +300,7 @@ def demote(user_uid, user_gid):
         os.setgid(user_gid)
         os.setuid(user_uid)
     return result
-def run_as_user(user_name, cmd: str = None, cmd_list: list = None, shell_cmd="/bin/sh", error_on_fail=False):
+def run_as_user(user_name, cmd: str = None, cmd_list: list = None, shell_cmd=None, error_on_fail=False):
     """Run a command as the specified username."""
     cwd = os.getcwd()
     pw_record = pwd.getpwnam(user_name)

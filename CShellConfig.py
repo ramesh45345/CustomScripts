@@ -345,41 +345,7 @@ function snap_search
     end
 end
 function up
-    if type -q nixos-rebuild ; and [ (id -u) != "0" ] ; and checkpath "/etc/nixos"; and test -d "/etc/nixos"
-        cd /etc/nixos
-        git pull
-    end
-    # System upgrade commands
-    if type -q topgrade
-        topgrade -y flatpak --disable firmware $argv
-    else if type -q rpm-ostree
-        sudo rpm-ostree upgrade
-    else if type -q nala
-        sudo nala update
-        sudo nala upgrade
-    else if type -q apt-get
-        sudo apt-get update
-        sudo apt-get dist-upgrade
-    else if type -q dnf
-        sudo dnf update --refresh -y
-    else if type -q yay
-        yay -Syu --needed --noconfirm
-    else if type -q zypper
-        sudo zypper up -y
-        sudo zypper dup -y
-    else if type -q nix; and not string match -qr $USER (which nix);
-        sudo nixos-rebuild switch --upgrade
-    end
-    # Non-root commands
-    if not type -q topgrade
-        distrobox-upgrade --all
-    end
-end
-function upr
-    # Root commands
-    if type -q distrobox-upgrade
-        distrobox-upgrade --root --all
-    end
+    up.py
 end
 
 # Set package manager functions
@@ -811,41 +777,7 @@ function snap_search () {
     fi
 }
 function up () {
-    if type -p nixos-rebuild &> /dev/null && [ $(id -u) != "0" ] && [ -d /etc/nixos ] ; then
-        cd /etc/nixos
-        git pull
-    fi
-    # System upgrade commands
-    if type -p topgrade &> /dev/null ; then
-        topgrade -y flatpak --disable firmware $@
-    elif type -p rpm-ostree &> /dev/null; then
-        $SUDOCMD rpm-ostree upgrade
-    elif type -p nala &> /dev/null; then
-        $SUDOCMD nala update
-        $SUDOCMD nala upgrade
-    elif type -p apt-get &> /dev/null; then
-        $SUDOCMD apt-get update
-        $SUDOCMD apt-get dist-upgrade
-    elif type -p dnf &> /dev/null; then
-        $SUDOCMD dnf update --refresh -y
-    elif type -p yay &> /dev/null; then
-        yay -Syu --needed --noconfirm
-    elif type -p zypper &> /dev/null; then
-        $SUDOCMD zypper up -y
-        $SUDOCMD zypper dup -y
-    elif type nix &> /dev/null && ! [[ "$(which nix)" == *"$USER"* ]]; then
-        $SUDOCMD nixos-rebuild switch --upgrade
-    fi
-    # Non-root commands
-    if ! type -p topgrade &> /dev/null ; then
-        distrobox-upgrade --all
-    fi
-}
-function upr () {
-    # Root commands
-    if type -p distrobox-upgrade &> /dev/null ; then
-        distrobox-upgrade --root --all
-    fi
+    $CUSTOMSCRIPTPATH/up.py
 }
 
 if type rpm-ostree &> /dev/null; then
