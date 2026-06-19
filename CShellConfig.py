@@ -1106,35 +1106,35 @@ else:
     print("ERROR: {0} is not writeable.".format(os.path.dirname(customprofile_path)))
 
 # Generate bash script
-BASHSCRIPT = "\nalias la='ls -lah --color=auto'"
-BASHSCRIPT += rc_additions
+bashscript = "\nalias la='ls -lah --color=auto'"
+bashscript += rc_additions
 
 # Set bash script
-BASHSCRIPTPATH = os.path.join(USERVARHOME, ".bashrc")
-print("Bash script path is {0}".format(BASHSCRIPTPATH))
+bashscriptpath = os.path.join(USERVARHOME, ".bashrc")
+print("Bash script path is {0}".format(bashscriptpath))
+bashrootscriptpath = os.path.join(ROOTHOME, ".bashrc")
 if rootstate is True:
-    BASHROOTSCRIPTPATH = os.path.join(ROOTHOME, ".bashrc")
-    print("Bash root script path is {0}".format(BASHROOTSCRIPTPATH))
+    print("Bash root script path is {0}".format(bashrootscriptpath))
 
 # Remove existing bash scripts and copy skeleton.
-if os.path.isfile(BASHSCRIPTPATH):
-    os.remove(BASHSCRIPTPATH)
+if os.path.isfile(bashscriptpath):
+    os.remove(bashscriptpath)
 if rootstate is True:
-    if os.path.isfile(BASHROOTSCRIPTPATH):
-        os.remove(BASHROOTSCRIPTPATH)
+    if os.path.isfile(bashrootscriptpath):
+        os.remove(bashrootscriptpath)
 
 # Skeleton will get overwritten by bash-it below, this is left here just in case it is needed in the future.
 if os.path.isfile("/etc/skel/.bashrc"):
-    shutil.copy("/etc/skel/.bashrc", BASHSCRIPTPATH)
+    shutil.copy("/etc/skel/.bashrc", bashscriptpath)
     if rootstate is True:
-        shutil.copy("/etc/skel/.bashrc", BASHROOTSCRIPTPATH)
-        shutil.chown(BASHSCRIPTPATH, USERNAMEVAR, USERGROUP)
+        shutil.copy("/etc/skel/.bashrc", bashrootscriptpath)
+        shutil.chown(bashscriptpath, USERNAMEVAR, USERGROUP)
 else:
     # Create bashrc if no skeleton
-    open(BASHSCRIPTPATH, 'a').close()
+    open(bashscriptpath, 'a').close()
     if rootstate is True:
-        open(BASHROOTSCRIPTPATH, 'a').close()
-        shutil.chown(BASHSCRIPTPATH, USERNAMEVAR, USERGROUP)
+        open(bashrootscriptpath, 'a').close()
+        shutil.chown(bashscriptpath, USERNAMEVAR, USERGROUP)
 
 # Install bash-it before modifying bashrc (which automatically deletes bashrc)
 # If /opt exists, use it. If not Windows, make and use /var/opt
@@ -1157,22 +1157,22 @@ if os.path.isdir(bashit_path):
     [ "$(id -u)" = "0" ] && HOME={0}
     {1}/install.sh --silent --overwrite-backup
     """.format(ROOTHOME, bashit_path), shell=True, check=True)
-    subprocess.run("""sed -i -- "s/BASH_IT_THEME=.*/BASH_IT_THEME='powerline'/g" {0}""".format(BASHSCRIPTPATH), shell=True, check=True)
+    subprocess.run("""sed -i -- "s/BASH_IT_THEME=.*/BASH_IT_THEME='powerline'/g" {0}""".format(bashscriptpath), shell=True, check=True)
     if rootstate is True:
         CFunc.run_as_user(user_name=USERNAMEVAR, cmd=f"{bashit_path}/install.sh --silent --overwrite-backup", shell_cmd=shutil.which("bash"), error_on_fail=True)
-        subprocess.run("""sed -i -- "s/BASH_IT_THEME=.*/BASH_IT_THEME='powerline'/g" {0} {1}""".format(BASHROOTSCRIPTPATH, BASHSCRIPTPATH), shell=True, check=True)
+        subprocess.run("""sed -i -- "s/BASH_IT_THEME=.*/BASH_IT_THEME='powerline'/g" {0} {1}""".format(bashrootscriptpath, bashscriptpath), shell=True, check=True)
 
 # Install bash script
-BASHSCRIPT_VAR = open(BASHSCRIPTPATH, mode='a')
-BASHSCRIPT_VAR.write(BASHSCRIPT)
+BASHSCRIPT_VAR = open(bashscriptpath, mode='a')
+BASHSCRIPT_VAR.write(bashscript)
 BASHSCRIPT_VAR.close()
-os.chmod(BASHSCRIPTPATH, 0o644)
+os.chmod(bashscriptpath, 0o644)
 if rootstate is True:
-    BASHSCRIPTUSER_VAR = open(BASHROOTSCRIPTPATH, mode='a')
-    BASHSCRIPTUSER_VAR.write(BASHSCRIPT)
+    BASHSCRIPTUSER_VAR = open(bashrootscriptpath, mode='a')
+    BASHSCRIPTUSER_VAR.write(bashscript)
     BASHSCRIPTUSER_VAR.close()
-    os.chmod(BASHROOTSCRIPTPATH, 0o644)
-    shutil.chown(BASHSCRIPTPATH, USERNAMEVAR, USERGROUP)
+    os.chmod(bashrootscriptpath, 0o644)
+    shutil.chown(bashscriptpath, USERNAMEVAR, USERGROUP)
 
 # Create .local/bin folder for normal user
 localbin_path = os.path.join(USERVARHOME, ".local", "bin")
@@ -1204,7 +1204,7 @@ if args.zsh is True and shutil.which('zsh'):
     # Write zshrc
     zshrc_path = os.path.join(USERVARHOME, ".zshrc")
     print("Writing {0}".format(zshrc_path))
-    ZSHSCRIPT = """export ZSH={0}/.oh-my-zsh
+    zshscript = """export ZSH={0}/.oh-my-zsh
 ZSH_THEME="agnoster"
 plugins=( {1} )
 DISABLE_UPDATE_PROMPT=true
@@ -1216,9 +1216,9 @@ if [ "${{PATH#*{2}}}" = "${{PATH}}" ] && [ -d "{2}" ]; then
     export PATH=$PATH:{2}
 fi
 """.format(USERVARHOME, ohmyzsh_plugins, SCRIPTDIR)
-    ZSHSCRIPT += rc_additions
+    zshscript += rc_additions
     with open(zshrc_path, 'w') as file:
-        file.write(ZSHSCRIPT)
+        file.write(zshscript)
     # chmod -R g-w,o-w .oh-my-zsh
     CFunc.chmod_recursive_mask(os.path.join(USERVARHOME, ".oh-my-zsh"), mask=((~stat.S_IXGRP & 0xFFFF) & (~stat.S_IXOTH & 0xFFFF)), and_mask=True)
     CFunc.chown_recursive(os.path.join(USERVARHOME, ".oh-my-zsh"), USERNAMEVAR, USERGROUP)
