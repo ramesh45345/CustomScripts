@@ -3,6 +3,7 @@
 
 # Python includes.
 import argparse
+import functools
 import os
 import shutil
 import subprocess
@@ -12,6 +13,9 @@ import time
 import CFunc
 import CFuncExt
 
+# Disable buffered stdout (to ensure prints are in order)
+print = functools.partial(print, flush=True)
+
 # Folder of this script
 SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -19,7 +23,7 @@ SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))
 def yay_invoke(run_as_user: str, options: str):
     """Invoke yay as normal user"""
     if shutil.which("yay"):
-        CFunc.run_as_user(run_as_user, "yay --noconfirm {0}".format(options), error_on_fail=True)
+        CFunc.run_as_user(user_name=run_as_user, cmd="yay --noconfirm {0}".format(options), error_on_fail=True)
     else:
         print("ERROR: yay not found. Exiting.")
         sys.exit(1)
@@ -47,7 +51,7 @@ def install_aur_pkg(package: str, username, usergroup):
     package_gitcheckout_folder = os.path.join(os.sep, "tmp", package)
     subprocess.run("cd /tmp ; git clone https://aur.archlinux.org/{0}.git".format(package), shell=True, check=True)
     CFunc.chown_recursive(package_gitcheckout_folder, username, usergroup)
-    CFunc.run_as_user(username, "cd {0} ; makepkg --noconfirm -si".format(package_gitcheckout_folder), error_on_fail=True)
+    CFunc.run_as_user(user_name=username, cmd="cd {0} ; makepkg --noconfirm -si".format(package_gitcheckout_folder), error_on_fail=True)
     shutil.rmtree(package_gitcheckout_folder)
 def snapper_arch():
     """Install snapper on Arch."""

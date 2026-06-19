@@ -3,12 +3,16 @@
 
 # Python includes.
 import argparse
+import functools
 import os
 import shutil
 import subprocess
 # Custom includes
 import CFunc
 import CFuncExt
+
+# Disable buffered stdout (to ensure prints are in order)
+print = functools.partial(print, flush=True)
 
 print("Running {0}".format(__file__))
 
@@ -175,7 +179,7 @@ unmanaged-devices=none""")
     subprocess.run(["/var/opt/CustomScripts/DExtMate.py"], check=True)
     # vscode setup
     if args.distro == "ubuntu" or args.distro == "fedora":
-        CFunc.run_as_user(USERNAMEVAR, os.path.join(SCRIPTDIR, "Cvscode.py"), shutil.which("bash"), error_on_fail=True)
+        CFunc.run_as_user(user_name=USERNAMEVAR, cmd=os.path.join(SCRIPTDIR, "Cvscode.py"), shell_cmd=shutil.which("bash"), error_on_fail=True)
 
     # Desktop configuration
     with open("/etc/xdg/autostart/mate-dset.desktop", 'w') as f:

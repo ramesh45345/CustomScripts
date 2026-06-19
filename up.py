@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Update script."""
 import argparse
+import functools
 import os
 import pathlib
 import re
@@ -10,6 +11,8 @@ import subprocess
 # Custom includes
 import CFunc
 
+# Disable buffered stdout (to ensure prints are in order)
+print = functools.partial(print, flush=True)
 
 ### Functions ###
 def getenvfromfile(filepath: str):
@@ -83,7 +86,7 @@ def detect_update():
         update_list.append("nixos")
         topgrade_disable_system = True
         if shutil.which("nh"):
-            update_cmd_list.append(["nh", "os", "boot", "-u"])
+            update_cmd_list.append(["nh", "os", "boot", "--bypass-root-check", "-u"])
         elif shutil.which("nixos-rebuild"):
             update_cmd_list.append(["nixos-rebuild", "boot", "--upgrade"])
         else:
@@ -139,7 +142,7 @@ def detect_update():
     return update_list, update_cmd_list, update_cmd_nonroot_list
 def ensure_root():
     """Elevate to root if not running as root"""
-    if not CFunc.is_windows() and CFunc.is_root(state_exit=False):
+    if not CFunc.is_windows() and CFunc.is_root(checkstate=False, state_exit=False):
         # Re-run the script with sudo preserving argv
         os.execvp("sudo", ["sudo", sys.executable] + sys.argv)
 def nixos_config_pull():
@@ -196,8 +199,9 @@ if __name__ == "__main__":
 
     # Run root upgrade commands
     for cmd in upgrade_cmd_list:
+        print(f"Running {cmd}")
         subprocess.run(cmd, check=True)
 
     # Non-root commands
     for cmd in update_cmd_nonroot_list:
-        CFunc.run_as_user(normal_user, cmd, error_on_fail=True)
+        CFunc.run_as_user(user_name=normal_user, cmd_list=cmd, error_on_fail=True)

@@ -3,10 +3,14 @@
 
 # Python includes.
 import argparse
+import functools
 import os
 import subprocess
 # Custom includes
 import CFunc
+
+# Disable buffered stdout (to ensure prints are in order)
+print = functools.partial(print, flush=True)
 
 # Folder of this script
 SCRIPTDIR = os.path.abspath(os.path.dirname(__file__))
@@ -21,8 +25,8 @@ def cli_scripts():
 def gui_scripts(user: str):
     """"""
     subprocess.run(['{0}/Cxdgdirs.py'.format(SCRIPTDIR)], check=True)
-    CFunc.run_as_user(user, "{0}/Cvscode.py".format(SCRIPTDIR), error_on_fail=True)
-    CFunc.run_as_user(user, "{0}/CMediaPlayerConfig.py".format(SCRIPTDIR), error_on_fail=True)
+    CFunc.run_as_user(user_name=user, cmd="{0}/Cvscode.py".format(SCRIPTDIR), error_on_fail=True)
+    CFunc.run_as_user(user_name=user, cmd="{0}/CMediaPlayerConfig.py".format(SCRIPTDIR), error_on_fail=True)
 
 ### Begin Code ###
 if __name__ == '__main__':

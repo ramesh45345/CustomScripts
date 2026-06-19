@@ -115,7 +115,7 @@ time = "#33658A"
     if CFunc.is_windows() or rootstate is False:
         os.makedirs(os.path.dirname(starship_config_path), exist_ok=True)
     else:
-        CFunc.run_as_user(user, "mkdir -p {0}".format(os.path.dirname(starship_config_path)))
+        CFunc.run_as_user(user_name=user, cmd="mkdir -p {0}".format(os.path.dirname(starship_config_path)))
 
     with open(starship_config_path, mode='w') as f:
         f.write(starship_config_text)
@@ -1159,7 +1159,7 @@ if os.path.isdir(bashit_path):
     """.format(ROOTHOME, bashit_path), shell=True, check=True)
     subprocess.run("""sed -i -- "s/BASH_IT_THEME=.*/BASH_IT_THEME='powerline'/g" {0}""".format(BASHSCRIPTPATH), shell=True, check=True)
     if rootstate is True:
-        CFunc.run_as_user(USERNAMEVAR, "{0}/install.sh --silent --overwrite-backup".format(bashit_path), shutil.which("bash"), error_on_fail=True)
+        CFunc.run_as_user(user_name=USERNAMEVAR, cmd=f"{bashit_path}/install.sh --silent --overwrite-backup", shell_cmd=shutil.which("bash"), error_on_fail=True)
         subprocess.run("""sed -i -- "s/BASH_IT_THEME=.*/BASH_IT_THEME='powerline'/g" {0} {1}""".format(BASHROOTSCRIPTPATH, BASHSCRIPTPATH), shell=True, check=True)
 
 # Install bash script

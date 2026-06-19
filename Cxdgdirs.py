@@ -22,7 +22,7 @@ rootstate = CFunc.is_root(checkstate=True, state_exit=False)
 
 # Create xdg folders
 if rootstate is True and shutil.which("xdg-user-dirs-update"):
-    CFunc.run_as_user(USERNAMEVAR, "xdg-user-dirs-update", shutil.which("bash"))
+    CFunc.run_as_user(user_name=USERNAMEVAR, cmd="xdg-user-dirs-update", shell_cmd=shutil.which("bash"))
 elif rootstate is False and shutil.which("xdg-user-dirs-update"):
     subprocess.run('xdg-user-dirs-update', shell=True)
 else:

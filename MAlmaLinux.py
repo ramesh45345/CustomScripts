@@ -86,7 +86,7 @@ elif args.kerneltype == 2:
 powerline_git_path = os.path.join(tempfile.gettempdir(), "pl-fonts")
 CFunc.gitclone("https://github.com/powerline/fonts", powerline_git_path)
 subprocess.run(os.path.join(powerline_git_path, "install.sh"), shell=True)
-CFunc.run_as_user(USERNAMEVAR, os.path.join(powerline_git_path, "install.sh"))
+CFunc.run_as_user(user_name=USERNAMEVAR, cmd=os.path.join(powerline_git_path, "install.sh"))
 shutil.rmtree(powerline_git_path)
 # firewalld
 CFunc.dnfinstall("firewalld")

@@ -139,11 +139,11 @@ def subpout_logger(cmd: str = None, cmd_list: list = None, suppress_out: bool = 
     if suppress_out is True:
         stdout_opt = subprocess.DEVNULL
         stderr_opt = subprocess.DEVNULL
-    if cmd is not None:
+    if cmd:
         if suppress_out is False:
             logging.info("Running command: %s", cmd)
         process = subprocess.Popen(cmd, stdout=stdout_opt, stderr=stderr_opt, shell=True)
-    elif cmd_list is not None:
+    if cmd_list:
         if suppress_out is False:
             logging.info(f"Running command: {shlex.join(cmd_list)}")
         process = subprocess.Popen(cmd_list, stdout=stdout_opt, stderr=stderr_opt)
@@ -181,6 +181,7 @@ def getuserdetails(username):
     return usergroup, userhome
 def getnormaluser(username: str = ""):
     """Auto-detect non-root user information."""
+    usernamevar = ""
     # Check if the passed user is really a user on this system.
     if username != "" and username in [entry.pw_name for entry in pwd.getpwall()]:
         usernamevar = username
@@ -299,7 +300,7 @@ def demote(user_uid, user_gid):
         os.setgid(user_gid)
         os.setuid(user_uid)
     return result
-def run_as_user(user_name, cmd, shell_cmd=None, error_on_fail=False):
+def run_as_user(user_name, cmd: str = None, cmd_list: list = None, shell_cmd="/bin/sh", error_on_fail=False):
     """Run a command as the specified username."""
     cwd = os.getcwd()
     pw_record = pwd.getpwnam(user_name)
@@ -314,11 +315,15 @@ def run_as_user(user_name, cmd, shell_cmd=None, error_on_fail=False):
     env['USER'] = user_name
     env['DBUS_SESSION_BUS_ADDRESS'] = "unix:path=/run/user/{0}/bus".format(user_uid)
     env['XDG_RUNTIME_DIR'] = "/run/user/{0}".format(user_uid)
-    print("Running {0} as {1}".format(cmd, user_name))
-    process = subprocess.Popen(cmd, preexec_fn=demote(user_uid, user_gid), cwd=cwd, env=env, shell=True, executable=shell_cmd)
+    if cmd_list:
+        print(f"Running {shlex.join(cmd_list)} as {user_name}")
+        process = subprocess.Popen(cmd_list, preexec_fn=demote(user_uid, user_gid), cwd=cwd, env=env, executable=shell_cmd)
+    else:
+        print(f"Running {cmd} as {user_name}")
+        process = subprocess.Popen(cmd, preexec_fn=demote(user_uid, user_gid), cwd=cwd, env=env, shell=True, executable=shell_cmd)
     process.wait()
     if error_on_fail is True and process.returncode != 0:
-        sys.exit("ERROR: {0} ran as user {1} returned status code {2}. Exiting.".format(cmd, user_name, process.returncode))
+        sys.exit(f"ERROR: {cmd_list if cmd_list else cmd} ran as user {user_name} returned status code {process.returncode}. Exiting.")
     return process.returncode
 def run_as_user_su(user_name, cmd, shell_cmd="/bin/sh", error_on_fail=False):
     """Run a command as the specified username using the su command."""
