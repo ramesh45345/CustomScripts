@@ -139,16 +139,14 @@ def subpout_logger(cmd: str = None, cmd_list: list = None, suppress_out: bool = 
     if suppress_out is True:
         stdout_opt = subprocess.DEVNULL
         stderr_opt = subprocess.DEVNULL
-    if cmd:
-        if suppress_out is False:
-            logging.info("Running command: %s", cmd)
-        process = subprocess.Popen(cmd, stdout=stdout_opt, stderr=stderr_opt, shell=True)
     if cmd_list:
         if suppress_out is False:
             logging.info(f"Running command: {shlex.join(cmd_list)}")
         process = subprocess.Popen(cmd_list, stdout=stdout_opt, stderr=stderr_opt)
     else:
-        logging.info("ERROR: cmd and cmd_list is None, cannot run command.")
+        if suppress_out is False:
+            logging.info("Running command: %s", cmd)
+        process = subprocess.Popen(cmd, stdout=stdout_opt, stderr=stderr_opt, shell=True)
     if suppress_out is False:
         with process.stdout:
             log_subprocess_output(process.stdout)

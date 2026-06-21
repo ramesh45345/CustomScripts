@@ -914,9 +914,9 @@ if __name__ == '__main__':
     buildlog_path = os.path.join(vmpath, "{0}.log".format(vmname))
     CFunc.log_config(buildlog_path)
     # Call packer.
-    CFunc.subpout_logger("packer init file.pkr.json")
+    CFunc.subpout_logger(cmd="packer init file.pkr.json")
     packer_buildcmd = "packer build file.pkr.json"
-    CFunc.subpout_logger(packer_buildcmd)
+    CFunc.subpout_logger(cmd=packer_buildcmd)
     # Save packer finish time.
     packerfinishtime = datetime.now()
 
