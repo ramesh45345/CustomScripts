@@ -118,12 +118,18 @@ function pc {
     git pull
     Set-Location $initialDir
 }
+function check_topgrade {
+    if (-not (Get-Command topgrade -ErrorAction SilentlyContinue)) {
+        inf("topgrade")
+    }
+}
 # topgrade
 function up {
+    check_topgrade()
     topgrade -y --tmux --no-self-update --no-retry --disable system
 }
 function upr {
-    inf("topgrade")
+    check_topgrade()
     topgrade -y --tmux --no-self-update --no-retry
 }
 """
