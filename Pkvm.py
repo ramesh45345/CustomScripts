@@ -26,6 +26,7 @@ import xml.etree.ElementTree as ET
 # Custom includes
 from passlib import hash
 import CFunc
+import CVirtFuncs
 import PCreateChrootVM
 
 # Disable buffered stdout (to ensure prints are in order)
@@ -191,20 +192,6 @@ def ovmf_bin_nvramcopy(destpath: str, vmname: str, secureboot: bool = False):
     shutil.copy(ovmf_nvram_fullpath, nvram_copy_path)
     os.chmod(nvram_copy_path, 0o777)
     return code_copy_path, nvram_copy_path
-def nmcli_connecteddevice():
-    """Get the connected device from Network Manager."""
-    # Get the device list, and convert it into a 2D list
-    dev = None
-    nmcli_dev = CFunc.subpout(f"nmcli --terse dev", error_on_fail=False)
-    nmcli_array = []
-    for nmcli_lines in nmcli_dev.split("\n"):
-        nmcli_array += [nmcli_lines.split(":")]
-    # Only return "connected" and not "connected (externally)"
-    for line in nmcli_array:
-        if line[2] == "connected":
-            dev = line[0]
-            break
-    return dev
 def cmd_virtinstall(vmname: str,
                     variant: str,
                     diskpath: str = "",
@@ -230,8 +217,8 @@ def cmd_virtinstall(vmname: str,
     # No disk is attached if diskpath is not specified.
     if diskpath != "":
         cmd += f" --disk path={diskpath},bus={diskinterface}"
-    if isolated is True and nmcli_connecteddevice() is not None:
-        cmd += f" --network bridge=virbr1,model={netdev} --network type=direct,source={nmcli_connecteddevice()},source_mode=bridge,model={netdev},trustGuestRxFilters=yes"
+    if isolated is True and CVirtFuncs.nmcli_connecteddevice() is not None:
+        cmd += f" --network bridge=virbr1,model={netdev} --network type=direct,source={CVirtFuncs.nmcli_connecteddevice()},source_mode=bridge,model={netdev},trustGuestRxFilters=yes"
     else:
         cmd += f" --network bridge=virbr0,model={netdev}"
     if efi is True:
