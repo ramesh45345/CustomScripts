@@ -5,6 +5,7 @@ import functools
 import os
 import pathlib
 import re
+import shlex
 import shutil
 import sys
 import subprocess
@@ -134,10 +135,11 @@ def detect_update():
             update_cmd_nonroot_list.append(["distrobox", "upgrade", "--all"])
 
     # Distrobox root
-    if shutil.which("distrobox"):
-        update_list.append("distrobox-root")
-        # Distrobox root expects to run as non-root first.
-        update_cmd_nonroot_list.append(["distrobox", "upgrade", "--root", "--all"])
+    # TODO: Disable this for now, always errors out.
+    # if shutil.which("distrobox"):
+    #     update_list.append("distrobox-root")
+    #     # Distrobox root expects to run as non-root first.
+    #     update_cmd_nonroot_list.append(["distrobox", "upgrade", "--root", "--all"])
 
     return update_list, update_cmd_list, update_cmd_nonroot_list
 def ensure_root():
@@ -199,7 +201,7 @@ if __name__ == "__main__":
 
     # Run root upgrade commands
     for cmd in upgrade_cmd_list:
-        print(f"Running {cmd}")
+        print(f"Running {shlex.join(cmd)}")
         subprocess.run(cmd, check=True)
 
     # Non-root commands
