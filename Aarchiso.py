@@ -77,6 +77,7 @@ btop
 btrfs-progs
 chntpw
 clonezilla
+cloud-guest-utils
 debootstrap
 fish
 fsarchiver

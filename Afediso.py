@@ -164,6 +164,8 @@ dnf install -y  \
     arch-install-scripts \
     btop \
     chntpw \
+    cloud-utils-growpart \
+    codium \
     debootstrap \
     fish \
     git \
@@ -182,7 +184,6 @@ dnf install -y  \
     starship \
     tmux \
     unzip \
-    codium \
     xfce4-clipman-plugin \
     xfce4-diskperf-plugin \
     xfce4-systemload-plugin \
