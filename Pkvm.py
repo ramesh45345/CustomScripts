@@ -352,7 +352,7 @@ if __name__ == '__main__':
     # Predetermined iso checksum.
     md5_isourl = None
     # Local ansible folder
-    ansiblefolder = os.path.join(os.sep, "var", "opt", "ansible-config")
+    ansiblefolder = os.path.join(os.sep, "var", "opt", "machineconfig")
 
     # Set OS options.
     # KVM os options can be found by running "osinfo-query os"
@@ -378,23 +378,26 @@ if __name__ == '__main__':
             args.imgsize = 120
         # Use cli settings for ISOVM.
         vmprovision_defopts = "-x"
-    if 7 <= args.ostype <= 8:
+    if 6 <= args.ostype <= 7:
         vmprovisionscript = "MFedoraSilverblue.py"
         vboxosid = "Fedora_64"
         kvm_variant = "silverblue-rawhide"
         isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/44/Kinoite/x86_64/iso/Fedora-Kinoite-ostree-x86_64-44-1.7.iso"
         vmprovision_defopts = ""
-    if args.ostype == 7:
-        vmname = "Packer-FedoraKA-{0}".format(hvname)
-    if args.ostype == 8:
+    if args.ostype == 6:
         vmname = "Packer-FedoraKinoite-{0}".format(hvname)
-    if args.ostype == 9:
+    if args.ostype == 7:
+        vmname = "Packer-FedoraKinoiteAnsible-{0}".format(hvname)
+    if 8 <= args.ostype <= 9:
         vmprovisionscript = "MFedoraSilverblue.py"
         vboxosid = "Fedora_64"
         kvm_variant = "silverblue-rawhide"
         isourl = "https://download.fedoraproject.org/pub/fedora/linux/releases/44/Silverblue/x86_64/iso/Fedora-Silverblue-ostree-x86_64-44-1.7.iso"
-        vmname = "Packer-FedoraSilverblue-{0}".format(hvname)
         vmprovision_defopts = ""
+    if args.ostype == 8:
+        vmname = "Packer-FedoraSilverblue-{0}".format(hvname)
+    if args.ostype == 9:
+        vmname = "Packer-FedoraSilverblueAnsible-{0}".format(hvname)
     if 10 <= args.ostype <= 19:
         vboxosid = "Ubuntu_64"
         vmprovisionscript = "MUbuntu.py"
@@ -748,11 +751,11 @@ if __name__ == '__main__':
         data['build']['provisioner'][2]["shell"]["inline"] = [f"{dest_path}/Aiso_CreateVM.py"]
         data['build']['provisioner'][2]["shell"]["pause_before"] = "15s"
         data['build']['provisioner'][2]["shell"]["timeout"] = "90m"
-    if 7 <= args.ostype <= 9:
+    if 6 <= args.ostype <= 9:
         data['source'][packer_type]['local']["boot_command"] = ["<up><wait>e<wait><down><wait><down><wait><end> inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/silverblue.cfg<wait><f10>"]
-    if 7 <= args.ostype <= 8:
+    if 6 <= args.ostype <= 7:
         CFunc.find_replace(tempunattendfolder, "silverblue", "kinoite", "silverblue.cfg")
-    if args.ostype == 7:
+    if args.ostype == 7 or args.ostype == 9:
         data['packer']["required_plugins"]["ansible"] = {}
         data['packer']["required_plugins"]["ansible"]["version"] = "~> 1"
         data['packer']["required_plugins"]["ansible"]["source"] = "github.com/hashicorp/ansible"
@@ -771,7 +774,7 @@ if __name__ == '__main__':
         data['build']['provisioner'][3]["ansible"]["playbook_file"] = os.path.join(ansiblefolder, "playbook", "config.yml")
         data['build']['provisioner'][3]["ansible"]["ansible_env_vars"] = [ f"ANSIBLE_ROLES_PATH={os.path.join(ansiblefolder, "roles")}" ]
         # data['build']['provisioner'][3]["ansible"]["user"] = "root"
-    if 8 <= args.ostype <= 9:
+    if args.ostype == 6 or args.ostype == 8:
         data['build']['provisioner'][1]["shell"] = {}
         # Work around issues in release ISO, such as https://github.com/coreos/rpm-ostree/issues/5494
         data['build']['provisioner'][1]["shell"]["inline"] = ["rpm-ostree upgrade; systemctl reboot"]
